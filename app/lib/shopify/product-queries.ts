@@ -148,3 +148,31 @@ export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
     }
   }
 ` as const;
+
+export const GET_POPULAR_COLLECTIONS = `#graphql
+  query GetPopularCollections(
+    $first: Int = 20
+    $sortKey: CollectionSortKeys = UPDATED_AT
+    $reverse: Boolean = true
+  ) {
+    collections(first: $first, sortKey: $sortKey, reverse: $reverse) {
+      edges {
+        node {
+          id
+          handle
+          title
+          updatedAt
+          description
+          image {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
+  }
+` as const;
+

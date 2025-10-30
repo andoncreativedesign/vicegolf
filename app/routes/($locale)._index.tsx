@@ -12,8 +12,9 @@ import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
 // import {getHeroSectionData} from '~/lib/sanity';
 import { getHomePageData } from '~/lib/sanity/home';
-import { MULTIPLE_COLLECTIONS_QUERY } from '~/lib/product-queries';
+import { GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY } from '~/lib/shopify/product-queries';
 import ClientLogos from '~/components/Home/ClientLogos';
+import ShopByCategories from '~/components/Home/ShopByCategories';
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: 'Hydrogen | Home' }];
@@ -26,11 +27,9 @@ export async function loader(args: Route.LoaderArgs) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  // Fetch hero section data from Sanity
-  // const heroData = await getHeroSectionData();
   const homePageData = await getHomePageData();
 
-  return { ...deferredData, ...criticalData, homePageData };
+  return { ...deferredData, ...criticalData, homePageData};
 }
 
 /**
@@ -38,22 +37,53 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context }: Route.LoaderArgs) {
-  const [collectionsData, categoryProducts] = await Promise.all([
+  const [collectionsData, categoryProducts, popularCollections] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
-        golfBallsHandle: 'golf-balls',
-        golfClubsHandle: 'golf-clubs',
+        golfBallsHandle: 'sporting-goods-outdoor-recreation-golf-golf-balls',
+        golfClubsHandle: 'golf-club-set',
         apparelHandle: 'apparel',
         gearHandle: 'gear',
         first: 8,
       },
     }),
+    context.storefront.query(GET_POPULAR_COLLECTIONS, {
+      variables: {
+        first: 4,
+      },
+    }),
   ]);
+
+  console.log('loadCriticalData start\n\n')
+
+  // console.log("categoryProducts \n")
+  // console.log(JSON.stringify(categoryProducts))
+
+  // console.log("collectionsData \n")
+  // console.log(JSON.stringify(collectionsData))
+
+  console.log("popularCollections\n\n")
+  console.log(JSON.stringify(popularCollections?.collections?.edges[0]))
+
+  // console.log('loadCriticalData end')
+
+
+  const collectionsTransformed = popularCollections?.collections?.edges?.map((edge: { node: FeaturedCollectionFragment }) => ({
+    id: edge.node.id,
+    title: edge.node.title,
+    handle: edge.node.handle,
+    description: edge.node.description,
+    image: edge.node.image
+  }))
+
+  console.log("collectionsTransformed \n\n")
+  console.log(JSON.stringify(collectionsTransformed?.[0]?.image))
 
   return {
     featuredCollection: collectionsData.collections.nodes[0],
     categoryProducts,
+    popularCollections: collectionsTransformed,
   };
 }
 
@@ -122,8 +152,13 @@ export default function Homepage() {
       </div>
 
       {/* <FeaturedCollection collection={data.featuredCollection} /> */}
+
       <ClientLogos brands={data.homePageData?.brand || []} />
+
+      <ShopByCategories categories={data.popularCollections} />
+
       <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
   );
@@ -176,6 +211,104 @@ function RecommendedProducts({
     </div>
   );
 }
+
+const ALL_PRODUCTS_QUERY = `#graphql
+  fragment ProductFragment on Product {
+    id
+    title
+    description
+    handle
+    productType
+    vendor
+    tags
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+      maxVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    featuredImage {
+      url
+      altText
+      width
+      height
+    }
+    images(first: 10) {
+      nodes {
+        url
+        altText
+        width
+        height
+      }
+    }
+    variants(first: 100) {
+      nodes {
+        id
+        title
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+        image {
+          url
+          altText
+        }
+        sku
+        barcode
+        quantityAvailable
+      }
+    }
+    options {
+      name
+      values
+    }
+    collections(first: 10) {
+      nodes {
+        id
+        title
+        handle
+      }
+    }
+    createdAt
+    updatedAt
+    publishedAt
+  }
+
+  query AllProducts(
+    $first: Int = 250
+    $after: String
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(first: $first, after: $after) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          ...ProductFragment
+        }
+      }
+    }
+  }
+` as const;
 
 const FEATURED_COLLECTION_QUERY = `#graphql
   fragment FeaturedCollection on Collection {
