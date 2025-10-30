@@ -9,6 +9,87 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {debugMenuItems} from '~/utils/debug-menu';
 
+interface DropdownItem {
+  name: string;
+  href: string;
+  image: string;
+  description: string;
+}
+
+interface DropdownSection {
+  title: string;
+  items: DropdownItem[];
+}
+
+const apparelDropdown: DropdownSection[] = [
+  {
+    title: 'Polos',
+    items: [
+      {
+        name: 'Performance Polos',
+        href: '/apparel/polos',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop',
+        description: 'Moisture-wicking golf polos'
+      }
+    ]
+  },
+  {
+    title: 'Sweatshirts & Hoodies',
+    items: [
+      {
+        name: 'Golf Hoodies',
+        href: '/apparel/hoodies',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&hue=200',
+        description: 'Comfortable golf sweatshirts'
+      }
+    ]
+  },
+  {
+    title: 'Mid & Outer Layers',
+    items: [
+      {
+        name: 'Golf Jackets',
+        href: '/apparel/jackets',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&hue=120',
+        description: 'Weather-resistant outerwear'
+      }
+    ]
+  },
+  {
+    title: 'T-Shirts',
+    items: [
+      {
+        name: 'Golf T-Shirts',
+        href: '/apparel/tshirts',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&brightness=110',
+        description: 'Casual golf tees'
+      }
+    ]
+  },
+  {
+    title: 'Headwear',
+    items: [
+      {
+        name: 'Golf Hats',
+        href: '/apparel/hats',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&contrast=120',
+        description: 'Caps and visors'
+      }
+    ]
+  },
+  {
+    title: 'Shoes',
+    items: [
+      {
+        name: 'Golf Shoes',
+        href: '/apparel/shoes',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&sepia=20',
+        description: 'Performance golf footwear'
+      }
+    ]
+  }
+];
+
 interface HeaderProps {
   header: HeaderQuery;
   cart: Promise<CartApiQueryFragment | null>;
