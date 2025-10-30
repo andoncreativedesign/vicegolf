@@ -147,11 +147,11 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
         buttonLink: hero.buttonLink,
         image: hero.backgroundImage?.asset?.url,
       })),
-      brand:[{
-        name: result.result?.brand?.[0].name,
-        logo: result.result?.brand?.[0].logo?.asset?.url,
-        url: result.result?.brand?.[0].url
-      }]
+      brand:result.result.brand?.map((brand: any) => ({
+        name: brand.name as string,
+        logo: brand.logo?.asset?.url as string,
+        url: brand.url 
+      })),
     };
 
     console.log("transformedData")

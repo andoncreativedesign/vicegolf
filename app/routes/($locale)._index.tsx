@@ -13,6 +13,7 @@ import { ProductGrid } from '~/components/ProductGrid';
 // import {getHeroSectionData} from '~/lib/sanity';
 import { getHomePageData } from '~/lib/sanity';
 import { MULTIPLE_COLLECTIONS_QUERY } from '~/lib/product-queries';
+import ClientLogos from '~/components/Home/ClientLogos';
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: 'Hydrogen | Home' }];
@@ -121,8 +122,8 @@ export default function Homepage() {
       </div>
 
       {/* <FeaturedCollection collection={data.featuredCollection} /> */}
+      <ClientLogos brands={data.homePageData?.brand || []} />
       <HeroSection heroData={data.homePageData?.secondaryHero || null} />
-
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
   );
