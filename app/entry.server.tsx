@@ -19,6 +19,22 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    imgSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://cdn.sanity.io', // Add Sanity CDN for images
+      'data:',
+    ],
+    connectSrc: [
+      "'self'",
+      'https://shopify.com',
+      'https://*.shopify.com',
+      'https://c248y25j.api.sanity.io', // Add Sanity API for data fetching
+    ],
+    mediaSrc: [
+      "'self'",
+      'https://cdn.sanity.io', // Add Sanity CDN for media files
+    ],
   });
 
   const body = await renderToReadableStream(

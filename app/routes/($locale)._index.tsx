@@ -1,4 +1,4 @@
-// app/routes/($locale)._index.tsx (updated to include HeroSection)
+// app/routes/($locale)._index.tsx (updated to include HeroSection and ProductGrids)
 import {Await, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense} from 'react';
@@ -8,7 +8,10 @@ import type {
   RecommendedProductsQuery,
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
-import {HeroSection} from '~/components/HeroSection'; // Add this import
+import {HeroSection} from '~/components/HeroSection';
+import {ProductGrid} from '~/components/ProductGrid';
+import {getHeroSectionData} from '~/lib/sanity';
+import {MULTIPLE_COLLECTIONS_QUERY} from '~/lib/product-queries';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'Hydrogen | Home'}];
@@ -21,7 +24,10 @@ export async function loader(args: Route.LoaderArgs) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  // Fetch hero section data from Sanity
+  const heroData = await getHeroSectionData();
+
+  return {...deferredData, ...criticalData, heroData};
 }
 
 /**
@@ -29,13 +35,22 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({context}: Route.LoaderArgs) {
-  const [{collections}] = await Promise.all([
+  const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
-    // Add other queries here, so that they are loaded in parallel
+    context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
+      variables: {
+        golfBallsHandle: 'golf-balls',
+        golfClubsHandle: 'golf-clubs', 
+        apparelHandle: 'apparel',
+        gearHandle: 'gear',
+        first: 8,
+      },
+    }),
   ]);
 
   return {
-    featuredCollection: collections.nodes[0],
+    featuredCollection: collectionsData.collections.nodes[0],
+    categoryProducts,
   };
 }
 
@@ -62,7 +77,47 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      <HeroSection /> {/* Add the HeroSection here */}
+      <HeroSection heroData={data.heroData} />
+      
+      {/* Product Grids by Category */}
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+        {/* Golf Balls Section */}
+        {data.categoryProducts?.golfBalls?.products?.nodes && (
+          <ProductGrid
+            products={data.categoryProducts.golfBalls.products.nodes}
+            title="VICE GOLF BALLS"
+            categoryHandle="golf-balls"
+          />
+        )}
+
+        {/* Golf Clubs Section */}
+        {data.categoryProducts?.golfClubs?.products?.nodes && (
+          <ProductGrid
+            products={data.categoryProducts.golfClubs.products.nodes}
+            title="VICE GOLF CLUBS"
+            categoryHandle="golf-clubs"
+          />
+        )}
+
+        {/* Apparel Section */}
+        {data.categoryProducts?.apparel?.products?.nodes && (
+          <ProductGrid
+            products={data.categoryProducts.apparel.products.nodes}
+            title="VICE APPAREL"
+            categoryHandle="apparel"
+          />
+        )}
+
+        {/* Gear Section */}
+        {data.categoryProducts?.gear?.products?.nodes && (
+          <ProductGrid
+            products={data.categoryProducts.gear.products.nodes}
+            title="VICE GEAR"
+            categoryHandle="gear"
+          />
+        )}
+      </div>
+
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
