@@ -5,21 +5,19 @@ import {
   useEffect,
   useState,
 } from 'react';
-
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
   type: AsideType;
   open: (mode: AsideType) => void;
   close: () => void;
 };
-
 /**
  * A side bar component with Overlay
  * @example
  * ```jsx
  * <Aside type="search" heading="SEARCH">
- *  <input type="search" />
- *  ...
+ * <input type="search" />
+ * ...
  * </Aside>
  * ```
  */
@@ -34,10 +32,8 @@ export function Aside({
 }) {
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
-
   useEffect(() => {
     const abortController = new AbortController();
-
     if (expanded) {
       document.addEventListener(
         'keydown',
@@ -51,15 +47,15 @@ export function Aside({
     }
     return () => abortController.abort();
   }, [close, expanded]);
-
   return (
     <div
       aria-modal
       className={`overlay ${expanded ? 'expanded' : ''}`}
+      style={{ zIndex: 9999 }}
       role="dialog"
     >
       <button className="close-outside" onClick={close} />
-      <aside>
+      <aside style={{ zIndex: 9999 }}>
         <header>
           <h3>{heading}</h3>
           <button className="close reset" onClick={close} aria-label="Close">
@@ -71,12 +67,9 @@ export function Aside({
     </div>
   );
 }
-
 const AsideContext = createContext<AsideContextValue | null>(null);
-
 Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
   const [type, setType] = useState<AsideType>('closed');
-
   return (
     <AsideContext.Provider
       value={{
@@ -89,7 +82,6 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
     </AsideContext.Provider>
   );
 };
-
 export function useAside() {
   const aside = useContext(AsideContext);
   if (!aside) {
