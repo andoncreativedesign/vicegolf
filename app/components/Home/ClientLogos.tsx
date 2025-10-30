@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Image } from '@shopify/hydrogen-react';
-import type { BrandItemTransformed } from '~/lib/sanity';
+import type { BrandItemTransformed } from '~/lib/sanity/home';
 
 const ClientLogos: React.FC<{brands: BrandItemTransformed[]}> = ({brands}) => {
 

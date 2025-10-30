@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Image } from '@shopify/hydrogen';
-import type { HeroItemTransformed } from '~/lib/sanity';
+import type { HeroItemTransformed } from '~/lib/sanity/home';
 
 interface HeroSlide {
   id: string;

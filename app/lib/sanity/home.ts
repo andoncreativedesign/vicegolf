@@ -1,10 +1,6 @@
-// Sanity configuration constants
-const SANITY_CONFIG = {
-  projectId: 'c248y25j',
-  dataset: 'production',
-  apiVersion: 'v2023-08-01',
-  token: 'skiI9IaA3TVtpDm5JbRdTPmhfXlIm6Yq4JKb2nezuSoUgBGQZSsClON3rNgdUnZoUxAJRbaRkwrR3UYAQQmCrk9I9eI0CM8Z3nT3sHJhICI4EhLhRsGZMPhbQMtNKacOraBRAXu3pdlPWQeikgng0G2sFhdV9ndMz3q39zhu8QzMxkTJLHcD',
-};
+import { HttpStatusCode } from "axios";
+import { axiosSanity } from "~/utils/axiosInsatances";
+
 
 // GraphQL query for home page data
 export const homePageQuery = `*[_type == "home"][0]{
@@ -106,7 +102,7 @@ export interface HomePageData {
   brand?: BrandItemTransformed[];
 }
 
-export interface HomePageDataTransformed{
+export interface HomePageDataTransformed {
   heroes?: HeroItemTransformed[];
   secondaryHero?: HeroItemTransformed[];
   brand?: BrandItemTransformed[];
@@ -117,20 +113,12 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
   console.log('get Homepage data call --')
   try {
     const query = encodeURIComponent(homePageQuery);
-    const url = `https://${SANITY_CONFIG.projectId}.api.sanity.io/${SANITY_CONFIG.apiVersion}/data/query/${SANITY_CONFIG.dataset}?query=${query}`;
+    const response = await axiosSanity.get("/?query=" + query);
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${SANITY_CONFIG.token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
+    if (response.status !== HttpStatusCode.Ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    const result = await response.json<{ result: HomePageData }>();
+    const result = response.data;
 
     // Transform the data to match our types
     const transformedData: HomePageDataTransformed = {
@@ -147,10 +135,10 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
         buttonLink: hero.buttonLink,
         image: hero.backgroundImage?.asset?.url,
       })),
-      brand:result.result.brand?.map((brand: any) => ({
+      brand: result.result.brand?.map((brand: any) => ({
         name: brand.name as string,
         logo: brand.logo?.asset?.url as string,
-        url: brand.url 
+        url: brand.url
       })),
     };
 

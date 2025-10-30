@@ -11,7 +11,7 @@ import { ProductItem } from '~/components/ProductItem';
 import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
 // import {getHeroSectionData} from '~/lib/sanity';
-import { getHomePageData } from '~/lib/sanity';
+import { getHomePageData } from '~/lib/sanity/home';
 import { MULTIPLE_COLLECTIONS_QUERY } from '~/lib/product-queries';
 import ClientLogos from '~/components/Home/ClientLogos';
 
