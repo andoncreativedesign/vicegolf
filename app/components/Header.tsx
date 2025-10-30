@@ -287,7 +287,7 @@ export function Header({
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-4 py-6 max-w-7xl mx-auto">
         {/* Left: Country/Currency Selector */}
         <div className="flex items-center space-x-2">
           <CountryCurrencySelector />
@@ -383,17 +383,19 @@ export function HeaderMenu({
     dropdownItems?: ProductDropdownItem[];
   };
 
-  // Combine Shopify menu items with additional golf items
-  const shopifyItems: NavigationItem[] = shopifyMenuItems.map(item => ({
-    title: item.title.toUpperCase(),
-    url: convertToRelativeUrl(item.url),
-    id: item.id,
-    items: item.items?.map(subItem => ({
-      title: subItem.title,
-      url: convertToRelativeUrl(subItem.url),
-      id: subItem.id,
-    })) || []
-  }));
+  // Combine Shopify menu items with additional golf items, filtering out home, contact, catalog
+  const shopifyItems: NavigationItem[] = shopifyMenuItems
+    .filter(item => !['HOME', 'CONTACT', 'CATALOG'].includes(item.title.toUpperCase()))
+    .map(item => ({
+      title: item.title.toUpperCase(),
+      url: convertToRelativeUrl(item.url),
+      id: item.id,
+      items: item.items?.map(subItem => ({
+        title: subItem.title,
+        url: convertToRelativeUrl(subItem.url),
+        id: subItem.id,
+      })) || []
+    }));
 
   // Create final navigation combining Shopify items and additional golf items
   const navigationItems: NavigationItem[] = [
