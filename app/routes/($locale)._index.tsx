@@ -1,20 +1,21 @@
 // app/routes/($locale)._index.tsx (updated to include HeroSection and ProductGrids)
-import {Await, useLoaderData, Link} from 'react-router';
-import type {Route} from './+types/_index';
-import {Suspense} from 'react';
-import {Image} from '@shopify/hydrogen';
+import { Await, useLoaderData, Link } from 'react-router';
+import type { Route } from './+types/_index';
+import { Suspense } from 'react';
+import { Image } from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
 } from 'storefrontapi.generated';
-import {ProductItem} from '~/components/ProductItem';
-import {HeroSection} from '~/components/HeroSection';
-import {ProductGrid} from '~/components/ProductGrid';
-import {getHeroSectionData} from '~/lib/sanity';
-import {MULTIPLE_COLLECTIONS_QUERY} from '~/lib/product-queries';
+import { ProductItem } from '~/components/ProductItem';
+import { HeroSection } from '~/components/HeroSection';
+import { ProductGrid } from '~/components/ProductGrid';
+// import {getHeroSectionData} from '~/lib/sanity';
+import { getHomePageData } from '~/lib/sanity';
+import { MULTIPLE_COLLECTIONS_QUERY } from '~/lib/product-queries';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Hydrogen | Home'}];
+  return [{ title: 'Hydrogen | Home' }];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -25,22 +26,23 @@ export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
 
   // Fetch hero section data from Sanity
-  const heroData = await getHeroSectionData();
+  // const heroData = await getHeroSectionData();
+  const homePageData = await getHomePageData();
 
-  return {...deferredData, ...criticalData, heroData};
+  return { ...deferredData, ...criticalData, homePageData };
 }
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context}: Route.LoaderArgs) {
+async function loadCriticalData({ context }: Route.LoaderArgs) {
   const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
         golfBallsHandle: 'golf-balls',
-        golfClubsHandle: 'golf-clubs', 
+        golfClubsHandle: 'golf-clubs',
         apparelHandle: 'apparel',
         gearHandle: 'gear',
         first: 8,
@@ -59,7 +61,7 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData({ context }: Route.LoaderArgs) {
   const recommendedProducts = context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY)
     .catch((error: Error) => {
@@ -77,8 +79,8 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      <HeroSection heroData={data.heroData} />
-      
+      <HeroSection heroData={data.homePageData?.heroes} />
+
       {/* Product Grids by Category */}
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         {/* Golf Balls Section */}
@@ -118,7 +120,9 @@ export default function Homepage() {
         )}
       </div>
 
-      <FeaturedCollection collection={data.featuredCollection} />
+      {/* <FeaturedCollection collection={data.featuredCollection} /> */}
+      <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+
       <RecommendedProducts products={data.recommendedProducts} />
     </div>
   );
@@ -160,8 +164,8 @@ function RecommendedProducts({
             <div className="recommended-products-grid">
               {response
                 ? response.products.nodes.map((product) => (
-                    <ProductItem key={product.id} product={product} />
-                  ))
+                  <ProductItem key={product.id} product={product} />
+                ))
                 : null}
             </div>
           )}
