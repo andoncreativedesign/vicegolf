@@ -123,9 +123,11 @@ export function Header({
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center">
           <NavLink prefetch="intent" to="/" className="flex items-center">
-            <div className="text-2xl font-bold text-black tracking-wider">
-              Vice
-            </div>
+            <img 
+              src="/vice_logo.svg" 
+              alt="Vice Logo" 
+              className="h-8 w-auto"
+            />
           </NavLink>
         </div>
 
@@ -194,6 +196,9 @@ export function HeaderMenu({
     { title: 'GOLF CLUBS', url: '/collections/golf-clubs' },
     { title: 'APPAREL', url: '/collections/apparel' },
     { title: 'GEAR', url: '/collections/gear' },
+    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions' },
+    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom' },
+    { title: 'JUNIORS', url: '/collections/juniors' },
   ];
 
   // Combine Shopify menu items with additional golf items
@@ -217,15 +222,6 @@ export function HeaderMenu({
   if (viewport === 'mobile') {
     return (
       <nav className="flex flex-col space-y-4 p-4" role="navigation">
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          to="/"
-          className="text-lg font-medium text-gray-900 hover:text-gray-600"
-        >
-          Home
-        </NavLink>
         {navigationItems.map((item, index) => (
           <div key={item.id || index}>
             <NavLink
