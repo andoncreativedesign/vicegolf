@@ -21,74 +21,12 @@ interface DropdownSection {
   items: DropdownItem[];
 }
 
-const apparelDropdown: DropdownSection[] = [
-  {
-    title: 'Polos',
-    items: [
-      {
-        name: 'Performance Polos',
-        href: '/apparel/polos',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop',
-        description: 'Moisture-wicking golf polos'
-      }
-    ]
-  },
-  {
-    title: 'Sweatshirts & Hoodies',
-    items: [
-      {
-        name: 'Golf Hoodies',
-        href: '/apparel/hoodies',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&hue=200',
-        description: 'Comfortable golf sweatshirts'
-      }
-    ]
-  },
-  {
-    title: 'Mid & Outer Layers',
-    items: [
-      {
-        name: 'Golf Jackets',
-        href: '/apparel/jackets',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&hue=120',
-        description: 'Weather-resistant outerwear'
-      }
-    ]
-  },
-  {
-    title: 'T-Shirts',
-    items: [
-      {
-        name: 'Golf T-Shirts',
-        href: '/apparel/tshirts',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&brightness=110',
-        description: 'Casual golf tees'
-      }
-    ]
-  },
-  {
-    title: 'Headwear',
-    items: [
-      {
-        name: 'Golf Hats',
-        href: '/apparel/hats',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&contrast=120',
-        description: 'Caps and visors'
-      }
-    ]
-  },
-  {
-    title: 'Shoes',
-    items: [
-      {
-        name: 'Golf Shoes',
-        href: '/apparel/shoes',
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=200&h=200&fit=crop&sepia=20',
-        description: 'Performance golf footwear'
-      }
-    ]
-  }
-];
+interface ProductDropdownItem {
+  name: string;
+  href: string;
+  image: string;
+  description?: string;
+}
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -98,6 +36,180 @@ interface HeaderProps {
 }
 
 type Viewport = 'desktop' | 'mobile';
+
+// Product dropdown data for golf categories
+const categoryDropdowns: Record<string, ProductDropdownItem[]> = {
+  'GOLF BALLS': [
+    {
+      name: 'Vice Pro Plus',
+      href: '/collections/golf-balls/pro-plus',
+      image: '/testimg.webp',
+      description: 'Tour quality performance with maximum spin.'
+    },
+    {
+      name: 'Vice Pro',
+      href: '/collections/golf-balls/pro',
+      image: '/testimg.webp',
+      description: 'Premium feel and distance control.'
+    },
+    {
+      name: 'Vice Pro Air',
+      href: '/collections/golf-balls/pro-air',
+      image: '/testimg.webp',
+      description: 'Lightweight design for higher launch.'
+    },
+    {
+      name: 'Vice Tour',
+      href: '/collections/golf-balls/tour',
+      image: '/testimg.webp',
+      description: 'Professional-grade urethane cover.'
+    },
+    {
+      name: 'Vice Drive',
+      href: '/collections/golf-balls/drive',
+      image: '/testimg.webp',
+      description: 'Long-distance straight flight.'
+    },
+    {
+      name: 'Vice Tracer',
+      href: '/collections/golf-balls/tracer',
+      image: '/testimg.webp',
+      description: 'High-visibility for easy tracking.'
+    },
+  ],
+  'GOLF CLUBS': [
+    {
+      name: 'Vice Driver',
+      href: '/collections/golf-clubs/driver',
+      image: '/testimg.webp',
+      description: 'Forgiving driver for maximum distance.'
+    },
+    {
+      name: 'Vice Irons',
+      href: '/collections/golf-clubs/irons',
+      image: '/testimg.webp',
+      description: 'Precision irons with soft feel.'
+    },
+    {
+      name: 'Vice Wedges',
+      href: '/collections/golf-clubs/wedges',
+      image: '/testimg.webp',
+      description: 'Versatile wedges for short game.'
+    },
+    {
+      name: 'Vice Putter',
+      href: '/collections/golf-clubs/putter',
+      image: '/testimg.webp',
+      description: 'Milled putter for alignment.'
+    },
+  ],
+  'APPAREL': [
+    {
+      name: 'Performance Polos',
+      href: '/collections/apparel/polos',
+      image: '/testimg.webp',
+      description: 'Moisture-wicking golf polos.'
+    },
+    {
+      name: 'Golf Hoodies',
+      href: '/collections/apparel/hoodies',
+      image: '/testimg.webp',
+      description: 'Comfortable layered sweatshirts.'
+    },
+    {
+      name: 'Golf Jackets',
+      href: '/collections/apparel/jackets',
+      image: '/testimg.webp',
+      description: 'Weather-resistant outerwear.'
+    },
+    {
+      name: 'Golf T-Shirts',
+      href: '/collections/apparel/tshirts',
+      image: '/testimg.webp',
+      description: 'Casual breathable tees.'
+    },
+    {
+      name: 'Golf Hats',
+      href: '/collections/apparel/hats',
+      image: '/testimg.webp',
+      description: 'Stylish caps and visors.'
+    },
+    {
+      name: 'Golf Shoes',
+      href: '/collections/apparel/shoes',
+      image: '/testimg.webp',
+      description: 'Spiked shoes for grip.'
+    },
+  ],
+  'GEAR': [
+    {
+      name: 'Golf Bags',
+      href: '/collections/gear/bags',
+      image: '/testimg.webp',
+      description: 'Durable carry and cart bags.'
+    },
+    {
+      name: 'Golf Gloves',
+      href: '/collections/gear/gloves',
+      image: '/testimg.webp',
+      description: 'All-weather grip gloves.'
+    },
+    {
+      name: 'Tees & Accessories',
+      href: '/collections/gear/accessories',
+      image: '/testimg.webp',
+      description: 'Essentials for every round.'
+    },
+  ],
+  'LIMITED EDITIONS': [
+    {
+      name: 'Special Release Balls',
+      href: '/collections/limited-editions/balls',
+      image: '/testimg.webp',
+      description: 'Exclusive limited edition designs.'
+    },
+    {
+      name: 'Custom Gear',
+      href: '/collections/limited-editions/gear',
+      image: '/testimg.webp',
+      description: 'One-of-a-kind apparel drops.'
+    },
+  ],
+  'FITTING & CUSTOMISATION': [
+    {
+      name: 'Ball Customization',
+      href: '/fitting-customization/balls',
+      image: '/testimg.webp',
+      description: 'Personalize your golf balls.'
+    },
+    {
+      name: 'Club Fitting',
+      href: '/fitting-customization/clubs',
+      image: '/testimg.webp',
+      description: 'Professional club fitting services.'
+    },
+  ],
+  'JUNIORS': [
+    {
+      name: 'Junior Golf Balls',
+      href: '/collections/juniors/balls',
+      image: '/testimg.webp',
+      description: 'Kid-friendly low-compression balls.'
+    },
+    {
+      name: 'Junior Clubs',
+      href: '/collections/juniors/clubs',
+      image: '/testimg.webp',
+      description: 'Lightweight sets for young golfers.'
+    },
+    {
+      name: 'Junior Apparel',
+      href: '/collections/juniors/apparel',
+      image: '/testimg.webp',
+      description: 'Fun and functional kids clothing.'
+    },
+  ],
+};
 
 // Inline SVG flags for SSR compatibility
 const flagSvgs: Record<string, string> = {
@@ -253,17 +365,26 @@ export function HeaderMenu({
   
   // Additional golf-specific navigation items to complement Shopify menu
   const additionalGolfItems = [
-    { title: 'GOLF BALLS', url: '/collections/golf-balls' },
-    { title: 'GOLF CLUBS', url: '/collections/golf-clubs' },
-    { title: 'APPAREL', url: '/collections/apparel' },
-    { title: 'GEAR', url: '/collections/gear' },
-    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions' },
-    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom' },
-    { title: 'JUNIORS', url: '/collections/juniors' },
+    { title: 'GOLF BALLS', url: '/collections/golf-balls', dropdownItems: categoryDropdowns['GOLF BALLS'] },
+    { title: 'GOLF CLUBS', url: '/collections/golf-clubs', dropdownItems: categoryDropdowns['GOLF CLUBS'] },
+    { title: 'APPAREL', url: '/collections/apparel', dropdownItems: categoryDropdowns['APPAREL'] },
+    { title: 'GEAR', url: '/collections/gear', dropdownItems: categoryDropdowns['GEAR'] },
+    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions', dropdownItems: categoryDropdowns['LIMITED EDITIONS'] },
+    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom', dropdownItems: categoryDropdowns['FITTING & CUSTOMISATION'] },
+    { title: 'JUNIORS', url: '/collections/juniors', dropdownItems: categoryDropdowns['JUNIORS'] },
   ];
 
+  // Extend type for navigation items
+  type NavigationItem = {
+    title: string;
+    url: string;
+    id?: string;
+    items?: Array<{ title: string; url: string; id?: string }>;
+    dropdownItems?: ProductDropdownItem[];
+  };
+
   // Combine Shopify menu items with additional golf items
-  const shopifyItems = shopifyMenuItems.map(item => ({
+  const shopifyItems: NavigationItem[] = shopifyMenuItems.map(item => ({
     title: item.title.toUpperCase(),
     url: convertToRelativeUrl(item.url),
     id: item.id,
@@ -275,7 +396,7 @@ export function HeaderMenu({
   }));
 
   // Create final navigation combining Shopify items and additional golf items
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     ...shopifyItems,
     ...additionalGolfItems
   ];
@@ -316,43 +437,73 @@ export function HeaderMenu({
   }
 
   return (
-    <nav className="hidden lg:flex items-center justify-center space-x-8 py-4" role="navigation">
-      {navigationItems.map((item, index) => (
-        <div key={item.id || index} className="relative group">
-          <NavLink
-            prefetch="intent"
-            to={item.url}
-            className={({isActive}) => 
-              `text-sm font-medium tracking-wide transition-colors duration-200 ${
-                isActive 
-                  ? 'text-black border-b-2 border-black pb-1' 
-                  : 'text-gray-700 hover:text-black'
-              }`
-            }
-          >
-            {item.title}
-          </NavLink>
-          
-          {/* Dropdown menu for desktop */}
-          {item.items && item.items.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
-              <div className="py-2">
-                {item.items.map((subItem, subIndex) => (
-                  <NavLink
-                    key={subItem.id || subIndex}
-                    prefetch="intent"
-                    to={subItem.url}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
-                  >
-                    {subItem.title}
-                  </NavLink>
-                ))}
+    <div className="relative">
+      <nav className="hidden lg:flex items-center justify-center space-x-8 py-4" role="navigation">
+        {navigationItems.map((item, index) => (
+          <div key={item.id || index} className={`group ${(item.items && item.items.length > 0) ? 'relative' : ''}`}>
+            <NavLink
+              prefetch="intent"
+              to={item.url}
+              className={({isActive}) => 
+                `text-sm font-medium tracking-wide transition-colors duration-200 ${
+                  isActive 
+                    ? 'text-black border-b-2 border-black pb-1' 
+                    : 'text-gray-700 hover:text-black'
+                }`
+              }
+            >
+              {item.title}
+            </NavLink>
+            
+            {/* Simple list dropdown for Shopify items */}
+            {item.items && item.items.length > 0 && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
+                <div className="py-2">
+                  {item.items.map((subItem, subIndex) => (
+                    <NavLink
+                      key={subItem.id || subIndex}
+                      prefetch="intent"
+                      to={subItem.url}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
+                    >
+                      {subItem.title}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </nav>
+            )}
+            
+            {/* Product grid dropdown for golf categories */}
+            {item.dropdownItems && !item.items && (
+              <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
+                <div className="px-4 py-8">
+                  <div className="grid grid-cols-6 gap-6">
+                    {item.dropdownItems.map((product, pIndex) => (
+                      <NavLink
+                        key={pIndex}
+                        prefetch="intent"
+                        to={product.href}
+                        className="group/item flex flex-col items-center text-center hover:bg-gray-50 rounded-lg p-3 transition-colors duration-200"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-20 h-20 object-cover rounded-md mb-2 group-hover/item:scale-105 transition-transform duration-200"
+                        />
+                        <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
+                        {product.description && (
+                          <p className="text-xs text-gray-600 mt-1">{product.description}</p>
+                        )}
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
+    </div>
   );
 }
 
