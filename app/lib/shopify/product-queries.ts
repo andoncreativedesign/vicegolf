@@ -313,6 +313,7 @@ fragment ProductItem on Product {
   }
 }`;
 
+
 export const GET_PRODUCTS_BY_COLLECTION = `
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
@@ -348,3 +349,94 @@ query Collection(
     }
   }
 }`;
+
+
+
+const PRODUCT_CARD_FRAGMENT = `
+fragment ProductCardFragment on Product {
+    id
+    title
+    handle
+    productType
+    vendor
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+    images(first: 2) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        id
+        availableForSale
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
+  }
+`;
+
+export const RECOMMENDED_PRODUCTS_QUERY = `#graphql
+fragment ProductCardFragment on Product {
+    id
+    title
+    handle
+    productType
+    vendor
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+    images(first: 2) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        id
+        availableForSale
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
+  }
+
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    products(first: 20, sortKey: UPDATED_AT, reverse: true) {
+      nodes {
+        ...ProductCardFragment
+      }
+    }
+  }
+` as const;
