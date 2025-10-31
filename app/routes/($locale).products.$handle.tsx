@@ -13,6 +13,7 @@ import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {WhatsNew} from '~/components/WhatsNew';
 import {Youtube} from '~/components/Youtube';
+import {CustomerReviews} from '~/components/CustomerReviews';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -96,6 +97,9 @@ export default function Product() {
 
       {/* Youtube Video Section */}
       <Youtube />
+
+      {/* Customer Reviews Section */}
+      <CustomerReviews />
 
       <Analytics.ProductView
         data={{
