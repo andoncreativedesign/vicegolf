@@ -41,8 +41,8 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
-        golfBallsHandle: 'sporting-goods-outdoor-recreation-golf-golf-balls',
-        golfClubsHandle: 'golf-club-set',
+        golfBallsHandle: 'golf-balls',
+        golfClubsHandle: 'golf-clubs',
         apparelHandle: 'apparel',
         gearHandle: 'gear',
         first: 8,
@@ -55,16 +55,14 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }),
   ]);
 
-  console.log('loadCriticalData start\n\n')
+  console.log('loadCriticalData start')
 
-  // console.log("categoryProducts \n")
-  // console.log(JSON.stringify(categoryProducts))
+  console.log("categoryProducts \n")
+  console.log(JSON.stringify(categoryProducts))
 
   // console.log("collectionsData \n")
   // console.log(JSON.stringify(collectionsData))
 
-  console.log("popularCollections\n\n")
-  console.log(JSON.stringify(popularCollections?.collections?.edges[0]))
 
   // console.log('loadCriticalData end')
 
@@ -76,9 +74,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     description: edge.node.description,
     image: edge.node.image
   }))
-
-  console.log("collectionsTransformed \n\n")
-  console.log(JSON.stringify(collectionsTransformed?.[0]?.image))
 
   return {
     featuredCollection: collectionsData.collections.nodes[0],
