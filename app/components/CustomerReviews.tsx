@@ -1,4 +1,3 @@
-// app/components/CustomerReviews.tsx
 import { useState } from "react";
 import { Star, ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
 
@@ -14,7 +13,7 @@ export function CustomerReviews() {
       title: "Best golf balls on the market",
       text: "Ever since I began using Vice golf balls, they honestly compare to, if not surpass, the industry standard leading golf balls. I don’t believe I’ll ever switch back to any other brand.",
       date: "04/21/25",
-      images: ["/images/review1.jpg"],
+      images: ["/golfball.png"],
     },
     {
       name: "Matthew K.",
@@ -24,7 +23,7 @@ export function CustomerReviews() {
       title: "Best ball in my opinion",
       text: "I will not buy a different ball. The pro plus has amazing feel from any club I use. I even think that the pro plus feels better than the Pro V1.",
       date: "04/21/25",
-      images: ["/images/review2.jpg", "/images/review3.jpg", "/images/review4.jpg"],
+      images: ["/golfball.png", "/golfball.png", "/golfball.png"],
     },
     {
       name: "Matt D.",
@@ -34,7 +33,7 @@ export function CustomerReviews() {
       title: "New Pro Plus Works!",
       text: "I got my first custom picture golf balls and they look great! Best performing Vice golf ball yet.",
       date: "10/29/25",
-      images: ["/images/review5.jpg"],
+      images: ["/golfball.png"],
     },
     {
       name: "Ashley N.",
@@ -64,10 +63,82 @@ export function CustomerReviews() {
   ];
 
   return (
-    <section className="w-full mt-16 bg-white py-12">
-      <h2 className="text-3xl font-bold text-center mb-10 text-gray-900">
-        Customer Reviews
-      </h2>
+    <section className="w-full bg-white py-16">
+      {/* Heading */}
+      <div className="mb-16 px-6">
+        <h2 className="text-3xl font-normal text-center text-gray-800 tracking-wide">
+          Customer Reviews
+        </h2>
+      </div>
+
+
+      {/* Summary Section */}
+      <div className="flex flex-col md:flex-row items-center justify-center gap-10 mb-16 px-6">
+        {/* Left: Average Rating */}
+        <div className="text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <span className="text-5xl font-bold text-gray-900">4.8</span>
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-6 h-6 ${
+                    i < 5 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+          <p className="text-gray-600 text-sm mt-1">Based on 1150 reviews</p>
+          <button className="mt-4 bg-black text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-gray-900 transition">
+            ★ See Reviews Summary
+          </button>
+        </div>
+
+        {/* Middle: Rating Breakdown */}
+        <div className="w-full md:w-[300px]">
+          {[5, 4, 3, 2, 1].map((star, i) => (
+            <div key={i} className="flex items-center gap-3 mb-2">
+              <span className="w-4 text-sm text-gray-800">{star}</span>
+              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-black"
+                  style={{
+                    width:
+                      star === 5
+                        ? "88%"
+                        : star === 4
+                        ? "8%"
+                        : star === 3
+                        ? "2%"
+                        : star === 2
+                        ? "1%"
+                        : "1%",
+                  }}
+                ></div>
+              </div>
+              <span className="w-10 text-xs text-gray-500 text-right">
+                {star === 5
+                  ? 1013
+                  : star === 4
+                  ? 98
+                  : star === 3
+                  ? 22
+                  : star === 2
+                  ? 3
+                  : 14}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Right: Write Review Button */}
+        <div>
+          <button className="bg-black text-white text-sm font-medium px-6 py-2.5 rounded-full hover:bg-gray-900 transition">
+            Write A Review
+          </button>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 items-center justify-between px-6 py-8 border-t border-gray-200 bg-gray-50">
@@ -84,7 +155,7 @@ export function CustomerReviews() {
             <option>3 stars</option>
           </select>
 
-          {/* With media toggle */}
+          {/* With Media Toggle */}
           <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
             <input
               type="checkbox"
@@ -111,7 +182,7 @@ export function CustomerReviews() {
         </div>
       </div>
 
-      {/* Popular topics */}
+      {/* Popular Topics */}
       <div className="px-6 mb-8 mt-6">
         <h3 className="text-sm font-semibold mb-4 text-gray-800 uppercase tracking-wide">
           Popular topics
@@ -131,7 +202,7 @@ export function CustomerReviews() {
         </div>
       </div>
 
-      {/* Reviews list */}
+      {/* Reviews List */}
       <div className="divide-y divide-gray-100 px-6">
         {filteredReviews.length > 0 ? (
           filteredReviews.map((r, i) => (
@@ -142,7 +213,9 @@ export function CustomerReviews() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="font-semibold text-gray-900">{r.name}</span>
-                  <span className="text-xs text-gray-500">• {r.country.toUpperCase()}</span>
+                  <span className="text-xs text-gray-500">
+                    • {r.country.toUpperCase()}
+                  </span>
                   {r.verified && (
                     <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
                       <CheckCircle className="w-3 h-3" />
@@ -156,16 +229,22 @@ export function CustomerReviews() {
                     <Star
                       key={j}
                       className={`w-5 h-5 ${
-                        j < r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                        j < r.rating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
                       }`}
                     />
                   ))}
-                  <span className="font-semibold text-gray-900 ml-3">{r.title}</span>
+                  <span className="font-semibold text-gray-900 ml-3">
+                    {r.title}
+                  </span>
                 </div>
 
-                <p className="text-gray-700 text-sm leading-relaxed max-w-2xl mb-3">{r.text}</p>
+                <p className="text-gray-700 text-sm leading-relaxed max-w-2xl mb-3">
+                  {r.text}
+                </p>
 
-                {/* Review images */}
+                {/* Review Images */}
                 {r.images.length > 0 && (
                   <div className="flex gap-3 mt-2 flex-wrap">
                     {r.images.map((img, idx) => (
@@ -200,7 +279,9 @@ export function CustomerReviews() {
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500 py-10">No reviews with media found.</p>
+          <p className="text-center text-gray-500 py-10">
+            No reviews with media found.
+          </p>
         )}
       </div>
 
