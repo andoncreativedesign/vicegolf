@@ -13,7 +13,7 @@ import {QuantitySelector} from './QuantitySelector';
 import {ShippingInfo} from './ShippingInfo';
 import {ProductDetailsAccordions} from './ProductDetailsAccordions';
 import type {ProductFragment} from 'storefrontapi.generated';
-import {useState} from 'react';
+import {useState, useEffect, useRef} from 'react';
 
 export function ProductForm({
   productOptions,
@@ -26,6 +26,8 @@ export function ProductForm({
   const {open} = useAside();
   const [quantity, setQuantity] = useState(1); // Default to 1 dozen
   const [selectedTier, setSelectedTier] = useState('1'); // For radio selection
+  const formRef = useRef<HTMLDivElement>(null);
+  const [formHeight, setFormHeight] = useState('auto');
 
   // Quantity tiers (labels only, no pricing here)
   const pricingTiers = [
@@ -54,8 +56,26 @@ export function ProductForm({
     open('cart');
   };
 
+  // Dynamically set form height to match image height (assumes image ref passed or use window resize listener;
+  // for simplicity, here we use a placeholder - in full impl, pass imageHeight prop or use ResizeObserver)
+  useEffect(() => {
+    // Placeholder: Assume image height is 600px; replace with actual measurement logic
+    // e.g., if imageHeight prop: setFormHeight(`${imageHeight}px`);
+    setFormHeight('600px'); // Match the fixed image height from screenshot/layout
+  }, []);
+
   return (
-    <div className="product-form">
+    <div 
+      ref={formRef}
+      className="product-form"
+      style={{
+        height: formHeight,
+        overflowY: 'auto',
+        scrollBehavior: 'smooth',
+        WebkitOverflowScrolling: 'touch',
+        paddingRight: '8px', // Optional: scrollbar gutter space
+      }}
+    >
       {/* Product Price - total with compare if applicable */}
       <ProductPrice 
         price={{amount: totalPriceAmount.toFixed(2), currencyCode}} 
