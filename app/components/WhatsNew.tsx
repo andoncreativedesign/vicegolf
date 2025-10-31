@@ -1,5 +1,12 @@
 // app/components/WhatsNew.tsx
+import { useState } from 'react';
+
 export function WhatsNew() {
+  const [openAccordion, setOpenAccordion] = useState<number | null>(null);
+  
+  const toggleAccordion = (index: number) => {
+    setOpenAccordion(openAccordion === index ? null : index);
+  };
   return (
     <section className="w-full py-24 px-6 md:px-12 lg:px-20">
       <div className="max-w-7xl mx-auto">
@@ -107,6 +114,77 @@ export function WhatsNew() {
               <p className="text-gray-600 leading-relaxed max-w-xs">
                 The thinnest Cast Urethane cover for maximum control and short game spin.
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* New Card Section with Accordion and Image */}
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* Left: Accordion */}
+            <div className="p-8 lg:p-12">
+              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-8">
+                Technical Specifications
+              </h3>
+              <div className="border-t border-gray-100">
+              {[
+  {
+    title: 'Cast Urethane',
+    content:
+      'Cast Urethane is one of the best covers on the market. The process creates an extra thin cover with stronger polymer bonds compared to other ball covers, leading to optimal performance with enhanced feel and control on the course.',
+  },
+  {
+    title: 'Vice Pro Plus Compression',
+    content:
+      'The Vice Pro Plus has a compression rating of 100, which is optimized to convert high swing speeds into high ball speeds with optimal efficiency. To compare compression ratings across our range, view our Ball Comparison page.',
+  },
+  {
+    title: 'Ball Flight Trajectory',
+    content:
+      'The Vice Pro Plus is developed for maximum control, giving players capable of achieving high swing speeds and controlling backspin the chance to shape shots at will and gain ultimate control over the ball flight.',
+  },
+].map((item, index) => (
+  <div key={index} className="border-b border-gray-100">
+    <button
+      onClick={() => toggleAccordion(index)}
+      className="flex w-full items-center justify-between py-5 text-left transition-colors duration-200 hover:bg-gray-50 px-2 -mx-2 rounded"
+    >
+      <span className="text-[15px] font-semibold text-gray-900 tracking-tight">
+        {item.title}
+      </span>
+      <svg
+        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${openAccordion === index ? 'rotate-180' : ''}`}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M19 9l-7 7-7-7"
+        />
+      </svg>
+    </button>
+    <div
+      className={`overflow-hidden transition-all duration-300 ${openAccordion === index ? 'max-h-40 pb-5' : 'max-h-0'}`}
+    >
+      <p className="text-sm text-gray-600 leading-relaxed tracking-wide px-2">
+        {item.content}
+      </p>
+    </div>
+  </div>
+))}
+              </div>
+            </div>
+            
+            {/* Right: Image */}
+            <div className="h-full min-h-[400px] bg-gray-50 flex items-center justify-center p-8">
+              <img
+                src="/golfball.png"
+                alt="GolfVice Technical Specifications"
+                className="w-full max-w-sm object-contain"
+              />
             </div>
           </div>
         </div>
