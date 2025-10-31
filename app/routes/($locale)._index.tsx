@@ -1,7 +1,7 @@
 // app/routes/($locale)._index.tsx (updated to include HeroSection and ProductGrids)
 import { Await, useLoaderData, Link } from 'react-router';
 import type { Route } from './+types/_index';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Image } from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
@@ -12,7 +12,7 @@ import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
 // import {getHeroSectionData} from '~/lib/sanity';
 import { getHomePageData } from '~/lib/sanity/home';
-import { GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY } from '~/lib/shopify/product-queries';
+import { GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY, RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import ClientLogos from '~/components/Home/ClientLogos';
 import ShopByCategories from '~/components/Home/ShopByCategories';
 
@@ -22,7 +22,7 @@ export const meta: Route.MetaFunction = () => {
 
 export async function loader(args: Route.LoaderArgs) {
   // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
+  const deferredData = await loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
@@ -41,8 +41,8 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
-        golfBallsHandle: 'sporting-goods-outdoor-recreation-golf-golf-balls',
-        golfClubsHandle: 'golf-club-set',
+        golfBallsHandle: 'golf-balls',
+        golfClubsHandle: 'golf-clubs',
         apparelHandle: 'apparel',
         gearHandle: 'gear',
         first: 8,
@@ -55,7 +55,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }),
   ]);
 
-  console.log('loadCriticalData start\n\n')
+  // console.log('loadCriticalData start')
 
   // console.log("categoryProducts \n")
   // console.log(JSON.stringify(categoryProducts))
@@ -63,8 +63,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   // console.log("collectionsData \n")
   // console.log(JSON.stringify(collectionsData))
 
-  console.log("popularCollections\n\n")
-  console.log(JSON.stringify(popularCollections?.collections?.edges[0]))
 
   // console.log('loadCriticalData end')
 
@@ -76,9 +74,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     description: edge.node.description,
     image: edge.node.image
   }))
-
-  console.log("collectionsTransformed \n\n")
-  console.log(JSON.stringify(collectionsTransformed?.[0]?.image))
 
   return {
     featuredCollection: collectionsData.collections.nodes[0],
@@ -92,8 +87,8 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({ context }: Route.LoaderArgs) {
-  const recommendedProducts = context.storefront
+async function loadDeferredData({ context }: Route.LoaderArgs) {
+  const recommendedProducts = await context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY)
     .catch((error: Error) => {
       // Log query errors, but don't throw them so the page can still render
@@ -108,6 +103,13 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+
+
+  useEffect(() => {
+    console.log("data", data);
+    console.log("data.recommendedProducts", data.recommendedProducts);
+  }, [data]);
+
   return (
     <div className="home">
       <HeroSection heroData={data.homePageData?.heroes} />
@@ -159,7 +161,15 @@ export default function Homepage() {
 
       <HeroSection heroData={data.homePageData?.secondaryHero || null} />
 
-      <RecommendedProducts products={data.recommendedProducts} />
+      {data.recommendedProducts?.products?.nodes && (
+        <ProductGrid
+          products={data.recommendedProducts.products.nodes}
+          title="RECOMMENDED PRODUCTS"
+          categoryHandle="recommended"
+        />
+      )}
+
+      {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>
   );
 }
@@ -333,31 +343,31 @@ const FEATURED_COLLECTION_QUERY = `#graphql
   }
 ` as const;
 
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    featuredImage {
-      id
-      url
-      altText
-      width
-      height
-    }
-  }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...RecommendedProduct
-      }
-    }
-  }
-` as const;
+// const RECOMMENDED_PRODUCTS_QUERY = `#graphql
+//   fragment RecommendedProduct on Product {
+//     id
+//     title
+//     handle
+//     priceRange {
+//       minVariantPrice {
+//         amount
+//         currencyCode
+//       }
+//     }
+//     featuredImage {
+//       id
+//       url
+//       altText
+//       width
+//       height
+//     }
+//   }
+//   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+//     @inContext(country: $country, language: $language) {
+//     products(first: 4, sortKey: UPDATED_AT, reverse: true) {
+//       nodes {
+//         ...RecommendedProduct
+//       }
+//     }
+//   }
+// ` as const;

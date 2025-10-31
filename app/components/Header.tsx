@@ -1,13 +1,16 @@
-import {Suspense, useEffect, useState} from 'react';
-import {Await, NavLink, useAsyncValue} from 'react-router';
+import { Suspense, useEffect, useState } from 'react';
+import { Await, NavLink, useAsyncValue, useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import {
   type CartViewPayload,
+  Image,
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
-import {debugMenuItems} from '~/utils/debug-menu';
+import type { HeaderQuery, CartApiQueryFragment } from 'storefrontapi.generated';
+import { useAside } from '~/components/Aside';
+import { debugMenuItems } from '~/utils/debug-menu';
+import { MULTIPLE_COLLECTIONS_QUERY, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV } from '~/lib/shopify/product-queries';
+import type { loader } from '~/root';
 
 interface DropdownItem {
   name: string;
@@ -24,7 +27,11 @@ interface DropdownSection {
 interface ProductDropdownItem {
   name: string;
   href: string;
-  image: string;
+  image: {
+    id: string;
+    altText: string;
+    url: string;
+  };
   description?: string;
 }
 
@@ -37,178 +44,18 @@ interface HeaderProps {
 
 type Viewport = 'desktop' | 'mobile';
 
-// Product dropdown data for golf categories
-const categoryDropdowns: Record<string, ProductDropdownItem[]> = {
-  'GOLF BALLS': [
-    {
-      name: 'Vice Pro Plus',
-      href: '/collections/golf-balls/pro-plus',
-      image: '/testimg.webp',
-      description: 'Tour quality performance with maximum spin.'
-    },
-    {
-      name: 'Vice Pro',
-      href: '/collections/golf-balls/pro',
-      image: '/testimg.webp',
-      description: 'Premium feel and distance control.'
-    },
-    {
-      name: 'Vice Pro Air',
-      href: '/collections/golf-balls/pro-air',
-      image: '/testimg.webp',
-      description: 'Lightweight design for higher launch.'
-    },
-    {
-      name: 'Vice Tour',
-      href: '/collections/golf-balls/tour',
-      image: '/testimg.webp',
-      description: 'Professional-grade urethane cover.'
-    },
-    {
-      name: 'Vice Drive',
-      href: '/collections/golf-balls/drive',
-      image: '/testimg.webp',
-      description: 'Long-distance straight flight.'
-    },
-    {
-      name: 'Vice Tracer',
-      href: '/collections/golf-balls/tracer',
-      image: '/testimg.webp',
-      description: 'High-visibility for easy tracking.'
-    },
-  ],
-  'GOLF CLUBS': [
-    {
-      name: 'Vice Driver',
-      href: '/collections/golf-clubs/driver',
-      image: '/testimg.webp',
-      description: 'Forgiving driver for maximum distance.'
-    },
-    {
-      name: 'Vice Irons',
-      href: '/collections/golf-clubs/irons',
-      image: '/testimg.webp',
-      description: 'Precision irons with soft feel.'
-    },
-    {
-      name: 'Vice Wedges',
-      href: '/collections/golf-clubs/wedges',
-      image: '/testimg.webp',
-      description: 'Versatile wedges for short game.'
-    },
-    {
-      name: 'Vice Putter',
-      href: '/collections/golf-clubs/putter',
-      image: '/testimg.webp',
-      description: 'Milled putter for alignment.'
-    },
-  ],
-  'APPAREL': [
-    {
-      name: 'Performance Polos',
-      href: '/collections/apparel/polos',
-      image: '/testimg.webp',
-      description: 'Moisture-wicking golf polos.'
-    },
-    {
-      name: 'Golf Hoodies',
-      href: '/collections/apparel/hoodies',
-      image: '/testimg.webp',
-      description: 'Comfortable layered sweatshirts.'
-    },
-    {
-      name: 'Golf Jackets',
-      href: '/collections/apparel/jackets',
-      image: '/testimg.webp',
-      description: 'Weather-resistant outerwear.'
-    },
-    {
-      name: 'Golf T-Shirts',
-      href: '/collections/apparel/tshirts',
-      image: '/testimg.webp',
-      description: 'Casual breathable tees.'
-    },
-    {
-      name: 'Golf Hats',
-      href: '/collections/apparel/hats',
-      image: '/testimg.webp',
-      description: 'Stylish caps and visors.'
-    },
-    {
-      name: 'Golf Shoes',
-      href: '/collections/apparel/shoes',
-      image: '/testimg.webp',
-      description: 'Spiked shoes for grip.'
-    },
-  ],
-  'GEAR': [
-    {
-      name: 'Golf Bags',
-      href: '/collections/gear/bags',
-      image: '/testimg.webp',
-      description: 'Durable carry and cart bags.'
-    },
-    {
-      name: 'Golf Gloves',
-      href: '/collections/gear/gloves',
-      image: '/testimg.webp',
-      description: 'All-weather grip gloves.'
-    },
-    {
-      name: 'Tees & Accessories',
-      href: '/collections/gear/accessories',
-      image: '/testimg.webp',
-      description: 'Essentials for every round.'
-    },
-  ],
-  'LIMITED EDITIONS': [
-    {
-      name: 'Special Release Balls',
-      href: '/collections/limited-editions/balls',
-      image: '/testimg.webp',
-      description: 'Exclusive limited edition designs.'
-    },
-    {
-      name: 'Custom Gear',
-      href: '/collections/limited-editions/gear',
-      image: '/testimg.webp',
-      description: 'One-of-a-kind apparel drops.'
-    },
-  ],
-  'FITTING & CUSTOMISATION': [
-    {
-      name: 'Ball Customization',
-      href: '/fitting-customization/balls',
-      image: '/testimg.webp',
-      description: 'Personalize your golf balls.'
-    },
-    {
-      name: 'Club Fitting',
-      href: '/fitting-customization/clubs',
-      image: '/testimg.webp',
-      description: 'Professional club fitting services.'
-    },
-  ],
-  'JUNIORS': [
-    {
-      name: 'Junior Golf Balls',
-      href: '/collections/juniors/balls',
-      image: '/testimg.webp',
-      description: 'Kid-friendly low-compression balls.'
-    },
-    {
-      name: 'Junior Clubs',
-      href: '/collections/juniors/clubs',
-      image: '/testimg.webp',
-      description: 'Lightweight sets for young golfers.'
-    },
-    {
-      name: 'Junior Apparel',
-      href: '/collections/juniors/apparel',
-      image: '/testimg.webp',
-      description: 'Fun and functional kids clothing.'
-    },
-  ],
+// Function to transform collections into dropdown items
+const transformCollectionsToDropdown = (collections: any[]): ProductDropdownItem[] => {
+  const dropdowns = collections.map(item => {
+    return {
+      name: item.title,
+      href: `/products/${item.handle}`,
+      image: item.images.nodes[0],
+      description: item.description || ''
+    }
+  })
+
+  return dropdowns;
 };
 
 // Inline SVG flags for SSR compatibility
@@ -278,14 +125,25 @@ export function Header({
   cart,
   publicStoreDomain,
 }: HeaderProps) {
-  const {shop, menu} = header;
+  const { shop, menu } = header;
+  const { productsForNav } = useLoaderData<typeof loader>();
+
+  // Transform collections into category dropdowns
+  const categoryDropdowns = {
+    golfBalls: transformCollectionsToDropdown(productsForNav?.golfBalls?.products?.nodes || []),
+    golfClubs: transformCollectionsToDropdown(productsForNav?.golfClubs?.products?.nodes || []),
+    apparel: transformCollectionsToDropdown(productsForNav?.apparel?.products?.nodes || []),
+    gear: transformCollectionsToDropdown(productsForNav?.gear?.products?.nodes || []),
+  };
 
   // Debug: Log menu items to console (remove in production)
   useEffect(() => {
     debugMenuItems(menu, 'Header Menu');
+    // console.log('Category products data:', productsForNav);
   }, [menu]);
+
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       {/* Top Header Bar */}
       <div className="flex items-center justify-between px-4 py-6 max-w-7xl mx-auto">
         {/* Left: Country/Currency Selector */}
@@ -296,9 +154,9 @@ export function Header({
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center">
           <NavLink prefetch="intent" to="/" className="flex items-center">
-            <img 
-              src="/vice_logo.svg" 
-              alt="Vice Logo" 
+            <img
+              src="/vice_logo.svg"
+              alt="Vice Logo"
               className="h-8 w-auto"
             />
           </NavLink>
@@ -307,9 +165,9 @@ export function Header({
         {/* Right: Icons */}
         <div className="flex items-center space-x-2">
           <SearchToggle />
-          <NavLink 
-            prefetch="intent" 
-            to="/account" 
+          <NavLink
+            prefetch="intent"
+            to="/account"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
             aria-label="Account"
           >
@@ -330,6 +188,7 @@ export function Header({
             viewport="desktop"
             primaryDomainUrl={header.shop.primaryDomain?.url || ''}
             publicStoreDomain={publicStoreDomain}
+            categoryDropdowns={categoryDropdowns}
           />
         </div>
       </nav>
@@ -342,17 +201,23 @@ export function HeaderMenu({
   primaryDomainUrl,
   viewport,
   publicStoreDomain,
+  categoryDropdowns,
 }: {
   menu: HeaderProps['header']['menu'];
   primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
   viewport: Viewport;
   publicStoreDomain: HeaderProps['publicStoreDomain'];
+  categoryDropdowns: Record<string, ProductDropdownItem[]>;
 }) {
-  const {close} = useAside();
+  const { close } = useAside();
+
+  if (categoryDropdowns === undefined) {
+    return null;
+  }
 
   // Get Shopify menu items
   const shopifyMenuItems = menu?.items || [];
-  
+
   // Convert Shopify URLs to relative URLs
   const convertToRelativeUrl = (url: string) => {
     try {
@@ -362,16 +227,31 @@ export function HeaderMenu({
       return url; // Return as-is if not a valid URL
     }
   };
-  
+
+  // Define category dropdown items
+  const categoryDropdownsTest: Record<string, ProductDropdownItem[]> = {
+    'golfBalls': [],
+    'golfClubs': [],
+    'apparel': [],
+    'gear': [],
+    'limitedEditions': [],
+    'fittingCustomisation': [],
+    'juniors': []
+  };
+
+  useEffect(() => {
+    console.log('Category dropdowns:', categoryDropdowns);
+  }, [categoryDropdowns])
+
   // Additional golf-specific navigation items to complement Shopify menu
   const additionalGolfItems = [
-    { title: 'GOLF BALLS', url: '/collections/golf-balls', dropdownItems: categoryDropdowns['GOLF BALLS'] },
-    { title: 'GOLF CLUBS', url: '/collections/golf-clubs', dropdownItems: categoryDropdowns['GOLF CLUBS'] },
-    { title: 'APPAREL', url: '/collections/apparel', dropdownItems: categoryDropdowns['APPAREL'] },
-    { title: 'GEAR', url: '/collections/gear', dropdownItems: categoryDropdowns['GEAR'] },
-    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions', dropdownItems: categoryDropdowns['LIMITED EDITIONS'] },
-    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom', dropdownItems: categoryDropdowns['FITTING & CUSTOMISATION'] },
-    { title: 'JUNIORS', url: '/collections/juniors', dropdownItems: categoryDropdowns['JUNIORS'] },
+    { title: 'GOLF BALLS', url: '/collections/golf-balls', dropdownItems: categoryDropdowns['golfBalls'] },
+    { title: 'GOLF CLUBS', url: '/collections/golf-clubs', dropdownItems: categoryDropdowns['golfClubs'] },
+    { title: 'APPAREL', url: '/collections/apparel', dropdownItems: categoryDropdowns['apparel'] },
+    { title: 'GEAR', url: '/collections/gear', dropdownItems: categoryDropdowns['gear'] },
+    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions', dropdownItems: categoryDropdowns['limitedEditions'] },
+    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom', dropdownItems: categoryDropdowns['fittingCustomisation'] },
+    { title: 'JUNIORS', url: '/collections/juniors', dropdownItems: categoryDropdowns['juniors'] },
   ];
 
   // Extend type for navigation items
@@ -384,22 +264,22 @@ export function HeaderMenu({
   };
 
   // Combine Shopify menu items with additional golf items, filtering out home, contact, catalog
-  const shopifyItems: NavigationItem[] = shopifyMenuItems
-    .filter(item => !['HOME', 'CONTACT', 'CATALOG'].includes(item.title.toUpperCase()))
-    .map(item => ({
-      title: item.title.toUpperCase(),
-      url: convertToRelativeUrl(item.url),
-      id: item.id,
-      items: item.items?.map(subItem => ({
-        title: subItem.title,
-        url: convertToRelativeUrl(subItem.url),
-        id: subItem.id,
-      })) || []
-    }));
+  // const shopifyItems: NavigationItem[] = shopifyMenuItems
+  //   .filter(item => !['HOME', 'CONTACT', 'CATALOG'].includes(item.title.toUpperCase()))
+  //   .map(item => ({
+  //     title: item.title.toUpperCase(),
+  //     url: convertToRelativeUrl(item.url),
+  //     id: item.id,
+  //     items: item.items?.map(subItem => ({
+  //       title: subItem.title,
+  //       url: convertToRelativeUrl(subItem.url),
+  //       id: subItem.id,
+  //     })) || []
+  //   }));
 
   // Create final navigation combining Shopify items and additional golf items
   const navigationItems: NavigationItem[] = [
-    ...shopifyItems,
+    // ...shopifyItems,
     ...additionalGolfItems
   ];
 
@@ -413,6 +293,7 @@ export function HeaderMenu({
               prefetch="intent"
               to={item.url}
               className="text-lg font-medium text-gray-900 hover:text-gray-600 block"
+              style={{textDecoration: 'none'}}
             >
               {item.title}
             </NavLink>
@@ -446,17 +327,16 @@ export function HeaderMenu({
             <NavLink
               prefetch="intent"
               to={item.url}
-              className={({isActive}) => 
-                `text-sm font-medium tracking-wide transition-colors duration-200 ${
-                  isActive 
-                    ? 'text-black border-b-2 border-black pb-1' 
-                    : 'text-gray-700 hover:text-black'
+              className={({ isActive }) =>
+                `text-sm font-medium tracking-wide transition-colors duration-200 ${isActive
+                  ? 'text-black border-b-2 border-black pb-1'
+                  : 'text-gray-700 hover:text-black'
                 }`
               }
             >
               {item.title}
             </NavLink>
-            
+
             {/* Simple list dropdown for Shopify items */}
             {item.items && item.items.length > 0 && (
               <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
@@ -474,7 +354,7 @@ export function HeaderMenu({
                 </div>
               </div>
             )}
-            
+
             {/* Product grid dropdown for golf categories */}
             {item.dropdownItems && !item.items && (
               <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
@@ -486,12 +366,14 @@ export function HeaderMenu({
                         prefetch="intent"
                         to={product.href}
                         className="group/item flex flex-col items-center text-center hover:bg-gray-50 rounded-lg p-3 transition-colors duration-200"
+                        style={{ textDecoration: 'none' }}
                       >
-                        <img
-                          src={product.image}
+                        <Image
+                          data={product.image}
                           alt={product.name}
-                          className="w-20 h-20 object-cover rounded-md mb-2 group-hover/item:scale-105 transition-transform duration-200"
+                          className="w-24 h-24 object-cover rounded-md mb-2 group-hover/item:scale-105 transition-transform duration-200"
                         />
+
                         <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
                         {product.description && (
                           <p className="text-xs text-gray-600 mt-1">{product.description}</p>
@@ -512,7 +394,7 @@ export function HeaderMenu({
 
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
+  const { open } = useAside();
   return (
     <button
       className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
@@ -527,10 +409,10 @@ function HeaderMenuMobileToggle() {
 }
 
 function SearchToggle() {
-  const {open} = useAside();
+  const { open } = useAside();
   return (
-    <button 
-      className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200" 
+    <button
+      className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
       onClick={() => open('search')}
       aria-label="Search"
     >
@@ -541,9 +423,9 @@ function SearchToggle() {
   );
 }
 
-function CartBadge({count}: {count: number | null}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
+function CartBadge({ count }: { count: number | null }) {
+  const { open } = useAside();
+  const { publish, shop, cart, prevCart } = useAnalytics();
 
   return (
     <button
@@ -564,7 +446,7 @@ function CartBadge({count}: {count: number | null}) {
       <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
       </svg>
-      
+
       {/* Badge with count */}
       {count !== null && count > 0 && (
         <span className="absolute -top-1 -right-1 bg-black text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
@@ -575,7 +457,7 @@ function CartBadge({count}: {count: number | null}) {
   );
 }
 
-function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
+function CartToggle({ cart }: Pick<HeaderProps, 'cart'>) {
   return (
     <Suspense fallback={<CartBadge count={null} />}>
       <Await resolve={cart}>
@@ -648,9 +530,9 @@ function CountryCurrencySelector() {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Select country and currency"
       >
-        <div 
+        <div
           className="w-5 h-4 flex items-center justify-center flex-shrink-0"
-          dangerouslySetInnerHTML={{ __html: flagSvgs[selectedCountry.code] }} 
+          dangerouslySetInnerHTML={{ __html: flagSvgs[selectedCountry.code] }}
         />
         <span className="hidden sm:inline">
           {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
@@ -658,10 +540,10 @@ function CountryCurrencySelector() {
         <span className="sm:hidden">
           {selectedCountry.currency} {selectedCountry.symbol}
         </span>
-        <svg 
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -672,11 +554,11 @@ function CountryCurrencySelector() {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-20" 
+          <div
+            className="fixed inset-0 z-20"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Dropdown Content */}
           <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-30 max-h-80 overflow-y-auto">
             {/* Search Input */}
@@ -693,14 +575,13 @@ function CountryCurrencySelector() {
               {filteredCountries.map((country) => (
                 <button
                   key={country.code}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${
-                    selectedCountry.code === country.code ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                    }`}
                   onClick={() => handleCountrySelect(country)}
                 >
-                  <div 
+                  <div
                     className="w-5 h-4 flex items-center justify-center flex-shrink-0"
-                    dangerouslySetInnerHTML={{ __html: flagSvgs[country.code] }} 
+                    dangerouslySetInnerHTML={{ __html: flagSvgs[country.code] }}
                   />
                   <div className="flex-1 text-left">
                     <div className="font-medium">{country.name}</div>
