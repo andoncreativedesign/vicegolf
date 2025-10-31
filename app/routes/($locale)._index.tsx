@@ -55,10 +55,10 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }),
   ]);
 
-  console.log('loadCriticalData start')
+  // console.log('loadCriticalData start')
 
-  console.log("categoryProducts \n")
-  console.log(JSON.stringify(categoryProducts))
+  // console.log("categoryProducts \n")
+  // console.log(JSON.stringify(categoryProducts))
 
   // console.log("collectionsData \n")
   // console.log(JSON.stringify(collectionsData))
@@ -103,6 +103,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+
   return (
     <div className="home">
       <HeroSection heroData={data.homePageData?.heroes} />

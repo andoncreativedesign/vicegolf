@@ -110,7 +110,6 @@ export interface HomePageDataTransformed {
 
 // Update the getHeroSectionData function to use the new query
 export async function getHomePageData(): Promise<HomePageDataTransformed | null> {
-  console.log('get Homepage data call --')
   try {
     const query = encodeURIComponent(homePageQuery);
     const response = await axiosSanity.get("/?query=" + query);
@@ -142,12 +141,12 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
       })),
     };
 
-    console.log("transformedData")
-    console.log(JSON.stringify(transformedData?.heroes?.[0]))
-    console.log('secondaryHero')
-    console.log(JSON.stringify(transformedData?.secondaryHero?.length))
-    console.log('brand')
-    console.log(JSON.stringify(transformedData?.brand?.[0]))
+    // console.log("transformedData")
+    // console.log(JSON.stringify(transformedData?.heroes?.[0]))
+    // console.log('secondaryHero')
+    // console.log(JSON.stringify(transformedData?.secondaryHero?.length))
+    // console.log('brand')
+    // console.log(JSON.stringify(transformedData?.brand?.[0]))
 
     return transformedData;
   } catch (error) {
