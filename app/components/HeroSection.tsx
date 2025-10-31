@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Image } from '@shopify/hydrogen';
-import type { HeroSectionData } from '~/lib/sanity';
+import type { HeroItemTransformed } from '~/lib/sanity/home';
 
 interface HeroSlide {
   id: string;
@@ -56,25 +56,26 @@ const fallbackSlides: HeroSlide[] = [
 ];
 
 interface HeroSectionProps {
-  heroData?: HeroSectionData | null;
+  heroData?: HeroItemTransformed[] | null;
 }
 
 export function HeroSection({ heroData }: HeroSectionProps) {
-  // Convert Sanity data to slide format or use fallback
-  const slides: HeroSlide[] = heroData ? [
-    {
-      id: heroData._id,
-      bgImage: {
-        url: heroData.backgroundImage?.asset?.url || heroData.image?.asset?.url || fallbackSlides[0].bgImage.url,
-        altText: heroData.backgroundImage?.asset?.altText || heroData.image?.asset?.altText || 'Hero image',
-      },
-      title: heroData.title || 'Welcome',
-      subtitle: heroData.subtitle,
-      description: heroData.description || 'Discover amazing products',
-      buttonText: heroData.buttonText || 'Shop Now',
-      buttonLink: heroData.buttonLink || '/collections',
-    }
-  ] : fallbackSlides;
+  // Convert HeroItemTransformed array to HeroSlide array
+  const heroSlides: HeroSlide[] = heroData?.map((item, index) => ({
+    id: `hero-${index}-${item.title?.replace(/\s+/g, '-').toLowerCase() || index}`,
+    bgImage: {
+      url: item.image || fallbackSlides[0].bgImage.url,
+      altText: item.title || `Hero slide ${index + 1}`,
+    },
+    title: item.title || 'Welcome',
+    subtitle: item.description,
+    description: item.description || 'Discover amazing products',
+    buttonText: item.buttonText || 'Shop Now',
+    buttonLink: '/collections', // Default link, can be customized
+  })) || [];
+
+  // Use hero slides if available, otherwise use fallback slides
+  const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
 
   // Ensure we always have at least one slide
   const validSlides = slides.length > 0 ? slides : fallbackSlides;
@@ -146,7 +147,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
           </p>
           <Link
             to={currentSlideData.buttonLink}
-            className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg"
+            className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 mt-6 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg"
           >
             {currentSlideData.buttonText}
           </Link>

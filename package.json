@@ -15,6 +15,7 @@
   "prettier": "@shopify/prettier-config",
   "dependencies": {
     "@shopify/hydrogen": "2025.7.0",
+    "axios": "^1.13.1",
     "country-currency-map": "^2.1.7",
     "country-flag-icons": "^1.5.21",
     "graphql": "^16.10.0",
