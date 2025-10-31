@@ -1,3 +1,4 @@
+// app/components/ProductForm.tsx (updated with imports)
 import {Link, useNavigate} from 'react-router';
 import {type MappedProductOptions} from '@shopify/hydrogen';
 import type {
@@ -6,7 +7,13 @@ import type {
 } from '@shopify/hydrogen/storefront-api-types';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
+import {ProductPrice} from './ProductPrice';
+import {ProductRating} from './ProductRating';
+import {QuantitySelector} from './QuantitySelector';
+import {ShippingInfo} from './ShippingInfo';
+import {ProductDetailsAccordions} from './ProductDetailsAccordions';
 import type {ProductFragment} from 'storefrontapi.generated';
+import {useState} from 'react';
 
 export function ProductForm({
   productOptions,
@@ -17,12 +24,52 @@ export function ProductForm({
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
+  const [quantity, setQuantity] = useState(1); // Default to 1 dozen
+  const [selectedTier, setSelectedTier] = useState('1'); // For radio selection
+
+  // Quantity tiers (labels only, no pricing here)
+  const pricingTiers = [
+    { key: '1', label: '1 dozen' },
+    { key: '3', label: '3 dozen' },
+    { key: '6', label: '6 dozen' },
+  ];
+
+  const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+  const unitPriceAmount = parseFloat(selectedVariant?.priceV2?.amount || '0');
+  const unitCompareAmount = parseFloat(selectedVariant?.compareAtPriceV2?.amount || '0');
+  const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
+  const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
+  const currencyCode = selectedVariant?.priceV2?.currencyCode || 'USD';
+  const showCompare = unitCompareAmount > unitPriceAmount;
+
+  // Custom quantity handler
+  const handleCustomQuantity = (q: number) => {
+    setQuantity(Math.max(1, q));
+    if (selectedTier !== 'custom') {
+      setSelectedTier('custom');
+    }
+  };
+
+  const handleAddToCart = () => {
+    open('cart');
+  };
+
   return (
     <div className="product-form">
+      {/* Product Price - total with compare if applicable */}
+      <ProductPrice 
+        price={{amount: totalPriceAmount.toFixed(2), currencyCode}} 
+        compareAtPrice={showCompare ? {amount: totalCompareAmount.toFixed(2), currencyCode} : undefined} 
+      />
+      {showCompare && <span className="price-per-dozen">(${unitPriceAmount.toFixed(2)}/dozen)</span>}
+
+      {/* Ratings Component */}
+      <ProductRating rating={4.8} reviewCount={1145} />
+
+      {/* Existing Product Options (e.g., Color Variants) */}
       {productOptions.map((option) => {
         // If there is only a single value in the option values, don't display the option
         if (option.optionValues.length === 1) return null;
-
         return (
           <div className="product-options" key={option.name}>
             <h5>{option.name}</h5>
@@ -38,7 +85,6 @@ export function ProductForm({
                   isDifferentProduct,
                   swatch,
                 } = value;
-
                 if (isDifferentProduct) {
                   // SEO
                   // When the variant is a combined listing child product
@@ -101,25 +147,40 @@ export function ProductForm({
           </div>
         );
       })}
+
+      {/* Quantity Selector Component */}
+      <QuantitySelector
+        selectedTier={selectedTier}
+        setSelectedTier={setSelectedTier}
+        quantity={quantity}
+        setQuantity={handleCustomQuantity}
+        pricingTiers={pricingTiers}
+      />
+
+      {/* Add to Cart Button with quantity */}
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
-        onClick={() => {
-          open('cart');
-        }}
+        onClick={handleAddToCart}
         lines={
           selectedVariant
             ? [
                 {
                   merchandiseId: selectedVariant.id,
-                  quantity: 1,
+                  quantity: totalQuantityDozens,
                   selectedVariant,
                 },
               ]
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {selectedVariant?.availableForSale ? 'Add to Cart' : 'Sold out'}
       </AddToCartButton>
+
+      {/* Shipping Info */}
+      <ShippingInfo />
+
+      {/* Details Accordions */}
+      <ProductDetailsAccordions />
     </div>
   );
 }
@@ -133,9 +194,7 @@ function ProductOptionSwatch({
 }) {
   const image = swatch?.image?.previewImage?.url;
   const color = swatch?.color;
-
-  if (!image && !color) return name;
-
+  if (!image && !color) return <span>{name}</span>;
   return (
     <div
       aria-label={name}
