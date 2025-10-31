@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 export function WhatsNew() {
-  const [openAccordion, setOpenAccordion] = useState<number | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<number | null>(0);
   
   const toggleAccordion = (index: number) => {
     setOpenAccordion(openAccordion === index ? null : index);
@@ -119,13 +119,15 @@ export function WhatsNew() {
         </div>
 
         {/* New Card Section with Accordion and Image */}
+        <div className="text-center mb-8">
+          <h3 className="text-2xl lg:text-3xl font-bold text-gray-900">
+           Technical Specs
+          </h3>
+        </div>
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Left: Accordion */}
             <div className="p-8 lg:p-12">
-              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-8">
-                Technical Specifications
-              </h3>
               <div className="border-t border-gray-100">
               {[
   {
@@ -146,14 +148,18 @@ export function WhatsNew() {
 ].map((item, index) => (
   <div key={index} className="border-b border-gray-100">
     <button
-      onClick={() => toggleAccordion(index)}
+      onClick={() =>
+        setOpenAccordion(openAccordion === index ? null : index)
+      }
       className="flex w-full items-center justify-between py-5 text-left transition-colors duration-200 hover:bg-gray-50 px-2 -mx-2 rounded"
     >
       <span className="text-[15px] font-semibold text-gray-900 tracking-tight">
         {item.title}
       </span>
       <svg
-        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${openAccordion === index ? 'rotate-180' : ''}`}
+        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+          openAccordion === index ? 'rotate-180' : ''
+        }`}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -166,20 +172,29 @@ export function WhatsNew() {
         />
       </svg>
     </button>
+
+    {/* FIXED SECTION: use scaleY animation instead of height expansion */}
     <div
-      className={`overflow-hidden transition-all duration-300 ${openAccordion === index ? 'max-h-40 pb-5' : 'max-h-0'}`}
+      className={`grid transition-all duration-300 ease-in-out ${
+        openAccordion === index
+          ? 'grid-rows-[1fr] opacity-100 scale-y-100'
+          : 'grid-rows-[0fr] opacity-0 scale-y-95'
+      }`}
     >
-      <p className="text-sm text-gray-600 leading-relaxed tracking-wide px-2">
-        {item.content}
-      </p>
+      <div className="overflow-hidden">
+        <p className="text-sm text-gray-600 leading-relaxed tracking-wide px-2 pb-4">
+          {item.content}
+        </p>
+      </div>
     </div>
   </div>
 ))}
+
               </div>
             </div>
             
             {/* Right: Image */}
-            <div className="h-full min-h-[400px] bg-gray-50 flex items-center justify-center p-8">
+            <div className="h-full min-h-[400px] flex items-center justify-center p-8">
               <img
                 src="/golfball.png"
                 alt="GolfVice Technical Specifications"
