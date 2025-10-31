@@ -1,8 +1,30 @@
+// app/components/CustomerReviews.tsx
 import { useState } from "react";
-import { Star, ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, CheckCircle, X } from "lucide-react";
 
 export function CustomerReviews() {
   const [withMediaOnly, setWithMediaOnly] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [review, setReview] = useState("");
+  const [headline, setHeadline] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const handleRatingClick = (selectedRating: number) => {
+    setRating(selectedRating);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log({ rating, review, headline, name, email });
+    setShowModal(false);
+    setRating(0);
+    setReview("");
+    setHeadline("");
+    setName("");
+    setEmail("");
+  };
 
   const reviews = [
     {
@@ -62,15 +84,24 @@ export function CustomerReviews() {
     "distance",
   ];
 
+  const scrollSlider = (direction: "left" | "right") => {
+    const container = document.querySelector(".media-slider");
+    if (container) {
+      container.scrollBy({
+        left: direction === "left" ? -300 : 300,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <section className="w-full bg-white py-16">
+    <section className="w-full bg-white py-16 relative">
       {/* Heading */}
       <div className="mb-16 px-6">
         <h2 className="text-3xl font-normal text-center text-gray-800 tracking-wide">
           Customer Reviews
         </h2>
       </div>
-
 
       {/* Summary Section */}
       <div className="flex flex-col md:flex-row items-center justify-center gap-10 mb-16 px-6">
@@ -134,8 +165,53 @@ export function CustomerReviews() {
 
         {/* Right: Write Review Button */}
         <div>
-          <button className="bg-black text-white text-sm font-medium px-6 py-2.5 rounded-full hover:bg-gray-900 transition">
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-black text-white text-sm font-medium px-6 py-2.5 rounded-full hover:bg-gray-900 transition"
+          >
             Write A Review
+          </button>
+        </div>
+      </div>
+
+      {/* Reviews with media slider */}
+      <div className="px-6 mb-12">
+        <h3 className="text-sm font-semibold text-gray-800 mb-4">
+          Reviews with media
+        </h3>
+
+        <div className="relative">
+          <div className="media-slider flex overflow-x-auto gap-4 pb-2 scrollbar-hide scroll-smooth">
+            {reviews
+              .filter((r) => r.images.length > 0)
+              .flatMap((r) => r.images)
+              .map((img, i) => (
+                <div
+                  key={i}
+                  className="flex-none w-[120px] h-[120px] rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition"
+                >
+                  <img
+                    src={img}
+                    alt={`review media ${i + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                  />
+                </div>
+              ))}
+          </div>
+
+          {/* Left & Right Arrows */}
+          <button
+            onClick={() => scrollSlider("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-white border border-gray-300 rounded-full p-1 shadow hover:bg-gray-100"
+          >
+            ‹
+          </button>
+
+          <button
+            onClick={() => scrollSlider("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-gray-300 rounded-full p-1 shadow hover:bg-gray-100"
+          >
+            ›
           </button>
         </div>
       </div>
@@ -244,7 +320,6 @@ export function CustomerReviews() {
                   {r.text}
                 </p>
 
-                {/* Review Images */}
                 {r.images.length > 0 && (
                   <div className="flex gap-3 mt-2 flex-wrap">
                     {r.images.map((img, idx) => (
@@ -306,6 +381,114 @@ export function CustomerReviews() {
           ›
         </button>
       </div>
+
+      {/* Write Review Modal */}
+      {showModal && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setShowModal(false)}
+          />
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Share your thoughts
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rate your experience *
+                </label>
+                <div className="flex gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleRatingClick(i + 1)}
+                      className={`${
+                        i < rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      } hover:text-yellow-400 transition-colors`}
+                    >
+                      <Star className="w-6 h-6" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Write a review *
+                </label>
+                <textarea
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  placeholder="Tell us what you like or dislike"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none h-24"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Add headline *
+                </label>
+                <input
+                  type="text"
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  placeholder="Summarize your experience"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your name *
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your email address *
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-black text-white font-medium py-2.5 rounded-md hover:bg-gray-900 transition"
+              >
+                Submit Review
+              </button>
+            </form>
+          </div>
+        </>
+      )}
     </section>
   );
 }
