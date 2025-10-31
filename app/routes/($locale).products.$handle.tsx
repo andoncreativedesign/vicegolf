@@ -11,7 +11,8 @@ import {
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {WhatsNew} from '~/components/WhatsNew'; // ✅ NEW IMPORT
+import {WhatsNew} from '~/components/WhatsNew';
+import {Youtube} from '~/components/Youtube';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -92,6 +93,9 @@ export default function Product() {
 
       {/* Reusable What's New Section */}
       <WhatsNew />
+
+      {/* Youtube Video Section */}
+      <Youtube />
 
       <Analytics.ProductView
         data={{
