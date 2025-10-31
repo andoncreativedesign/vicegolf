@@ -1,3 +1,4 @@
+// app/components/QuantitySelector.tsx
 import { Minus, Plus } from 'lucide-react';
 import type { ComponentProps } from 'react';
 
@@ -26,49 +27,52 @@ export function QuantitySelector({
   ...props
 }: Props) {
   return (
-    <div className="w-full max-w-lg" {...props}>
-      <h5 className="text-base font-semibold text-gray-900 mb-3">
-        Save Big With Vice
-      </h5>
+    <div className="w-full" {...props}>
 
       <div className="flex flex-col gap-3">
-        {pricingTiers.map((tier) => {
+        {pricingTiers.map((tier, index) => {
           const isSelected = selectedTier === tier.key;
           return (
             <label
               key={tier.key}
-              className={`flex items-center justify-between rounded-xl border cursor-pointer transition-all duration-200 px-4 py-3 
-                ${
-                  isSelected
-                    ? 'border-[#f0c040] bg-[#fffbea]'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+              className={`relative flex items-center justify-between rounded-2xl border-2 cursor-pointer transition-all duration-300 px-5 py-4 group ${
+                isSelected
+                  ? 'border-amber-500 bg-amber-50 shadow-md'
+                  : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+              }`}
             >
-              <div className="flex items-center gap-3">
+              
+              <div className="flex items-center gap-4">
+                <div className={`relative w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+                  ${isSelected ? 'border-amber-500 bg-amber-500' : 'border-gray-300 bg-white'}`}>
+                  {isSelected && (
+                    <div className="w-2 h-2 rounded-full bg-white"></div>
+                  )}
+                </div>
                 <input
                   type="radio"
                   name="quantity"
                   value={tier.key}
                   checked={isSelected}
                   onChange={(e) => setSelectedTier(e.target.value)}
-                  className="accent-black h-4 w-4"
+                  className="absolute opacity-0"
                 />
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-base font-semibold text-gray-900">
                     {tier.label}
                   </span>
                   {tier.subtext && (
-                    <span className="text-xs text-gray-500">{tier.subtext}</span>
+                    <span className="text-sm text-gray-500 mt-0.5">{tier.subtext}</span>
                   )}
                 </div>
               </div>
 
               <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-base font-bold text-gray-900">
                   {tier.price}
                 </p>
                 {tier.oldPrice && (
-                  <p className="text-xs text-gray-400 line-through">
+                  <p className="text-sm text-gray-400 line-through mt-0.5">
                     {tier.oldPrice}
                   </p>
                 )}
@@ -78,38 +82,47 @@ export function QuantitySelector({
         })}
 
         {/* Custom Quantity Selector */}
-        <div className="mt-4">
-          <p className="text-sm font-medium text-gray-900 mb-2">
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <p className="text-base font-semibold text-gray-900 mb-4">
             Pick a Custom Quantity
           </p>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
+          <div className="flex items-center justify-between bg-gray-50 rounded-2xl px-6 py-4">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
 
-            <div className="flex items-center border border-gray-200 rounded-full px-4 py-1.5">
-              <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                className="w-10 text-center text-sm font-medium text-gray-900 outline-none"
-              />
-              <span className="ml-1 text-sm text-gray-600">dozen</span>
+              <div className="flex items-center">
+                <input
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                  className="w-16 text-center text-lg font-bold text-gray-900 bg-transparent outline-none"
+                />
+                <span className="ml-2 text-base text-gray-600 font-medium">dozen</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setQuantity(quantity + 1)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setQuantity(quantity + 1)}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
+            
+            <div className="text-right">
+              <p className="text-sm text-gray-500 mb-1">Total</p>
+              <p className="text-lg font-bold text-gray-900">
+                ${(quantity * 39.99).toFixed(2)}
+              </p>
+            </div>
           </div>
         </div>
       </div>

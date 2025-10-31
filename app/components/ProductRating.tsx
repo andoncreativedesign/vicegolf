@@ -9,28 +9,44 @@ type Props = ComponentProps<'div'> & {
 
 export function ProductRating({ rating, reviewCount, ...props }: Props) {
   const stars = Array.from({ length: 5 }, (_, i) => {
-    const filled = i < Math.round(rating);
+    const filled = i < Math.floor(rating);
+    const partial = i === Math.floor(rating) && rating % 1 > 0;
+    
     return (
-      <Star
-        key={i}
-        size={18}
-        className={filled ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-      />
+      <div key={i} className="relative">
+        <Star
+          size={20}
+          className="text-gray-300"
+        />
+        {(filled || partial) && (
+          <div 
+            className={`absolute top-0 left-0 overflow-hidden ${
+              partial ? `w-[${(rating % 1) * 100}%]` : 'w-full'
+            }`}
+          >
+            <Star
+              size={20}
+              className="fill-amber-400 text-amber-400"
+            />
+          </div>
+        )}
+      </div>
     );
   });
 
   return (
     <div
-      className="flex items-center gap-2 text-sm text-gray-700"
+      className="flex items-center gap-3"
       {...props}
     >
-      <span className="flex items-center">{stars}</span>
-      <span className="font-semibold text-base">{rating.toFixed(1)}</span>
+      <div className="flex items-center gap-1">{stars}</div>
+      <span className="text-lg font-bold text-gray-900">{rating.toFixed(1)}</span>
+      <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
       <a
         href="#reviews"
-        className="text-gray-500 underline hover:text-gray-700"
+        className="text-gray-600 hover:text-gray-900 font-medium text-base transition-colors underline decoration-gray-300 hover:decoration-gray-600"
       >
-        ({reviewCount})
+        {reviewCount.toLocaleString()} Reviews
       </a>
     </div>
   );
