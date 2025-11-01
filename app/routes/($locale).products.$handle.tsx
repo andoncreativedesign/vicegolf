@@ -1,4 +1,5 @@
 import {redirect, useLoaderData} from 'react-router';
+import {useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -8,12 +9,20 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductImage} from '~/components/ProductImage';
+import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {WhatsNew} from '~/components/WhatsNew';
 import {Youtube} from '~/components/Youtube';
 import {CustomerReviews} from '~/components/CustomerReviews';
+
+type ProductImageType = {
+  id: string;
+  url: string;
+  altText?: string | null;
+  width?: number | null;
+  height?: number | null;
+};
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -73,16 +82,34 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const {title, descriptionHtml, images} = product;
+  const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(
+    selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null,
+  );
+
+  // Update selected image when variant changes
+  if (selectedVariant?.image && selectedImage?.id !== selectedVariant.image.id) {
+    setSelectedImage(selectedVariant.image as ProductImageType);
+  }
 
   return (
-    <div className="product-page-container flex flex-col gap-12 px-8 py-10">
+    <div className="product-page-container flex flex-col gap-12 px-4 md:px-8 py-6 md:py-10">
       {/* Image + Form in Flex */}
-      <div className="flex flex-col lg:flex-row gap-10 items-start">
-        <div className="flex-1">
-          <ProductImage image={selectedVariant?.image} />
+      <div className="flex flex-col lg:flex-row gap-8 md:gap-10 items-start">
+        <div className="w-full lg:flex-1">
+          {images?.nodes?.length > 0 ? (
+            <ProductGallery
+              images={images.nodes as ProductImageType[]}
+              selectedImage={selectedImage}
+              onImageSelect={setSelectedImage}
+            />
+          ) : (
+            <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
+              <span className="text-gray-400">No image available</span>
+            </div>
+          )}
         </div>
-        <div className="flex-1">
+        <div className="w-full lg:flex-1">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
@@ -169,6 +196,15 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    images(first: 10) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
     options {
       name
       optionValues {
