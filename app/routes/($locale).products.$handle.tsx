@@ -12,8 +12,7 @@ import {
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {WhatsNew} from '~/components/WhatsNew';
-import {Youtube} from '~/components/Youtube';
+import {GolfBallProduct} from '~/components/GolfBallProduct';
 import {CustomerReviews} from '~/components/CustomerReviews';
 
 type ProductImageType = {
@@ -120,13 +119,12 @@ export default function Product() {
         </div>
       </div>
 
-      {/* Reusable What's New Section */}
-      <WhatsNew />
+      {/* Product-specific sections */}
+      {product.productType?.toLowerCase() === 'golf balls' ? (
+        <GolfBallProduct product={product} />
+      ) : null}
 
-      {/* Youtube Video Section */}
-      <Youtube />
-
-      {/* Customer Reviews Section */}
+      {/* Customer Reviews Section (common for all products) */}
       <CustomerReviews />
 
       <Analytics.ProductView
