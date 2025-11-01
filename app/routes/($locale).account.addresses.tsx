@@ -1,4 +1,4 @@
-import type {CustomerAddressInput} from '@shopify/hydrogen/customer-account-api-types';
+import type { CustomerAddressInput } from '@shopify/hydrogen/customer-account-api-types';
 import type {
   AddressFragment,
   CustomerFragment,
@@ -6,12 +6,15 @@ import type {
 import {
   data,
   Form,
+  Link,
+  Outlet,
   useActionData,
+  useLocation,
   useNavigation,
   useOutletContext,
   type Fetcher,
 } from 'react-router';
-import type {Route} from './+types/account.addresses';
+import type { Route } from './+types/account.addresses';
 import {
   UPDATE_ADDRESS_MUTATION,
   DELETE_ADDRESS_MUTATION,
@@ -28,17 +31,17 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Addresses'}];
+  return [{ title: 'Addresses' }];
 };
 
-export async function loader({context}: Route.LoaderArgs) {
+export async function loader({ context }: Route.LoaderArgs) {
   context.customerAccount.handleAuthStatus();
 
   return {};
 }
 
-export async function action({request, context}: Route.ActionArgs) {
-  const {customerAccount} = context;
+export async function action({ request, context }: Route.ActionArgs) {
+  const { customerAccount } = context;
 
   try {
     const form = await request.formData();
@@ -54,7 +57,7 @@ export async function action({request, context}: Route.ActionArgs) {
     const isLoggedIn = await customerAccount.isLoggedIn();
     if (!isLoggedIn) {
       return data(
-        {error: {[addressId]: 'Unauthorized'}},
+        { error: { [addressId]: 'Unauthorized' } },
         {
           status: 401,
         },
@@ -89,7 +92,7 @@ export async function action({request, context}: Route.ActionArgs) {
       case 'POST': {
         // handle new address creation
         try {
-          const {data, errors} = await customerAccount.mutate(
+          const { data, errors } = await customerAccount.mutate(
             CREATE_ADDRESS_MUTATION,
             {
               variables: {
@@ -120,14 +123,14 @@ export async function action({request, context}: Route.ActionArgs) {
         } catch (error: unknown) {
           if (error instanceof Error) {
             return data(
-              {error: {[addressId]: error.message}},
+              { error: { [addressId]: error.message } },
               {
                 status: 400,
               },
             );
           }
           return data(
-            {error: {[addressId]: error}},
+            { error: { [addressId]: error } },
             {
               status: 400,
             },
@@ -138,7 +141,7 @@ export async function action({request, context}: Route.ActionArgs) {
       case 'PUT': {
         // handle address updates
         try {
-          const {data, errors} = await customerAccount.mutate(
+          const { data, errors } = await customerAccount.mutate(
             UPDATE_ADDRESS_MUTATION,
             {
               variables: {
@@ -170,14 +173,14 @@ export async function action({request, context}: Route.ActionArgs) {
         } catch (error: unknown) {
           if (error instanceof Error) {
             return data(
-              {error: {[addressId]: error.message}},
+              { error: { [addressId]: error.message } },
               {
                 status: 400,
               },
             );
           }
           return data(
-            {error: {[addressId]: error}},
+            { error: { [addressId]: error } },
             {
               status: 400,
             },
@@ -188,7 +191,7 @@ export async function action({request, context}: Route.ActionArgs) {
       case 'DELETE': {
         // handles address deletion
         try {
-          const {data, errors} = await customerAccount.mutate(
+          const { data, errors } = await customerAccount.mutate(
             DELETE_ADDRESS_MUTATION,
             {
               variables: {
@@ -210,18 +213,18 @@ export async function action({request, context}: Route.ActionArgs) {
             throw new Error('Customer address delete failed.');
           }
 
-          return {error: null, deletedAddress: addressId};
+          return { error: null, deletedAddress: addressId };
         } catch (error: unknown) {
           if (error instanceof Error) {
             return data(
-              {error: {[addressId]: error.message}},
+              { error: { [addressId]: error.message } },
               {
                 status: 400,
               },
             );
           }
           return data(
-            {error: {[addressId]: error}},
+            { error: { [addressId]: error } },
             {
               status: 400,
             },
@@ -231,7 +234,7 @@ export async function action({request, context}: Route.ActionArgs) {
 
       default: {
         return data(
-          {error: {[addressId]: 'Method not allowed'}},
+          { error: { [addressId]: 'Method not allowed' } },
           {
             status: 405,
           },
@@ -241,14 +244,14 @@ export async function action({request, context}: Route.ActionArgs) {
   } catch (error: unknown) {
     if (error instanceof Error) {
       return data(
-        {error: error.message},
+        { error: error.message },
         {
           status: 400,
         },
       );
     }
     return data(
-      {error},
+      { error },
       {
         status: 400,
       },
@@ -257,23 +260,42 @@ export async function action({request, context}: Route.ActionArgs) {
 }
 
 export default function Addresses() {
-  const {customer} = useOutletContext<{customer: CustomerFragment}>();
-  const {defaultAddress, addresses} = customer;
+  const { customer } = useOutletContext<{ customer: CustomerFragment }>();
+  const { defaultAddress, addresses } = customer;
+  const location = useLocation();
+  const isAddRoute = location.pathname.endsWith('/add');
 
+  // If we're on the add route, just render the Outlet which will show the add form
+  if (isAddRoute) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <Outlet />
+      </div>
+    );
+  }
+
+  // Otherwise, show the addresses list with the option to add a new one
   return (
     <div className="account-addresses">
       <h2>Addresses</h2>
       <br />
       {!addresses.nodes.length ? (
-        <p>You have no addresses saved.</p>
+        <div className="space-y-8">
+          <p className="mb-6">You have no addresses saved.</p>
+          <Link
+            to="add"
+            className="inline-block bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+            style={{ textDecoration: 'none', color: "white" }}
+          >
+            Add Address
+          </Link>
+        </div>
       ) : (
         <div>
           <div>
-            <legend>Create address</legend>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Address</h2>
             <NewAddressForm />
           </div>
-          <br />
-          <hr />
           <br />
           <ExistingAddresses
             addresses={addresses}
@@ -301,23 +323,26 @@ function NewAddressForm() {
   } as CustomerAddressInput;
 
   return (
-    <AddressForm
-      addressId={'NEW_ADDRESS_ID'}
-      address={newAddress}
-      defaultAddress={null}
-    >
-      {({stateForMethod}) => (
-        <div>
-          <button
-            disabled={stateForMethod('POST') !== 'idle'}
-            formMethod="POST"
-            type="submit"
-          >
-            {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
-          </button>
-        </div>
-      )}
-    </AddressForm>
+    <div className="max-w-3xl mb-8 border-b-2 border-gray-800">
+      <AddressForm
+        addressId={'NEW_ADDRESS_ID'}
+        address={newAddress}
+        defaultAddress={null}
+      >
+        {({ stateForMethod }) => (
+          <div className="mt-6">
+            <button
+              type="submit"
+              formMethod="POST"
+              disabled={stateForMethod('POST') !== 'idle'}
+              className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {stateForMethod('POST') !== 'idle' ? 'Saving...' : 'Save Address'}
+            </button>
+          </div>
+        )}
+      </AddressForm>
+    </div>
   );
 }
 
@@ -326,34 +351,37 @@ function ExistingAddresses({
   defaultAddress,
 }: Pick<CustomerFragment, 'addresses' | 'defaultAddress'>) {
   return (
-    <div>
-      <legend>Existing addresses</legend>
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Saved Addresses</h2>
       {addresses.nodes.map((address) => (
-        <AddressForm
-          key={address.id}
-          addressId={address.id}
-          address={address}
-          defaultAddress={defaultAddress}
-        >
-          {({stateForMethod}) => (
-            <div>
-              <button
-                disabled={stateForMethod('PUT') !== 'idle'}
-                formMethod="PUT"
-                type="submit"
-              >
-                {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
-              </button>
-              <button
-                disabled={stateForMethod('DELETE') !== 'idle'}
-                formMethod="DELETE"
-                type="submit"
-              >
-                {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
-              </button>
-            </div>
-          )}
-        </AddressForm>
+        <div key={address.id} className="border-b-2 border-gray-800">
+          <AddressForm
+            addressId={address.id}
+            address={address}
+            defaultAddress={defaultAddress}
+          >
+            {({ stateForMethod }) => (
+              <div className="flex space-x-4 mt-6">
+                <button
+                  type="submit"
+                  formMethod="PUT"
+                  disabled={stateForMethod('PUT') !== 'idle'}
+                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {stateForMethod('PUT') !== 'idle' ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  type="submit"
+                  formMethod="DELETE"
+                  disabled={stateForMethod('DELETE') !== 'idle'}
+                  className="px-6 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {stateForMethod('DELETE') !== 'idle' ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </AddressForm>
+        </div>
       ))}
     </div>
   );
@@ -372,15 +400,15 @@ export function AddressForm({
     stateForMethod: (method: 'PUT' | 'POST' | 'DELETE') => Fetcher['state'];
   }) => React.ReactNode;
 }) {
-  const {state, formMethod} = useNavigation();
+  const { state, formMethod } = useNavigation();
   const action = useActionData<ActionResponse>();
   const error = action?.error?.[addressId];
   const isDefaultAddress = defaultAddress?.id === addressId;
   return (
-    <Form id={addressId}>
+    <Form id={addressId} className='text-gray-700'>
       <fieldset>
         <input type="hidden" name="addressId" defaultValue={addressId} />
-        <label htmlFor="firstName">First name*</label>
+        <label className="text-sm font-medium" htmlFor="firstName">First name*</label>
         <input
           aria-label="First name"
           autoComplete="given-name"
@@ -391,7 +419,7 @@ export function AddressForm({
           required
           type="text"
         />
-        <label htmlFor="lastName">Last name*</label>
+        <label className="text-sm font-medium" htmlFor="lastName">Last name*</label>
         <input
           aria-label="Last name"
           autoComplete="family-name"
@@ -402,7 +430,7 @@ export function AddressForm({
           required
           type="text"
         />
-        <label htmlFor="company">Company</label>
+        <label className="text-sm font-medium" htmlFor="company">Company</label>
         <input
           aria-label="Company"
           autoComplete="organization"
@@ -412,7 +440,7 @@ export function AddressForm({
           placeholder="Company"
           type="text"
         />
-        <label htmlFor="address1">Address line*</label>
+        <label className="text-sm font-medium" htmlFor="address1">Address line*</label>
         <input
           aria-label="Address line 1"
           autoComplete="address-line1"
@@ -423,7 +451,7 @@ export function AddressForm({
           required
           type="text"
         />
-        <label htmlFor="address2">Address line 2</label>
+        <label className="text-sm font-medium" htmlFor="address2">Address line 2</label>
         <input
           aria-label="Address line 2"
           autoComplete="address-line2"
@@ -433,7 +461,7 @@ export function AddressForm({
           placeholder="Address line 2"
           type="text"
         />
-        <label htmlFor="city">City*</label>
+        <label className="text-sm font-medium" htmlFor="city">City*</label>
         <input
           aria-label="City"
           autoComplete="address-level2"
@@ -444,7 +472,7 @@ export function AddressForm({
           required
           type="text"
         />
-        <label htmlFor="zoneCode">State / Province*</label>
+        <label className="text-sm font-medium" htmlFor="zoneCode">State / Province*</label>
         <input
           aria-label="State/Province"
           autoComplete="address-level1"
@@ -455,7 +483,7 @@ export function AddressForm({
           required
           type="text"
         />
-        <label htmlFor="zip">Zip / Postal Code*</label>
+        <label className="text-sm font-medium" htmlFor="zip">Zip / Postal Code*</label>
         <input
           aria-label="Zip"
           autoComplete="postal-code"
@@ -466,7 +494,7 @@ export function AddressForm({
           required
           type="text"
         />
-        <label htmlFor="territoryCode">Country Code*</label>
+        <label className="text-sm font-medium" htmlFor="territoryCode">Country Code*</label>
         <input
           aria-label="territoryCode"
           autoComplete="country"
@@ -478,7 +506,7 @@ export function AddressForm({
           type="text"
           maxLength={2}
         />
-        <label htmlFor="phoneNumber">Phone</label>
+        <label className="text-sm font-medium" htmlFor="phoneNumber">Phone</label>
         <input
           aria-label="Phone Number"
           autoComplete="tel"
@@ -496,16 +524,12 @@ export function AddressForm({
             name="defaultAddress"
             type="checkbox"
           />
-          <label htmlFor="defaultAddress">Set as default address</label>
+          <label htmlFor="defaultAddress" className="ml-2">Set as default address</label>
         </div>
-        {error ? (
-          <p>
-            <mark>
-              <small>{error}</small>
-            </mark>
-          </p>
-        ) : (
-          <br />
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+            <p className="text-sm">{error}</p>
+          </div>
         )}
         {children({
           stateForMethod: (method) => (formMethod === method ? state : 'idle'),
