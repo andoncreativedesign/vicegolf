@@ -1,4 +1,6 @@
+import {useState} from 'react';
 import {Image} from '@shopify/hydrogen';
+import {ProductImage} from './ProductImage';
 import './ProductGallery.css';
 
 type ImageType = {
@@ -18,23 +20,33 @@ type ProductGalleryProps = {
 
 export function ProductGallery({
   images,
-  selectedImage,
-  onImageSelect,
+  selectedImage: initialSelectedImage,
+  onImageSelect: externalOnImageSelect,
 }: ProductGalleryProps) {
+  const [selectedImage, setSelectedImage] = useState<ImageType | null>(
+    initialSelectedImage || (images?.[0] || null),
+  );
+
   if (!images?.length) return null;
 
-  const mainImage = selectedImage || images[0];
-  const thumbnailImages = images.filter((img) => img.id !== mainImage.id);
+  const handleImageSelect = (image: ImageType) => {
+    setSelectedImage(image);
+    externalOnImageSelect?.(image);
+  };
+
+  const thumbnailImages = images.filter((img) => img.id !== selectedImage?.id);
 
   return (
-    <div className="product-gallery flex">
+    <div className="product-gallery flex flex-col md:flex-row gap-4">
       {thumbnailImages.length > 0 && (
-        <div className="thumbnail-container mr-4">
+        <div className="thumbnail-container flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:max-h-[600px] md:w-20">
           {thumbnailImages.map((image) => (
             <button
               key={image.id}
-              className={`thumbnail-image ${selectedImage?.id === image.id ? 'ring-2 ring-blue-500' : ''}`}
-              onClick={() => onImageSelect?.(image)}
+              className={`thumbnail-image flex-shrink-0 w-16 h-16 md:w-full md:h-auto ${
+                selectedImage?.id === image.id ? 'ring-2 ring-blue-500' : ''
+              }`}
+              onClick={() => handleImageSelect(image)}
             >
               <Image
                 data={image}
@@ -47,13 +59,11 @@ export function ProductGallery({
           ))}
         </div>
       )}
-      <div className="main-image">
-        <Image
-          data={mainImage}
-          alt={mainImage.altText || 'Product Image'}
-          aspectRatio="1/1"
-          className="w-full h-auto rounded-lg"
-          sizes="(min-width: 64em) 50vw, 100vw"
+      <div className="main-image flex-1">
+        <ProductImage
+          image={selectedImage || images[0]}
+          galleryImages={images}
+          onImageChange={handleImageSelect}
         />
       </div>
     </div>
