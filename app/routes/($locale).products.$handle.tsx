@@ -88,6 +88,7 @@ export default function Product() {
             selectedVariant={selectedVariant}
             title={title}
             description={descriptionHtml}
+            productType={product.productType}
           />
         </div>
       </div>
@@ -163,6 +164,7 @@ const PRODUCT_FRAGMENT = `#graphql
     title
     vendor
     handle
+    productType
     descriptionHtml
     description
     encodedVariantExistence
