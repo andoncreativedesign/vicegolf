@@ -108,7 +108,13 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
           <p>You haven&apos;t placed any orders yet.</p>
           <br />
           <p>
-            <Link to="/collections">Start Shopping →</Link>
+              <Link
+                to="/collections"
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
+                style={{textDecoration: 'none', color: 'white'}}
+              >
+                Start Shopping →
+              </Link>
           </p>
         </>
       )}
@@ -152,7 +158,7 @@ function OrderSearchForm({
     <form
       ref={formRef}
       onSubmit={handleSubmit}
-      className="order-search-form"
+      className="order-search-form text-gray-700"
       aria-label="Search orders"
     >
       <fieldset className="order-search-fieldset">

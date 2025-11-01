@@ -47,7 +47,7 @@ export default function AccountLayout() {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
         <div className="w-full md:w-64 flex-shrink-0 ">
-          <div className="rounded-sm p-2 bg-gray-100">
+          <div className="rounded-sm p-4 bg-gray-100">
             <h2 className="text-lg font-medium text-gray-900 mb-6">My Account</h2>
             <AccountMenu />
           </div>
@@ -55,7 +55,7 @@ export default function AccountLayout() {
 
         {/* Main Content */}
         <div className="flex-1">
-          <div className="bg-white rounded-md p-2">
+          <div className="bg-gray-100 p-6">
             <Outlet context={{customer}} />
           </div>
         </div>
@@ -72,7 +72,7 @@ function AccountMenu() {
   ];
 
   return (
-    <nav className="space-y-2">
+    <nav className="space-y-2 text-gray-700">
       {menuItems.map((item) => (
         <NavLink
           key={item.to}

@@ -89,10 +89,10 @@ export default function AccountProfile() {
     <div className="account-profile">
       <h2>My profile</h2>
       <br />
-      <Form method="PUT">
+      <Form method="PUT" className="text-gray-700">
         <legend>Personal information</legend>
         <fieldset>
-          <label htmlFor="firstName">First name</label>
+          <label htmlFor="firstName" className="font-semibold ">First name</label>
           <input
             id="firstName"
             name="firstName"
@@ -102,8 +102,9 @@ export default function AccountProfile() {
             aria-label="First name"
             defaultValue={customer.firstName ?? ''}
             minLength={2}
+            className="border border-gray-400 rounded px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent"
           />
-          <label htmlFor="lastName">Last name</label>
+          <label htmlFor="lastName" className="font-semibold ">Last name</label>
           <input
             id="lastName"
             name="lastName"
@@ -113,6 +114,7 @@ export default function AccountProfile() {
             aria-label="Last name"
             defaultValue={customer.lastName ?? ''}
             minLength={2}
+            className="border border-gray-400 rounded px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent"
           />
         </fieldset>
         {action?.error ? (
@@ -124,7 +126,11 @@ export default function AccountProfile() {
         ) : (
           <br />
         )}
-        <button type="submit" disabled={state !== 'idle'}>
+        <button
+          type="submit"
+          disabled={state !== 'idle'}
+          className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
+        >
           {state !== 'idle' ? 'Updating' : 'Update'}
         </button>
       </Form>
