@@ -13,6 +13,7 @@ import {ProductGallery} from '~/components/ProductGallery';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {GolfBallProduct} from '~/components/GolfBallProduct';
+import {GolfClubSetProduct} from '~/components/GolfClubSetProduct';
 import {CustomerReviews} from '~/components/CustomerReviews';
 
 type ProductImageType = {
@@ -120,9 +121,18 @@ export default function Product() {
       </div>
 
       {/* Product-specific sections */}
-      {product.productType?.toLowerCase() === 'golf balls' ? (
-        <GolfBallProduct product={product} />
-      ) : null}
+      {(() => {
+        const productType = product.productType?.toLowerCase();
+        
+        switch(productType) {
+          case 'golf balls':
+            return <GolfBallProduct product={product} />;
+          case 'golf club set':
+            return <GolfClubSetProduct product={product} />;
+          default:
+            return null;
+        }
+      })()}
 
       {/* Customer Reviews Section (common for all products) */}
       <CustomerReviews />
