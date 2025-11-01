@@ -23,18 +23,24 @@ export function ProductGallery({
   selectedImage: initialSelectedImage,
   onImageSelect: externalOnImageSelect,
 }: ProductGalleryProps) {
+  if (!images?.length && !initialSelectedImage) return null;
+
+  const fixedExcludedId = initialSelectedImage?.id || images?.[0]?.id;
+  const galleryThumbs = images.filter((img) => img.id !== fixedExcludedId);
+
+  const shouldPrepend = !!initialSelectedImage && !images.some((img) => img.id === initialSelectedImage.id);
+  const fullImagesForNav = shouldPrepend ? [initialSelectedImage, ...images] : images;
+
   const [selectedImage, setSelectedImage] = useState<ImageType | null>(
     initialSelectedImage || (images?.[0] || null),
   );
-
-  if (!images?.length) return null;
 
   const handleImageSelect = (image: ImageType) => {
     setSelectedImage(image);
     externalOnImageSelect?.(image);
   };
 
-  const thumbnailImages = images.filter((img) => img.id !== selectedImage?.id);
+  const thumbnailImages = galleryThumbs;
 
   return (
     <div className="product-gallery flex flex-col md:flex-row gap-4">
@@ -61,8 +67,8 @@ export function ProductGallery({
       )}
       <div className="main-image flex-1">
         <ProductImage
-          image={selectedImage || images[0]}
-          galleryImages={images}
+          image={selectedImage!}
+          galleryImages={fullImagesForNav}
           onImageChange={handleImageSelect}
         />
       </div>
