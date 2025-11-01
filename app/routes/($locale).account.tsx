@@ -37,61 +37,74 @@ export async function loader({context}: Route.LoaderArgs) {
 export default function AccountLayout() {
   const {customer} = useLoaderData<typeof loader>();
 
-  const heading = customer
-    ? customer.firstName
-      ? `Welcome, ${customer.firstName}`
-      : `Welcome to your account.`
-    : 'Account Details';
+  const heading = customer?.firstName
+    ? `Welcome, ${customer.firstName}`
+    : 'Welcome to your account.';
 
   return (
-    <div className="account">
-      <h1>{heading}</h1>
-      <br />
-      <AccountMenu />
-      <br />
-      <br />
-      <Outlet context={{customer}} />
+    <div className="account max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center w-full">{heading}</h1>
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar */}
+        <div className="w-full md:w-64 flex-shrink-0 ">
+          <div className="rounded-sm p-4 bg-gray-100">
+            <h2 className="text-lg font-medium text-gray-900 mb-6">My Account</h2>
+            <AccountMenu />
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          <div className="bg-gray-100 p-6">
+            <Outlet context={{customer}} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function AccountMenu() {
-  function isActiveStyle({
-    isActive,
-    isPending,
-  }: {
-    isActive: boolean;
-    isPending: boolean;
-  }) {
-    return {
-      fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
-    };
-  }
+  const menuItems = [
+    { to: '/account/orders', label: 'Orders' },
+    { to: '/account/profile', label: 'Profile' },
+    { to: '/account/addresses', label: 'Addresses' },
+  ];
 
   return (
-    <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <Logout />
+    <nav className="space-y-2 text-gray-700">
+      {menuItems.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          className={({isActive}) =>
+            `block px-4 py-2 text-sm font-medium ${
+              isActive
+                ? 'text-gray-900 border-l-2 border-gray-800'
+                : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+            }`
+          }
+          style={{textDecoration: 'none'}}
+        >
+          {item.label}
+        </NavLink>
+      ))}
+      <div className="pt-4 mt-4 border-t border-gray-200">
+        <Logout />
+      </div>
     </nav>
   );
 }
 
 function Logout() {
   return (
-    <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
+    <Form method="POST" action="/account/logout">
+      <button
+        type="submit"
+        className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md"
+      >
+        Sign out
+      </button>
     </Form>
   );
 }
