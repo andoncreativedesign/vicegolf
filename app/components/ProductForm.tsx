@@ -20,11 +20,13 @@ export function ProductForm({
   selectedVariant,
   title,
   description,
+  productType,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
   description: string;
+  productType?: string;
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
@@ -75,6 +77,9 @@ export function ProductForm({
     >
       {/* Product Title */}
       <h1 className="text-2xl font-bold text-gray-900 mb-1">{title}</h1>
+      {productType && (
+        <div className="text-sm text-gray-500 mb-2">{productType}</div>
+      )}
       
       {/* Product Price */}
       <div className="mb-6">
