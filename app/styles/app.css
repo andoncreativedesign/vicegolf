@@ -1,5 +1,5 @@
 :root {
-  --aside-width: 400px;
+  --aside-width: 500px; /* Increased from 400px */
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 250px;
   --grid-item-width: 355px;
@@ -42,11 +42,12 @@ aside {
   right: calc(-1 * var(--aside-width));
   top: 0;
   transition: transform 200ms ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
 
 aside header {
   align-items: center;
-  border-bottom: 1px solid var(--color-dark);
   display: flex;
   height: var(--header-height);
   justify-content: space-between;
@@ -76,6 +77,8 @@ aside header h2 {
 
 aside main {
   margin: 1rem;
+  max-height: calc(100vh - var(--header-height) - 2rem);
+  overflow-y: auto;
 }
 
 aside p {
@@ -99,8 +102,7 @@ aside li {
   position: fixed;
   right: 0;
   top: 0;
-  transition: opacity 400ms ease-in-out;
-  transition: opacity 400ms;
+  transition: opacity 400ms ease-in-out, visibility 400ms ease-in-out;
   visibility: hidden;
   z-index: 10;
 }
@@ -132,7 +134,11 @@ aside li {
   pointer-events: auto;
   visibility: visible;
 }
-/* reveal aside */
+/* animate aside */
+aside {
+  transition: transform 400ms ease-in-out;
+}
+
 .overlay.expanded aside {
   transform: translateX(calc(var(--aside-width) * -1));
 }
@@ -225,14 +231,63 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .cart-main {
-  height: 100%;
-  max-height: calc(100vh - var(--cart-aside-summary-height));
-  overflow-y: auto;
-  width: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
 }
 
-.cart-main.with-discount {
-  max-height: calc(100vh - var(--cart-aside-summary-height-with-discount));
+.cart-details {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.cart-content {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1rem 0;
+  padding-bottom: 80px; /* Space for fixed checkout button */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.cart-content::-webkit-scrollbar {
+  display: none;
+}
+
+.cart-items {
+  margin-bottom: 1rem;
+}
+
+.cart-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cart-summary {
+  padding: 1.5rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.checkout-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 100;
 }
 
 .cart-line {
@@ -248,15 +303,12 @@ button.reset:hover:not(:has(> *)) {
 
 .cart-summary-page {
   position: relative;
+  width: 100%;
 }
 
 .cart-summary-aside {
   background: white;
-  border-top: 1px solid var(--color-dark);
-  bottom: 0;
-  padding-top: 0.75rem;
-  position: absolute;
-  width: calc(var(--aside-width) - 40px);
+  width: 100%;
 }
 
 .cart-line-quantity {
