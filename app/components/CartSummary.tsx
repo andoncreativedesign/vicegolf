@@ -70,12 +70,10 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
       <a 
         href={checkoutUrl} 
         target="_self"
-        className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 shadow-sm hover:shadow-md"
+        className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline"
+        style={{ textDecoration: 'none' }}
       >
-        Proceed to Checkout
-        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
+      Checkout securely
       </a>
     </div>
   );
@@ -86,7 +84,7 @@ function CartDiscounts({
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
 }) {
-  const [showInput, setShowInput] = useState(false);
+  const [showInput, setShowInput] = useState(true);
   const codes: string[] = discountCodes?.filter((discount) => discount.applicable)?.map(({code}) => code) || [];
 
   return (
@@ -116,29 +114,31 @@ function CartDiscounts({
       )}
 
       {/* Discount input form */}
-      <div className="discount-input">
+      <div className="discount-input mt-2">
         {!showInput && !codes.length ? (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
           >
             + Add discount code
           </button>
         ) : (
           <UpdateDiscountForm discountCodes={codes} onSuccess={() => setShowInput(false)}>
-            <div className="flex gap-2">
-              <input 
-                type="text" 
-                name="discountCode" 
-                placeholder="Enter discount code"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <button 
-                type="submit"
-                className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900 transition-colors duration-200"
-              >
-                Apply
-              </button>
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  name="discountCode" 
+                  placeholder="Discount code"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <button 
+                  type="submit"
+                  className="px-6 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           </UpdateDiscountForm>
         )}
@@ -175,7 +175,7 @@ function CartGiftCard({
 }: {
   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
 }) {
-  const [showInput, setShowInput] = useState(false);
+  const [showInput, setShowInput] = useState(true);
   const appliedGiftCardCodes = useRef<string[]>([]);
   const giftCardCodeInput = useRef<HTMLInputElement>(null);
   const giftCardAddFetcher = useFetcher({key: 'gift-card-add'});
@@ -226,11 +226,11 @@ function CartGiftCard({
       )}
 
       {/* Gift card input form */}
-      <div className="gift-card-input">
+      <div className="gift-card-input mt-2">
         {!showInput ? (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
           >
             + Add gift card
           </button>
@@ -240,21 +240,23 @@ function CartGiftCard({
             saveAppliedCode={saveAppliedCode}
             fetcherKey="gift-card-add"
           >
-            <div className="flex gap-2">
-              <input
-                type="text"
-                name="giftCardCode"
-                placeholder="Enter gift card code"
-                ref={giftCardCodeInput}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <button 
-                type="submit" 
-                disabled={giftCardAddFetcher.state !== 'idle'}
-                className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900 disabled:opacity-50 transition-colors duration-200"
-              >
-                Apply
-              </button>
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  name="giftCardCode"
+                  placeholder="Gift card"
+                  ref={giftCardCodeInput}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <button 
+                  type="submit" 
+                  disabled={giftCardAddFetcher.state !== 'idle'}
+                  className="px-6 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           </UpdateGiftCardForm>
         )}

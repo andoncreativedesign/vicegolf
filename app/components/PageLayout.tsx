@@ -62,7 +62,11 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
         {(cartData) => (
           <Aside 
             type="cart" 
-            heading={`Your Cart${cartData?.totalQuantity ? ` (${cartData.totalQuantity})` : ''}`}
+            heading={
+              <span className="text-base font-normal">
+                {`Your Cart${cartData?.totalQuantity ? ` (${cartData.totalQuantity})` : ''}`}
+              </span>
+            }
           >
             <CartMain cart={cartData} layout="aside" />
           </Aside>
