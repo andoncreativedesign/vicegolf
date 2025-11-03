@@ -26,6 +26,25 @@ const ProductSummaryGolfClub = () => {
           </div>
         </div>
       </div>
+        <div className="flex flex-col w-full gap-6 mt-12">
+        {/* Heading - centered */}
+        <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 text-center mx-auto">
+          Everything You Need, Nothing You Don't
+        </h3>
+        {/* Description - left-aligned, full width */}
+        <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed text-left w-full">
+          The Vice Boost is built to make golf easier for new and improving players. The driver launches effortlessly, the hybrid replaces tough long irons, and the forgiving cavity-back irons provide consistency. The balanced blade putter adds confidence on the greens. Everything in the bag is designed to help you play better, stress less, and enjoy the game.
+        </p>
+        {/* Image - under description, full width */}
+        <div className="w-full rounded-lg overflow-hidden bg-black">
+          <img 
+            src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-starter-set-boost-body-01.jpg?v=1741009645?width=1600&quality=80" 
+            alt="Vice Boost Clubs Detail"
+            className="w-full h-auto object-cover"
+            loading="lazy"
+          />
+        </div>
+      </div>
     </div>
   );
 };
