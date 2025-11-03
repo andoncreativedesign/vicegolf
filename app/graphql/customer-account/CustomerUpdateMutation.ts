@@ -1,25 +1,27 @@
-// NOTE: https://shopify.dev/docs/api/customer/latest/mutations/customerUpdate
+// Storefront API mutation for updating customer information
 export const CUSTOMER_UPDATE_MUTATION = `#graphql
   mutation customerUpdate(
+    $customerAccessToken: String!
     $customer: CustomerUpdateInput!
-    $language: LanguageCode
-  ) @inContext(language: $language) {
-    customerUpdate(input: $customer) {
+  ) {
+    customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
       customer {
+        id
+        email
         firstName
         lastName
-        emailAddress {
-          emailAddress
-        }
-        phoneNumber {
-          phoneNumber
-        }
+        phone
+        acceptsMarketing
       }
-      userErrors {
+      customerAccessToken {
+        accessToken
+        expiresAt
+      }
+      customerUserErrors {
         code
         field
         message
       }
     }
   }
-` as const;
+`;
