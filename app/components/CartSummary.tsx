@@ -15,10 +15,13 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   
   return (
     <div aria-labelledby="cart-summary" className={`cart-summary ${isPageLayout ? 'cart-summary-page' : 'cart-summary-aside'}`}>
-      <div className="summary-card bg-gray-50 rounded-xl p-6 border border-gray-200">
+      <div className="summary-card p-6">
         <h4 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h4>
         
         <div className="space-y-3 mb-6">
+          <CartDiscounts discountCodes={cart?.discountCodes} />
+          <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
+          
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
             <span className="font-medium text-gray-900">
@@ -29,9 +32,6 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
               )}
             </span>
           </div>
-          
-          <CartDiscounts discountCodes={cart?.discountCodes} />
-          <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
           
           {cart?.cost?.totalAmount && (
             <div className="border-t border-gray-200 pt-3 mt-3">
