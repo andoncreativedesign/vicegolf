@@ -1,5 +1,5 @@
 :root {
-  --aside-width: 400px;
+  --aside-width: 500px; /* Increased from 400px */
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 250px;
   --grid-item-width: 355px;
@@ -42,6 +42,8 @@ aside {
   right: calc(-1 * var(--aside-width));
   top: 0;
   transition: transform 200ms ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
 
 aside header {
@@ -76,6 +78,8 @@ aside header h2 {
 
 aside main {
   margin: 1rem;
+  max-height: calc(100vh - var(--header-height) - 2rem);
+  overflow-y: auto;
 }
 
 aside p {
