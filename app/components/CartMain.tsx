@@ -64,17 +64,17 @@ function CartEmpty({
         <p className="text-gray-600 mb-8">
           Looks like you haven't added anything yet, let's get you started!
         </p>
-        <Link 
-          to="/collections" 
-          onClick={close} 
-          prefetch="viewport"
-          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
-        >
-          Continue Shopping
-          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </Link>
+        <div className="w-full flex justify-center">
+          <Link 
+            to="/collections" 
+            onClick={close} 
+            prefetch="viewport"
+            className="flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline"
+            style={{ textDecoration: 'none', maxWidth: 'fit-content' }}
+          >
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     </div>
   );
