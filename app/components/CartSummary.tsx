@@ -34,7 +34,7 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
           {cart?.cost?.totalAmount && (
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Total (excl. taxes and shipping)</span>
+                <span className="text-gray-900 font-medium">Total <span className="text-gray-600 font-normal">(excl. taxes and shipping)</span></span>
                 <span className="font-medium text-gray-900">
                   <Money data={cart.cost.totalAmount} />
                 </span>
