@@ -22,7 +22,7 @@ export function CartLineItem({
   const {close} = useAside();
 
   return (
-    <li key={id} className="cart-line group flex gap-4 py-6 border-b border-gray-100 last:border-b-0 transition-colors duration-200 hover:bg-gray-50 px-4 rounded-lg">
+    <li key={id} className="cart-line group flex gap-4 py-6 transition-colors duration-200 hover:bg-gray-50 px-4 rounded-lg">
       {image && (
         <Link
           to={lineItemUrl}

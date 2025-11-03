@@ -28,15 +28,19 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       <CartEmpty hidden={linesCount} layout={layout} />
       {cartHasItems && (
         <div className="cart-details">
-          <div className="cart-items" aria-labelledby="cart-lines">
-            <div className="cart-header"></div>
-            <ul className="cart-lines">
-              {(cart?.lines?.nodes ?? []).map((line) => (
-                <CartLineItem key={line.id} line={line} layout={layout} />
-              ))}
-            </ul>
+          <div className="cart-content">
+            <div className="cart-items" aria-labelledby="cart-lines">
+              <div className="cart-header"></div>
+              <ul className="cart-lines">
+                {(cart?.lines?.nodes ?? []).map((line) => (
+                  <CartLineItem key={line.id} line={line} layout={layout} />
+                ))}
+              </ul>
+            </div>
+            <div className="cart-summary">
+              <CartSummary cart={cart} layout={layout} />
+            </div>
           </div>
-          <CartSummary cart={cart} layout={layout} />
         </div>
       )}
     </div>

@@ -15,10 +15,8 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   
   return (
     <div aria-labelledby="cart-summary" className={`cart-summary ${isPageLayout ? 'cart-summary-page' : 'cart-summary-aside'}`}>
-      <div className="summary-card p-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h4>
-        
-        <div className="space-y-3 mb-6">
+      <div className="summary-card px-4 py-2">
+        <div className="space-y-2">
           <CartDiscounts discountCodes={cart?.discountCodes} />
           <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
           
@@ -70,11 +68,74 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
       <a 
         href={checkoutUrl} 
         target="_self"
-        className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline"
+        className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3"
         style={{ textDecoration: 'none' }}
       >
-      Checkout securely
+        Checkout securely
       </a>
+      <div className="flex justify-center items-center gap-3 mt-2">
+  <img
+    src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=50&crop=center"
+    srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=150&crop=center 3x
+    "
+    alt="Mastercard"
+    className="h-6 w-auto"
+  />
+  <img
+    src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=50&crop=center"
+    srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=150&crop=center 3x
+    "
+    alt="Visa"
+    className="h-6 w-auto"
+  />
+  <img
+    src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=50&crop=center"
+    srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=150&crop=center 3x
+    "
+    alt="PayPal"
+    className="h-6 w-auto"
+  />
+  <img
+    src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=50&crop=center"
+    srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=150&crop=center 3x
+    "
+    alt="Apple Pay"
+    className="h-6 w-auto"
+  />
+  <img
+    src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=50&crop=center"
+    srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=150&crop=center 3x
+    "
+    alt="Google Pay"
+    className="h-6 w-auto"
+  />
+  <img
+    src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center"
+    srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=150&crop=center 3x
+    "
+    alt="American Express"
+    className="h-6 w-auto"
+  />
+</div>
+
     </div>
   );
 }
@@ -114,7 +175,7 @@ function CartDiscounts({
       )}
 
       {/* Discount input form */}
-      <div className="discount-input mt-2">
+      <div className="discount-input mt-2 w-full">
         {!showInput && !codes.length ? (
           <button
             onClick={() => setShowInput(true)}
@@ -124,17 +185,17 @@ function CartDiscounts({
           </button>
         ) : (
           <UpdateDiscountForm discountCodes={codes} onSuccess={() => setShowInput(false)}>
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex items-center gap-2">
+            <div className="w-full">
+              <div className="flex w-full gap-2">
                 <input 
                   type="text" 
                   name="discountCode" 
                   placeholder="Discount code"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button 
                   type="submit"
-                  className="px-6 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap"
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center"
                 >
                   Apply
                 </button>
@@ -226,7 +287,7 @@ function CartGiftCard({
       )}
 
       {/* Gift card input form */}
-      <div className="gift-card-input mt-2">
+      <div className="gift-card-input mt-2 w-full">
         {!showInput ? (
           <button
             onClick={() => setShowInput(true)}
@@ -240,19 +301,19 @@ function CartGiftCard({
             saveAppliedCode={saveAppliedCode}
             fetcherKey="gift-card-add"
           >
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex items-center gap-2">
+            <div className="w-full">
+              <div className="flex w-full gap-2">
                 <input
                   type="text"
                   name="giftCardCode"
                   placeholder="Gift card"
                   ref={giftCardCodeInput}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button 
                   type="submit" 
                   disabled={giftCardAddFetcher.state !== 'idle'}
-                  className="px-6 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50"
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
                 >
                   Apply
                 </button>
