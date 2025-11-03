@@ -57,7 +57,7 @@ export function Aside({
       <button className="close-outside" onClick={close} />
       <aside style={{ zIndex: 9999 }}>
         <header>
-          <h3>{heading}</h3>
+          <h3 className="text-2xl font-bold text-gray-900">{heading}</h3>
           <button className="close reset" onClick={close} aria-label="Close">
             &times;
           </button>

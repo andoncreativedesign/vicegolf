@@ -34,17 +34,14 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
           <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
           
           {cart?.cost?.totalAmount && (
-            <>
-              <div className="border-t border-gray-200 pt-3 mt-3">
-                <div className="flex justify-between items-center text-lg font-semibold">
-                  <span className="text-gray-900">Total</span>
-                  <span className="text-gray-900">
-                    <Money data={cart.cost.totalAmount} />
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Taxes and shipping calculated at checkout</p>
+            <div className="border-t border-gray-200 pt-3 mt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Total (excl. taxes and shipping)</span>
+                <span className="font-medium text-gray-900">
+                  <Money data={cart.cost.totalAmount} />
+                </span>
               </div>
-            </>
+            </div>
           )}
         </div>
         
@@ -98,7 +95,7 @@ function CartDiscounts({
       {codes.length > 0 && (
         <div className="applied-discounts mb-3">
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Discount{sodes.length > 1 ? 's' : ''}</span>
+            <span className="text-gray-600">Volume discount</span>
             <UpdateDiscountForm>
               <button 
                 type="submit"

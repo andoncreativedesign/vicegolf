@@ -29,12 +29,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       {cartHasItems && (
         <div className="cart-details">
           <div className="cart-items" aria-labelledby="cart-lines">
-            <div className="cart-header">
-              <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
-              <span className="text-sm text-gray-500">
-                {cart.totalQuantity} {cart.totalQuantity === 1 ? 'item' : 'items'}
-              </span>
-            </div>
+            <div className="cart-header"></div>
             <ul className="cart-lines">
               {(cart?.lines?.nodes ?? []).map((line) => (
                 <CartLineItem key={line.id} line={line} layout={layout} />
