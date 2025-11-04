@@ -185,12 +185,13 @@ export default function OrderRoute() {
         </div>
       </div>
 
-      <div className="order-actions">
+      <div className="order-actions mt-8">
         <a 
           target="_blank" 
           href={order.statusPageUrl} 
           rel="noreferrer"
-          className="view-status-link"
+          className="inline-block bg-gray-800 px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
+          style={{ color: 'white' }}
         >
           View Order Status →
         </a>

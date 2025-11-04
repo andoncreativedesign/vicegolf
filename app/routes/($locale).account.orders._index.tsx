@@ -183,9 +183,13 @@ function OrderSearchForm({
           />
         </div>
 
-        <div className="order-search-buttons">
-          <button type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching' : 'Search'}
+        <div className="order-search-buttons flex gap-4 mt-4">
+          <button 
+            type="submit" 
+            disabled={isSearching}
+            className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {isSearching ? 'Searching...' : 'Search Orders'}
           </button>
           {hasFilters && (
             <button
@@ -195,8 +199,9 @@ function OrderSearchForm({
                 setSearchParams(new URLSearchParams());
                 formRef.current?.reset();
               }}
+              className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer"
             >
-              Clear
+              Clear Filters
             </button>
           )}
         </div>
