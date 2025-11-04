@@ -11,6 +11,7 @@ import { useAside } from '~/components/Aside';
 import { debugMenuItems } from '~/utils/debug-menu';
 import { MULTIPLE_COLLECTIONS_QUERY, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV } from '~/lib/shopify/product-queries';
 import type { loader } from '~/root';
+import { BlackFridayBanner } from './Banner';
 
 interface DropdownItem {
   name: string;
@@ -142,8 +143,10 @@ export function Header({
     // console.log('Category products data:', productsForNav);
   }, [menu]);
 
+
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="sticky top-0 z-50 bg-white shadow-sm">
+      <BlackFridayBanner />
       {/* Top Header Bar */}
       <div className="flex items-center justify-between px-4 py-6 max-w-7xl mx-auto">
         {/* Left: Country/Currency Selector */}
