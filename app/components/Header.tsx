@@ -165,16 +165,7 @@ export function Header({
         {/* Right: Icons */}
         <div className="flex items-center space-x-2">
           <SearchToggle />
-          <NavLink
-            prefetch="intent"
-            to="/account"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
-            aria-label="Account"
-          >
-            <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </NavLink>
+          <AccountToggle isLoggedIn={isLoggedIn} />
           <CartToggle cart={cart} />
           <HeaderMenuMobileToggle />
         </div>
@@ -482,6 +473,38 @@ const countries = [
   { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£' },
   { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr' },
 ];
+
+function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
+  return (
+    <Suspense fallback={<AccountIcon />}>
+      <Await resolve={isLoggedIn}>
+        {(loggedIn) => (
+          <NavLink
+            prefetch="intent"
+            to={loggedIn ? "/account" : "/account/login"}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            aria-label={loggedIn ? "Account" : "Login"}
+            title={loggedIn ? "My Account" : "Sign In"}
+          >
+            <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </NavLink>
+        )}
+      </Await>
+    </Suspense>
+  );
+}
+
+function AccountIcon() {
+  return (
+    <div className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+      <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    </div>
+  );
+}
 
 function CountryCurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
