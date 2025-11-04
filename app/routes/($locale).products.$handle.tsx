@@ -14,6 +14,8 @@ import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {GolfBallProduct} from '~/components/GolfBallProduct';
 import {GolfClubSetProduct} from '~/components/GolfClubSetProduct';
+import {ShoesProduct} from '~/components/ShoesProduct';
+import {PoloProduct} from '~/components/PoloProduct';
 import {CustomerReviews} from '~/components/CustomerReviews';
 
 type ProductImageType = {
@@ -129,6 +131,11 @@ export default function Product() {
             return <GolfBallProduct product={product} />;
           case 'golf club set':
             return <GolfClubSetProduct product={product} />;
+          case 'shoes':
+            return <ShoesProduct product={product} />;
+          case 'polo':
+          case 'polos':
+            return <PoloProduct product={product} />;
           default:
             return null;
         }
