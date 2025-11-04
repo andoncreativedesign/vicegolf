@@ -35,7 +35,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-  const { storefront, customerAccount } = context;
+  const { customerAccount, storefront } = context;
 
   if (request.method !== 'PUT') {
     return data({ error: 'Method not allowed' }, { status: 405 });
@@ -48,30 +48,6 @@ export async function action({ request, context }: Route.ActionArgs) {
     return data(
       { error: 'Please sign in to update your profile', customer: null },
       { status: 401 },
-    );
-  }
-  
-  // Get customer data
-  const { data: customerData } = await customerAccount.query(`#graphql
-    query CustomerDetails {
-      customer {
-        id
-        email
-        firstName
-        lastName
-        phone
-      }
-    }
-  `);
-  
-  console.log("customerData")
-  console.log(customerData)
-
-  if (!customerData?.customer) {
-    console.error('Failed to fetch customer data');
-    return data(
-      { error: 'Failed to load customer data', customer: null },
-      { status: 400 },
     );
   }
 
@@ -95,82 +71,142 @@ export async function action({ request, context }: Route.ActionArgs) {
   }
 
   try {
-    // Prepare customer update input according to Storefront API requirements
-    const customerUpdateInput: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-      phone?: string | null;
-      acceptsMarketing?: boolean;
-    } = {};
-    
-    if (firstName !== undefined) customerUpdateInput.firstName = String(firstName);
-    if (lastName !== undefined) customerUpdateInput.lastName = String(lastName);
-    if (email !== undefined) customerUpdateInput.email = String(email);
-    if (phone !== undefined) customerUpdateInput.phone = phone ? String(phone) : null;
-    
-    // Include acceptsMarketing if needed (default to current value or false)
-    customerUpdateInput.acceptsMarketing = customerData?.customer?.acceptsMarketing || false;
+    let updatedCustomer = null;
 
-    // Make a single API call to update all fields
-    console.log('Updating customer with data:', customerUpdateInput);
-    const { data: updateData, errors } = await storefront.mutate(
-      CUSTOMER_UPDATE_MUTATION,
-      {
-        variables: {
-          customerAccessToken: await customerAccount.getAccessToken(),
-          customer: customerUpdateInput,
+    // Update name fields using Customer Account API
+    if ((firstName !== undefined && firstName.trim()) || (lastName !== undefined && lastName.trim())) {
+      const customerUpdateInput: {
+        firstName?: string;
+        lastName?: string;
+      } = {};
+      
+      if (firstName !== undefined && firstName.trim()) {
+        customerUpdateInput.firstName = String(firstName).trim();
+      }
+      if (lastName !== undefined && lastName.trim()) {
+        customerUpdateInput.lastName = String(lastName).trim();
+      }
+
+      console.log('Updating customer name with Customer Account API:', customerUpdateInput);
+      const { data: nameUpdateData, errors: nameErrors } = await customerAccount.mutate(
+        CUSTOMER_UPDATE_MUTATION,
+        {
+          variables: {
+            input: customerUpdateInput,
+          },
         },
-      },
-    );
-    
-    console.log('Update response:', JSON.stringify(updateData, null, 2));
+      );
 
-    if (errors?.length) {
-      console.error('GraphQL Errors:', JSON.stringify(errors, null, 2));
-      throw new Error(errors[0].message || 'Failed to update profile');
+      if (nameErrors?.length) {
+        console.error('Name Update GraphQL Errors:', JSON.stringify(nameErrors, null, 2));
+        throw new Error(nameErrors[0].message || 'Failed to update name');
+      }
+
+      const nameUpdate = nameUpdateData?.customerUpdate;
+      
+      if (nameUpdate?.userErrors?.length) {
+        console.error('Name Update Errors:', JSON.stringify(nameUpdate.userErrors, null, 2));
+        const error = nameUpdate.userErrors[0];
+        throw new Error(error.message || 'Failed to update name');
+      }
+
+      updatedCustomer = nameUpdate?.customer;
     }
 
-    const customerUpdate = updateData?.customerUpdate;
-    
-    if (customerUpdate?.customerUserErrors?.length) {
-      console.error('Customer Update Errors:', JSON.stringify(customerUpdate.customerUserErrors, null, 2));
-      const error = customerUpdate.customerUserErrors[0];
-      throw new Error(error.message || 'Failed to update profile');
+    // Update email/phone using Storefront API if provided
+    if (email || phone) {
+      const customerAccessToken = await customerAccount.getAccessToken();
+      
+      const storefrontUpdateInput: {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        phone?: string | null;
+        acceptsMarketing?: boolean;
+      } = {};
+      
+      // Include current name values to avoid overwriting
+      if (updatedCustomer) {
+        storefrontUpdateInput.firstName = updatedCustomer.firstName;
+        storefrontUpdateInput.lastName = updatedCustomer.lastName;
+      }
+      
+      if (email !== undefined && email.trim()) {
+        storefrontUpdateInput.email = String(email).trim();
+      }
+      if (phone !== undefined) {
+        storefrontUpdateInput.phone = phone.trim() ? String(phone).trim() : null;
+      }
+      
+      storefrontUpdateInput.acceptsMarketing = false; // Default value
+
+      console.log('Updating customer email/phone with Storefront API:', storefrontUpdateInput);
+      
+      // Create a Storefront API mutation for email/phone
+      const STOREFRONT_CUSTOMER_UPDATE = `#graphql
+        mutation customerUpdate($customerAccessToken: String!, $customer: CustomerUpdateInput!) {
+          customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
+            customer {
+              id
+              firstName
+              lastName
+              email
+              phone
+            }
+            customerAccessToken {
+              accessToken
+              expiresAt
+            }
+            customerUserErrors {
+              code
+              field
+              message
+            }
+          }
+        }
+      `;
+
+      const { data: storefrontUpdateData, errors: storefrontErrors } = await storefront.mutate(
+        STOREFRONT_CUSTOMER_UPDATE,
+        {
+          variables: {
+            customerAccessToken,
+            customer: storefrontUpdateInput,
+          },
+        },
+      );
+
+      if (storefrontErrors?.length) {
+        console.error('Storefront Update GraphQL Errors:', JSON.stringify(storefrontErrors, null, 2));
+        throw new Error(storefrontErrors[0].message || 'Failed to update email/phone');
+      }
+
+      const storefrontUpdate = storefrontUpdateData?.customerUpdate;
+      
+      if (storefrontUpdate?.customerUserErrors?.length) {
+        console.error('Storefront Update Errors:', JSON.stringify(storefrontUpdate.customerUserErrors, null, 2));
+        const error = storefrontUpdate.customerUserErrors[0];
+        throw new Error(error.message || 'Failed to update email/phone');
+      }
+
+      if (storefrontUpdate?.customer) {
+        updatedCustomer = storefrontUpdate.customer;
+      }
     }
 
-    if (!customerUpdate?.customer) {
-      throw new Error('Failed to update customer profile');
-    }
-
-    // Update the customer access token in session if a new one was returned
-    if (customerUpdate.customerAccessToken?.accessToken) {
-      await session.set('customerAccessToken', customerUpdate.customerAccessToken.accessToken);
-    }
-
-    // Note: Password updates would typically be handled through a separate API call
-    // to update the customer's password in Shopify.
-    // This would require additional backend implementation.
     if (newPassword) {
-      console.log('Password update would happen here (requires implementation)');
+      console.log('Password update is not supported via Customer Account API');
+      // You could implement password reset flow here if needed
     }
 
     return {
       error: null,
-      customer: customerUpdate.customer,
+      customer: updatedCustomer,
     };
   } catch (error: any) {
     console.error('Profile update error:', {
       message: error.message,
       stack: error.stack,
-      response: error.response,
-      request: error.request,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: error.config?.headers,
-        data: error.config?.data,
-      },
     });
     
     return data(
@@ -186,11 +222,16 @@ export default function AccountProfile() {
   const action = useActionData<ActionResponse>();
   const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment }>();
   const [formData, setFormData] = React.useState({
-    email: customer.email || '',
-    phone: customer.phone || '',
-    firstName: customer.firstName || '',
-    lastName: customer.lastName || '',
+    email: customer?.email || '',
+    phone: customer?.phone || '',
+    firstName: customer?.firstName || '',
+    lastName: customer?.lastName || '',
   });
+
+  // Debug: Log customer data
+  React.useEffect(() => {
+    console.log('Customer data in profile:', customer);
+  }, [customer]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -279,7 +320,6 @@ export default function AccountProfile() {
               />
             </div>
           </div>
-
           <div className="space-y-1">
             <label htmlFor="newPassword" className="font-semibold">New Password</label>
             <div className="relative">
@@ -317,6 +357,11 @@ export default function AccountProfile() {
         {action?.error && (
           <div className="mt-4 mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
             <p className="text-sm">{action.error}</p>
+          </div>
+        )}
+        {action && !action.error && action.customer && (
+          <div className="mt-4 mb-6 p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+            <p className="text-sm">Profile updated successfully!</p>
           </div>
         )}
         <button

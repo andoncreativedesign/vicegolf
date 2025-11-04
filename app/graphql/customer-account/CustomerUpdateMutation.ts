@@ -1,23 +1,13 @@
-// Storefront API mutation for updating customer information
+// Customer Account API mutation for updating customer information
 export const CUSTOMER_UPDATE_MUTATION = `#graphql
-  mutation customerUpdate(
-    $customerAccessToken: String!
-    $customer: CustomerUpdateInput!
-  ) {
-    customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
+  mutation customerUpdate($input: CustomerUpdateInput!) {
+    customerUpdate(input: $input) {
       customer {
         id
-        email
         firstName
         lastName
-        phone
-        acceptsMarketing
       }
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-      customerUserErrors {
+      userErrors {
         code
         field
         message

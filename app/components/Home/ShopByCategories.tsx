@@ -1,6 +1,6 @@
 import { Image } from '@shopify/hydrogen';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 type ImageType = {
   id: string;
@@ -60,7 +60,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ categories }) => {
             <div
               key={category.id}
               onClick={() => handleCategoryClick(category.link)}
-            // className="relative group cursor-pointer overflow-hidden rounded-lg bg-gray-100 hover:shadow-xl transition-all duration-300"
+              // className="relative group cursor-pointer overflow-hidden rounded-lg bg-gray-100 hover:shadow-xl transition-all duration-300"
               // ! image not 
               className=""
             >
