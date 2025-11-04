@@ -16,6 +16,7 @@ import {GolfBallProduct} from '~/components/GolfBallProduct';
 import {GolfClubSetProduct} from '~/components/GolfClubSetProduct';
 import {ShoesProduct} from '~/components/ShoesProduct';
 import {PoloProduct} from '~/components/PoloProduct';
+import {GolfBagProduct} from '~/components/GolfBagProduct';
 import {CustomerReviews} from '~/components/CustomerReviews';
 
 type ProductImageType = {
@@ -131,6 +132,9 @@ export default function Product() {
             return <GolfBallProduct product={product} />;
           case 'golf club set':
             return <GolfClubSetProduct product={product} />;
+          case 'golf bag':
+          case 'golf bags':
+            return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
           case 'shoes':
             return <ShoesProduct product={product} />;
           case 'polo':
