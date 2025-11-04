@@ -208,21 +208,23 @@ function OrderSearchForm({
 function OrderItem({order}: {order: OrderItemFragment}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
-    <>
-      <fieldset>
-        <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong>#{order.number}</strong>
-        </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
-        {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
-        )}
-        <p>{order.financialStatus}</p>
-        {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
-        <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
-      </fieldset>
-      <br />
-    </>
+    <div className="order-item">
+      <Link to={`/account/orders/${btoa(order.id)}`} className="order-item-link">
+        <div className="order-item-content">
+          <div className="order-item-details">
+            <p className="order-number">Order {order.name}</p>
+            <p className="order-date">Placed on {new Date(order.processedAt!).toDateString()}</p>
+            <p className="order-total">
+              <span>Total: </span>
+              <Money data={order.totalPrice!} />
+            </p>
+            <p className="order-status">
+              <span>Status: </span>
+              {order.fulfillmentStatus}
+            </p>
+          </div>
+        </div>
+      </Link>
+    </div>
   );
 }
