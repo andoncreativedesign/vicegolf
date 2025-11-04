@@ -125,6 +125,8 @@ export default function Product() {
 
       {/* Product-specific sections */}
       {(() => {
+        return <GolfBallProduct product={product} />;
+        
         const productType = product.productType?.toLowerCase();
         
         switch(productType) {
