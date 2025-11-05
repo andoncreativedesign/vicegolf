@@ -13,9 +13,7 @@ export function GolfBallProduct({ product }: GolfBallProductProps) {
 
   useEffect(() => {
     const fetchProductDetails = async () => {
-      console.log("fetchProductDetails productid", product.id);
       const productDetails = await getProductDetails(product.id);
-      console.log("productDetails", productDetails);
       setProductDetails(productDetails);
     }
 

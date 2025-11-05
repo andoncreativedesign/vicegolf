@@ -1,4 +1,9 @@
+import { useEffect, useState } from 'react';
 import type {ProductFragment} from 'storefrontapi.generated';
+import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
+import { ProductDetailContents } from './Product/ProductDetailContents';
+import ProductDetailsContent1 from './Product/ProductDetailsContent1';
+import { Youtube } from './Youtube';
 
 const ProductSummaryPolo = () => {
   return (
@@ -36,9 +41,35 @@ type PoloProductProps = {
 };
 
 export function PoloProduct({product}: PoloProductProps) {
-  return (
-    <div className="polo-product">
-      <ProductSummaryPolo />
-    </div>
-  );
+ const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
+ 
+   useEffect(() => {
+     const fetchProductDetails = async () => {
+       const productDetails = await getProductDetails(product.id);
+       setProductDetails(productDetails);
+     }
+ 
+     fetchProductDetails();
+   }, [])
+ 
+   return (
+     <>
+       {/* Reusable What's New Section */}
+       {productDetails?.productContent1?.content?.map((item, index) => {
+         const isEven = (index + 1) % 2 === 0;
+         return (
+           <ProductDetailsContent1
+             key={index}
+             content={item}
+             showImageLeft={!isEven}
+             isTextFull={isEven}
+             isImageFull={isEven}
+           />
+         );
+       })}
+
+       {/* Youtube Video Section */}
+       <Youtube />
+     </>
+   );
 }

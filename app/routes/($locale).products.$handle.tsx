@@ -125,26 +125,38 @@ export default function Product() {
 
       {/* Product-specific sections */}
       {(() => {
-        return <GolfBallProduct product={product} />;
         
         const productType = product.productType?.toLowerCase();
-        
-        switch(productType) {
-          case 'golf balls':
-            return <GolfBallProduct product={product} />;
-          case 'golf club set':
-            return <GolfClubSetProduct product={product} />;
-          case 'golf bag':
-          case 'golf bags':
-            return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
-          case 'shoes':
-            return <ShoesProduct product={product} />;
+
+        switch (productType) {
           case 'polo':
           case 'polos':
+          case 'shoes':
+          case 'golf club set':
             return <PoloProduct product={product} />;
           default:
-            return null;
+            return <GolfBallProduct product={product} />;
         }
+        
+      
+      // ! working code below
+      //   switch(productType) {
+      //     case 'golf balls':
+      //       return <GolfBallProduct product={product} />;
+      //     case 'golf club set':
+      //       return <GolfClubSetProduct product={product} />;
+      //     case 'golf bag':
+      //     case 'golf bags':
+      //       return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
+      //     case 'shoes':
+      //       return <ShoesProduct product={product} />;
+      //     case 'polo':
+      //     case 'polos':
+      //       return <PoloProduct product={product} />;
+      //     default:
+      //       return null;
+        //   }
+        
       })()}
 
       {/* Customer Reviews Section (common for all products) */}

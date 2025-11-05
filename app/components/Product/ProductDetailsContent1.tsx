@@ -3,18 +3,25 @@ import type { ProductContent1Item } from "~/lib/sanity/products";
 
 interface ProductContent1Props {
   content: ProductContent1Item;
-  showImageLeft: boolean;
+  showImageLeft?: boolean;
+  isTextFull?: boolean;
+  isImageFull?: boolean;
 }
 
-const ProductDetailsContent1 = ({ content, showImageLeft = false }: ProductContent1Props) => {
+const ProductDetailsContent1 = ({ 
+  content, 
+  showImageLeft = false, 
+  isTextFull = false, 
+  isImageFull = false 
+}: ProductContent1Props) => {
   const imageSection = (
-    <div className={`flex justify-center ${showImageLeft ? 'lg:justify-end' : 'lg:justify-start'} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'}`}>
+    <div className={`flex justify-center ${isImageFull ? 'w-full' : ''} ${showImageLeft ? 'lg:justify-end' : 'lg:justify-start'} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'}`}>
       <div className="relative group">
         {content?.images?.[0]?.asset?.url && (
           <img
             src={content.images[0].asset.url}
             alt={content.title || 'Product image'}
-            className="w-full max-w-md lg:max-w-lg object-contain"
+            className={`${isImageFull ? 'w-full' : 'w-full max-w-md lg:max-w-lg'} object-contain`}
           />
         )}
       </div>
@@ -22,21 +29,21 @@ const ProductDetailsContent1 = ({ content, showImageLeft = false }: ProductConte
   );
 
   const textSection = (
-    <div className={`space-y-8 text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
-      <div className="space-y-4">
+    <div className={`space-y-8 ${isTextFull ? 'w-full flex flex-col items-center' : ''} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
+      <div className={`space-y-4 ${isTextFull ? 'w-full max-w-4xl' : ''}`}>
         {content.title && (
-          <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
+          <h3 className={`text-2xl lg:text-3xl font-bold text-gray-900 mb-3 ${isTextFull ? 'text-center' : ''}`}>
             {content.title}
           </h3>
         )}
       </div>
       {content.description && (
-        <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed font-medium max-w-lg mx-auto lg:mx-0">
+        <p className={`text-xl lg:text-2xl text-gray-700 leading-relaxed font-medium ${isTextFull ? 'max-w-4xl text-center' : 'max-w-lg'} mx-auto lg:mx-0`}>
           {content.description}
         </p>
       )}
       {content.points && content.points.length > 0 && (
-        <ul className="space-y-4 text-lg lg:text-xl max-w-md mx-auto lg:mx-0">
+        <ul className={`space-y-4 text-lg lg:text-xl ${isTextFull ? 'max-w-2xl text-center' : 'max-w-md'} mx-auto lg:mx-0`}>
           {content.points.map((point, index) => (
             <li key={index} className="flex items-start group">
               <span className="text-green-500 font-bold mr-4 mt-1 transform group-hover:scale-110 transition-transform shrink-0">
@@ -52,29 +59,18 @@ const ProductDetailsContent1 = ({ content, showImageLeft = false }: ProductConte
     </div>
   );
 
-  // If no images, only show text section centered
+  // If no images, only show text section
   if (!content?.images?.length) {
     return (
-      <div className="flex justify-center items-center min-h-[30vh] mb-2 lg:mb-4">
-        <div className="text-center max-w-3xl px-4">
-          {content.title && (
-            <h3 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-6">
-              {content.title}
-            </h3>
-          )}
-          {content.description && (
-            <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed">
-              {content.description}
-            </p>
-          )}
-        </div>
+      <div className="w-full flex justify-center items-center">
+        {textSection}
       </div>
     );
   }
 
-  // If there are images, show the normal layout
+  // Show layout with images and text
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-2 lg:mb-4">
+    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} gap-8 lg:gap-12 items-center mb-2 lg:mb-4`}>
       {showImageLeft ? (
         <>
           {imageSection}
