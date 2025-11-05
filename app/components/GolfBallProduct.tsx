@@ -21,7 +21,9 @@ export function GolfBallProduct({ product, productDetails }: GolfBallProductProp
         />
       }
       {/* Youtube Video Section */}
-      <Youtube />
+      {productDetails && productDetails?.youtubeVideos &&
+      <Youtube youtubeVideo={productDetails?.youtubeVideos}/>
+      }
     </>
   );
 }

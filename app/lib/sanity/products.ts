@@ -115,7 +115,14 @@ export const productDetailsQuery = (gid: string) => `
           }
         }
       }
+    },
+
+    youtubeVideos[0] {
+      title,
+      description,
+      links
     }
+
   }
 `;
 
@@ -326,6 +333,12 @@ export interface StoreProduct {
   variants: StoreVariant[];
 }
 
+export interface YoutubeVideo {
+  title: string;
+  description?: string;
+  links: string[];
+}
+
 export interface ProductDetails {
   _id: string;
   _type: string;
@@ -351,6 +364,7 @@ export interface ProductDetails {
   }>;
   productContent1?: ProductContent1;
   productContent2?: ProductContent2;
+  youtubeVideos?: YoutubeVideo;
   store: StoreProduct;
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type {ProductFragment} from 'storefrontapi.generated';
+import type { ProductFragment } from 'storefrontapi.generated';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { ProductDetailContents } from './Product/ProductDetailContents';
 import ProductDetailsContent1 from './Product/ProductDetailsContent1';
@@ -12,8 +12,8 @@ const ProductSummaryPolo = () => {
         {/* Image section - left side */}
         <div className="w-full lg:w-[50%] max-w-xl">
           <div className="relative pb-[90%] rounded-lg overflow-hidden">
-            <img 
-              src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-drip-polo-navy-body-image1.jpg?v=1751368007?width=1600&quality=80" 
+            <img
+              src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-drip-polo-navy-body-image1.jpg?v=1751368007?width=1600&quality=80"
               alt="Vice Golf Polo Shirt"
               className="absolute inset-0 w-full h-full object-cover"
               loading="lazy"
@@ -26,7 +26,7 @@ const ProductSummaryPolo = () => {
           <div className="w-full space-y-4 lg:space-y-6 text-center lg:text-left">
             <h3 className="text-2xl lg:text-3xl font-bold text-gray-900">The Definitive Golf Polo</h3>
             <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-lg mx-auto lg:mx-0">
-The original performance-focused Vice Golf Polo is a staple of every golfer's wardrobe. Crafted to be the definitive golfing polo, it's specifically engineered with a premium fabric blend featuring sweat-wicking properties to keep you cool when the heat is on. Cut for the course, it provides optimal movement through each swing and is reinforced in high-stress areas to maintain the sleek look and keep you looking sharp if you decide to take things beyond the course.
+              The original performance-focused Vice Golf Polo is a staple of every golfer's wardrobe. Crafted to be the definitive golfing polo, it's specifically engineered with a premium fabric blend featuring sweat-wicking properties to keep you cool when the heat is on. Cut for the course, it provides optimal movement through each swing and is reinforced in high-stress areas to maintain the sleek look and keep you looking sharp if you decide to take things beyond the course.
 
             </p>
           </div>
@@ -41,26 +41,28 @@ type PoloProductProps = {
   productDetails: ProductDetails | null;
 };
 
-export function PoloProduct({product, productDetails}: PoloProductProps) {
- 
-   return (
-     <>
-       {/* Reusable What's New Section */}
-       {productDetails?.productContent1?.content?.map((item, index) => {
-         const isEven = (index + 1) % 2 === 0;
-         return (
-           <ProductDetailsContent1
-             key={index}
-             content={item}
-             showImageLeft={!isEven}
-             isTextFull={isEven}
-             isImageFull={isEven}
-           />
-         );
-       })}
+export function PoloProduct({ product, productDetails }: PoloProductProps) {
 
-       {/* Youtube Video Section */}
-       <Youtube />
-     </>
-   );
+  return (
+    <>
+      {/* Reusable What's New Section */}
+      {productDetails?.productContent1?.content?.map((item, index) => {
+        const isEven = (index + 1) % 2 === 0;
+        return (
+          <ProductDetailsContent1
+            key={index}
+            content={item}
+            showImageLeft={!isEven}
+            isTextFull={isEven}
+            isImageFull={isEven}
+          />
+        );
+      })}
+
+      {/* Youtube Video Section */}
+      {productDetails && productDetails.youtubeVideos &&
+        <Youtube youtubeVideo={productDetails.youtubeVideos} />
+      }
+    </>
+  );
 }
