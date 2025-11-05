@@ -38,19 +38,10 @@ The original performance-focused Vice Golf Polo is a staple of every golfer's wa
 
 type PoloProductProps = {
   product: ProductFragment;
+  productDetails: ProductDetails | null;
 };
 
-export function PoloProduct({product}: PoloProductProps) {
- const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
- 
-   useEffect(() => {
-     const fetchProductDetails = async () => {
-       const productDetails = await getProductDetails(product.id);
-       setProductDetails(productDetails);
-     }
- 
-     fetchProductDetails();
-   }, [])
+export function PoloProduct({product, productDetails}: PoloProductProps) {
  
    return (
      <>

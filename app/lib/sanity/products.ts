@@ -1,58 +1,6 @@
 import { HttpStatusCode } from "axios";
 import { axiosSanity } from "~/utils/axiosInsatances";
 
-// GraphQL query for product details
-// export const productDetailsQuery = (id: string) => `*[_type == "product" && _id == "${id}"][0]{
-//   _id,
-//   _type,
-//   _createdAt,
-//   _updatedAt,
-//   _rev,
-//   hidden,
-//   title: store.title,
-//   slug: store.slug.current,
-//   colorTheme->{
-//     _id,
-//     title,
-//     primary,
-//     primaryForeground,
-//     secondary,
-//     secondaryForeground,
-//     accent,
-//     accentForeground,
-//     destructive,
-//     destructiveForeground,
-//     ring,
-//     background,
-//     foreground,
-//     muted,
-//     mutedForeground,
-//     border,
-//   },
-//   body,
-//   store {
-//     ...
-//   },
-//   seo {
-//     ...
-//   },
-//   accordionItems[] {
-//     _key,
-//     title,
-//     description
-//   },
-//   productContent1->{
-//     _id,
-//     title,
-//     content
-//   },
-//   productContent2->{
-//     _id,
-//     title,
-//     content
-//   }
-// }`;
-
 export const productDetailsQuery = (gid: string) => `
   *[_type == "product" && store.gid == "${gid}"][0]{
     _id,
@@ -85,6 +33,7 @@ export const productDetailsQuery = (gid: string) => `
         }
       }
     },
+    
     accordionItems[]{
       _key,
       title,
