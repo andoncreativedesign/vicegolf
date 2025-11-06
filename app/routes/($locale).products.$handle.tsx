@@ -1,6 +1,6 @@
-import {redirect, useLoaderData} from 'react-router';
-import {useState} from 'react';
-import type {Route} from './+types/products.$handle';
+import { redirect, useLoaderData } from 'react-router';
+import { useEffect, useState } from 'react';
+import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -9,15 +9,16 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductGallery} from '~/components/ProductGallery';
-import {ProductForm} from '~/components/ProductForm';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {GolfBallProduct} from '~/components/GolfBallProduct';
-import {GolfClubSetProduct} from '~/components/GolfClubSetProduct';
-import {ShoesProduct} from '~/components/ShoesProduct';
-import {PoloProduct} from '~/components/PoloProduct';
-import {GolfBagProduct} from '~/components/GolfBagProduct';
-import {CustomerReviews} from '~/components/CustomerReviews';
+import { ProductGallery } from '~/components/ProductGallery';
+import { ProductForm } from '~/components/ProductForm';
+import { redirectIfHandleIsLocalized } from '~/lib/redirect';
+import { GolfBallProduct } from '~/components/GolfBallProduct';
+import { GolfClubSetProduct } from '~/components/GolfClubSetProduct';
+import { ShoesProduct } from '~/components/ShoesProduct';
+import { PoloProduct } from '~/components/PoloProduct';
+import { GolfBagProduct } from '~/components/GolfBagProduct';
+import { CustomerReviews } from '~/components/CustomerReviews';
+import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 
 type ProductImageType = {
   id: string;
@@ -27,9 +28,9 @@ type ProductImageType = {
   height?: number | null;
 };
 
-export const meta: Route.MetaFunction = ({data}) => {
+export const meta: Route.MetaFunction = ({ data }) => {
   return [
-    {title: `Hydrogen | ${data?.product.title ?? ''}`},
+    { title: `Hydrogen | ${data?.product.title ?? ''}` },
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
@@ -40,38 +41,38 @@ export const meta: Route.MetaFunction = ({data}) => {
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData };
 }
 
-async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
-  const {handle} = params;
-  const {storefront} = context;
+async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
+  const { handle } = params;
+  const { storefront } = context;
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const [{product}] = await Promise.all([
+  const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
-      variables: {handle, selectedOptions: getSelectedProductOptions(request)},
+      variables: { handle, selectedOptions: getSelectedProductOptions(request) },
     }),
   ]);
 
   if (!product?.id) {
-    throw new Response(null, {status: 404});
+    throw new Response(null, { status: 404 });
   }
 
-  redirectIfHandleIsLocalized(request, {handle, data: product});
+  redirectIfHandleIsLocalized(request, { handle, data: product });
 
-  return {product};
+  return { product };
 }
 
-function loadDeferredData({context, params}: Route.LoaderArgs) {
+function loadDeferredData({ context, params }: Route.LoaderArgs) {
   return {};
 }
 
 export default function Product() {
-  const {product} = useLoaderData<typeof loader>();
+  const { product } = useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -85,15 +86,26 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml, images} = product;
+  const { title, descriptionHtml, images } = product;
   const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(
     selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null,
   );
+  const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
 
   // Update selected image when variant changes
   if (selectedVariant?.image && selectedImage?.id !== selectedVariant.image.id) {
     setSelectedImage(selectedVariant.image as ProductImageType);
   }
+  
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      const productDetails = await getProductDetails(product.id);
+      setProductDetails(productDetails);
+      console.log('productDetails ',productDetails)
+    }
+
+    fetchProductDetails();
+  }, [])
 
   return (
     <div className="product-page-container flex flex-col gap-12 px-4 md:px-8 py-6 md:py-10">
@@ -119,32 +131,45 @@ export default function Product() {
             title={title}
             description={descriptionHtml}
             productType={product.productType}
+            productAccordions={productDetails?.accordionItems || []}
           />
         </div>
       </div>
 
       {/* Product-specific sections */}
       {(() => {
-        return <GolfBallProduct product={product} />;
-        
+
         const productType = product.productType?.toLowerCase();
-        
-        switch(productType) {
-          case 'golf balls':
-            return <GolfBallProduct product={product} />;
-          case 'golf club set':
-            return <GolfClubSetProduct product={product} />;
-          case 'golf bag':
-          case 'golf bags':
-            return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
-          case 'shoes':
-            return <ShoesProduct product={product} />;
+
+        switch (productType) {
           case 'polo':
           case 'polos':
-            return <PoloProduct product={product} />;
+          case 'shoes':
+          case 'golf club set':
+            return <PoloProduct product={product} productDetails={productDetails} />;
           default:
-            return null;
+            return <GolfBallProduct product={product} productDetails={productDetails} />;
         }
+
+
+        // ! working code below
+        //   switch(productType) {
+        //     case 'golf balls':
+        //       return <GolfBallProduct product={product} />;
+        //     case 'golf club set':
+        //       return <GolfClubSetProduct product={product} />;
+        //     case 'golf bag':
+        //     case 'golf bags':
+        //       return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
+        //     case 'shoes':
+        //       return <ShoesProduct product={product} />;
+        //     case 'polo':
+        //     case 'polos':
+        //       return <PoloProduct product={product} />;
+        //     default:
+        //       return null;
+        //   }
+
       })()}
 
       {/* Customer Reviews Section (common for all products) */}

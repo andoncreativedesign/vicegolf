@@ -1,19 +1,20 @@
 // app/components/ProductForm.tsx (updated with imports)
-import {Link, useNavigate} from 'react-router';
-import {type MappedProductOptions} from '@shopify/hydrogen';
+import { Link, useNavigate } from 'react-router';
+import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
   ProductOptionValueSwatch,
 } from '@shopify/hydrogen/storefront-api-types';
-import {AddToCartButton} from './AddToCartButton';
-import {useAside} from './Aside';
-import {ProductPrice} from './ProductPrice';
-import {ProductRating} from './ProductRating';
-import {QuantitySelector} from './QuantitySelector';
-import {ShippingInfo} from './ShippingInfo';
-import {ProductDetailsAccordions} from './ProductDetailsAccordions';
-import type {ProductFragment} from 'storefrontapi.generated';
-import {useState, useEffect, useRef} from 'react';
+import { AddToCartButton } from './AddToCartButton';
+import { useAside } from './Aside';
+import { ProductPrice } from './ProductPrice';
+import { ProductRating } from './ProductRating';
+import { QuantitySelector } from './QuantitySelector';
+import { ShippingInfo } from './ShippingInfo';
+import { ProductDetailsAccordions } from './ProductDetailsAccordions';
+import type { ProductFragment } from 'storefrontapi.generated';
+import { useState, useEffect, useRef } from 'react';
+import type { AccordionItem } from '~/lib/sanity/products';
 
 export function ProductForm({
   productOptions,
@@ -21,15 +22,17 @@ export function ProductForm({
   title,
   description,
   productType,
+  productAccordions,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
   description: string;
   productType?: string;
+  productAccordions: AccordionItem[]
 }) {
   const navigate = useNavigate();
-  const {open} = useAside();
+  const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
   const formRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,7 @@ export function ProductForm({
   }, []);
 
   return (
-    <div 
+    <div
       ref={formRef}
       className="product-form bg-white p-6"
       style={{
@@ -80,12 +83,12 @@ export function ProductForm({
       {productType && (
         <div className="text-sm text-gray-500 mb-2">{productType}</div>
       )}
-      
+
       {/* Product Price */}
       <div className="mb-6">
-        <ProductPrice 
-          price={{amount: totalPriceAmount.toFixed(2), currencyCode}} 
-          compareAtPrice={showCompare ? {amount: totalCompareAmount.toFixed(2), currencyCode} : undefined} 
+        <ProductPrice
+          price={{ amount: totalPriceAmount.toFixed(2), currencyCode }}
+          compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
         />
         {showCompare && (
           <span className="text-sm text-emerald-600 font-medium ml-2">
@@ -96,7 +99,7 @@ export function ProductForm({
 
       {/* Product Description */}
       {description && (
-        <div 
+        <div
           className="mb-6 text-gray-600 text-sm"
           dangerouslySetInnerHTML={{ __html: description }}
         />
@@ -127,13 +130,12 @@ export function ProductForm({
                   isDifferentProduct,
                   swatch,
                 } = value;
-                
+
                 if (isDifferentProduct) {
                   return (
                     <Link
-                      className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${
-                        selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
-                      } ${!available ? 'opacity-40 grayscale' : ''}`}
+                      className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
+                        } ${!available ? 'opacity-40 grayscale' : ''}`}
                       key={option.name + name}
                       prefetch="intent"
                       preventScrollReset
@@ -147,11 +149,9 @@ export function ProductForm({
                   return (
                     <button
                       type="button"
-                      className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${
-                        selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
-                      } ${!exists ? 'opacity-40 cursor-not-allowed' : ''} ${
-                        !available ? 'grayscale' : ''
-                      }`}
+                      className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
+                        } ${!exists ? 'opacity-40 cursor-not-allowed' : ''} ${!available ? 'grayscale' : ''
+                        }`}
                       key={option.name + name}
                       disabled={!exists}
                       onClick={() => {
@@ -192,12 +192,12 @@ export function ProductForm({
           lines={
             selectedVariant
               ? [
-                  {
-                    merchandiseId: selectedVariant.id,
-                    quantity: totalQuantityDozens,
-                    selectedVariant,
-                  },
-                ]
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: totalQuantityDozens,
+                  selectedVariant,
+                },
+              ]
               : []
           }
         >
@@ -211,7 +211,7 @@ export function ProductForm({
       </div>
 
       {/* Details Accordions */}
-      <ProductDetailsAccordions />
+      <ProductDetailsAccordions accordions={productAccordions}/>
     </div>
   );
 }
