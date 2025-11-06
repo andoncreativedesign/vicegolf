@@ -1,3 +1,7 @@
+export const createCategoryQuery = (handle: string) => {
+  return `product_type:'${handle}'`
+}
+
 // GraphQL queries for fetching products by collection
 
 export const COLLECTION_PRODUCTS_QUERY = `#graphql
@@ -149,96 +153,175 @@ export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
   }
 ` as const;
 
-export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
-  fragment ProductCard on Product {
-    id
-    title
-    handle
-    productType
-    vendor
-    featuredImage {
-      id
-      url
-      altText
-      width
-      height
-    }
-    images(first: 2) {
-      nodes {
-        id
-        url
-        altText
-        width
-        height
-      }
-    }
-    variants(first: 1) {
-      nodes {
-        id
-        availableForSale
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-      }
-    }
-  }
+// export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
+//   fragment ProductCard on Product {
+//     id
+//     title
+//     handle
+//     productType
+//     vendor
+//     featuredImage {
+//       id
+//       url
+//       altText
+//       width
+//       height
+//     }
+//     images(first: 2) {
+//       nodes {
+//         id
+//         url
+//         altText
+//         width
+//         height
+//       }
+//     }
+//     variants(first: 1) {
+//       nodes {
+//         id
+//         availableForSale
+//         price {
+//           amount
+//           currencyCode
+//         }
+//         compareAtPrice {
+//           amount
+//           currencyCode
+//         }
+//       }
+//     }
+//   }
 
-  query MultipleCollections(
-    $golfBallsHandle: String!
-    $golfClubsHandle: String!
-    $apparelHandle: String!
-    $gearHandle: String!
-    $first: Int = 8
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    golfBalls: collection(handle: $golfBallsHandle) {
+//   query MultipleCollections(
+//     $golfBallsHandle: String!
+//     $golfClubsHandle: String!
+//     $apparelHandle: String!
+//     $gearHandle: String!
+//     $first: Int = 8
+//     $country: CountryCode
+//     $language: LanguageCode
+//   ) @inContext(country: $country, language: $language) {
+//     golfBalls: collection(handle: $golfBallsHandle) {
+//       id
+//       title
+//       handle
+//       products(first: $first) {
+//         nodes {
+//           ...ProductCard
+//         }
+//       }
+//     }
+//     golfClubs: collection(handle: $golfClubsHandle) {
+//       id
+//       title
+//       handle
+//       products(first: $first) {
+//         nodes {
+//           ...ProductCard
+//         }
+//       }
+//     }
+//     apparel: collection(handle: $apparelHandle) {
+//       id
+//       title
+//       handle
+//       products(first: $first) {
+//         nodes {
+//           ...ProductCard
+//         }
+//       }
+//     }
+//     gear: collection(handle: $gearHandle) {
+//       id
+//       title
+//       handle
+//       products(first: $first) {
+//         nodes {
+//           ...ProductCard
+//         }
+//       }
+//     }
+//   }
+// ` as const;
+
+export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
+fragment ProductCard on Product {
+  id
+  title
+  handle
+  productType
+  vendor
+  featuredImage {
+    id
+    url
+    altText
+    width
+    height
+  }
+  variants(first: 1) {
+    nodes {
       id
-      title
-      handle
-      products(first: $first) {
-        nodes {
-          ...ProductCard
-        }
+      availableForSale
+      price {
+        amount
+        currencyCode
       }
-    }
-    golfClubs: collection(handle: $golfClubsHandle) {
-      id
-      title
-      handle
-      products(first: $first) {
-        nodes {
-          ...ProductCard
-        }
-      }
-    }
-    apparel: collection(handle: $apparelHandle) {
-      id
-      title
-      handle
-      products(first: $first) {
-        nodes {
-          ...ProductCard
-        }
-      }
-    }
-    gear: collection(handle: $gearHandle) {
-      id
-      title
-      handle
-      products(first: $first) {
-        nodes {
-          ...ProductCard
-        }
+      compareAtPrice {
+        amount
+        currencyCode
       }
     }
   }
-` as const;
+}
+
+query MultipleProductGroups(
+  $golfBallsHandle: String!
+  $golfClubsHandle: String!
+  $apparelHandle: String!
+  $gearHandle: String!
+  $limitedEditionsHandle: String!
+  $fittingCustomisationHandle: String!
+  $juniorsHandle: String!
+  $first: Int = 8
+) {
+  golfBalls: products(first: $first, query: $golfBallsHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+  golfClubs: products(first: $first, query: $golfClubsHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+  apparel: products(first: $first, query: $apparelHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+  gear: products(first: $first, query: $gearHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+  limitedEditions: products(first: $first, query: $limitedEditionsHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+  fittingCustomisation: products(first: $first, query: $fittingCustomisationHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+  juniors: products(first: $first, query: $juniorsHandle) {
+    nodes {
+      ...ProductCard
+    }
+  }
+}
+`;
+
 
 export const GET_POPULAR_COLLECTIONS = `#graphql
   query GetPopularCollections(
