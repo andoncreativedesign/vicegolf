@@ -4,6 +4,9 @@ export const CUSTOMER_FRAGMENT = `#graphql
     id
     firstName
     lastName
+    emailAddress {
+      emailAddress
+    }
     defaultAddress {
       ...Address
     }
@@ -38,3 +41,6 @@ export const CUSTOMER_DETAILS_QUERY = `#graphql
   }
   ${CUSTOMER_FRAGMENT}
 ` as const;
+
+
+
