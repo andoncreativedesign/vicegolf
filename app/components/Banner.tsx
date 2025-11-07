@@ -97,8 +97,12 @@ if (typeof document !== 'undefined') {
 export function BlackFridayBanner() {
   return (
     <Banner 
-      text="⚡️ Black Friday Deals Are Live ⚡️"
+      messages={[
+        "⚡️ Black Friday Deals Are Live ⚡️",
+        "✈️ Free shipping at $150"
+      ]}
       className="font-semibold"
+      speed={15}
     />
   );
 }
