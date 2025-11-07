@@ -145,10 +145,11 @@ export default function Product() {
           case 'polo':
           case 'polos':
           case 'shoes':
-          case 'golf club set':
             return <PoloProduct product={product} productDetails={productDetails} />;
+          case 'golf club set':
+            return <GolfClubSetProduct productDetails={productDetails}/>
           default:
-            return <GolfBallProduct product={product} productDetails={productDetails} />;
+            return <GolfBallProduct productDetails={productDetails} />;
         }
 
 

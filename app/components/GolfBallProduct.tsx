@@ -5,11 +5,10 @@ import { Youtube } from '~/components/Youtube';
 import type { ProductDetails } from '~/lib/sanity/products';
 
 type GolfBallProductProps = {
-  product: ProductFragment;
   productDetails: ProductDetails | null;
 };
 
-export function GolfBallProduct({ product, productDetails }: GolfBallProductProps) {
+export function GolfBallProduct({ productDetails }: GolfBallProductProps) {
 
   return (
     <>
