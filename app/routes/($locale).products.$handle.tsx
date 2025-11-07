@@ -146,6 +146,7 @@ export default function Product() {
           case 'polo':
           case 'polos':
           case 'shoes':
+          case 'headwear':
             return <PoloProduct product={product} productDetails={productDetails} />;
           case 'golf club set':
             return <GolfClubSetProduct productDetails={productDetails}/>;

@@ -35,6 +35,18 @@ export function Youtube({youtubeVideo}: YoutubeProps) {
     };
   }, [emblaApi, onSelect]);
 
+  const getEmbedUrl = (url: string) => {
+    const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    const videoId = match ? match[1] : null;
+    return videoId
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&loop=1&playlist=${videoId}`
+      : url;
+  };
+
+  useEffect(() => {
+    console.log("youtubeVideo ",youtubeVideo)
+  },[youtubeVideo])
+
   return (
     <section className="w-full py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
@@ -52,7 +64,7 @@ export function Youtube({youtubeVideo}: YoutubeProps) {
                   <div className="max-w-4xl mx-auto aspect-video bg-gray-200 rounded-xl overflow-hidden">
                     <iframe
                       className="w-full h-full"
-                      src={link}
+                      src={getEmbedUrl(link)}
                       title={''}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

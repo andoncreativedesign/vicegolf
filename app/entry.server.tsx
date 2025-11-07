@@ -5,7 +5,8 @@ import {
   createContentSecurityPolicy,
   type HydrogenRouterContextProvider,
 } from '@shopify/hydrogen';
-import type {EntryContext} from 'react-router';
+import type { EntryContext } from 'react-router';
+
 
 export default async function handleRequest(
   request: Request,
@@ -19,22 +20,50 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    
     imgSrc: [
       "'self'",
       'https://cdn.shopify.com',
-      'https://cdn.sanity.io', // Add Sanity CDN for images
+      'https://cdn.sanity.io',
+      'https://i.ytimg.com',
+      'https://img.youtube.com',
       'data:',
     ],
+
     connectSrc: [
       "'self'",
       'https://shopify.com',
       'https://*.shopify.com',
-      'https://c248y25j.api.sanity.io', // Add Sanity API for data fetching
+      'https://c248y25j.api.sanity.io',
     ],
+
     mediaSrc: [
       "'self'",
-      'https://cdn.sanity.io', // Add Sanity CDN for media files
+      'https://cdn.sanity.io',
+      'https://c248y25j.api.sanity.io',
+      'https://www.youtube.com',
+      'https://youtube.com',
+      'https://*.googlevideo.com',
     ],
+
+    frameSrc: [
+      "'self'",
+      'https://www.youtube.com',
+      'https://youtube.com',
+      'https://youtu.be', // ✅ add shortened YouTube domain
+      'https://cdn.sanity.io', // ✅ allow Sanity-hosted videos in iframe
+      'https://player.vimeo.com',
+    ],
+
+    defaultSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://cdn.sanity.io',
+      'https://www.youtube.com',
+      'https://youtube.com',
+      'https://*.googlevideo.com',
+    ],
+
   });
 
   const body = await renderToReadableStream(
