@@ -9,7 +9,6 @@ import {
 import type { HeaderQuery, CartApiQueryFragment } from 'storefrontapi.generated';
 import { useAside } from '~/components/Aside';
 import { debugMenuItems } from '~/utils/debug-menu';
-import { MULTIPLE_COLLECTIONS_QUERY, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV } from '~/lib/shopify/product-queries';
 import type { loader } from '~/root';
 import { BlackFridayBanner } from './Banner';
 
@@ -51,8 +50,8 @@ const transformCollectionsToDropdown = (collections: any[]): ProductDropdownItem
     return {
       name: item.title,
       href: `/products/${item.handle}`,
-      image: item.images.nodes[0],
-      description: item.description || ''
+      image: item.featuredImage,
+      description: item?.description || ''
     }
   })
 
@@ -131,10 +130,13 @@ export function Header({
 
   // Transform collections into category dropdowns
   const categoryDropdowns = {
-    golfBalls: transformCollectionsToDropdown(productsForNav?.golfBalls?.products?.nodes || []),
-    golfClubs: transformCollectionsToDropdown(productsForNav?.golfClubs?.products?.nodes || []),
-    apparel: transformCollectionsToDropdown(productsForNav?.apparel?.products?.nodes || []),
-    gear: transformCollectionsToDropdown(productsForNav?.gear?.products?.nodes || []),
+    golfBalls: transformCollectionsToDropdown(productsForNav?.golfBalls?.nodes || []),
+    golfClubs: transformCollectionsToDropdown(productsForNav?.golfClubs?.nodes || []),
+    apparel: transformCollectionsToDropdown(productsForNav?.apparel?.nodes || []),
+    gear: transformCollectionsToDropdown(productsForNav?.gear?.nodes || []),
+    limitedEditions: transformCollectionsToDropdown(productsForNav?.limitedEditions?.nodes || []),
+    fittingCustomisation: transformCollectionsToDropdown(productsForNav?.fittingCustomisation?.nodes || []),
+    juniors: transformCollectionsToDropdown(productsForNav?.juniors?.nodes || []),
   };
 
   // Debug: Log menu items to console (remove in production)
@@ -237,15 +239,16 @@ export function HeaderMenu({
     console.log('Category dropdowns:', categoryDropdowns);
   }, [categoryDropdowns])
 
+
   // Additional golf-specific navigation items to complement Shopify menu
   const additionalGolfItems = [
-    { title: 'GOLF BALLS', url: '/collections/golf-balls', dropdownItems: categoryDropdowns['golfBalls'] },
-    { title: 'GOLF CLUBS', url: '/collections/golf-clubs', dropdownItems: categoryDropdowns['golfClubs'] },
-    { title: 'APPAREL', url: '/collections/apparel', dropdownItems: categoryDropdowns['apparel'] },
-    { title: 'GEAR', url: '/collections/gear', dropdownItems: categoryDropdowns['gear'] },
-    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions', dropdownItems: categoryDropdowns['limitedEditions'] },
-    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom', dropdownItems: categoryDropdowns['fittingCustomisation'] },
-    { title: 'JUNIORS', url: '/collections/juniors', dropdownItems: categoryDropdowns['juniors'] },
+    { title: 'GOLF BALLS', url: `/collections/${decodeURIComponent('Golf Balls')}`, dropdownItems: categoryDropdowns['golfBalls'] },
+    { title: 'GOLF CLUBS', url: `/collections/${decodeURIComponent('Golf Club Set')}`, dropdownItems: categoryDropdowns['golfClubs'] },
+    { title: 'APPAREL', url: `/collections/${decodeURIComponent('Polo')}`, dropdownItems: categoryDropdowns['apparel'] },
+    { title: 'GEAR', url: `/collections/${decodeURIComponent('Gloves Men')}`, dropdownItems: categoryDropdowns['gear'] },
+    { title: 'LIMITED EDITIONS', url: `/collections/${decodeURIComponent('Longsleeve')}`, dropdownItems: categoryDropdowns['limitedEditions'] },
+    { title: 'FITTING & CUSTOMISATION', url: `/collections/${decodeURIComponent('Divot Tool')}`, dropdownItems: categoryDropdowns['fittingCustomisation'] },
+    { title: 'JUNIORS', url: `/collections/${decodeURIComponent('Juniors')}`, dropdownItems: categoryDropdowns['juniors'] },
   ];
 
   // Extend type for navigation items
@@ -287,7 +290,7 @@ export function HeaderMenu({
               prefetch="intent"
               to={item.url}
               className="text-lg font-medium text-gray-900 hover:text-gray-600 block"
-              style={{textDecoration: 'none'}}
+              style={{ textDecoration: 'none' }}
             >
               {item.title}
             </NavLink>
@@ -327,6 +330,7 @@ export function HeaderMenu({
                   : 'text-gray-700 hover:text-black'
                 }`
               }
+              style={{ textDecoration: 'none' }}
             >
               {item.title}
             </NavLink>
@@ -341,6 +345,7 @@ export function HeaderMenu({
                       prefetch="intent"
                       to={subItem.url}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
+                      style={{ textDecoration: 'none' }}
                     >
                       {subItem.title}
                     </NavLink>
@@ -365,7 +370,7 @@ export function HeaderMenu({
                         <Image
                           data={product.image}
                           alt={product.name}
-                          className="w-24 h-24 object-cover rounded-md mb-2 group-hover/item:scale-105 transition-transform duration-200"
+                          className="w-24 h-24 object-contain p-1 rounded-md mb-2 group-hover/item:scale-105 transition-transform duration-200"
                         />
 
                         <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>

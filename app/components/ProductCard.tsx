@@ -7,8 +7,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({product}: ProductCardProps) {
-  const firstVariant = product.variants.nodes[0];
-  const image = product.featuredImage || product.images.nodes[0];
+  const firstVariant = product.variants?.nodes[0];
+  const image = product.featuredImage || product.images?.nodes[0];
 
   // Generate mock rating (in real app, this would come from reviews data)
   const rating = 4.5 + Math.random() * 0.5; // Random rating between 4.5-5.0

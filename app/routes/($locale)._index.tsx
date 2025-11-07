@@ -2,7 +2,7 @@
 import { Await, useLoaderData, Link } from 'react-router';
 import type { Route } from './+types/_index';
 import { Suspense, useEffect } from 'react';
-import { Image } from '@shopify/hydrogen';
+import { createContentSecurityPolicy, Image } from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
@@ -12,7 +12,7 @@ import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
 // import {getHeroSectionData} from '~/lib/sanity';
 import { getHomePageData } from '~/lib/sanity/home';
-import { GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY, RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
+import { createCategoryQuery, GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY, RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import ClientLogos from '~/components/Home/ClientLogos';
 import ShopByCategories from '~/components/Home/ShopByCategories';
 
@@ -37,15 +37,27 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context }: Route.LoaderArgs) {
+
+  const golfBallsHandle = createCategoryQuery('Golf Balls');
+  const golfClubsHandle = createCategoryQuery('Golf Club Set');
+  const apparelHandle = createCategoryQuery('Gloves Men');
+  const gearHandle = createCategoryQuery('Polo');
+  const limitedEditionsHandle = createCategoryQuery('Towels');
+  const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
+  const juniorsHandle = createCategoryQuery('Divot Tool');
+
   const [collectionsData, categoryProducts, popularCollections] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
-        golfBallsHandle: 'golf-balls',
-        golfClubsHandle: 'golf-clubs',
-        apparelHandle: 'apparel',
-        gearHandle: 'gear',
-        first: 8,
+        golfBallsHandle,
+        golfClubsHandle,
+        apparelHandle,
+        gearHandle,
+        limitedEditionsHandle,
+        fittingCustomisationHandle,
+        juniorsHandle,
+        first: 15,
       },
     }),
     context.storefront.query(GET_POPULAR_COLLECTIONS, {
@@ -54,18 +66,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       },
     }),
   ]);
-
-  // console.log('loadCriticalData start')
-
-  // console.log("categoryProducts \n")
-  // console.log(JSON.stringify(categoryProducts))
-
-  // console.log("collectionsData \n")
-  // console.log(JSON.stringify(collectionsData))
-
-
-  // console.log('loadCriticalData end')
-
 
   const collectionsTransformed = popularCollections?.collections?.edges?.map((edge: { node: FeaturedCollectionFragment }) => ({
     id: edge.node.id,
@@ -104,10 +104,9 @@ async function loadDeferredData({ context }: Route.LoaderArgs) {
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
 
-
   useEffect(() => {
     console.log("data", data);
-    console.log("data.recommendedProducts", data.recommendedProducts);
+    console.log("data.recommendedProducts", data);
   }, [data]);
 
   return (
@@ -117,36 +116,36 @@ export default function Homepage() {
       {/* Product Grids by Category */}
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         {/* Golf Balls Section */}
-        {data.categoryProducts?.golfBalls?.products?.nodes && (
+        {data.categoryProducts?.golfBalls?.nodes && (
           <ProductGrid
-            products={data.categoryProducts.golfBalls.products.nodes}
+            products={data.categoryProducts.golfBalls.nodes}
             title="VICE GOLF BALLS"
             categoryHandle="golf-balls"
           />
         )}
 
         {/* Golf Clubs Section */}
-        {data.categoryProducts?.golfClubs?.products?.nodes && (
+        {data.categoryProducts?.golfClubs?.nodes && (
           <ProductGrid
-            products={data.categoryProducts.golfClubs.products.nodes}
+            products={data.categoryProducts.golfClubs.nodes}
             title="VICE GOLF CLUBS"
             categoryHandle="golf-clubs"
           />
         )}
 
         {/* Apparel Section */}
-        {data.categoryProducts?.apparel?.products?.nodes && (
+        {data.categoryProducts?.apparel?.nodes && (
           <ProductGrid
-            products={data.categoryProducts.apparel.products.nodes}
+            products={data.categoryProducts.apparel.nodes}
             title="VICE APPAREL"
             categoryHandle="apparel"
           />
         )}
 
         {/* Gear Section */}
-        {data.categoryProducts?.gear?.products?.nodes && (
+        {data.categoryProducts?.gear?.nodes && (
           <ProductGrid
-            products={data.categoryProducts.gear.products.nodes}
+            products={data.categoryProducts.gear.nodes}
             title="VICE GEAR"
             categoryHandle="gear"
           />
