@@ -150,6 +150,7 @@ export default function Product() {
           case 'golf club set':
             return <GolfClubSetProduct productDetails={productDetails}/>;
           case 'rangefinder':
+            case 'tees':
             return <RangefinderProduct productDetails={productDetails} />;
           default:
             return <GolfBallProduct productDetails={productDetails} />;
