@@ -60,7 +60,6 @@ export const productDetailsQuery = (gid: string) => `
         }
       }
     },
-
     
     productContent2->{
       _id,
@@ -121,6 +120,17 @@ export const productDetailsQuery = (gid: string) => `
       title,
       description,
       links
+    },
+
+    videoContent[0] {
+      title,
+      description,
+      video {
+        asset->{
+          url,
+          metadata { dimensions }
+        }
+      }
     }
 
   }
@@ -339,6 +349,26 @@ export interface YoutubeVideo {
   links: string[];
 }
 
+export interface SanityVideoAsset {
+  _type: 'sanity.fileAsset';
+  url: string;
+  metadata: {
+    dimensions: {
+      width: number;
+      height: number;
+    };
+  };
+}
+
+export interface VideoContentItem {
+  _key?: string;
+  title?: string;
+  description?: string;
+  video?: {
+    asset: SanityVideoAsset;
+  };
+}
+
 export interface ProductDetails {
   _id: string;
   _type: string;
@@ -365,6 +395,7 @@ export interface ProductDetails {
   productContent1?: ProductContent1;
   productContent2?: ProductContent2;
   youtubeVideos?: YoutubeVideo;
+  videoContent?: VideoContentItem;
   store: StoreProduct;
 }
 
@@ -378,7 +409,7 @@ export async function getProductDetails(id: string): Promise<ProductDetails | nu
     }
 
     const result = response.data.result;
-    
+
     if (!result) {
       return null;
     }

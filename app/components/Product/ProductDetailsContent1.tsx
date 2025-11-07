@@ -32,13 +32,13 @@ const ProductDetailsContent1 = ({
     <div className={`space-y-8 ${isTextFull ? 'w-full flex flex-col items-center' : ''} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
       <div className={`space-y-4 ${isTextFull ? 'w-full max-w-4xl' : ''}`}>
         {content.title && (
-          <h3 className={`text-2xl lg:text-3xl font-bold text-gray-900 mb-3 ${isTextFull ? 'text-center' : ''}`}>
+          <h3 className={`text-2xl lg:text-3xl font-bold mb-3 ${isTextFull ? 'text-center' : ''}`}>
             {content.title}
           </h3>
         )}
       </div>
       {content.description && (
-        <p className={`text-xl lg:text-2xl text-gray-700 leading-relaxed font-medium ${isTextFull ? 'max-w-4xl text-center' : 'max-w-lg'} mx-auto lg:mx-0`}>
+        <p className={`text-xl lg:text-2xl leading-relaxed font-medium ${isTextFull ? 'max-w-4xl text-center' : 'max-w-lg'} mx-auto lg:mx-0`}>
           {content.description}
         </p>
       )}
