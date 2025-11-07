@@ -17,6 +17,7 @@ import { GolfClubSetProduct } from '~/components/GolfClubSetProduct';
 import { ShoesProduct } from '~/components/ShoesProduct';
 import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
+import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 
@@ -147,7 +148,9 @@ export default function Product() {
           case 'shoes':
             return <PoloProduct product={product} productDetails={productDetails} />;
           case 'golf club set':
-            return <GolfClubSetProduct productDetails={productDetails}/>
+            return <GolfClubSetProduct productDetails={productDetails}/>;
+          case 'rangefinder':
+            return <RangefinderProduct productDetails={productDetails} />;
           default:
             return <GolfBallProduct productDetails={productDetails} />;
         }
