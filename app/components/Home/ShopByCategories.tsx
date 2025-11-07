@@ -1,5 +1,5 @@
 import { Image } from '@shopify/hydrogen';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 type ImageType = {
@@ -24,15 +24,13 @@ interface ShopByCategoriesProps {
 
 // Helper function to map any to the expected props
 const mapToCategoryProps = (category: CategoriesType) => {
-  console.log("category\n\n")
-  console.log(JSON.stringify(category.image))
-
+  const handle = decodeURIComponent(category.title)
   return {
     id: category.id,
     title: category.title,
     image: category.image,
     description: `Shop ${category.title}`,
-    link: `/collections/${category.handle}`
+    link: `/collections/${handle}`
   };
 };
 
@@ -47,7 +45,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ categories }) => {
   const mappedCategories = categories.map(mapToCategoryProps);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-white cursor-pointer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-12">

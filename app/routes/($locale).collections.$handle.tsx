@@ -6,7 +6,7 @@ import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
-import { GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
+import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
@@ -37,13 +37,19 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     throw redirect('/collections');
   }
 
-  const [{ collection }] = await Promise.all([
+  const decodedHandle = decodeURIComponent(handle);
+
+  const [ collection ] = await Promise.all([
     storefront.query(GET_PRODUCTS_BY_COLLECTION, {
-      variables: { handle, ...paginationVariables },
+      variables: {
+        handle: createCategoryQuery(decodedHandle),
+        ...paginationVariables
+      },
       // Add other queries here, so that they are loaded in parallel
     }),
   ]);
 
+  console.log('golf collection ', collection)
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {
       status: 404,
@@ -51,10 +57,11 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
 
   // The API handle might be localized, so redirect to the localized handle
-  redirectIfHandleIsLocalized(request, { handle, data: collection });
+  // redirectIfHandleIsLocalized(request, { handle, data: collection });
 
   return {
     collection,
+    handle: decodedHandle
   };
 }
 
@@ -68,11 +75,11 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const { collection } = useLoaderData<typeof loader>();
+  const { collection , handle} = useLoaderData<typeof loader>();
 
   return (
     <div className="collection">
-      <h1>{collection.title}</h1>
+      <h1>{handle}</h1>
       <p className="collection-description">{collection.description}</p>
       <PaginatedResourceSection<ProductItemFragment>
         connection={collection.products}

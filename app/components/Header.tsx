@@ -239,15 +239,16 @@ export function HeaderMenu({
     console.log('Category dropdowns:', categoryDropdowns);
   }, [categoryDropdowns])
 
+
   // Additional golf-specific navigation items to complement Shopify menu
   const additionalGolfItems = [
-    { title: 'GOLF BALLS', url: '/collections/golf-balls', dropdownItems: categoryDropdowns['golfBalls'] },
-    { title: 'GOLF CLUBS', url: '/collections/golf-clubs', dropdownItems: categoryDropdowns['golfClubs'] },
-    { title: 'APPAREL', url: '/collections/apparel', dropdownItems: categoryDropdowns['apparel'] },
-    { title: 'GEAR', url: '/collections/gear', dropdownItems: categoryDropdowns['gear'] },
-    { title: 'LIMITED EDITIONS', url: '/collections/limited-editions', dropdownItems: categoryDropdowns['limitedEditions'] },
-    { title: 'FITTING & CUSTOMISATION', url: '/collections/custom', dropdownItems: categoryDropdowns['fittingCustomisation'] },
-    { title: 'JUNIORS', url: '/collections/juniors', dropdownItems: categoryDropdowns['juniors'] },
+    { title: 'GOLF BALLS', url: `/collections/${decodeURIComponent('Golf Balls')}`, dropdownItems: categoryDropdowns['golfBalls'] },
+    { title: 'GOLF CLUBS', url: `/collections/${decodeURIComponent('Golf Club Set')}`, dropdownItems: categoryDropdowns['golfClubs'] },
+    { title: 'APPAREL', url: `/collections/${decodeURIComponent('Polo')}`, dropdownItems: categoryDropdowns['apparel'] },
+    { title: 'GEAR', url: `/collections/${decodeURIComponent('Gloves Men')}`, dropdownItems: categoryDropdowns['gear'] },
+    { title: 'LIMITED EDITIONS', url: `/collections/${decodeURIComponent('Longsleeve')}`, dropdownItems: categoryDropdowns['limitedEditions'] },
+    { title: 'FITTING & CUSTOMISATION', url: `/collections/${decodeURIComponent('Divot Tool')}`, dropdownItems: categoryDropdowns['fittingCustomisation'] },
+    { title: 'JUNIORS', url: `/collections/${decodeURIComponent('Juniors')}`, dropdownItems: categoryDropdowns['juniors'] },
   ];
 
   // Extend type for navigation items
@@ -289,7 +290,7 @@ export function HeaderMenu({
               prefetch="intent"
               to={item.url}
               className="text-lg font-medium text-gray-900 hover:text-gray-600 block"
-              style={{textDecoration: 'none'}}
+              style={{ textDecoration: 'none' }}
             >
               {item.title}
             </NavLink>
@@ -329,6 +330,7 @@ export function HeaderMenu({
                   : 'text-gray-700 hover:text-black'
                 }`
               }
+              style={{ textDecoration: 'none' }}
             >
               {item.title}
             </NavLink>
@@ -343,6 +345,7 @@ export function HeaderMenu({
                       prefetch="intent"
                       to={subItem.url}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
+                      style={{ textDecoration: 'none' }}
                     >
                       {subItem.title}
                     </NavLink>
