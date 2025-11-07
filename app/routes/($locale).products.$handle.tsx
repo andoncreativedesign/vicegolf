@@ -20,6 +20,7 @@ import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
+import { TeeProduct } from '~/components/TeesProduct';
 
 type ProductImageType = {
   id: string;
@@ -97,12 +98,12 @@ export default function Product() {
   if (selectedVariant?.image && selectedImage?.id !== selectedVariant.image.id) {
     setSelectedImage(selectedVariant.image as ProductImageType);
   }
-  
+
   useEffect(() => {
     const fetchProductDetails = async () => {
       const productDetails = await getProductDetails(product.id);
       setProductDetails(productDetails);
-      console.log('productDetails ',productDetails)
+      console.log('productDetails ', productDetails)
     }
 
     fetchProductDetails();
@@ -149,9 +150,10 @@ export default function Product() {
           case 'headwear':
             return <PoloProduct product={product} productDetails={productDetails} />;
           case 'golf club set':
-            return <GolfClubSetProduct productDetails={productDetails}/>;
+            return <GolfClubSetProduct productDetails={productDetails} />;
+          case 'tees':
+            return <TeeProduct productDetails={productDetails} />
           case 'rangefinder':
-            case 'tees':
             return <RangefinderProduct productDetails={productDetails} />;
           default:
             return <GolfBallProduct productDetails={productDetails} />;

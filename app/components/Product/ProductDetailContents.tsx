@@ -36,7 +36,7 @@ export function ProductDetailContents({ content, content2 }: ProductDetailConten
         )}
 
         {/* New Card Section with Accordion and Image */}
-        <ProductAccordion2 />
+        {/* <ProductAccordion2 /> */}
 
       </div>
     </section>
