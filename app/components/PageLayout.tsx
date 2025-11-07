@@ -83,20 +83,18 @@ function SearchAside() {
       <div className="predictive-search">
         <br />
         <SearchFormPredictive>
-          {({fetchResults, goToSearch, inputRef}) => (
-            <>
-              <input
-                name="q"
-                onChange={fetchResults}
-                onFocus={fetchResults}
-                placeholder="Search"
-                ref={inputRef}
-                type="search"
-                list={queriesDatalistId}
-              />
-              &nbsp;
-              <button onClick={goToSearch}>Search</button>
-            </>
+          {({fetchResults, inputRef}) => (
+            <input
+              name="q"
+              onChange={fetchResults}
+              onFocus={fetchResults}
+              placeholder="Search products..."
+              ref={inputRef}
+              type="search"
+              list={queriesDatalistId}
+              autoComplete="off"
+              autoFocus
+            />
           )}
         </SearchFormPredictive>
 
