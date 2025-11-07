@@ -52,7 +52,7 @@ export default function SearchPage() {
                 name="q"
                 placeholder="Search products..."
                 ref={inputRef}
-                type="search"
+                type="text"
                 autoComplete="off"
               />
               {term && (
@@ -63,6 +63,9 @@ export default function SearchPage() {
                     if (inputRef.current) {
                       inputRef.current.value = '';
                       inputRef.current.focus();
+                      // Trigger search update
+                      const event = new Event('input', { bubbles: true });
+                      inputRef.current.dispatchEvent(event);
                     }
                   }}
                 >

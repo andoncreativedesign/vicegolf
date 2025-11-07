@@ -598,7 +598,7 @@ button.reset:hover:not(:has(> *)) {
 .search-input {
   width: 100%;
   height: 48px;
-  padding: 0 1rem;
+  padding: 0 36px 0 16px;
   border: 1px solid #e1e1e1;
   border-radius: 4px;
   font-size: 1rem;
@@ -606,6 +606,7 @@ button.reset:hover:not(:has(> *)) {
   background: #fff;
   outline: none;
   transition: border-color 0.2s ease;
+  -webkit-appearance: none; /* Removes default search input styling in WebKit */
 }
 
 .search-input:focus {
@@ -615,11 +616,16 @@ button.reset:hover:not(:has(> *)) {
 
 .search-input::placeholder {
   color: #999;
+  opacity: 1; /* Firefox */
+}
+
+.search-input::-webkit-search-cancel-button {
+  display: none; /* Hide the default clear button in WebKit */
 }
 
 .clear-search {
   position: absolute;
-  right: 10px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -632,6 +638,8 @@ button.reset:hover:not(:has(> *)) {
   justify-content: center;
   border-radius: 50%;
   transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
 }
 
 .clear-search:hover {
