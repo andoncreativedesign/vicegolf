@@ -222,7 +222,7 @@ export default function AccountProfile() {
   const action = useActionData<ActionResponse>();
   const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment }>();
   const [formData, setFormData] = React.useState({
-    email: customer?.email || '',
+    email: customer?.emailAddress?.emailAddress || '',
     phone: customer?.phone || '',
     firstName: customer?.firstName || '',
     lastName: customer?.lastName || '',
