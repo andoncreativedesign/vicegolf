@@ -126,7 +126,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
 
       {/* Text and CTA */}
       <div className="absolute inset-0 z-20 flex items-center justify-start px-4 sm:pl-6 md:pl-16 text-white">
-        <div className="max-w-xl drop-shadow-2xl bg-black/30 backdrop-blur-sm p-6 rounded-lg mx-2 sm:mx-0">
+        <div className="max-w-xl drop-shadow-2xl">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold uppercase mb-2 leading-tight">
             {currentSlideData.title}
           </h1>
@@ -135,9 +135,6 @@ export function HeroSection({ heroData }: HeroSectionProps) {
               {currentSlideData.subtitle}
             </h2>
           )}
-          <p className="text-base md:text-lg mb-8 leading-relaxed">
-            {currentSlideData.description}
-          </p>
           <Link
             to={currentSlideData.buttonLink}
             className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition duration-300 shadow-lg"
