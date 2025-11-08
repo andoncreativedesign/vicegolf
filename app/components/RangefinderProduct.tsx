@@ -10,11 +10,6 @@ type RangefinderProductProps = {
 };
 
 export function RangefinderProduct({ productDetails }: RangefinderProductProps) {
-
-  useEffect(() => {
-    console.log('productDetails ', productDetails)
-  }, [productDetails])
-
   return (
     <>
       {productDetails?.videoContent && (
