@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {ProductImage} from './ProductImage';
 import './ProductGallery.css';
@@ -34,6 +34,17 @@ export function ProductGallery({
   const [selectedImage, setSelectedImage] = useState<ImageType | null>(
     initialSelectedImage || (images?.[0] || null),
   );
+
+  // Update selectedImage when initialSelectedImage changes
+  useEffect(() => {
+    if (initialSelectedImage) {
+      setSelectedImage(initialSelectedImage);
+    } else if (images?.[0]) {
+      setSelectedImage(images[0]);
+    } else {
+      setSelectedImage(null);
+    }
+  }, [initialSelectedImage, images]);
 
   const handleImageSelect = (image: ImageType) => {
     setSelectedImage(image);

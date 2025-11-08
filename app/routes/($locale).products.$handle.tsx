@@ -95,19 +95,27 @@ export default function Product() {
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
 
   // Update selected image when variant changes
-  if (selectedVariant?.image && selectedImage?.id !== selectedVariant.image.id) {
-    setSelectedImage(selectedVariant.image as ProductImageType);
-  }
+  useEffect(() => {
+    if (selectedVariant?.image && selectedImage?.id !== selectedVariant.image.id) {
+      setSelectedImage(selectedVariant.image as ProductImageType);
+    }
+  }, [selectedVariant, selectedImage]);
 
+  // Fetch product details when product changes
   useEffect(() => {
     const fetchProductDetails = async () => {
       const productDetails = await getProductDetails(product.id);
       setProductDetails(productDetails);
-      console.log('productDetails ', productDetails)
-    }
+      console.log('productDetails ', productDetails);
+      
+      // Reset selected image when product changes
+      if (product.images?.nodes?.[0]) {
+        setSelectedImage(product.images.nodes[0] as ProductImageType);
+      }
+    };
 
     fetchProductDetails();
-  }, [])
+  }, [product.id]);
 
   return (
     <div className="product-page-container flex flex-col gap-12 px-4 md:px-8 py-6 md:py-10">
