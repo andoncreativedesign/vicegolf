@@ -17,12 +17,11 @@ interface HeroSlide {
   buttonLink: string;
 }
 
-// Fallback slides if Sanity data is not available
 const fallbackSlides: HeroSlide[] = [
   {
     id: 'slide-1',
     bgImage: {
-      url: 'https://via.placeholder.com/1920x1080/000000/FFFFFF?text=Black+Space+BG+with+Golf+Elements',
+      url: 'https://via.placeholder.com/2032x768/000000/FFFFFF?text=Black+Space+BG+with+Golf+Elements',
       altText: 'Black Friday Early Access',
     },
     title: 'BLACK FRIDAY',
@@ -34,7 +33,7 @@ const fallbackSlides: HeroSlide[] = [
   {
     id: 'slide-2',
     bgImage: {
-      url: 'https://via.placeholder.com/1920x1080/4ECDC4/FFFFFF?text=Hero+Image+2',
+      url: 'https://via.placeholder.com/2032x768/4ECDC4/FFFFFF?text=Hero+Image+2',
       altText: 'Hero slide 2',
     },
     title: 'Summer Essentials Await',
@@ -45,7 +44,7 @@ const fallbackSlides: HeroSlide[] = [
   {
     id: 'slide-3',
     bgImage: {
-      url: 'https://via.placeholder.com/1920x1080/45B7D1/FFFFFF?text=Hero+Image+3',
+      url: 'https://via.placeholder.com/2032x768/45B7D1/FFFFFF?text=Hero+Image+3',
       altText: 'Hero slide 3',
     },
     title: 'Exclusive Deals Inside',
@@ -60,56 +59,43 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ heroData }: HeroSectionProps) {
-  // Convert HeroItemTransformed array to HeroSlide array
-  const heroSlides: HeroSlide[] = heroData?.map((item, index) => ({
-    id: `hero-${index}-${item.title?.replace(/\s+/g, '-').toLowerCase() || index}`,
-    bgImage: {
-      url: item.image || fallbackSlides[0].bgImage.url,
-      altText: item.title || `Hero slide ${index + 1}`,
-    },
-    title: item.title || 'Welcome',
-    subtitle: item.description,
-    description: item.description || 'Discover amazing products',
-    buttonText: item.buttonText || 'Shop Now',
-    buttonLink: '/collections', // Default link, can be customized
-  })) || [];
+  const heroSlides: HeroSlide[] =
+    heroData?.map((item, index) => ({
+      id: `hero-${index}-${item.title?.replace(/\s+/g, '-').toLowerCase() || index}`,
+      bgImage: {
+        url: item.image || fallbackSlides[0].bgImage.url,
+        altText: item.title || `Hero slide ${index + 1}`,
+      },
+      title: item.title || 'Welcome',
+      subtitle: item.description,
+      description: item.description || 'Discover amazing products',
+      buttonText: item.buttonText || 'Shop Now',
+      buttonLink: '/collections',
+    })) || [];
 
-  // Use hero slides if available, otherwise use fallback slides
   const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
-
-  // Ensure we always have at least one slide
   const validSlides = slides.length > 0 ? slides : fallbackSlides;
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    // Only auto-advance if there are multiple slides
     if (validSlides.length > 1) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % validSlides.length);
-      }, 5000); // Auto-advance every 5 seconds
-
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [validSlides.length]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % validSlides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + validSlides.length) % validSlides.length);
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % validSlides.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + validSlides.length) % validSlides.length);
+  const goToSlide = (index: number) => setCurrentSlide(index);
 
   const currentSlideData = validSlides[currentSlide];
 
   return (
-    <section className="relative w-full h-[70vh] max-h-[700px] lg:h-[80vh] lg:max-h-none 2xl:h-[40vw] 2xl:max-h-[80vh] mb-8 overflow-hidden">
-      {/* Background Container */}
+    <section className="relative w-full overflow-hidden mb-8 h-[80vh] min-h-[500px] max-h-[90vh] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
+      {/* Background slides */}
       <div className="absolute inset-0">
         {validSlides.map((slide, index) => (
           <div
@@ -118,57 +104,62 @@ export function HeroSection({ heroData }: HeroSectionProps) {
               index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            <Image
-              className="w-full h-full object-cover"
-              data={slide.bgImage}
-              alt={slide.bgImage.altText}
-              sizes="100vw"
-              loading={index === 0 ? 'eager' : 'lazy'}
-            />
-            {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/20" />
+       <Image
+  className="absolute inset-0 w-full h-full object-cover object-center"
+  data={slide.bgImage}
+  alt={slide.bgImage.altText}
+  sizes="100vw"
+  loading={index === 0 ? 'eager' : 'lazy'}
+  width={1920}
+  height={1080}
+  loaderOptions={{
+    scale: 2,
+    crop: 'center',
+    quality: 85
+  }}
+/>
+
+            <div className="absolute inset-0 bg-black/25" />
           </div>
         ))}
       </div>
 
-      {/* Content Overlay */}
-      <div className="absolute inset-0 z-20 flex items-center justify-start pl-8 md:pl-16 text-left text-white pr-8 md:pr-32">
-        <div className="max-w-lg">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase mb-2 md:mb-4 leading-tight drop-shadow-2xl">
+      {/* Text and CTA */}
+      <div className="absolute inset-0 z-20 flex items-center justify-start px-4 sm:pl-6 md:pl-16 text-white">
+        <div className="max-w-xl drop-shadow-2xl">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold uppercase mb-2 leading-tight">
             {currentSlideData.title}
           </h1>
           {currentSlideData.subtitle && (
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold uppercase mb-6 md:mb-8 drop-shadow-2xl">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold uppercase mb-6">
               {currentSlideData.subtitle}
             </h2>
           )}
-          <p className="text-base md:text-lg mb-8 md:mb-12 drop-shadow-lg leading-relaxed max-w-none">
-            {currentSlideData.description}
-          </p>
           <Link
             to={currentSlideData.buttonLink}
-            className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 mt-6 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg"
+            className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition duration-300 shadow-lg"
           >
             {currentSlideData.buttonText}
           </Link>
         </div>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Arrows + Dots */}
       {validSlides.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors duration-300 z-30"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-30"
             aria-label="Previous slide"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
+
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors duration-300 z-30"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-30"
             aria-label="Next slide"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,8 +167,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
             </svg>
           </button>
 
-          {/* Dots Indicator */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-30">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
             {validSlides.map((_, index) => (
               <button
                 key={index}
