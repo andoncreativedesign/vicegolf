@@ -53,6 +53,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const form = await request.formData();
   const formData = Object.fromEntries(form.entries()) as {
+    customerId?: string;
     firstName?: string;
     lastName?: string;
     email?: string;
@@ -60,7 +61,10 @@ export async function action({ request, context }: Route.ActionArgs) {
     newPassword?: string;
     confirmNewPassword?: string;
   };
+
+  const customerId = formData.customerId;
   const { firstName, lastName, email, phone, newPassword, confirmNewPassword } = formData;
+  console.log("\n\ncustomerId ", customerId)
 
   // Validate passwords match if provided
   if (newPassword && newPassword !== confirmNewPassword) {
@@ -79,7 +83,7 @@ export async function action({ request, context }: Route.ActionArgs) {
         firstName?: string;
         lastName?: string;
       } = {};
-      
+
       if (firstName !== undefined && firstName.trim()) {
         customerUpdateInput.firstName = String(firstName).trim();
       }
@@ -103,7 +107,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       }
 
       const nameUpdate = nameUpdateData?.customerUpdate;
-      
+
       if (nameUpdate?.userErrors?.length) {
         console.error('Name Update Errors:', JSON.stringify(nameUpdate.userErrors, null, 2));
         const error = nameUpdate.userErrors[0];
@@ -115,83 +119,31 @@ export async function action({ request, context }: Route.ActionArgs) {
 
     // Update email/phone using Storefront API if provided
     if (email || phone) {
-      const customerAccessToken = await customerAccount.getAccessToken();
-      
-      const storefrontUpdateInput: {
-        firstName?: string;
-        lastName?: string;
-        email?: string;
-        phone?: string | null;
-        acceptsMarketing?: boolean;
-      } = {};
-      
-      // Include current name values to avoid overwriting
-      if (updatedCustomer) {
-        storefrontUpdateInput.firstName = updatedCustomer.firstName;
-        storefrontUpdateInput.lastName = updatedCustomer.lastName;
-      }
-      
-      if (email !== undefined && email.trim()) {
-        storefrontUpdateInput.email = String(email).trim();
-      }
-      if (phone !== undefined) {
-        storefrontUpdateInput.phone = phone.trim() ? String(phone).trim() : null;
-      }
-      
-      storefrontUpdateInput.acceptsMarketing = false; // Default value
+      const { env } = context;
+      const customerNumberId = customerId?.split('/').pop()?.split('Customer/').pop() || ''
+      // const ADMIN_ACCESS_TOKEN = env.ADMIN_ACCESS_TOKEN; // set in .env file
+      // const ADMIN_API_URL = `${env.ADMIN_API_URL}/customers/${customerNumberId}.json`;
+      const ADMIN_ACCESS_TOKEN = 'REMOVED_TOKEN'
+      const ADMIN_API_URL = `https://tzasu4-jj.myshopify.com/admin/api/2025-01/customers/${customerNumberId}.json`
 
-      console.log('Updating customer email/phone with Storefront API:', storefrontUpdateInput);
-      
-      // Create a Storefront API mutation for email/phone
-      const STOREFRONT_CUSTOMER_UPDATE = `#graphql
-        mutation customerUpdate($customerAccessToken: String!, $customer: CustomerUpdateInput!) {
-          customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
-            customer {
-              id
-              firstName
-              lastName
-              email
-              phone
-            }
-            customerAccessToken {
-              accessToken
-              expiresAt
-            }
-            customerUserErrors {
-              code
-              field
-              message
-            }
-          }
-        }
-      `;
-
-      const { data: storefrontUpdateData, errors: storefrontErrors } = await storefront.mutate(
-        STOREFRONT_CUSTOMER_UPDATE,
-        {
-          variables: {
-            customerAccessToken,
-            customer: storefrontUpdateInput,
-          },
+      const res = await fetch(ADMIN_API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN,
         },
-      );
+        body: JSON.stringify({
+          customer: {
+            id: customerNumberId,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phone: phone,
+          },
+        }),
+      })
 
-      if (storefrontErrors?.length) {
-        console.error('Storefront Update GraphQL Errors:', JSON.stringify(storefrontErrors, null, 2));
-        throw new Error(storefrontErrors[0].message || 'Failed to update email/phone');
-      }
-
-      const storefrontUpdate = storefrontUpdateData?.customerUpdate;
-      
-      if (storefrontUpdate?.customerUserErrors?.length) {
-        console.error('Storefront Update Errors:', JSON.stringify(storefrontUpdate.customerUserErrors, null, 2));
-        const error = storefrontUpdate.customerUserErrors[0];
-        throw new Error(error.message || 'Failed to update email/phone');
-      }
-
-      if (storefrontUpdate?.customer) {
-        updatedCustomer = storefrontUpdate.customer;
-      }
+      const data = await res.json()
     }
 
     if (newPassword) {
@@ -208,7 +160,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       message: error.message,
       stack: error.stack,
     });
-    
+
     return data(
       { error: error.message || 'An error occurred while updating your profile', customer: null },
       { status: 400 },
@@ -227,11 +179,6 @@ export default function AccountProfile() {
     firstName: customer?.firstName || '',
     lastName: customer?.lastName || '',
   });
-
-  // Debug: Log customer data
-  React.useEffect(() => {
-    console.log('Customer data in profile:', customer);
-  }, [customer]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -353,6 +300,8 @@ export default function AccountProfile() {
               />
             </div>
           </div>
+
+          <input type="hidden" name="customerId" value={customer?.id} />
         </fieldset>
         {action?.error && (
           <div className="mt-4 mb-6 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
