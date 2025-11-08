@@ -94,14 +94,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
   const currentSlideData = validSlides[currentSlide];
 
   return (
-    <section
-      className="
-        relative w-full overflow-hidden mb-8
-        aspect-[2032/768]          /* Maintain the correct aspect ratio */
-        max-h-[80vh]               /* Prevent over-scaling on tall screens */
-        min-h-[400px]              /* Ensure visibility on small screens */
-      "
-    >
+    <section className="relative w-full overflow-hidden mb-8 h-[80vh] min-h-[500px] max-h-[90vh] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
       {/* Background slides */}
       <div className="absolute inset-0">
         {validSlides.map((slide, index) => (
@@ -112,11 +105,18 @@ export function HeroSection({ heroData }: HeroSectionProps) {
             }`}
           >
        <Image
-  className="absolute inset-0 w-full h-full object-cover object-[70%_center] md:object-[80%_center] lg:object-[85%_center]"
+  className="absolute inset-0 w-full h-full object-cover object-center"
   data={slide.bgImage}
   alt={slide.bgImage.altText}
   sizes="100vw"
   loading={index === 0 ? 'eager' : 'lazy'}
+  width={1920}
+  height={1080}
+  loaderOptions={{
+    scale: 2,
+    crop: 'center',
+    quality: 85
+  }}
 />
 
             <div className="absolute inset-0 bg-black/25" />
@@ -125,8 +125,8 @@ export function HeroSection({ heroData }: HeroSectionProps) {
       </div>
 
       {/* Text and CTA */}
-      <div className="absolute inset-0 z-20 flex items-center justify-start pl-6 md:pl-16 text-white">
-        <div className="max-w-xl drop-shadow-2xl">
+      <div className="absolute inset-0 z-20 flex items-center justify-start px-4 sm:pl-6 md:pl-16 text-white">
+        <div className="max-w-xl drop-shadow-2xl bg-black/30 backdrop-blur-sm p-6 rounded-lg mx-2 sm:mx-0">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold uppercase mb-2 leading-tight">
             {currentSlideData.title}
           </h1>
