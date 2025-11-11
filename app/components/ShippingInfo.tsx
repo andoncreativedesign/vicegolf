@@ -1,28 +1,32 @@
 // app/components/ShippingInfo.tsx
-import { Truck, Clock } from 'lucide-react';
-
 export function ShippingInfo() {
   return (
-    <div className="w-full border border-gray-200 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow duration-300">
-      <div className="flex-shrink-0 w-10 h-10 bg-black rounded-full flex items-center justify-center">
-        <Truck className="h-5 w-5 text-white" strokeWidth={2} />
+    <div className="w-full flex items-start gap-3 p-4 border border-gray-200 rounded-lg">
+      <div className="flex-shrink-0 mt-0.5">
+        <img 
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/icon-delivery.svg?v=1721740613&width=200&crop=center" 
+          alt="Delivery"
+          className="w-5 h-5 text-gray-600"
+          width={20}
+          height={20}
+          loading="lazy"
+        />
       </div>
       <div className="flex-1">
-        <h6 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-          Premium Shipping
-          <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full">
-            <Clock className="h-3 w-3" />
-            Fast
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-900">Free shipping</span>
+          <span className="text-[10px] font-medium text-white bg-blue-600 rounded-full px-1.5 py-0.5 leading-none">
+            Free
           </span>
-        </h6>
-        <div className="space-y-1">
-          <p className="text-sm text-gray-600 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-            Ships within 2 business days
+        </div>
+        <div className="mt-1.5 space-y-1.5">
+          <p className="text-xs text-gray-600 flex items-start gap-1.5">
+            <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-1.5 flex-shrink-0"></span>
+            <span>Standard: Ships within 2 business days</span>
           </p>
-          <p className="text-sm text-gray-600 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-            Customized balls ship within 2 weeks
+          <p className="text-xs text-gray-600 flex items-start gap-1.5">
+            <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-1.5 flex-shrink-0"></span>
+            <span>Customized balls: Ships within 2 weeks</span>
           </p>
         </div>
       </div>
