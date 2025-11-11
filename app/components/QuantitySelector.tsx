@@ -82,46 +82,39 @@ export function QuantitySelector({
         })}
 
         {/* Custom Quantity Selector */}
-        <div className="mt-6 pt-6 border-t border-gray-100">
-          <p className="text-base font-semibold text-gray-900 mb-4">
-            Pick a Custom Quantity
-          </p>
-
-          <div className="flex items-center justify-between bg-gray-50 rounded-2xl px-6 py-4">
-            <div className="flex items-center gap-4">
+        <div className="mt-6">
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700 mb-1">Pick a Custom Quantity</p>
+            
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+                className="h-10 w-10 flex items-center justify-center text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
               >
                 <Minus className="h-4 w-4" />
               </button>
-
-              <div className="flex items-center">
-                <input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  className="w-16 text-center text-lg font-bold text-gray-900 bg-transparent outline-none"
-                />
-                <span className="ml-2 text-base text-gray-600 font-medium">dozen</span>
+              
+              <div className="flex items-center h-10 px-2">
+                <span className="w-12 text-center text-base font-medium text-gray-900">
+                  {quantity}
+                </span>
               </div>
-
+              
               <button
                 type="button"
                 onClick={() => setQuantity(quantity + 1)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+                className="h-10 w-10 flex items-center justify-center text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
               >
                 <Plus className="h-4 w-4" />
               </button>
             </div>
             
-            <div className="text-right">
-              <p className="text-sm text-gray-500 mb-1">Total</p>
-              <p className="text-lg font-bold text-gray-900">
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-sm text-gray-500">Total</span>
+              <span className="text-base font-semibold text-gray-900">
                 ${(quantity * 39.99).toFixed(2)}
-              </p>
+              </span>
             </div>
           </div>
         </div>
