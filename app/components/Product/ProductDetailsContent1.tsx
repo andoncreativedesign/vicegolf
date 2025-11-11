@@ -32,24 +32,24 @@ const ProductDetailsContent1 = ({
     <div className={`space-y-8 ${isTextFull ? 'w-full flex flex-col items-center' : ''} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
       <div className={`space-y-4 ${isTextFull ? 'w-full max-w-4xl' : ''}`}>
         {content.title && (
-          <h3 className={`text-2xl lg:text-3xl font-bold mb-3 ${isTextFull ? 'text-center' : ''}`}>
+          <h3 className={`text-2xl lg:text-3xl font-semibold mb-3 ${isTextFull ? 'text-center' : ''}`}>
             {content.title}
           </h3>
         )}
       </div>
       {content.description && (
-        <p className={`text-xl lg:text-2xl leading-relaxed font-medium ${isTextFull ? 'max-w-4xl text-center' : 'max-w-lg'} mx-auto lg:mx-0`}>
+        <p className={`text-xl leading-relaxed font-normal ${isTextFull ? 'max-w-4xl text-center' : 'max-w-lg'} mx-auto lg:mx-0`}>
           {content.description}
         </p>
       )}
       {content.points && content.points.length > 0 && (
-        <ul className={`space-y-4 text-lg lg:text-xl ${isTextFull ? 'max-w-2xl text-center' : 'max-w-md'} mx-auto lg:mx-0`}>
+        <ul className={`space-y-4 ${isTextFull ? 'max-w-2xl text-start' : 'max-w-md'} mx-auto lg:mx-0`}>
           {content.points.map((point, index) => (
             <li key={index} className="flex items-start group">
-              <span className="text-green-500 font-bold mr-4 mt-1 transform group-hover:scale-110 transition-transform shrink-0">
+              <span className="text-green-500 mr-4 mt-1 transform group-hover:scale-110 transition-transform shrink-0">
                 ✓
               </span>
-              <span className="text-gray-800 group-hover:text-gray-900 transition-colors flex-1">
+              <span className="text-gray-800 group-hover:text-gray-900 transition-colors flex-1 font-normal">
                 {point}
               </span>
             </li>
