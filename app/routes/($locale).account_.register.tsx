@@ -104,9 +104,12 @@ export async function action({ request, context }: any) {
       });
     }
 
-    // Redirect to Shopify OAuth for secure account creation
-    return context.customerAccount.login({
-      countryCode: context.storefront.i18n.country,
+    // After storing registration data, redirect to login page
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': '/account/login'
+      }
     });
   } catch (error) {
     console.error('Registration error:', error);
