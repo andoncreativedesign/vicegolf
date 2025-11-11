@@ -173,9 +173,14 @@ export default function AccountProfile() {
   const { state } = useNavigation();
   const action = useActionData<ActionResponse>();
   const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment }>();
+  
+  // Debug: Log the customer data to see its structure
+  React.useEffect(() => {
+    console.log('Customer Data:', JSON.stringify(customer, null, 2));
+  }, [customer]);
   const [formData, setFormData] = React.useState({
-    email: customer?.emailAddress?.emailAddress || '',
-    phone: customer?.phone || '',
+    email: customer?.emailAddress?.emailAddress || customer?.email || '',
+    phone: customer?.phoneNumber?.phoneNumber || '',
     firstName: customer?.firstName || '',
     lastName: customer?.lastName || '',
   });

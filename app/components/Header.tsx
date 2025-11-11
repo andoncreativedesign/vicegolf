@@ -150,7 +150,7 @@ export function Header({
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <BlackFridayBanner />
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between px-4 py-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-4 py-6 w-full max-w-full mx-auto">
         {/* Left: Country/Currency Selector */}
         <div className="flex items-center space-x-2">
           <CountryCurrencySelector />
@@ -177,8 +177,8 @@ export function Header({
       </div>
 
       {/* Navigation Menu */}
-      <nav className="bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
+      <nav className="bg-white border-t border-gray-100 w-full">
+        <div className="w-full px-0">
           <HeaderMenu
             menu={menu}
             viewport="desktop"
@@ -317,8 +317,8 @@ export function HeaderMenu({
   }
 
   return (
-    <div className="relative">
-      <nav className="hidden lg:flex items-center justify-center space-x-8 py-4" role="navigation">
+    <div className="relative w-full">
+      <nav className="hidden lg:flex items-center justify-center space-x-8 py-4 w-full" role="navigation">
         {navigationItems.map((item, index) => (
           <div key={item.id || index} className={`group ${(item.items && item.items.length > 0) ? 'relative' : ''}`}>
             <NavLink
@@ -356,7 +356,7 @@ export function HeaderMenu({
 
             {/* Product grid dropdown for golf categories */}
             {item.dropdownItems && !item.items && (
-              <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
+              <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
                 <div className="px-4 py-8">
                   <div className="grid grid-cols-6 gap-6">
                     {item.dropdownItems.map((product, pIndex) => (
