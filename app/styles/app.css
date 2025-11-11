@@ -12,6 +12,11 @@ img {
   border-radius: 4px;
 }
 
+html,
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
 /*
 * --------------------------------------------------
 * Non anchor links
