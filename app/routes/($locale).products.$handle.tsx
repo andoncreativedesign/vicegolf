@@ -133,10 +133,9 @@ export default function Product() {
   }, [product.id]);
 
   return (
-    <div className="product-page-container flex flex-col gap-12 px-8 md:px-16 py-6 md:py-10">
-      {/* Image + Form in Flex */}
-      <div className="flex flex-col lg:flex-row gap-10 md:gap-16 items-start">
-        <div className="w-full lg:flex-[1.1]">
+    <div className="product-page-container w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <div className="flex flex-col lg:flex-row gap-8 w-full">
+        <div className="w-full lg:w-3/5">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}

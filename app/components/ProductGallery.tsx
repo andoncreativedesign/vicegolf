@@ -82,9 +82,38 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
   const hasMultipleImages = images.length > 1;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-row gap-4 w-full h-full">
+      {/* Thumbnails - Vertical on the left */}
+      {hasMultipleImages && (
+        <div className="flex flex-col gap-2 w-20 flex-shrink-0">
+          {images.map((image, index) => {
+            const isActive = mainImage.id === image.id;
+            return (
+              <button
+                key={image.id}
+                onClick={() => handleThumbClick(image)}
+                className={`relative w-full aspect-square rounded-md overflow-hidden border-2 transition-all ${
+                  isActive ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                }`}
+                aria-label={`View ${image.altText || 'product image'}`}
+                aria-current={isActive ? 'true' : 'false'}
+              >
+                <Image
+                  data={image}
+                  alt={image.altText || `Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  width={80}
+                  height={80}
+                  loading="lazy"
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
+      
       {/* Main Image with Navigation */}
-      <div className="relative w-full aspect-square overflow-hidden rounded-lg bg-gray-50">
+      <div className="relative flex-1 h-full min-h-[500px] overflow-hidden rounded-lg bg-gray-50">
         {/* Navigation Arrows */}
         {hasMultipleImages && (
           <>
@@ -134,17 +163,16 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
         </div>
       </div>
 
-      {/* Thumbnails */}
-      {hasMultipleImages && (
-        <div className="grid grid-cols-4 gap-2 mt-2">
+      {/* Mobile Thumbnails - Hidden since we're using a different approach */}
+      {false && hasMultipleImages && (
+        <div className="md:hidden flex gap-2 overflow-x-auto py-2 px-1 -mx-1">
           {images.map((image, index) => {
             const isActive = mainImage.id === image.id;
-            
             return (
               <button
                 key={image.id}
                 onClick={() => handleThumbClick(image)}
-                className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all cursor-pointer ${
+                className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-all ${
                   isActive ? 'border-primary' : 'border-transparent hover:border-gray-300'
                 }`}
                 aria-label={`View ${image.altText || 'product image'}`}
@@ -152,10 +180,10 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
               >
                 <Image
                   data={image}
-                  alt={image.altText || `Product thumbnail ${index + 1}`}
+                  alt={image.altText || `Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
-                  width={120}
-                  height={120}
+                  width={64}
+                  height={64}
                   loading="lazy"
                 />
               </button>
