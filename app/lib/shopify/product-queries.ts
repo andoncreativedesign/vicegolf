@@ -140,6 +140,7 @@ query MultipleProductGroups(
 }
 ` as const;
 
+/* 
 export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
 fragment ProductCard on Product {
   id
@@ -217,6 +218,132 @@ query MultipleProductGroups(
   }
 }
 `;
+*/
+
+
+export interface MenuItemImage {
+  url: string;
+  altText: string | null;
+}
+
+export interface MenuItemResource {
+  id: string;
+  handle: string;
+  title: string;
+  image?: {
+    url: string;
+    altText: string | null;
+  };
+}
+
+export interface MenuItem {
+  id: string;
+  title: string;
+  type: string;
+  url: string;
+  resourceId: string | null;
+  resource: MenuItemResource | null;
+  items: MenuItem[];
+}
+
+export interface MenuData {
+  menu: {
+    id: string;
+    title: string;
+    items: MenuItem[];
+  };
+}
+
+export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
+query GetMenu($handle: String!) {
+  menu(handle: $handle) {
+    id
+    title
+    items {
+      id
+      title
+      type
+      url
+      resourceId
+      resource {
+        ... on Collection {
+          id
+          handle
+          title
+          image {
+            url
+            altText
+          }
+        }
+        ... on Product {
+          id
+          handle
+          title
+          featuredImage {
+            url
+            altText
+          }
+        }
+      }
+      items {
+        id
+        title
+        type
+        url
+        resourceId
+        resource {
+          ... on Collection {
+            id
+            handle
+            title
+            image {
+              url
+              altText
+            }
+          }
+          ... on Product {
+            id
+            handle
+            title
+            featuredImage {
+              url
+              altText
+            }
+          }
+        }
+        items {
+          id
+          title
+          type
+          url
+          resourceId
+          resource {
+            ... on Collection {
+              id
+              handle
+              title
+              image {
+                url
+                altText
+              }
+            }
+            ... on Product {
+              id
+              handle
+              title
+              featuredImage {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
 
 
 export const GET_POPULAR_COLLECTIONS = `#graphql
