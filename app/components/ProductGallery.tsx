@@ -49,7 +49,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && (
-        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide md:w-24">
+        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] scrollbar-hide">
           {images.map((image) => {
             const isActive = mainImage.id === image.id;
             return (

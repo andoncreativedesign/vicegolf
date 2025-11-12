@@ -28,14 +28,17 @@ export function ProductImage({ image, galleryImages = [], onImageChange }: Produ
   const currentImage = galleryImages[index] || image;
 
   return (
-    <div className="relative group rounded-2xl overflow-hidden bg-white shadow-sm flex items-center justify-center aspect-square">
-      <Image
-        alt={currentImage.altText || 'Product Image'}
-        data={currentImage}
-        aspectRatio="1/1"
-        className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.02]"
-        sizes="(min-width: 45em) 50vw, 100vw"
-      />
+    <div className="relative group rounded-2xl overflow-hidden bg-white shadow-sm w-full">
+      <div className="relative pt-[100%] w-full">
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <Image
+            alt={currentImage.altText || 'Product Image'}
+            data={currentImage}
+            className="max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.02]"
+            sizes="(min-width: 45em) 50vw, 100vw"
+          />
+        </div>
+      </div>
 
       {galleryImages.length > 1 && (
         <>
