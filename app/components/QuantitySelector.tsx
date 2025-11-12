@@ -102,7 +102,7 @@ export function QuantitySelector({
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium text-gray-900 mb-3">
-              Custom Quantity
+             Pick a Custom Quantity
             </p>
             
             <div className="flex items-center justify-between p-3 rounded-lg">
@@ -110,7 +110,7 @@ export function QuantitySelector({
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg transition-colors shadow-sm"
+                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded-full transition-colors shadow-sm"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
@@ -122,7 +122,7 @@ export function QuantitySelector({
                 <button
                   type="button"
                   onClick={() => setQuantity(quantity + 1)}
-                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg transition-colors shadow-sm"
+                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded-full transition-colors shadow-sm"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
