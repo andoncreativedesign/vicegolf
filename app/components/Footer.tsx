@@ -1,4 +1,4 @@
-import {Suspense, useState} from 'react';
+import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 
@@ -15,10 +15,49 @@ export function Footer({
 }: FooterProps) {
   return (
     <footer className="bg-white">
-      {/* Newsletter Section */}
-      <NewsletterSection />
+      {/* Modern Newsletter Section */}
+      <div className="bg-white border-b border-gray-200 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl font-light tracking-wide text-gray-900 sm:text-4xl">
+              JOIN OUR NEWSLETTER
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Sign up for exclusive offers, new product updates, and more.
+            </p>
+            <div className="mt-8 max-w-xs mx-auto">
+              <form className="relative w-full">
+                <label htmlFor="email-address" className="sr-only">Email address</label>
+                <div className="relative">
+                  <input
+                    id="email-address"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 shadow-sm placeholder-gray-400 focus:ring-1 focus:ring-black focus:border-black rounded-none text-sm"
+                    placeholder="Enter your email"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400 hover:text-black transition-colors"
+                    aria-label="Subscribe"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </form>
+              <p className="mt-3 text-sm text-gray-500">
+                We respect your privacy. Unsubscribe at any time.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
       
-      {/* Main Footer */}
+      {/* Main Footer Content */}
       <div className="bg-black text-white">
         <Suspense>
           <Await resolve={footerPromise}>
@@ -36,67 +75,6 @@ export function Footer({
   );
 }
 
-function NewsletterSection() {
-  const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    
-    setIsSubmitting(true);
-    
-    // Here you would integrate with your newsletter service (Klaviyo, Mailchimp, etc.)
-    // For now, we'll just simulate a submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      setEmail('');
-      
-      // Reset success message after 3 seconds
-      setTimeout(() => setIsSuccess(false), 3000);
-    }, 1000);
-  };
-
-  return (
-    <div className="bg-gray-100 py-12">
-      <div className="max-w-7xl mx-auto px-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          JOIN OUR NEWSLETTER
-        </h2>
-        <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-          Unlock exclusive savings, receive early access to new arrivals, and discover insider tips to elevate your game.
-        </p>
-        
-        <form onSubmit={handleSubmit} className="flex max-w-md mx-auto">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Type in your email"
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-            required
-            disabled={isSubmitting}
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting || !email.trim()}
-            className="bg-black text-white px-8 py-3 rounded-r-full hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50"
-          >
-            {isSubmitting ? '...' : 'Subscribe'}
-          </button>
-        </form>
-        
-        {isSuccess && (
-          <p className="text-green-600 text-sm mt-4">
-            Thank you for subscribing! Check your email for confirmation.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function FooterContent({
   footer,
