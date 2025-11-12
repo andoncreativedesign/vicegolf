@@ -33,16 +33,16 @@ export function Footer({
   return (
     <footer className="bg-white">
       {/* Modern Newsletter Section */}
-      <div className="bg-gray-50 border-b border-gray-200 py-16">
+      <div className="bg-gray-50 border-b border-gray-200 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-4xl font-light tracking-wide text-gray-900 sm:text-5xl uppercase">
+            <h2 className="text-3xl font-light tracking-wide text-gray-900 sm:text-4xl uppercase">
               JOIN OUR NEWSLETTER!
             </h2>
-            <p className="mt-4 text-lg text-gray-600">
+            <p className="mt-2 text-base text-gray-600">
               Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
             </p>
-            <div className="mt-8 max-w-md mx-auto w-full relative">
+            <div className="mt-6 max-w-md mx-auto w-full relative">
               <form onSubmit={handleSubmit}>
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <input
