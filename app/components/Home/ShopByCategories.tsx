@@ -45,52 +45,50 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ categories }) => {
   const mappedCategories = categories.map(mapToCategoryProps);
 
   return (
-    <section className="py-16 bg-white cursor-pointer">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">SHOP BY CATEGORIES</h2>
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight uppercase">SHOP BY CATEGORIES</h2>
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {mappedCategories.map((category) => (
             <div
               key={category.id}
               onClick={() => handleCategoryClick(category.link)}
-              // className="relative group cursor-pointer overflow-hidden rounded-lg bg-gray-100 hover:shadow-xl transition-all duration-300"
-              // ! image not 
-              className=""
+              className="relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
             >
               {/* Category Image */}
-              <div className="aspect-[4/3] overflow-hidden">
+              <div className="aspect-[4/3] overflow-hidden relative">
                 <Image
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                   data={category.image}
-                  alt={category.image.altText}
-                  sizes="100vw"
+                  alt={category.image.altText || category.title}
+                  sizes="(min-width: 768px) 50vw, 100vw"
                   loading="eager"
                 />
               </div>
 
-              {/* Category Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300">
-                <div className="absolute top-6 left-6">
-                  <h3 className="text-xl font-bold text-white mb-2 tracking-wide">
+              {/* Category Info */}
+              <div className="absolute inset-0 flex flex-col justify-start p-6">
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-semibold text-black mb-2 tracking-tight">
                     {category.title}
                   </h3>
                   {category.description && (
-                    <p className="text-white text-sm opacity-90">
+                    <p className="text-gray-900 text-sm font-medium tracking-wide">
                       {category.description}
                     </p>
                   )}
                 </div>
 
-                {/* Hover Arrow */}
-                <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                {/* Arrow */}
+                <div className="absolute bottom-6 right-6">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200">
                     <svg
-                      className="w-5 h-5 text-gray-900"
+                      className="w-5 h-5 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
