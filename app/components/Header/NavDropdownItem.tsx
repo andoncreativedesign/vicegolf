@@ -14,9 +14,9 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
   }, [menuItem])
 
   return (
-    <div className="absolute left-0 transform -translate-x-1/2 w-screen h-64 mt-4 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
+    <div className="absolute mt-4 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
       <div className="px-4 sm:px-6 lg:px-8 py-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="flex justify-center items-center gap-2 px-auto">
           {menuItem?.items?.map((subItem, subIndex) => (
             <NavLink
               key={subItem.id || subIndex}

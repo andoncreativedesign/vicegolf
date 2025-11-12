@@ -1,4 +1,4 @@
-import {Await, Link} from 'react-router';
+import {Await, Link, useLoaderData} from 'react-router';
 import {Suspense, useId} from 'react';
 import type {
   CartApiQueryFragment,
@@ -15,6 +15,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import type { MenuData } from '~/lib/shopify/product-queries';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -163,16 +164,18 @@ function MobileMenuAside({
 }: {
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
-}) {
+  }) {
+  
+  const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
+  // Get menu items from the productsForNav data
+  const menuItems = productsForNav?.menu?.items[0]?.items || [];
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
       <Aside type="mobile" heading="MENU">
         <HeaderMenu
-          menu={header.menu}
           viewport="mobile"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
+          menuItems={menuItems}
         />
       </Aside>
     )
