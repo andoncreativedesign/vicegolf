@@ -1,5 +1,6 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Await, NavLink } from 'react-router';
+import { ArrowRight } from 'lucide-react';
 import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated';
 
 interface FooterProps {
@@ -13,43 +14,62 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
+  const [email, setEmail] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
+    console.log('Submitted email:', email);
+    // Show success message
+    setIsSubmitted(true);
+    // Clear the input field
+    setEmail('');
+    // Reset the success message after 5 seconds
+    setTimeout(() => {
+      setIsSubmitted(false);
+    }, 5000);
+  };
   return (
     <footer className="bg-white">
       {/* Modern Newsletter Section */}
-      <div className="bg-white border-b border-gray-200 py-16">
+      <div className="bg-gray-50 border-b border-gray-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl font-light tracking-wide text-gray-900 sm:text-4xl">
-              JOIN OUR NEWSLETTER
+            <h2 className="text-4xl font-light tracking-wide text-gray-900 sm:text-5xl uppercase">
+              JOIN OUR NEWSLETTER!
             </h2>
             <p className="mt-4 text-lg text-gray-600">
-              Sign up for exclusive offers, new product updates, and more.
+              Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
             </p>
-            <div className="mt-8 max-w-xs mx-auto">
-              <form className="relative w-full">
-                <label htmlFor="email-address" className="sr-only">Email address</label>
-                <div className="relative flex gap-2">
+            <div className="mt-8 max-w-md mx-auto w-full relative">
+              <form onSubmit={handleSubmit}>
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <input
-                    id="email-address"
-                    name="email"
                     type="email"
-                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your Email"
+                    className="px-6 py-3 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 w-full h-12 text-base bg-white text-gray-900 placeholder-gray-500"
+                    style={{ borderRadius: '9999px' }}
                     required
-                    className="flex-1 px-4 h-10 border border-gray-300 shadow-sm placeholder-gray-400 focus:ring-1 focus:ring-black focus:border-black rounded-full text-sm !rounded-full"
-                    placeholder="Enter your email"
                   />
                   <button
                     type="submit"
-                    className="px-6 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
+                    className="bg-black text-white px-6 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap h-12 text-base font-medium flex items-center justify-center gap-2"
+                    style={{ borderRadius: '9999px' }}
                   >
-                    Join
+                    <ArrowRight className="w-5 h-5" />
                   </button>
                 </div>
-
               </form>
-              <p className="mt-3 text-sm text-gray-500">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
+              <div className="h-6 mt-2">
+                {isSubmitted && (
+                  <p className="text-green-500 text-sm text-center">
+                    Thank you for subscribing!
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
