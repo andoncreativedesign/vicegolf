@@ -16,7 +16,7 @@ export function ProductRating({ rating, reviewCount, ...props }: Props) {
       <div key={i} className="relative">
         <Star
           size={20}
-          className="text-gray-300"
+          className="text-gray-200"
         />
         {(filled || partial) && (
           <div 
@@ -26,7 +26,7 @@ export function ProductRating({ rating, reviewCount, ...props }: Props) {
           >
             <Star
               size={20}
-              className="fill-amber-400 text-amber-400"
+              className="fill-yellow-400 text-yellow-400"
             />
           </div>
         )}
@@ -36,11 +36,11 @@ export function ProductRating({ rating, reviewCount, ...props }: Props) {
 
   return (
     <div
-      className="flex items-center gap-3"
+      className="flex items-center gap-2"
       {...props}
     >
-      <div className="flex items-center gap-1">{stars}</div>
       <span className="text-lg font-bold text-gray-900">{rating.toFixed(1)}</span>
+      <div className="flex items-center gap-0.5">{stars}</div>
       <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
       <a
         href="#reviews"
