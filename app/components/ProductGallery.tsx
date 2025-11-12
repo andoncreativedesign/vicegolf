@@ -1,88 +1,116 @@
-import {useState, useEffect} from 'react';
-import {Image} from '@shopify/hydrogen';
-import {ProductImage} from './ProductImage';
-import './ProductGallery.css';
+import { useState, useEffect } from 'react';
+import { Image } from '@shopify/hydrogen';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-type ImageType = {
+type ProductImageType = {
   id: string;
   url: string;
   altText?: string | null;
   width?: number | null;
   height?: number | null;
-  __typename?: string;
 };
 
 type ProductGalleryProps = {
-  images: ImageType[];
-  selectedImage?: ImageType | null;
-  onImageSelect?: (image: ImageType) => void;
+  images: ProductImageType[];
+  selectedImage: ProductImageType | null;
+  onImageSelect: (image: ProductImageType) => void;
 };
 
-export function ProductGallery({
-  images,
-  selectedImage: initialSelectedImage,
-  onImageSelect: externalOnImageSelect,
-}: ProductGalleryProps) {
-  if (!images?.length && !initialSelectedImage) return null;
+export function ProductGallery({ images = [], selectedImage, onImageSelect }: ProductGalleryProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const fixedExcludedId = initialSelectedImage?.id || images?.[0]?.id;
-  const galleryThumbs = images.filter((img) => img.id !== fixedExcludedId);
-
-  const shouldPrepend = !!initialSelectedImage && !images.some((img) => img.id === initialSelectedImage.id);
-  const fullImagesForNav = shouldPrepend ? [initialSelectedImage, ...images] : images;
-
-  const [selectedImage, setSelectedImage] = useState<ImageType | null>(
-    initialSelectedImage || (images?.[0] || null),
-  );
-
-  // Update selectedImage when initialSelectedImage changes
   useEffect(() => {
-    if (initialSelectedImage) {
-      setSelectedImage(initialSelectedImage);
-    } else if (images?.[0]) {
-      setSelectedImage(images[0]);
-    } else {
-      setSelectedImage(null);
-    }
-  }, [initialSelectedImage, images]);
+    if (!selectedImage) return;
+    const index = images.findIndex((img) => img.id === selectedImage.id);
+    if (index !== -1 && index !== currentIndex) setCurrentIndex(index);
+  }, [selectedImage, images, currentIndex]);
 
-  const handleImageSelect = (image: ImageType) => {
-    setSelectedImage(image);
-    externalOnImageSelect?.(image);
+  if (!images.length)
+    return (
+      <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-xl">
+        <span className="text-gray-400 text-sm">No images available</span>
+      </div>
+    );
+
+  const mainImage = selectedImage || images[0];
+  const hasMultiple = images.length > 1;
+
+  const handleNavigate = (dir: 'prev' | 'next') => {
+    if (!hasMultiple) return;
+    const newIndex =
+      dir === 'next'
+        ? (currentIndex + 1) % images.length
+        : (currentIndex - 1 + images.length) % images.length;
+    setCurrentIndex(newIndex);
+    onImageSelect(images[newIndex]);
   };
 
-  const thumbnailImages = galleryThumbs;
-
   return (
-    <div className="product-gallery flex flex-col md:flex-row gap-4">
-      {thumbnailImages.length > 0 && (
-        <div className="thumbnail-container flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:max-h-[600px] md:w-20">
-          {thumbnailImages.map((image) => (
-            <button
-              key={image.id}
-              className={`thumbnail-image flex-shrink-0 w-16 h-16 md:w-full md:h-auto ${
-                selectedImage?.id === image.id ? 'ring-2 ring-blue-500' : ''
-              }`}
-              onClick={() => handleImageSelect(image)}
-            >
-              <Image
-                data={image}
-                alt={image.altText || 'Product thumbnail'}
-                aspectRatio="1/1"
-                className="w-full h-full object-cover rounded"
-                sizes="(min-width: 64em) 12.5vw, 25vw"
-              />
-            </button>
-          ))}
+    <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
+      {/* Thumbnails */}
+      {hasMultiple && (
+        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] scrollbar-hide">
+          {images.map((image) => {
+            const isActive = mainImage.id === image.id;
+            return (
+              <button
+                key={image.id}
+                onClick={() => onImageSelect(image)}
+                className={`relative flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                  isActive
+                    ? 'border-black shadow-md scale-[1.03]'
+                    : 'border-transparent hover:border-gray-300'
+                }`}
+              >
+                <Image
+                  data={image}
+                  alt={image.altText || 'Thumbnail'}
+                  className="w-20 h-20 object-cover bg-gray-50"
+                  loading="lazy"
+                />
+              </button>
+            );
+          })}
         </div>
       )}
-      <div className="main-image flex-1">
-        <ProductImage
-          image={selectedImage!}
-          galleryImages={fullImagesForNav}
-          onImageChange={handleImageSelect}
+
+      {/* Main Image */}
+      <div className="relative flex-1 group bg-white rounded-2xl shadow-sm overflow-hidden aspect-square flex items-center justify-center">
+        <Image
+          data={mainImage}
+          alt={mainImage.altText || 'Product Image'}
+          className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.02]"
+          aspectRatio="1/1"
+          sizes="(min-width: 45em) 50vw, 100vw"
         />
+
+        {hasMultiple && (
+          <div className="absolute bottom-6 right-6 flex gap-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigate('prev');
+              }}
+              className="bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-90 hover:opacity-100"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigate('next');
+              }}
+              className="bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-90 hover:opacity-100"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-700" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+export default ProductGallery;

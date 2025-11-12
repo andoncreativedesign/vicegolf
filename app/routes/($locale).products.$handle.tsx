@@ -1,5 +1,5 @@
 import { redirect, useLoaderData } from 'react-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -89,17 +89,32 @@ export default function Product() {
   });
 
   const { title, descriptionHtml, images } = product;
-  const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(
-    selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null,
-  );
+  // Memoize the image selection to prevent unnecessary re-renders
+  const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(null);
+  
+  // Initialize selected image when component mounts or variant changes
+  useEffect(() => {
+    const newSelectedImage = selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
+    setSelectedImage(prev => {
+      // Only update if the image ID is different to prevent unnecessary re-renders
+      if (!prev || !newSelectedImage || prev.id !== newSelectedImage.id) {
+        return newSelectedImage;
+      }
+      return prev;
+    });
+  }, [selectedVariant, images]);
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
 
-  // Update selected image when variant changes
-  useEffect(() => {
-    if (selectedVariant?.image && selectedImage?.id !== selectedVariant.image.id) {
-      setSelectedImage(selectedVariant.image as ProductImageType);
-    }
-  }, [selectedVariant, selectedImage]);
+  // Handle image selection with proper object reference
+  const handleImageSelect = useCallback((image: ProductImageType) => {
+    setSelectedImage(prev => {
+      // Only update if the image ID is different to prevent unnecessary re-renders
+      if (!prev || prev.id !== image.id) {
+        return { ...image }; // Return a new object to ensure state update
+      }
+      return prev;
+    });
+  }, []);
 
   // Fetch product details when product changes
   useEffect(() => {
@@ -118,15 +133,14 @@ export default function Product() {
   }, [product.id]);
 
   return (
-    <div className="product-page-container flex flex-col gap-12 px-8 md:px-16 py-6 md:py-10">
-      {/* Image + Form in Flex */}
-      <div className="flex flex-col lg:flex-row gap-10 md:gap-16 items-start">
-        <div className="w-full lg:flex-[1.1]">
+    <div className="product-page-container w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-6 md:py-10">
+      <div className="flex flex-col lg:flex-row gap-8 w-full">
+        <div className="w-full lg:w-[55%]">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
               selectedImage={selectedImage}
-              onImageSelect={setSelectedImage}
+              onImageSelect={handleImageSelect}
             />
           ) : (
             <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
@@ -134,7 +148,7 @@ export default function Product() {
             </div>
           )}
         </div>
-        <div className="w-full lg:flex-[0.9]">
+        <div className="w-full lg:w-[45%]">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
