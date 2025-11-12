@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Image } from '@shopify/hydrogen';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type ProductImageType = {
   id: string;
@@ -85,20 +85,28 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
         />
 
         {hasMultiple && (
-          <>
+          <div className="absolute bottom-6 right-6 flex gap-4">
             <button
-              onClick={() => handleNavigate('prev')}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigate('prev');
+              }}
+              className="bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-90 hover:opacity-100"
+              aria-label="Previous image"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
             </button>
             <button
-              onClick={() => handleNavigate('next')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigate('next');
+              }}
+              className="bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-90 hover:opacity-100"
+              aria-label="Next image"
             >
-              <ArrowRight className="w-5 h-5 text-gray-700" />
+              <ChevronRight className="w-5 h-5 text-gray-700" />
             </button>
-          </>
+          </div>
         )}
       </div>
     </div>
