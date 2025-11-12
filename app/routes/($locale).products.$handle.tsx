@@ -133,9 +133,9 @@ export default function Product() {
   }, [product.id]);
 
   return (
-    <div className="product-page-container w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+    <div className="product-page-container w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-6 md:py-10">
       <div className="flex flex-col lg:flex-row gap-8 w-full">
-        <div className="w-full lg:w-3/5">
+        <div className="w-full lg:w-1/2">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
@@ -148,7 +148,7 @@ export default function Product() {
             </div>
           )}
         </div>
-        <div className="w-full lg:flex-[0.9]">
+        <div className="w-full lg:w-1/2">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}

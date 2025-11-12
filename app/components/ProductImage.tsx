@@ -1,65 +1,55 @@
-import {useState, useEffect} from 'react';
-import type {ProductVariantFragment} from 'storefrontapi.generated';
-import {Image} from '@shopify/hydrogen';
-import {ArrowLeft, ArrowRight} from 'lucide-react';
+import { useState } from 'react';
+import { Image } from '@shopify/hydrogen';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import type { ProductVariantFragment } from 'storefrontapi.generated';
+
 type ImageType = NonNullable<ProductVariantFragment['image']>;
 type ProductImageProps = {
-  image: ProductVariantFragment['image'];
+  image: ImageType;
   galleryImages?: ImageType[];
   onImageChange?: (image: ImageType) => void;
 };
-export function ProductImage({image, galleryImages = [], onImageChange}: ProductImageProps) {
-  const [currentImage, setCurrentImage] = useState<ImageType | null>(image ? {...image} : null);
-  const [currentIndex, setCurrentIndex] = useState(() => {
-    if (image && galleryImages.length > 0) {
-      return galleryImages.findIndex(img => img.id === image.id);
-    }
-    return 0;
-  });
-  const navigateImage = (direction: 'prev' | 'next') => {
-    if (galleryImages.length <= 1) return;
-   
-    let newIndex;
-    if (direction === 'next') {
-      newIndex = (currentIndex + 1) % galleryImages.length;
-    } else {
-      newIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-    }
-   
-    const newImage = galleryImages[newIndex];
-    setCurrentImage(newImage);
-    setCurrentIndex(newIndex);
-    onImageChange?.(newImage);
+
+export function ProductImage({ image, galleryImages = [], onImageChange }: ProductImageProps) {
+  const [index, setIndex] = useState(
+    galleryImages.findIndex((img) => img.id === image?.id) || 0
+  );
+
+  const handleNavigate = (dir: 'prev' | 'next') => {
+    if (!galleryImages.length) return;
+    const newIndex =
+      dir === 'next'
+        ? (index + 1) % galleryImages.length
+        : (index - 1 + galleryImages.length) % galleryImages.length;
+    setIndex(newIndex);
+    onImageChange?.(galleryImages[newIndex]);
   };
-  if (!currentImage || !currentImage.url) {
-    return <div className="product-image" />;
-  }
+
+  const currentImage = galleryImages[index] || image;
+
   return (
-    <div className="product-image relative group">
+    <div className="relative group rounded-2xl overflow-hidden bg-white shadow-sm flex items-center justify-center aspect-square">
       <Image
         alt={currentImage.altText || 'Product Image'}
-        aspectRatio="1/1"
         data={currentImage}
-        key={currentImage.id}
+        aspectRatio="1/1"
+        className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.02]"
         sizes="(min-width: 45em) 50vw, 100vw"
-        className="w-full h-full object-cover"
       />
-     
+
       {galleryImages.length > 1 && (
         <>
           <button
-            onClick={() => navigateImage('prev')}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            aria-label="Previous image"
+            onClick={() => handleNavigate('prev')}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-800" />
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
           <button
-            onClick={() => navigateImage('next')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            aria-label="Next image"
+            onClick={() => handleNavigate('next')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
           >
-            <ArrowRight className="w-5 h-5 text-gray-800" />
+            <ArrowRight className="w-5 h-5 text-gray-700" />
           </button>
         </>
       )}
