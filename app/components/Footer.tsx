@@ -49,9 +49,17 @@ export function Footer({
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your Email"
-                    className="px-6 py-3 border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 w-full h-12 text-base bg-white text-gray-900 placeholder-gray-500"
-                    style={{ borderRadius: '9999px' }}
+                    placeholder="Type in your email"
+                    className="px-6 py-3 w-full h-12 text-base bg-gray-200 text-gray-900 placeholder-gray-500"
+                    style={{
+                      borderRadius: '9999px',
+                      border: 'none',
+                      outline: 'none',
+                      boxShadow: 'none',
+                      WebkitAppearance: 'none',
+                      MozAppearance: 'none',
+                      appearance: 'none'
+                    }}
                     required
                   />
                   <button
