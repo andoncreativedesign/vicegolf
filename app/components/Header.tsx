@@ -11,6 +11,9 @@ import { useAside } from '~/components/Aside';
 import { debugMenuItems } from '~/utils/debug-menu';
 import type { loader } from '~/root';
 import { BlackFridayBanner } from './Banner';
+import type { MenuData } from '~/lib/shopify/product-queries';
+import DropdownItem from './Header/NavDropdownItem';
+import  HeaderMenu  from './Header/HeaderMenu';
 
 interface DropdownItem {
   name: string;
@@ -119,6 +122,8 @@ const flagSvgs: Record<string, string> = {
 </svg>`,
 };
 
+
+// Then update the Header component
 export function Header({
   header,
   isLoggedIn,
@@ -126,25 +131,13 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const { shop, menu } = header;
-  const { productsForNav } = useLoaderData<typeof loader>();
+  const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
+  // Get menu items from the productsForNav data
+  const menuItems = productsForNav?.menu?.items[0]?.items || [];
 
-  // Transform collections into category dropdowns
-  const categoryDropdowns = {
-    golfBalls: transformCollectionsToDropdown(productsForNav?.golfBalls?.nodes || []),
-    golfClubs: transformCollectionsToDropdown(productsForNav?.golfClubs?.nodes || []),
-    apparel: transformCollectionsToDropdown(productsForNav?.apparel?.nodes || []),
-    gear: transformCollectionsToDropdown(productsForNav?.gear?.nodes || []),
-    limitedEditions: transformCollectionsToDropdown(productsForNav?.limitedEditions?.nodes || []),
-    fittingCustomisation: transformCollectionsToDropdown(productsForNav?.fittingCustomisation?.nodes || []),
-    juniors: transformCollectionsToDropdown(productsForNav?.juniors?.nodes || []),
-  };
-
-  // Debug: Log menu items to console (remove in production)
   useEffect(() => {
-    debugMenuItems(menu, 'Header Menu');
-    // console.log('Category products data:', productsForNav);
-  }, [menu]);
-
+    console.log('navigation items - Header', menuItems)
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -179,214 +172,14 @@ export function Header({
       {/* Navigation Menu */}
       <nav className="bg-white border-t border-gray-100 w-full">
         <div className="w-full px-0">
-          <HeaderMenu
-            menu={menu}
-            viewport="desktop"
-            primaryDomainUrl={header.shop.primaryDomain?.url || ''}
-            publicStoreDomain={publicStoreDomain}
-            categoryDropdowns={categoryDropdowns}
-          />
+          {menuItems &&
+            <HeaderMenu
+              viewport="desktop"
+              menuItems={menuItems}
+            />}
         </div>
       </nav>
     </header>
-  );
-}
-
-export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
-  viewport,
-  publicStoreDomain,
-  categoryDropdowns,
-}: {
-  menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
-  viewport: Viewport;
-  publicStoreDomain: HeaderProps['publicStoreDomain'];
-  categoryDropdowns: Record<string, ProductDropdownItem[]>;
-}) {
-  const { close } = useAside();
-
-  if (categoryDropdowns === undefined) {
-    return null;
-  }
-
-  // Get Shopify menu items
-  const shopifyMenuItems = menu?.items || [];
-
-  // Convert Shopify URLs to relative URLs
-  const convertToRelativeUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      return urlObj.pathname + urlObj.search + urlObj.hash;
-    } catch {
-      return url; // Return as-is if not a valid URL
-    }
-  };
-
-  // Define category dropdown items
-  const categoryDropdownsTest: Record<string, ProductDropdownItem[]> = {
-    'golfBalls': [],
-    'golfClubs': [],
-    'apparel': [],
-    'gear': [],
-    'limitedEditions': [],
-    'fittingCustomisation': [],
-    'juniors': []
-  };
-
-  useEffect(() => {
-    console.log('Category dropdowns:', categoryDropdowns);
-  }, [categoryDropdowns])
-
-
-  // Additional golf-specific navigation items to complement Shopify menu
-  const additionalGolfItems = [
-    { title: 'GOLF BALLS', url: `/collections/${decodeURIComponent('Golf Balls')}`, dropdownItems: categoryDropdowns['golfBalls'] },
-    { title: 'GOLF CLUBS', url: `/collections/${decodeURIComponent('Golf Club Set')}`, dropdownItems: categoryDropdowns['golfClubs'] },
-    { title: 'APPAREL', url: `/collections/${decodeURIComponent('Polo')}`, dropdownItems: categoryDropdowns['apparel'] },
-    { title: 'GEAR', url: `/collections/${decodeURIComponent('Gloves Men')}`, dropdownItems: categoryDropdowns['gear'] },
-    { title: 'LIMITED EDITIONS', url: `/collections/${decodeURIComponent('Longsleeve')}`, dropdownItems: categoryDropdowns['limitedEditions'] },
-    { title: 'FITTING & CUSTOMISATION', url: `/collections/${decodeURIComponent('Divot Tool')}`, dropdownItems: categoryDropdowns['fittingCustomisation'] },
-    { title: 'JUNIORS', url: `/collections/${decodeURIComponent('Juniors')}`, dropdownItems: categoryDropdowns['juniors'] },
-  ];
-
-  // Extend type for navigation items
-  type NavigationItem = {
-    title: string;
-    url: string;
-    id?: string;
-    items?: Array<{ title: string; url: string; id?: string }>;
-    dropdownItems?: ProductDropdownItem[];
-  };
-
-  // Combine Shopify menu items with additional golf items, filtering out home, contact, catalog
-  // const shopifyItems: NavigationItem[] = shopifyMenuItems
-  //   .filter(item => !['HOME', 'CONTACT', 'CATALOG'].includes(item.title.toUpperCase()))
-  //   .map(item => ({
-  //     title: item.title.toUpperCase(),
-  //     url: convertToRelativeUrl(item.url),
-  //     id: item.id,
-  //     items: item.items?.map(subItem => ({
-  //       title: subItem.title,
-  //       url: convertToRelativeUrl(subItem.url),
-  //       id: subItem.id,
-  //     })) || []
-  //   }));
-
-  // Create final navigation combining Shopify items and additional golf items
-  const navigationItems: NavigationItem[] = [
-    // ...shopifyItems,
-    ...additionalGolfItems
-  ];
-
-  if (viewport === 'mobile') {
-    return (
-      <nav className="flex flex-col space-y-4 p-4" role="navigation">
-        {navigationItems.map((item, index) => (
-          <div key={item.id || index}>
-            <NavLink
-              onClick={close}
-              prefetch="intent"
-              to={item.url}
-              className="text-lg font-medium text-gray-900 hover:text-gray-600 block"
-              style={{ textDecoration: 'none' }}
-            >
-              {item.title}
-            </NavLink>
-            {/* Render sub-menu items for mobile */}
-            {item.items && item.items.length > 0 && (
-              <div className="ml-4 mt-2 space-y-2">
-                {item.items.map((subItem, subIndex) => (
-                  <NavLink
-                    key={subItem.id || subIndex}
-                    onClick={close}
-                    prefetch="intent"
-                    to={subItem.url}
-                    className="text-base font-normal text-gray-700 hover:text-gray-900 block"
-                  >
-                    {subItem.title}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-    );
-  }
-
-  return (
-    <div className="relative w-full">
-      <nav className="hidden lg:flex items-center justify-center space-x-8 py-4 w-full" role="navigation">
-        {navigationItems.map((item, index) => (
-          <div key={item.id || index} className={`group ${(item.items && item.items.length > 0) ? 'relative' : ''}`}>
-            <NavLink
-              prefetch="intent"
-              to={item.url}
-              className={({ isActive }) =>
-                `text-sm font-medium tracking-wide transition-colors duration-200 ${isActive
-                  ? 'text-black border-b-2 border-black pb-1'
-                  : 'text-gray-700 hover:text-black'
-                }`
-              }
-              style={{ textDecoration: 'none' }}
-            >
-              {item.title}
-            </NavLink>
-
-            {/* Simple list dropdown for Shopify items */}
-            {item.items && item.items.length > 0 && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
-                <div className="py-2">
-                  {item.items.map((subItem, subIndex) => (
-                    <NavLink
-                      key={subItem.id || subIndex}
-                      prefetch="intent"
-                      to={subItem.url}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      {subItem.title}
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Product grid dropdown for golf categories */}
-            {item.dropdownItems && !item.items && (
-              <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
-                <div className="px-4 py-8">
-                  <div className="grid grid-cols-6 gap-6">
-                    {item.dropdownItems.map((product, pIndex) => (
-                      <NavLink
-                        key={pIndex}
-                        prefetch="intent"
-                        to={product.href}
-                        className="group/item flex flex-col items-center text-center hover:bg-gray-50 rounded-lg p-3 transition-colors duration-200"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Image
-                          data={product.image}
-                          alt={product.name}
-                          className="w-24 h-24 object-contain p-1 rounded-md mb-2 group-hover/item:scale-105 transition-transform duration-200"
-                        />
-
-                        <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
-                        {product.description && (
-                          <p className="text-xs text-gray-600 mt-1">{product.description}</p>
-                        )}
-                      </NavLink>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-    </div>
   );
 }
 

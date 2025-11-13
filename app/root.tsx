@@ -13,7 +13,7 @@ import {
 import type { Route } from './+types/root';
 import favicon from '~/assets/favicon.svg';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
-import { createCategoryQuery, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV } from '~/lib/shopify/product-queries';
+import { createCategoryQuery, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, type MenuData } from '~/lib/shopify/product-queries';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -116,24 +116,24 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
-    storefront.query(MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, {
+    storefront.query<MenuData>(MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, {
       cache: storefront.CacheLong(),
       variables: {
-        golfBallsHandle,
-        golfClubsHandle,
-        apparelHandle,
-        gearHandle,
-        limitedEditionsHandle,
-        fittingCustomisationHandle,
-        juniorsHandle,
-        first: 6,
-      },
+        handle: "customer-account-main-menu"
+      }
+      // variables: {
+      //   golfBallsHandle,
+      //   golfClubsHandle,
+      //   apparelHandle,
+      //   gearHandle,
+      //   limitedEditionsHandle,
+      //   fittingCustomisationHandle,
+      //   juniorsHandle,
+      //   first: 6,
+      // },
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
-
-  console.log('\n\nproductsForNav');
-  console.log(productsForNav)
 
   return { header, productsForNav };
 }
