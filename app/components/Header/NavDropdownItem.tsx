@@ -46,15 +46,6 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
   return (
     <div className="fixed left-0 right-0 mt-0 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
       <div className="relative w-full px-4 sm:px-6 lg:px-8 py-4">
-        {showLeftArrow && (
-          <button 
-            onClick={() => scroll('left')}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-2 shadow-md z-10 transition-all hover:scale-110"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-        )}
         
         <div 
           ref={containerRef}
@@ -88,15 +79,27 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
           ))}
         </div>
 
-        {showRightArrow && (
-          <button 
-            onClick={() => scroll('right')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-700 rounded-full p-2 shadow-md z-10 transition-all hover:scale-110"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        )}
+        <div className="flex justify-end items-center gap-4 mt-4 pt-2">
+          {showLeftArrow && (
+            <button 
+              onClick={() => scroll('left')}
+              className="bg-white/80 hover:bg-white text-red-500 rounded-full p-2 shadow-md z-10 transition-all hover:scale-110"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-6 h-6 text-red-500" />
+            </button>
+          )}
+          
+          {showRightArrow && (
+            <button 
+              onClick={() => scroll('right')}
+              className="bg-white/80 hover:bg-white text-red-500 rounded-full p-2 shadow-md z-10 transition-all hover:scale-110"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-6 h-6 text-red-500" />
+            </button>
+          )}
+        </div>
       </div>
       
       <style>{`
