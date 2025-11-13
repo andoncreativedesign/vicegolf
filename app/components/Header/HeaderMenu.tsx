@@ -3,8 +3,8 @@ import { Image } from "@shopify/hydrogen"
 import { NavLink } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
 import { useAside } from '~/components/Aside';
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef } from "react";
+import { ChevronRight } from 'lucide-react';
 
 const HeaderMenu = ({
   viewport,
@@ -14,7 +14,32 @@ const HeaderMenu = ({
   menuItems: MenuItem[];
 }) => {
   const { close } = useAside();
-  const [menu, setMenu] = useState<MenuItem[]>([])
+  const [menu, setMenu] = useState<MenuItem[]>([]);
+  const [activeSubmenu, setActiveSubmenu] = useState<MenuItem | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const handleSubmenuOpen = (item: MenuItem, event: React.MouseEvent) => {
+    event.preventDefault();
+    setActiveSubmenu(item);
+  };
+
+  const handleBackToMain = (event: React.MouseEvent) => {
+    event.preventDefault();
+    setActiveSubmenu(null);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveSubmenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
 
@@ -23,15 +48,7 @@ const HeaderMenu = ({
       return JSON.stringify(ids)
     }
 
-
     return items.map(item => {
-      // const updatedItem = {
-      //   ...item,
-      //   url: item.resourceId
-      //     ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}`
-      //     : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}`
-      // };
-
       const updatedItem = {
         ...item,
         url: item.resourceId
@@ -55,71 +72,92 @@ const HeaderMenu = ({
 
   if (viewport === "mobile") {
     return (
-      <nav className="flex flex-col space-y-4 p-4" role="navigation">
-        {menu?.map((item, index) => (
-          <div key={item.id || index}>
-            <NavLink
-              onClick={close}
-              prefetch="intent"
-              to={item.url}
-              className="text-lg font-medium text-gray-900 hover:text-gray-600 block"
-              style={{ textDecoration: "none" }}
+      <nav className="flex flex-col p-4" role="navigation">
+        {activeSubmenu ? (
+          <>
+            <button 
+              onClick={handleBackToMain}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 text-sm font-medium"
             >
-              {item.title}
-            </NavLink>
-
-            {/* Sub-menu with possible images */}
-            {item.items?.length > 0 && (
-              <div className="ml-4 mt-3 space-y-3">
-                {item.items.map((subItem, subIndex) => (
-                  <div key={subItem.id || subIndex}>
-                    <NavLink
-                      onClick={close}
-                      prefetch="intent"
-                      to={subItem.url}
-                      className="flex items-center gap-3 text-base font-normal text-gray-700 hover:text-gray-900"
-                      style={{ textDecoration: "none" }}
-                    >
-                      {/* Image if resource image exists */}
-                      {subItem.resource?.image?.url && (
-                        <Image
-                          data={subItem.resource.image}
-                          alt={subItem.resource.image.altText || subItem.title}
-                          className="w-10 h-10 object-cover rounded-md uppercase"
-                        />
-                      )}
-                      <span>{subItem.title}</span>
-                    </NavLink>
-                  </div>
-                ))}
+              <ChevronRight className="w-4 h-4 rotate-180" />
+              Back to Categories
+            </button>
+            <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {activeSubmenu.items?.map((subItem) => (
+                <NavLink
+                  key={subItem.id}
+                  to={subItem.url}
+                  onClick={close}
+                  className="flex flex-col items-center p-2 rounded-md hover:bg-gray-50 text-gray-700 border border-gray-100"
+                >
+                  {subItem.resource?.image?.url && (
+                    <div className="w-full aspect-square mb-2 overflow-hidden rounded-md bg-gray-50 flex items-center justify-center">
+                      <Image
+                        data={subItem.resource.image}
+                        alt={subItem.resource.image.altText || subItem.title}
+                        className="w-full h-full object-contain p-1"
+                        width={120}
+                        height={120}
+                      />
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-center line-clamp-2">
+                    {subItem.title}
+                  </span>
+                </NavLink>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="space-y-1">
+            {menu.map((item) => (
+              <div key={item.id} className="border-b border-gray-100">
+                {item.items?.length > 0 ? (
+                  <button
+                    onClick={(e) => handleSubmenuOpen(item, e)}
+                    className="w-full flex justify-between items-center py-3 px-2 text-left text-gray-700 hover:bg-gray-50 rounded-md"
+                  >
+                    <span className="font-medium">{item.title}</span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                ) : (
+                  <NavLink
+                    to={item.url}
+                    onClick={close}
+                    className="block py-3 px-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                  >
+                    {item.title}
+                  </NavLink>
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
+        )}
       </nav>
     );
   }
 
   // ====== DESKTOP VIEW ======
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={menuRef}>
       <nav
         className="hidden lg:flex items-center justify-center space-x-8 py-4 w-full"
         role="navigation"
       >
-        {menu?.map((item, index) => (
+        {menu?.map((item) => (
           <div
-            key={item.id || index}
-            className={`group ${item.items?.length > 0 ? "relative" : ""
-              }`}
+            key={item.id}
+            className={`group ${item.items?.length > 0 ? "relative" : ""}`}
           >
             <NavLink
               prefetch="intent"
               to={item.url}
+              onClick={(e) => item.items?.length > 0 && e.preventDefault()}
+              onMouseEnter={() => item.items?.length > 0 && setActiveSubmenu(item)}
               className={({ isActive }) =>
-                `text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${isActive
-                  ? "text-black border-b-2 border-black pb-1"
-                  : "text-gray-700 hover:text-black"
+                `flex items-center gap-1 text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${
+                  isActive ? "text-black border-b-2 border-black pb-1" : "text-gray-700 hover:text-black"
                 }`
               }
               style={{ textDecoration: "none" }}
@@ -127,7 +165,13 @@ const HeaderMenu = ({
               {item.title}
             </NavLink>
 
-            <NavDropdownItem menuItem={item} />
+            {activeSubmenu?.id === item.id && (
+              <NavDropdownItem 
+                menuItem={item} 
+                onBack={handleBackToMain}
+                onClose={() => setActiveSubmenu(null)}
+              />
+            )}
           </div>
         ))}
       </nav>
