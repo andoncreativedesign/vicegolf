@@ -26,6 +26,7 @@ export function ProductDetailContents({ content, content2 }: ProductDetailConten
             key={index}
             content={item}
             showImageLeft={index % 2 === 0}
+            isTextFull={index === 2} // Make the third item full width
           />
         ))}
 
