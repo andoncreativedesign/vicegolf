@@ -7,8 +7,8 @@ interface ProductContent2Props {
 const ProductDetailsContent2 = ({ content }: ProductContent2Props) => {
 
   return (
-    <div className="text-center mb-20" >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center max-w-6xl mx-auto mt-16 px-4">
+    <div className="text-center mb-12" >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-center max-w-6xl mx-auto mt-8 px-4">
         {/* Left: Outer Mantle */}
         <div className="text-right lg:text-base xl:text-lg space-y-3 p-6">
           <h2 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-gray-900 leading-tight">
