@@ -3,26 +3,65 @@ import { Image } from "@shopify/hydrogen"
 import { NavLink } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
 import { useAside } from '~/components/Aside';
+import { useEffect, useState } from "react";
 
 
 const HeaderMenu = ({
   viewport,
-  menuItems
+  menuItems = []
 }: {
   viewport: 'desktop' | 'mobile';
   menuItems: MenuItem[];
 }) => {
   const { close } = useAside();
+  const [menu, setMenu] = useState<MenuItem[]>([])
+
+  const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
+
+    const getAllResourceIdsOfChild = (items: MenuItem[]) => {
+      const ids = items.map(item => item.resourceId || '')
+      return JSON.stringify(ids)
+    }
+
+
+    return items.map(item => {
+      // const updatedItem = {
+      //   ...item,
+      //   url: item.resourceId
+      //     ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}`
+      //     : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}`
+      // };
+
+      const updatedItem = {
+        ...item,
+        url: item.resourceId
+          ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
+          : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}/${decodeURIComponent(item.title)}`
+      };
+
+      if (item.items && item.items.length > 0) {
+        updatedItem.items = updateMenuItems(item.items);
+      }
+
+      return updatedItem;
+    });
+  };
+
+  useEffect(() => {
+    if (menuItems.length === 0) return;
+    const updatedMenu = updateMenuItems(menuItems);
+    setMenu(updatedMenu);
+  }, [menuItems]);
 
   if (viewport === "mobile") {
     return (
       <nav className="flex flex-col space-y-4 p-4" role="navigation">
-        {menuItems?.map((item, index) => (
+        {menu?.map((item, index) => (
           <div key={item.id || index}>
             <NavLink
               onClick={close}
               prefetch="intent"
-              to={item.url as string}
+              to={item.url}
               className="text-lg font-medium text-gray-900 hover:text-gray-600 block"
               style={{ textDecoration: "none" }}
             >
@@ -68,7 +107,7 @@ const HeaderMenu = ({
         className="hidden lg:flex items-center justify-center space-x-8 py-4 w-full"
         role="navigation"
       >
-        {menuItems?.map((item, index) => (
+        {menu?.map((item, index) => (
           <div
             key={item.id || index}
             className={`group ${item.items?.length > 0 ? "relative" : ""

@@ -420,32 +420,140 @@ fragment ProductItem on Product {
 }`;
 
 
+// export const GET_PRODUCTS_BY_COLLECTION = `#graphql
+// ${MONEY_FRAGMENT}
+// ${PRODUCT_FRAGMENT_FOR_COLLECTION}
+
+// query ProductsByType(
+//   $handle: String!
+//   $country: CountryCode
+//   $language: LanguageCode
+//   $first: Int
+//   $startCursor: String
+//   $endCursor: String
+// ) @inContext(country: $country, language: $language) {
+//   products(
+//     first: $first
+//     before: $startCursor
+//     after: $endCursor
+//     query: $handle
+//   ) {
+//     nodes {
+//       ...ProductItem
+//     }
+//     pageInfo {
+//       hasPreviousPage
+//       hasNextPage
+//       endCursor
+//       startCursor
+//     }
+//   }
+// }
+// `;
+
+
+export interface ShopifyCollectionResponse {
+  nodes: ShopifyCollection[];
+}
+
+export interface ShopifyCollection {
+  id: string;
+  handle: string;
+  title: string;
+  description: string;
+  image?: ShopifyImage | null;
+  products: {
+    edges: {
+      node: ShopifyProduct;
+    }[];
+    pageInfo: ShopifyPageInfo;
+  };
+}
+
+export interface ShopifyProduct {
+  id: string;
+  handle: string;
+  title: string;
+  description?: string;
+  productType: string;
+  vendor: string;
+  featuredImage?: ShopifyImage | null;
+  priceRange: {
+    minVariantPrice: ShopifyMoney;
+    maxVariantPrice: ShopifyMoney;
+  };
+  variants: {
+    nodes: ShopifyVariant[];
+  };
+}
+
+export interface ShopifyVariant {
+  id: string;
+  availableForSale: boolean;
+  price: ShopifyMoney;
+  compareAtPrice?: ShopifyMoney | null;
+}
+
+export interface ShopifyImage {
+  id?: string;
+  url: string;
+  altText?: string | null;
+  width?: number;
+  height?: number;
+}
+
+export interface ShopifyMoney {
+  amount: string;
+  currencyCode: string;
+}
+
+export interface ShopifyPageInfo {
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+  startCursor?: string;
+  endCursor?: string;
+}
+
+
 export const GET_PRODUCTS_BY_COLLECTION = `#graphql
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
 
-query ProductsByType(
-  $handle: String!
+query GetProductsByCollectionIds(
+  $ids: [ID!]!
   $country: CountryCode
   $language: LanguageCode
   $first: Int
   $startCursor: String
   $endCursor: String
 ) @inContext(country: $country, language: $language) {
-  products(
-    first: $first
-    before: $startCursor
-    after: $endCursor
-    query: $handle
-  ) {
-    nodes {
-      ...ProductItem
-    }
-    pageInfo {
-      hasPreviousPage
-      hasNextPage
-      endCursor
-      startCursor
+  nodes(ids: $ids) {
+    ... on Collection {
+      id
+      handle
+      title
+      description
+      image {
+        url
+        altText
+      }
+      products(
+        first: $first
+        before: $startCursor
+        after: $endCursor
+      ) {
+        edges {
+          node {
+            ...ProductItem
+          }
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
+        }
+      }
     }
   }
 }

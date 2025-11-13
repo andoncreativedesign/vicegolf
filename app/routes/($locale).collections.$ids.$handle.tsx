@@ -6,7 +6,8 @@ import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
-import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
+import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
+import { useEffect } from 'react';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
@@ -27,42 +28,85 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
-  const { handle } = params;
+  const { ids, handle } = params;
+
   const { storefront } = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
 
-  if (!handle) {
+  if (!ids) {
     throw redirect('/collections');
   }
 
-  const decodedHandle = decodeURIComponent(handle);
+  const decodedIds = JSON.parse(decodeURIComponent(ids));
+  const decodedHandle = decodeURIComponent(handle)
 
-  const [ collection ] = await Promise.all([
+  const [collection] = await Promise.all<ShopifyCollectionResponse>([
     storefront.query(GET_PRODUCTS_BY_COLLECTION, {
       variables: {
-        handle: createCategoryQuery(decodedHandle),
+        // handle: createCategoryQuery(decodedIds),
+        ids: decodedIds,
         ...paginationVariables
       },
       // Add other queries here, so that they are loaded in parallel
     }),
   ]);
 
-  console.log('golf collection ', collection)
+  console.log('\n\ngolf collection ')
+  console.log(JSON.stringify(collection))
+
   if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
+    throw new Response(`Collection ${decodedHandle} not found`, {
       status: 404,
     });
   }
 
-  // The API handle might be localized, so redirect to the localized handle
-  // redirectIfHandleIsLocalized(request, { handle, data: collection });
+  const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection => {
+    if (!collections?.nodes?.length) {
+      return null;
+    }
+
+    // If there's only one collection, return it as is
+    if (collections.nodes.length === 1) {
+      return collections.nodes[0];
+    }
+
+    // Get the first collection to use as a base
+    const baseCollection = { ...collections.nodes[0] };
+
+    // Combine all products from all collections
+    const allEdges = collections.nodes.flatMap(collection =>
+      collection.products?.edges || []
+    );
+
+    // Create a map to deduplicate products by ID
+    const uniqueProducts = new Map();
+
+    allEdges.forEach(edge => {
+      if (edge?.node?.id && !uniqueProducts.has(edge.node.id)) {
+        uniqueProducts.set(edge.node.id, edge);
+      }
+    });
+
+    // Update the base collection with combined products
+    return {
+      ...baseCollection,
+      products: {
+        ...baseCollection.products,
+        edges: Array.from(uniqueProducts.values())
+      }
+    };
+  }
+
+  // In your loadCriticalData function:
+  const updatedCollection = combineCollectionProducts(collection);
 
   return {
-    collection,
+    collection: updatedCollection,
     handle: decodedHandle
   };
+
 }
 
 /**
@@ -75,7 +119,11 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const { collection , handle} = useLoaderData<typeof loader>();
+  const { collection, handle } = useLoaderData<typeof loader>(); 
+  
+  useEffect(() => {
+    console.log("collections data get by ids", collection)
+  },[collection])
 
   return (
     <div className="collection">
