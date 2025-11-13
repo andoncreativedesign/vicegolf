@@ -83,20 +83,20 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
           {showLeftArrow && (
             <button 
               onClick={() => scroll('left')}
-              className="bg-white/80 hover:bg-white text-red-500 rounded-full p-2 shadow-md z-10 transition-all hover:scale-110"
+              className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 z-10 transition-all hover:scale-110"
               aria-label="Scroll left"
             >
-              <ChevronLeft className="w-6 h-6 text-red-500" />
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
             </button>
           )}
           
           {showRightArrow && (
             <button 
               onClick={() => scroll('right')}
-              className="bg-white/80 hover:bg-white text-red-500 rounded-full p-2 shadow-md z-10 transition-all hover:scale-110"
+              className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 z-10 transition-all hover:scale-110"
               aria-label="Scroll right"
             >
-              <ChevronRight className="w-6 h-6 text-red-500" />
+              <ChevronRight className="w-6 h-6 text-gray-600" />
             </button>
           )}
         </div>
