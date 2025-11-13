@@ -1,7 +1,7 @@
 // app/routes/($locale)._index.tsx (updated to include HeroSection and ProductGrids)
-import { Await, useLoaderData, Link } from 'react-router';
+import { Await, useLoaderData, Link, useRouteLoaderData } from 'react-router';
 import type { Route } from './+types/_index';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { createContentSecurityPolicy, Image } from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
@@ -12,9 +12,10 @@ import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
 // import {getHeroSectionData} from '~/lib/sanity';
 import { getHomePageData } from '~/lib/sanity/home';
-import { createCategoryQuery, GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY, RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
+import { createCategoryQuery, GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY, RECOMMENDED_PRODUCTS_QUERY, type MenuData } from '~/lib/shopify/product-queries';
 import ClientLogos from '~/components/Home/ClientLogos';
 import ShopByCategories from '~/components/Home/ShopByCategories';
+import type { MenuItem } from '~/lib/shopify/product-queries';
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: 'Hydrogen | Home' }];
@@ -29,7 +30,7 @@ export async function loader(args: Route.LoaderArgs) {
 
   const homePageData = await getHomePageData();
 
-  return { ...deferredData, ...criticalData, homePageData};
+  return { ...deferredData, ...criticalData, homePageData };
 }
 
 /**
@@ -37,7 +38,6 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context }: Route.LoaderArgs) {
-
   const golfBallsHandle = createCategoryQuery('Golf Balls');
   const golfClubsHandle = createCategoryQuery('Golf Club Set');
   const apparelHandle = createCategoryQuery('Gloves Men');
@@ -79,6 +79,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     featuredCollection: collectionsData.collections.nodes[0],
     categoryProducts,
     popularCollections: collectionsTransformed,
+    productsForNav: context.productsForNav
   };
 }
 
@@ -103,11 +104,41 @@ async function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+  // const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();  
+  const rootData = useRouteLoaderData<{ productsForNav: MenuData }>("root");
+  const productsForNav = rootData?.productsForNav;
+
+  const [menu, setMenu] = useState<MenuItem[]>([])
+
+  const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
+    const getAllResourceIdsOfChild = (items: MenuItem[]) => {
+      const ids = items.map(item => item.resourceId || '')
+      return JSON.stringify(ids)
+    }
+
+    return items.map(item => {
+      const updatedItem = {
+        ...item,
+        url: item.resourceId
+          ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
+          : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}/${decodeURIComponent(item.title)}`
+      };
+
+      if (item.items && item.items.length > 0) {
+        updatedItem.items = updateMenuItems(item.items);
+      }
+
+      return updatedItem;
+    });
+  };
+
+  const menuItems = productsForNav?.menu?.items[0]?.items || [];
 
   useEffect(() => {
-    console.log("data", data);
-    console.log("data.recommendedProducts", data);
-  }, [data]);
+    if (menuItems.length === 0) return;
+    const updatedMenu = updateMenuItems(menuItems);
+    setMenu(updatedMenu);
+  }, [menuItems]);
 
   return (
     <div className="home">
@@ -156,7 +187,7 @@ export default function Homepage() {
 
       <ClientLogos brands={data.homePageData?.brand || []} />
 
-      <ShopByCategories categories={data.popularCollections} />
+      <ShopByCategories menuItems={menu.slice(0,4)} />
 
       <HeroSection heroData={data.homePageData?.secondaryHero || null} />
 

@@ -1,6 +1,7 @@
 import { Image } from '@shopify/hydrogen';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import type { MenuItem } from '~/lib/shopify/product-queries';
 
 type ImageType = {
   id: string;
@@ -19,30 +20,19 @@ type CategoriesType = {
 }
 
 interface ShopByCategoriesProps {
-  categories: CategoriesType[]
+  menuItems: MenuItem[]
 }
 
-// Helper function to map any to the expected props
-const mapToCategoryProps = (category: CategoriesType) => {
-  const handle = decodeURIComponent(category.title)
-  return {
-    id: category.id,
-    title: category.title,
-    image: category.image,
-    description: `Shop ${category.title}`,
-    link: `/collections/${handle}`
-  };
-};
-
-const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ categories }) => {
+const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ menuItems }) => {
   const navigate = useNavigate();
 
   const handleCategoryClick = (link: string) => {
     navigate(link);
   };
 
-  // Map ProductCategory to the expected category format
-  const mappedCategories = categories.map(mapToCategoryProps);
+  useEffect(() => {
+    console.log('menuItems ShopByCategories', menuItems)
+  }, [menuItems])
 
   return (
     <section className="py-20 bg-gray-50">
@@ -54,18 +44,18 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ categories }) => {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {mappedCategories.map((category) => (
+          {menuItems?.map((category) => (
             <div
               key={category.id}
-              onClick={() => handleCategoryClick(category.link)}
+              onClick={() => handleCategoryClick(category.url)}
               className="relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
             >
               {/* Category Image */}
               <div className="aspect-[4/3] overflow-hidden relative">
                 <Image
                   className="w-full h-full object-cover"
-                  data={category.image}
-                  alt={category.image.altText || category.title}
+                  data={category?.resource?.image}
+                  alt={category.title}
                   sizes="(min-width: 768px) 50vw, 100vw"
                   loading="eager"
                 />
@@ -77,7 +67,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({ categories }) => {
                   <h3 className="text-2xl font-semibold text-black mb-2 tracking-tight">
                     {category.title}
                   </h3>
-                  {category.description && (
+                  {category?.description && (
                     <p className="text-gray-900 text-sm font-medium tracking-wide">
                       {category.description}
                     </p>
