@@ -163,9 +163,6 @@ const HeaderMenu = ({
               style={{ textDecoration: "none" }}
             >
               {item.title}
-              {item.items?.length > 0 && (
-                <ChevronRight className="w-3.5 h-3.5 mt-0.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-              )}
             </NavLink>
 
             {activeSubmenu?.id === item.id && (
