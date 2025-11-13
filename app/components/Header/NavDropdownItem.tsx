@@ -56,11 +56,16 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
               <NavLink
                 prefetch="intent"
                 to={subItem.url}
-                className="flex flex-col items-center gap-2 hover:bg-gray-50 rounded-md p-3 transition group w-full"
+                className="flex flex-col gap-2 bg-gray-50 hover:bg-gray-100 rounded-md p-3 transition-colors group w-full h-full"
                 style={{ textDecoration: "none" }}
               >
+                <div className="w-full">
+                  <h4 className="text-sm font-medium text-gray-900 text-start line-clamp-2">
+                    {subItem.title}
+                  </h4>
+                </div>
                 {subItem.resource?.image?.url && (
-                  <div className="w-full aspect-square bg-gray-50 rounded-md overflow-hidden flex items-center justify-center">
+                  <div className="w-full aspect-square rounded-md overflow-hidden flex items-center justify-center mt-2">
                     <Image
                       data={subItem.resource.image}
                       alt={subItem.resource.image.altText || subItem.title}
@@ -69,11 +74,6 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
                     />
                   </div>
                 )}
-                <div className="w-full">
-                  <h4 className="text-sm font-medium text-gray-900 text-center line-clamp-2">
-                    {subItem.title}
-                  </h4>
-                </div>
               </NavLink>
             </div>
           ))}
