@@ -13,15 +13,16 @@ export function GolfBallProduct({ productDetails }: GolfBallProductProps) {
   return (
     <>
       {/* Reusable What's New Section */}
-      {productDetails && 
+      {productDetails &&
         <ProductDetailContents
           content={productDetails?.productContent1?.content || []}
           content2={productDetails?.productContent2?.sections?.[0]}
+          imageSize="xlarge"
         />
       }
       {/* Youtube Video Section */}
       {productDetails && productDetails?.youtubeVideos &&
-      <Youtube youtubeVideo={productDetails?.youtubeVideos}/>
+        <Youtube youtubeVideo={productDetails?.youtubeVideos} />
       }
     </>
   );

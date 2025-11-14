@@ -6,13 +6,15 @@ interface ProductContent1Props {
   showImageLeft?: boolean;
   isTextFull?: boolean;
   isImageFull?: boolean;
+  imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
 }
 
-const ProductDetailsContent1 = ({ 
-  content, 
-  showImageLeft = false, 
-  isTextFull = false, 
-  isImageFull = false 
+const ProductDetailsContent1 = ({
+  content,
+  showImageLeft = false,
+  isTextFull = false,
+  isImageFull = false,
+  imageSize = 'medium'
 }: ProductContent1Props) => {
   const imageSection = (
     <div className={`flex justify-center ${isImageFull ? 'w-full' : ''} ${showImageLeft ? 'lg:justify-end' : 'lg:justify-start'} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'}`}>
@@ -21,7 +23,12 @@ const ProductDetailsContent1 = ({
           <img
             src={content.images[0].asset.url}
             alt={content.title || 'Product image'}
-            className={`${isImageFull ? 'w-full' : 'w-full max-w-md lg:max-w-lg'} object-contain`}
+            className={`${isImageFull ? 'w-full' : 'w-full '} ${!isImageFull && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
+              !isImageFull && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
+                !isImageFull && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
+                  !isImageFull && imageSize === 'xlarge' ? 'max-w-2xl lg:max-w-4xl' :
+                    ''
+              } object-contain`}
           />
         )}
       </div>
@@ -29,10 +36,10 @@ const ProductDetailsContent1 = ({
   );
 
   const textSection = (
-    <div className={`space-y-8 ${isTextFull ? 'w-full flex flex-col items-center' : ''} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
-      <div className={`space-y-4 ${isTextFull ? 'w-full max-w-4xl' : ''}`}>
+    <div className={`space-y-6 ${isTextFull ? 'w-full flex flex-col items-center' : ''} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
+      <div className={`space-y-2 ${isTextFull ? 'w-full max-w-4xl' : ''}`}>
         {content.title && (
-          <h3 className={`text-3xl lg:text-4xl font-semibold mb-4 ${isTextFull ? 'text-center' : ''}`}>
+          <h3 className={`text-4xl lg:text-5xl font-bold mb-2 text-main-900 ${isTextFull ? 'text-center' : 'text-left'}`}>
             {content.title}
           </h3>
         )}

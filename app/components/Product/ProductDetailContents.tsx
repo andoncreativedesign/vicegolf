@@ -8,9 +8,10 @@ import ProductAccordion2 from './ProductAccordion2';
 interface ProductDetailContentsProps {
   content: ProductContent1Item[]
   content2: ProductContent2Section
+  imageSize?: 'small' | 'medium' | 'large' | 'xlarge'
 }
 
-export function ProductDetailContents({ content, content2 }: ProductDetailContentsProps) {
+export function ProductDetailContents({ content, content2, imageSize = 'medium' }: ProductDetailContentsProps) {
   const [openAccordion, setOpenAccordion] = useState<number | null>(0);
 
   const toggleAccordion = (index: number) => {
@@ -27,6 +28,7 @@ export function ProductDetailContents({ content, content2 }: ProductDetailConten
             content={item}
             showImageLeft={index % 2 === 0}
             isTextFull={index === 2} // Make the third item full width
+            imageSize={imageSize}
           />
         ))}
 
