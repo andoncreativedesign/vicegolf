@@ -42,6 +42,17 @@ export const homePageQuery = `*[_type == "home"][0]{
       url
     },
 
+    homeCategories[] {
+      title,
+      description,
+      image{
+        asset->{
+          _id,
+          url
+        }
+      },
+    }
+
   }`;
 
 // Types for the home page data
@@ -96,6 +107,12 @@ export interface BrandItemTransformed {
   url?: string;
 }
 
+export interface HomeCategories {
+  title: string;
+  image: string;
+  description?: string;
+}
+
 export interface HomePageData {
   heroes?: HeroContentImage[];
   secondaryHero?: HeroContentImage[];
@@ -106,6 +123,7 @@ export interface HomePageDataTransformed {
   heroes?: HeroItemTransformed[];
   secondaryHero?: HeroItemTransformed[];
   brand?: BrandItemTransformed[];
+  homeCategories: HomeCategories[]
 }
 
 // Update the getHeroSectionData function to use the new query
@@ -117,7 +135,11 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
     if (response.status !== HttpStatusCode.Ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     const result = response.data;
+
+    console.log("\n\nresponse.data.result")
+    console.log(response.data.result.homeCategories)
 
     // Transform the data to match our types
     const transformedData: HomePageDataTransformed = {
@@ -139,10 +161,15 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
         logo: brand.logo?.asset?.url as string,
         url: brand.url
       })),
+      homeCategories: result.result.homeCategories?.map((category: any) => ({
+        title: category.title as string,
+        image: category.image?.asset?.url as string,
+        description: category?.description
+      })),
     };
 
     // console.log("transformedData")
-    // console.log(JSON.stringify(transformedData?.heroes?.[0]))
+    // console.log(JSON.stringify(transformedData?.homeCategories?.[0]))
     // console.log('secondaryHero')
     // console.log(JSON.stringify(transformedData?.secondaryHero?.length))
     // console.log('brand')

@@ -53,8 +53,10 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     }),
   ]);
 
+
   console.log('\n\ngolf collection ')
-  console.log(JSON.stringify(collection))
+  console.log(JSON.stringify(collection.nodes[0].products.edges))
+
 
   if (!collection) {
     throw new Response(`Collection ${decodedHandle} not found`, {
@@ -62,45 +64,115 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     });
   }
 
-  const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection => {
-    if (!collections?.nodes?.length) {
-      return null;
-    }
+  // const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection => {
+  //   if (!collections?.nodes?.length) {
+  //     return null;
+  //   }
 
-    // If there's only one collection, return it as is
-    if (collections.nodes.length === 1) {
-      return collections.nodes[0];
-    }
+  //   // If there's only one collection, return it as is
+  //   if (collections.nodes.length === 1) {
+  //     return collections.nodes[0];
+  //   }
 
-    // Get the first collection to use as a base
-    const baseCollection = { ...collections.nodes[0] };
+  //   // Get the first collection to use as a base
+  //   const baseCollection = { ...collections.nodes[0] };
 
-    // Combine all products from all collections
-    const allEdges = collections.nodes.flatMap(collection =>
-      collection.products?.edges || []
-    );
+  //   // Combine all products from all collections
+  //   const allEdges = collections.nodes.flatMap(collection =>
+  //     collection.products?.edges || []
+  //   );
 
-    // Create a map to deduplicate products by ID
-    const uniqueProducts = new Map();
+  //   // Create a map to deduplicate products by ID
+  //   const uniqueProducts = new Map();
 
-    allEdges.forEach(edge => {
-      if (edge?.node?.id && !uniqueProducts.has(edge.node.id)) {
-        uniqueProducts.set(edge.node.id, edge);
-      }
-    });
+  //   allEdges.forEach(edge => {
+  //     if (edge?.node?.id && !uniqueProducts.has(edge.node.id)) {
+  //       uniqueProducts.set(edge.node.id, edge);
+  //     }
+  //   });
 
-    // Update the base collection with combined products
-    return {
-      ...baseCollection,
-      products: {
-        ...baseCollection.products,
-        edges: Array.from(uniqueProducts.values())
-      }
-    };
-  }
+  //   // Update the base collection with combined products
+  //   return {
+  //     ...baseCollection,
+  //     products: {
+  //       ...baseCollection.products,
+  //       edges: Array.from(uniqueProducts.values())
+  //     }
+  //   };
+  // }
+
 
   // In your loadCriticalData function:
+
+  const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection | null => {
+    try {
+      // Check if collections or nodes exist
+      if (!collections?.nodes?.length) {
+        console.log('No collections found');
+        return null;
+      }
+
+      console.log('Processing collections:', JSON.stringify(collections.nodes, null, 2));
+
+      // Filter out any null/undefined collections
+      const validCollections = collections.nodes.filter(
+        collection => collection?.products?.edges?.length > 0
+      );
+
+      if (validCollections.length === 0) {
+        console.log('No valid collections with products found');
+        return null;
+      }
+
+      // If there's only one valid collection, return it as is
+      if (validCollections.length === 1) {
+        console.log('Single collection found, returning as is');
+        return validCollections[0];
+      }
+
+      // Get the first collection to use as a base
+      const baseCollection = { ...validCollections[0] };
+
+      // Combine all products from all valid collections
+      const allEdges = validCollections.flatMap(collection => {
+        if (!collection?.products?.edges) return [];
+        return collection.products.edges.filter(edge => edge?.node);
+      });
+
+      // Create a map to deduplicate products by ID
+      const uniqueProducts = new Map();
+      allEdges.forEach(edge => {
+        if (edge?.node?.id) {
+          uniqueProducts.set(edge.node.id, edge);
+        }
+      });
+
+      console.log(`Combined ${allEdges.length} products into ${uniqueProducts.size} unique products`);
+
+      // Update the base collection with combined products
+      const result = {
+        ...baseCollection,
+        products: {
+          ...baseCollection.products,
+          edges: Array.from(uniqueProducts.values()),
+          pageInfo: baseCollection.products?.pageInfo || {
+            hasNextPage: false,
+            hasPreviousPage: false
+          }
+        }
+      };
+
+      return result;
+    } catch (error) {
+      console.error('Error combining collections:', error);
+      return null;
+    }
+  };
+
   const updatedCollection = combineCollectionProducts(collection);
+
+  console.log("\n\nupdatedCollection?.products data")
+  console.log(updatedCollection?.products)
 
   return {
     collection: updatedCollection,

@@ -119,18 +119,10 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     storefront.query<MenuData>(MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, {
       cache: storefront.CacheLong(),
       variables: {
-        handle: "customer-account-main-menu"
+        handle: "customer-account-main-menu",
+        country: "IN", 
+        language: "EN",
       }
-      // variables: {
-      //   golfBallsHandle,
-      //   golfClubsHandle,
-      //   apparelHandle,
-      //   gearHandle,
-      //   limitedEditionsHandle,
-      //   fittingCustomisationHandle,
-      //   juniorsHandle,
-      //   first: 6,
-      // },
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
