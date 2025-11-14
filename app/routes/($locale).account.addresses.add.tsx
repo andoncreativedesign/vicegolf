@@ -306,7 +306,7 @@ function NewAddressForm() {
   } as CustomerAddressInput;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Add a new address</h2>
       <AddressForm
         addressId={'NEW_ADDRESS_ID'}
