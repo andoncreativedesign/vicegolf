@@ -140,6 +140,10 @@ export default function Homepage() {
     setMenu(updatedMenu);
   }, [menuItems]);
 
+  useEffect(() => {
+    console.log("home page data", data.homePageData?.homeCategories)
+  }, [data])
+
   return (
     <div className="home">
       <HeroSection heroData={data.homePageData?.heroes} />
@@ -186,8 +190,13 @@ export default function Homepage() {
       {/* <FeaturedCollection collection={data.featuredCollection} /> */}
 
       <ClientLogos brands={data.homePageData?.brand || []} />
-
-      <ShopByCategories menuItems={menu.slice(0,4)} />
+      
+      {data?.homePageData?.homeCategories &&
+        <ShopByCategories
+          menuItems={menu.slice(0, 4)}
+          sanityHomeCategories={data?.homePageData?.homeCategories}
+        />
+      }
 
       <HeroSection heroData={data.homePageData?.secondaryHero || null} />
 
