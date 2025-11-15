@@ -7,7 +7,7 @@ import {
   UPDATE_ADDRESS_MUTATION,
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -200,6 +200,9 @@ export default function AddressEditor() {
   const locationState = (location.state ?? null) as LocationState;
   const addressFromState = locationState?.address ?? null;
   const navigate = useNavigate();
+  
+  // Store address data in state to preserve it during errors
+  const [preservedAddress, setPreservedAddress] = useState<Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } | null>(null);
 
   useEffect(() => {
     console.log('AddressEditor mounted', {
@@ -209,20 +212,24 @@ export default function AddressEditor() {
 
     if (addressFromState) {
       console.log('Loaded address from navigation state', addressFromState);
+      // Store the address data when it's available from navigation state
+      setPreservedAddress(addressFromState);
+    } else if (preservedAddress) {
+      console.log('Using preserved address data', preservedAddress);
     } else {
       console.warn('No address found in navigation state. This can happen after a full page refresh.');
     }
-  }, [addressFromState, location]);
+  }, [addressFromState, location, preservedAddress]);
 
   useEffect(() => {
-    if (action?.createdAddress || action?.updatedAddress) {
+    if ((action?.createdAddress || action?.updatedAddress) && !action?.error) {
       navigate('..', { replace: true });
     }
-  }, [action?.createdAddress, action?.updatedAddress, navigate]);
+  }, [action?.createdAddress, action?.updatedAddress, action?.error, navigate]);
 
-  const isEditMode = Boolean(addressFromState?.id);
+  const isEditMode = Boolean(addressFromState?.id || preservedAddress?.id);
   const derivedAddress: Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } =
-    addressFromState ?? {
+    addressFromState ?? preservedAddress ?? {
       address1: '',
       address2: '',
       city: '',
