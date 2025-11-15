@@ -27,6 +27,7 @@ import {
 } from '~/graphql/customer-account/CustomerAddressMutations';
 import { AddressCard } from '~/components/Profile/AddressCard';
 import { AddressForm } from '~/components/Profile/AddressForm';
+import showToast from '~/components/basic/CustomToast';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -315,8 +316,16 @@ function ExistingAddresses({
   useEffect(() => {
     if (fetcher.state === 'idle') {
       setRemovingId(null);
+
+      // Check for errors in fetcher data and show toast
+      if (fetcher.data?.error && removingId) {
+        const errorMessage = fetcher.data.error[removingId];
+        if (errorMessage) {
+          showToast.error('Failed to delete address: ' + errorMessage);
+        }
+      }
     }
-  }, [fetcher.state]);
+  }, [fetcher.state, fetcher.data, removingId]);
 
   const handleEdit = (address: AddressFragment) => {
     navigate('update', {

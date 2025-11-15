@@ -207,8 +207,6 @@ export default function AccountProfile() {
             autoComplete="given-name"
             placeholder="First name"
             aria-label="First name"
-            value={formData.firstName}
-            onChange={handleInputChange}
             minLength={2}
             required
           />
