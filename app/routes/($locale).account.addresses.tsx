@@ -1,4 +1,5 @@
 import type { CustomerAddressInput } from '@shopify/hydrogen/customer-account-api-types';
+import { useEffect, useState } from 'react';
 import type {
   AddressFragment,
   CustomerFragment,
@@ -9,17 +10,23 @@ import {
   Link,
   Outlet,
   useActionData,
+  useFetcher,
   useLocation,
   useNavigation,
+  useNavigate,
   useOutletContext,
   type Fetcher,
+  NavLink,
 } from 'react-router';
+import { CustomInputFiled } from '~/components/basic/CustomInputFiled';
 import type { Route } from './+types/account.addresses';
 import {
   UPDATE_ADDRESS_MUTATION,
   DELETE_ADDRESS_MUTATION,
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
+import { AddressCard } from '~/components/Profile/AddressCard';
+import { AddressForm } from '~/components/Profile/AddressForm';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -263,10 +270,10 @@ export default function Addresses() {
   const { customer } = useOutletContext<{ customer: CustomerFragment }>();
   const { defaultAddress, addresses } = customer;
   const location = useLocation();
-  const isAddRoute = location.pathname.endsWith('/add');
+  const isFormRoute = /\/(add|update)(?:\/.+)?$/.test(location.pathname);
 
-  // If we're on the add route, just render the Outlet which will show the add form
-  if (isAddRoute) {
+  // When we're on the add or update routes, render the nested form-only view
+  if (isFormRoute) {
     return (
       <div className="max-w-3xl mx-auto">
         <Outlet />
@@ -276,265 +283,76 @@ export default function Addresses() {
 
   // Otherwise, show the addresses list with the option to add a new one
   return (
-    <div className="account-addresses">
-      <h2>Addresses</h2>
+    <div className="account-addresses" >
+      <div className='flex justify-between items-center'>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">My Address</h2>
+        <NavLink
+          to="update"
+          className="inline-block bg-gray-800 text-white px-4 py-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
+          style={{ textDecoration: 'none', color: "white" }}
+        >
+          Add new one
+        </NavLink>
+      </div>
       <br />
-      {!addresses.nodes.length ? (
-        <div className="space-y-8">
-          <p className="mb-6">You have no addresses saved.</p>
-          <Link
-            to="add"
-            className="inline-block bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
-            style={{ textDecoration: 'none', color: "white" }}
-          >
-            Add Address
-          </Link>
-        </div>
-      ) : (
-        <div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Address</h2>
-            <NewAddressForm />
-          </div>
-          <br />
-          <ExistingAddresses
-            addresses={addresses}
-            defaultAddress={defaultAddress}
-          />
-        </div>
-      )}
+      <ExistingAddresses
+        addresses={addresses}
+        defaultAddress={defaultAddress}
+      />
     </div>
-  );
+  )
 }
 
-function NewAddressForm() {
-  const newAddress = {
-    address1: '',
-    address2: '',
-    city: '',
-    company: '',
-    territoryCode: '',
-    firstName: '',
-    id: 'new',
-    lastName: '',
-    phoneNumber: '',
-    zoneCode: '',
-    zip: '',
-  } as CustomerAddressInput;
-
-  return (
-    <div className="max-w-3xl mb-8 border-b-2 border-gray-800">
-      <AddressForm
-        addressId={'NEW_ADDRESS_ID'}
-        address={newAddress}
-        defaultAddress={null}
-      >
-        {({ stateForMethod }) => (
-          <div className="mt-6">
-            <button
-              type="submit"
-              formMethod="POST"
-              disabled={stateForMethod('POST') !== 'idle'}
-              className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {stateForMethod('POST') !== 'idle' ? 'Saving...' : 'Save Address'}
-            </button>
-          </div>
-        )}
-      </AddressForm>
-    </div>
-  );
-}
 
 function ExistingAddresses({
   addresses,
   defaultAddress,
 }: Pick<CustomerFragment, 'addresses' | 'defaultAddress'>) {
+  const navigate = useNavigate();
+  const fetcher = useFetcher();
+  const [removingId, setRemovingId] = useState<AddressFragment['id'] | null>(null);
+
+  useEffect(() => {
+    if (fetcher.state === 'idle') {
+      setRemovingId(null);
+    }
+  }, [fetcher.state]);
+
+  const handleEdit = (address: AddressFragment) => {
+    navigate('update', {
+      state: { address },
+    });
+  };
+
+  const handleRemove = (address: AddressFragment) => {
+    if (fetcher.state !== 'idle') return;
+    setRemovingId(address.id);
+    fetcher.submit(
+      { addressId: address.id },
+      { method: 'DELETE', action: '.' },
+    );
+  };
+
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Saved Addresses</h2>
-      {addresses.nodes.map((address) => (
-        <div key={address.id} className="border-b-2 border-gray-800">
-          <AddressForm
-            addressId={address.id}
-            address={address}
-            defaultAddress={defaultAddress}
-          >
-            {({ stateForMethod }) => (
-              <div className="flex space-x-4 mt-6">
-                <button
-                  type="submit"
-                  formMethod="PUT"
-                  disabled={stateForMethod('PUT') !== 'idle'}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {stateForMethod('PUT') !== 'idle' ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button
-                  type="submit"
-                  formMethod="DELETE"
-                  disabled={stateForMethod('DELETE') !== 'idle'}
-                  className="px-6 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {stateForMethod('DELETE') !== 'idle' ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            )}
-          </AddressForm>
-        </div>
-      ))}
-    </div>
-  );
-}
+      <div className="space-y-2">
+        {addresses.nodes.map((address) => {
+          const isDefault = defaultAddress?.id === address.id;
+          const isRemoving = removingId === address.id && fetcher.state !== 'idle';
 
-export function AddressForm({
-  addressId,
-  address,
-  defaultAddress,
-  children,
-}: {
-  addressId: AddressFragment['id'];
-  address: CustomerAddressInput;
-  defaultAddress: CustomerFragment['defaultAddress'];
-  children: (props: {
-    stateForMethod: (method: 'PUT' | 'POST' | 'DELETE') => Fetcher['state'];
-  }) => React.ReactNode;
-}) {
-  const { state, formMethod } = useNavigation();
-  const action = useActionData<ActionResponse>();
-  const error = action?.error?.[addressId];
-  const isDefaultAddress = defaultAddress?.id === addressId;
-  return (
-    <Form id={addressId} className='text-gray-700'>
-      <fieldset>
-        <input type="hidden" name="addressId" defaultValue={addressId} />
-        <label className="text-sm font-medium" htmlFor="firstName">First name*</label>
-        <input
-          aria-label="First name"
-          autoComplete="given-name"
-          defaultValue={address?.firstName ?? ''}
-          id="firstName"
-          name="firstName"
-          placeholder="First name"
-          required
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="lastName">Last name*</label>
-        <input
-          aria-label="Last name"
-          autoComplete="family-name"
-          defaultValue={address?.lastName ?? ''}
-          id="lastName"
-          name="lastName"
-          placeholder="Last name"
-          required
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="company">Company</label>
-        <input
-          aria-label="Company"
-          autoComplete="organization"
-          defaultValue={address?.company ?? ''}
-          id="company"
-          name="company"
-          placeholder="Company"
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="address1">Address line*</label>
-        <input
-          aria-label="Address line 1"
-          autoComplete="address-line1"
-          defaultValue={address?.address1 ?? ''}
-          id="address1"
-          name="address1"
-          placeholder="Address line 1*"
-          required
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="address2">Address line 2</label>
-        <input
-          aria-label="Address line 2"
-          autoComplete="address-line2"
-          defaultValue={address?.address2 ?? ''}
-          id="address2"
-          name="address2"
-          placeholder="Address line 2"
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="city">City*</label>
-        <input
-          aria-label="City"
-          autoComplete="address-level2"
-          defaultValue={address?.city ?? ''}
-          id="city"
-          name="city"
-          placeholder="City"
-          required
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="zoneCode">State / Province*</label>
-        <input
-          aria-label="State/Province"
-          autoComplete="address-level1"
-          defaultValue={address?.zoneCode ?? ''}
-          id="zoneCode"
-          name="zoneCode"
-          placeholder="State / Province"
-          required
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="zip">Zip / Postal Code*</label>
-        <input
-          aria-label="Zip"
-          autoComplete="postal-code"
-          defaultValue={address?.zip ?? ''}
-          id="zip"
-          name="zip"
-          placeholder="Zip / Postal Code"
-          required
-          type="text"
-        />
-        <label className="text-sm font-medium" htmlFor="territoryCode">Country Code*</label>
-        <input
-          aria-label="territoryCode"
-          autoComplete="country"
-          defaultValue={address?.territoryCode ?? ''}
-          id="territoryCode"
-          name="territoryCode"
-          placeholder="Country"
-          required
-          type="text"
-          maxLength={2}
-        />
-        <label className="text-sm font-medium" htmlFor="phoneNumber">Phone</label>
-        <input
-          aria-label="Phone Number"
-          autoComplete="tel"
-          defaultValue={address?.phoneNumber ?? ''}
-          id="phoneNumber"
-          name="phoneNumber"
-          placeholder="+16135551111"
-          pattern="^\+?[1-9]\d{3,14}$"
-          type="tel"
-        />
-        <div>
-          <input
-            defaultChecked={isDefaultAddress}
-            id="defaultAddress"
-            name="defaultAddress"
-            type="checkbox"
-          />
-          <label htmlFor="defaultAddress" className="ml-2">Set as default address</label>
-        </div>
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-        {children({
-          stateForMethod: (method) => (formMethod === method ? state : 'idle'),
+          return (
+            <div key={address.id} className="space-y-6 ">
+              <AddressCard
+                address={address}
+                isDefault={isDefault}
+                onEdit={() => handleEdit(address)}
+                onRemove={() => handleRemove(address)}
+                isRemoving={isRemoving}
+              />
+            </div>
+          );
         })}
-      </fieldset>
-    </Form>
+      </div>
+    </div>
   );
 }
