@@ -75,7 +75,7 @@ const HeaderMenu = ({
       <nav className="flex flex-col p-4" role="navigation">
         {activeSubmenu ? (
           <>
-            <button 
+            <button
               onClick={handleBackToMain}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 text-sm font-medium"
             >
@@ -83,7 +83,7 @@ const HeaderMenu = ({
               Back to Categories
             </button>
             <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               {activeSubmenu.items?.map((subItem) => (
                 <NavLink
                   key={subItem.id}
@@ -107,6 +107,93 @@ const HeaderMenu = ({
                   </span>
                 </NavLink>
               ))}
+            </div>
+            <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-800">
+              <div>
+                <h5 className="font-semibold mb-2">Highlights</h5>
+                <ul className="space-y-1">
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      All Balls
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Drip Balls
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Shade & Color Balls
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Bundles
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-2">Tools</h5>
+                <ul className="space-y-1">
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Ball Customization
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Ball Comparison Tool
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Ball Fitting Tool
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-2 mt-4">About</h5>
+                <ul className="space-y-1">
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      The Story of Vice Golf
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      How we test our golf balls
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Your Yearly Savings with Vice
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mb-2 mt-4">More</h5>
+                <ul className="space-y-1">
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      eGift Card
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Special Offers
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
+                      Limited Editions
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
             </div>
           </>
         ) : (
@@ -155,8 +242,7 @@ const HeaderMenu = ({
               to={item.url}
               onMouseEnter={() => item.items?.length > 0 && setActiveSubmenu(item)}
               className={({ isActive }) =>
-                `flex items-center gap-1 text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${
-                  isActive ? "text-black border-b-2 border-black pb-1" : "text-gray-700 hover:text-black"
+                `flex items-center gap-1 text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${isActive ? "text-black border-b-2 border-black pb-1" : "text-gray-700 hover:text-black"
                 }`
               }
               style={{ textDecoration: "none" }}
@@ -165,8 +251,8 @@ const HeaderMenu = ({
             </NavLink>
 
             {activeSubmenu?.id === item.id && (
-              <NavDropdownItem 
-                menuItem={item} 
+              <NavDropdownItem
+                menuItem={item}
                 onBack={handleBackToMain}
                 onClose={() => setActiveSubmenu(null)}
               />
