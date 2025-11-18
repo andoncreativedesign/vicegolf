@@ -153,7 +153,6 @@ const HeaderMenu = ({
             <NavLink
               prefetch="intent"
               to={item.url}
-              onClick={(e) => item.items?.length > 0 && e.preventDefault()}
               onMouseEnter={() => item.items?.length > 0 && setActiveSubmenu(item)}
               className={({ isActive }) =>
                 `flex items-center gap-1 text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${

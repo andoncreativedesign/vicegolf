@@ -49,7 +49,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
 
   return (
     <section className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="text-center mb-16">
           <h2 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight uppercase">
@@ -58,7 +58,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {menuItems?.map((category) => {
             const matchedSanityCategory = getSanityCategory(category.title);
             const fallbackShopifyImage = category?.resource?.image;
@@ -72,7 +72,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
                 className="relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
               >
                 {/* Category Image */}
-                <div className="aspect-[4/3] overflow-hidden relative">
+                <div className="aspect-[4/2.4] overflow-hidden relative">
                   {matchedSanityCategory?.image ? (
                     <img
                       src={matchedSanityCategory.image}

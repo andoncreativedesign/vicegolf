@@ -100,24 +100,23 @@ export function HeroSection({ heroData }: HeroSectionProps) {
         {validSlides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
           >
-       <Image
-  className="absolute inset-0 w-full h-full object-cover object-center"
-  data={slide.bgImage}
-  alt={slide.bgImage.altText}
-  sizes="100vw"
-  loading={index === 0 ? 'eager' : 'lazy'}
-  width={1920}
-  height={1080}
-  loaderOptions={{
-    scale: 2,
-    crop: 'center',
-    quality: 85
-  }}
-/>
+            <Image
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              data={slide.bgImage}
+              alt={slide.bgImage.altText}
+              sizes="100vw"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              width={1920}
+              height={1080}
+              loaderOptions={{
+                scale: 2,
+                crop: 'center',
+                quality: 85
+              }}
+            />
 
             <div className="absolute inset-0 bg-black/25" />
           </div>
@@ -138,6 +137,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
           <Link
             to={currentSlideData.buttonLink}
             className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition duration-300 shadow-lg"
+            style={{ textDecoration: 'none' }}
           >
             {currentSlideData.buttonText}
           </Link>
@@ -172,9 +172,8 @@ export function HeroSection({ heroData }: HeroSectionProps) {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                  index === currentSlide ? 'bg-white' : 'bg-white/50'
-                }`}
+                className={`w-3 h-3 rounded-full transition-colors duration-300 ${index === currentSlide ? 'bg-white' : 'bg-white/50'
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}

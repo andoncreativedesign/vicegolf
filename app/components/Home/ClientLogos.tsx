@@ -6,7 +6,7 @@ const ClientLogos: React.FC<{brands: BrandItemTransformed[]}> = ({brands}) => {
 
   return (
     <section className="py-12 lg:py-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="px-4 mx-0 sm:px-6 lg:px-8 text-center">
         <h2 className="text-lg sm:text-xl text-gray-600 font-medium mb-8 lg:mb-12">
           As Seen In
         </h2>

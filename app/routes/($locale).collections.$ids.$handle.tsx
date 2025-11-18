@@ -10,7 +10,7 @@ import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection
 import { useEffect } from 'react';
 
 export const meta: Route.MetaFunction = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.collection.title ?? ''} Collection` }];
+  return [{ title: `Hydrogen | ${data?.collection?.title ?? ''} Collection` }];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -191,41 +191,53 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const { collection, handle } = useLoaderData<typeof loader>(); 
-  
+  const { collection, handle } = useLoaderData<typeof loader>();
+
   useEffect(() => {
     console.log("collections data get by ids", collection)
-  },[collection])
+  }, [collection])
+
+  const hasProducts = Boolean(
+    collection?.products?.edges?.some((edge) => edge?.node) 
+  );
 
   return (
     <div className="collection">
       <h1>{handle}</h1>
-      <p className="collection-description">{collection.description}</p>
-      <PaginatedResourceSection<ProductItemFragment>
-        connection={collection.products}
-        resourcesClassName="products-grid"
-      >
-        {({ node: product, index }) => (
-          // <ProductItem
-          //   key={product.id}
-          //   product={product}
-          //   loading={index < 8 ? 'eager' : undefined}
-          // />
-          <ProductCard
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
-      <Analytics.CollectionView
-        data={{
-          collection: {
-            id: collection.id,
-            handle: collection.handle,
-          },
-        }}
-      />
+      <p className="collection-description">{collection?.description}</p>
+      {collection?.products && hasProducts && (
+        <PaginatedResourceSection<ProductItemFragment>
+          connection={collection.products}
+          resourcesClassName="products-grid"
+        >
+          {({ node: product, index }) => (
+            product ? (
+              <ProductCard
+                key={product.id}
+                product={product}
+                loading={index < 8 ? 'eager' : undefined}
+              />
+            ) : null
+          )}
+        </PaginatedResourceSection>
+      )}
+
+      {!hasProducts && (
+        <p className="mt-6 text-center text-gray-500 text-sm">
+          No products found in this collection.
+        </p>
+      )}
+
+      {collection?.id && collection?.handle &&
+        <Analytics.CollectionView
+          data={{
+            collection: {
+              id: collection.id,
+              handle: collection.handle,
+            },
+          }}
+        />
+      }
     </div>
   );
 }

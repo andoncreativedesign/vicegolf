@@ -149,7 +149,7 @@ export default function Homepage() {
       <HeroSection heroData={data.homePageData?.heroes} />
 
       {/* Product Grids by Category */}
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+      <div className="py-8 space-y-12">
         {/* Golf Balls Section */}
         {data.categoryProducts?.golfBalls?.nodes && (
           <ProductGrid
@@ -189,24 +189,24 @@ export default function Homepage() {
 
       {/* <FeaturedCollection collection={data.featuredCollection} /> */}
 
-      <ClientLogos brands={data.homePageData?.brand || []} />
-      
-      {data?.homePageData?.homeCategories &&
-        <ShopByCategories
-          menuItems={menu.slice(0, 4)}
-          sanityHomeCategories={data?.homePageData?.homeCategories}
-        />
-      }
+        <ClientLogos brands={data.homePageData?.brand || []} />
 
-      <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+        {data?.homePageData?.homeCategories &&
+          <ShopByCategories
+            menuItems={menu.slice(0, 4)}
+            sanityHomeCategories={data?.homePageData?.homeCategories}
+          />
+        }
 
-      {data.recommendedProducts?.products?.nodes && (
-        <ProductGrid
-          products={data.recommendedProducts.products.nodes}
-          title="RECOMMENDED PRODUCTS"
-          categoryHandle="recommended"
-        />
-      )}
+        <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+
+        {data.recommendedProducts?.products?.nodes && (
+          <ProductGrid
+            products={data.recommendedProducts.products.nodes}
+            title="RECOMMENDED PRODUCTS"
+            categoryHandle="recommended"
+          />
+        )}
 
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>

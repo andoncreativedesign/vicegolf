@@ -18,6 +18,8 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from './components/PageLayout';
+import { CustomToastContainer } from './components/basic/CustomToast';
+import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 
 export type RootLoader = typeof loader;
 
@@ -64,6 +66,7 @@ export function links() {
       href: 'https://shop.app',
     },
     { rel: 'icon', type: 'image/svg+xml', href: favicon },
+    { rel: "stylesheet", href: toastStyles }
   ];
 }
 
@@ -199,6 +202,7 @@ export default function App() {
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>
+      <CustomToastContainer />
     </Analytics.Provider>
   );
 }
