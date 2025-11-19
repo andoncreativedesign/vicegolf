@@ -30,8 +30,6 @@ export function ImageList({ images, title, className = '' }: ImageListProps) {
                     </div>
                 </div>
             </div>
-            {/* Dark overlay for better text visibility */}
-            <div className="absolute inset-0 bg-black/40 z-0" />
         </section>
     );
 }

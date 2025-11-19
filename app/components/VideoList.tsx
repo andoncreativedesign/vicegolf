@@ -108,8 +108,6 @@ export function VideoList({ videos, title = 'Videos', className = '' }: VideoLis
                     </div>
                 </div>
             </div>
-            {/* Dark overlay for better text visibility */}
-            <div className="absolute inset-0 bg-black/40 z-0" />
         </section>
     );
 }
