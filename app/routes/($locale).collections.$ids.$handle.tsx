@@ -9,6 +9,8 @@ import { ProductCard } from '~/components/ProductCard';
 import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
 import { useEffect } from 'react';
+import { ImageList } from '~/components/ImageList';
+import { VideoList } from '~/components/VideoList';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection?.title ?? ''} Collection` }];
@@ -233,49 +235,21 @@ export default function Collection() {
           )}
 
           {/* Display listing images */}
-          {listing.images && listing.images.length > 0 && (
-            <div className="listing-images mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listing.images.map((image, index) => (
-                  <div key={index} className="relative aspect-square">
-                    <img
-                      src={image.asset.url}
-                      alt={image.alt || listing.title}
-                      className="w-full h-full object-cover rounded-lg"
-                      loading={index < 2 ? 'eager' : 'lazy'}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <ImageList
+            images={listing.images}
+            className="mb-8"
+          />
 
           {/* Display listing videos */}
-          {listing.videos && listing.videos.length > 0 && (
-            <div className="listing-videos mb-8">
-              <h3 className="text-xl font-semibold mb-4">Videos</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {listing.videos.map((video, index) => (
-                  <div key={index} className="video-container">
-                    {video.title && <h4 className="font-medium mb-2">{video.title}</h4>}
-                    {video.description && <p className="text-gray-600 mb-2">{video.description}</p>}
-                    <video
-                      controls
-                      className="w-full rounded-lg"
-                      preload="metadata"
-                    >
-                      <source src={video.asset.url} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <VideoList
+            videos={listing.videos}
+            className="mb-8"
+          />
+
+          {/* Fallback to original collection header if no listing data */}
         </div>
       )}
 
-      {/* Fallback to original collection header if no listing data */}
       {!listing && (
         <>
           <h1>{handle}</h1>
