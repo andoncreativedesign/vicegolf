@@ -23,13 +23,15 @@ export function ProductForm({
   description,
   productType,
   productAccordions,
+  colorVariants,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
   description: string;
   productType?: string;
-  productAccordions: AccordionItem[]
+  productAccordions: AccordionItem[];
+  colorVariants?: any[];
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -112,9 +114,42 @@ export function ProductForm({
         <ProductRating rating={4.8} reviewCount={1145} />
       </div>
 
+      {/* Color Variants Section */}
+      {colorVariants && colorVariants.length > 0 && (
+        <div className="mb-6">
+          <h5 className="text-sm font-medium text-gray-700 mb-3">Variants:</h5>
+          <div className="flex flex-wrap gap-2">
+            {colorVariants.map((variant) => (
+              <Link
+                key={variant.id}
+                to={`/products/${variant.handle}`}
+                className="group block"
+              >
+                <div className="flex items-center gap-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                  <div className="w-16 h-16 overflow-hidden rounded bg-gray-100">
+                    {variant.featuredImage ? (
+                      <img
+                        src={variant.featuredImage.url}
+                        alt={variant.featuredImage.altText || variant.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                        No img
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Product Options */}
       {productOptions.map((option) => {
         if (option.optionValues.length === 1) return null;
+        if(option.name === 'Color') return null;
         return (
           <div className="product-options mb-6" key={option.name}>
             <h5 className="text-sm font-medium text-gray-700 mb-3">

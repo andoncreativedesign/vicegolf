@@ -1,4 +1,4 @@
-import { redirect, useLoaderData } from 'react-router';
+import { redirect, useLoaderData, Link } from 'react-router';
 import { useCallback, useEffect, useState } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
@@ -21,6 +21,7 @@ import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
+import { PRODUCTS_BY_FAMILY_QUERY } from '~/lib/shopify/product-queries';
 
 type ProductImageType = {
   id: string;
@@ -66,7 +67,31 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
 
   redirectIfHandleIsLocalized(request, { handle, data: product });
 
-  return { product };
+  // Fetch color variants if product has family metafield
+  let colorVariants = [];
+  if (product.metafield?.value) {
+    try {
+      const variantsResponse = await storefront.query(PRODUCTS_BY_FAMILY_QUERY, {
+        variables: { searchQuery: `metafield:custom.family:'${product.metafield.value}'` },
+      });
+      colorVariants = variantsResponse?.products?.nodes || [];
+      // Filter out the current product from variants
+      colorVariants = colorVariants.filter((variant: any) => variant.id !== product.id);
+
+      console.log('\n\ncolor variants')
+      colorVariants.map((item: any) => {
+        if(item.metafield?.value === product.metafield?.value) {
+          console.log('item title',item.title)
+        }
+        return item
+      })
+
+    } catch (error) {
+      console.error('Error fetching color variants:', error);
+    }
+  }
+
+  return { product, colorVariants };
 }
 
 function loadDeferredData({ context, params }: Route.LoaderArgs) {
@@ -74,7 +99,12 @@ function loadDeferredData({ context, params }: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const { product } = useLoaderData<typeof loader>();
+  const { product, colorVariants } = useLoaderData<typeof loader>();
+
+  useEffect(() => {
+    console.log('product details from shopify',product)
+    console.log('color variants from shopify',colorVariants)
+  }, [colorVariants,product])
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -156,6 +186,7 @@ export default function Product() {
             description={descriptionHtml}
             productType={product.productType}
             productAccordions={productDetails?.accordionItems || []}
+            colorVariants={colorVariants}
           />
         </div>
       </div>
@@ -199,7 +230,6 @@ export default function Product() {
         //     default:
         //       return null;
         //   }
-
       })()}
 
       {/* Customer Reviews Section (common for all products) */}
@@ -272,6 +302,13 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    metafield(namespace: "custom", key: "family") {
+      id
+      namespace
+      key
+      type
+      value
+    }
     images(first: 10) {
       nodes {
         id
