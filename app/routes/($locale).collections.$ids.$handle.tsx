@@ -239,11 +239,11 @@ export default function Collection() {
           {listing.subtitle && (
             <h2 className="text-2xl font-semibold mb-4 text-gray-600">{listing.subtitle}</h2>
           )}
-          {listing.description && (
-            <div className="collection-description mb-6 text-gray-700 max-w-4xl">
-              <p>{listing.description}</p>
-            </div>
-          )}
+         {listing.description && (
+  <p className="text-base text-gray-700 leading-relaxed mb-6">
+    {listing.description}
+  </p>
+)}
 
           {/* Fallback to original collection header if no listing data */}
         </div>
