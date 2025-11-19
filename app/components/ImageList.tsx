@@ -12,20 +12,26 @@ export function ImageList({ images, title, className = '' }: ImageListProps) {
     }
 
     return (
-        <div className={`listing-images ${className}`}>
-            {title && <h3 className="text-xl font-semibold mb-4">{title}</h3>}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {images.map((image, index) => (
-                    <div key={index} className="relative aspect-square">
-                        <img
-                            src={image.asset.url}
-                            alt={image.alt || 'Listing image'}
-                            className="w-full h-full object-cover rounded-lg"
-                            loading={index < 2 ? 'eager' : 'lazy'}
-                        />
+        <section className={`relative w-full overflow-hidden mb-8 h-[80vh] min-h-[500px] max-h-[90vh] w-screen max-w-[100vw] left-1/2 -ml-[50vw] listing-images ${className}`}>
+            <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
+                <div className="w-full h-full">
+                    {title && <h3 className="text-2xl md:text-4xl font-bold text-white mb-8 text-center drop-shadow-lg absolute top-4 left-1/2 -translate-x-1/2 z-20">{title}</h3>}
+                    <div className="w-full h-full flex items-center justify-center">
+                        {images.map((image, index) => (
+                            <div key={index} className="relative w-full h-full">
+                                <img
+                                    src={image.asset.url}
+                                    alt={image.alt || 'Listing image'}
+                                    className="w-full h-full object-cover"
+                                    loading={index < 2 ? 'eager' : 'lazy'}
+                                />
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
-        </div>
+            {/* Dark overlay for better text visibility */}
+            <div className="absolute inset-0 bg-black/40 z-0" />
+        </section>
     );
 }
