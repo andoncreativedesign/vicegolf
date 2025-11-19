@@ -1,9 +1,9 @@
-import {useOptimisticCart} from '@shopify/hydrogen';
-import {Link} from 'react-router';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
-import {CartLineItem} from '~/components/CartLineItem';
-import {CartSummary} from './CartSummary';
+import { useOptimisticCart } from '@shopify/hydrogen';
+import { Link } from 'react-router';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import { useAside } from '~/components/Aside';
+import { CartLineItem } from '~/components/CartLineItem';
+import { CartSummary } from './CartSummary';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -16,7 +16,7 @@ export type CartMainProps = {
  * The main cart component that displays the cart items and summary.
  * It is used by both the /cart route and the cart aside dialog.
  */
-export function CartMain({layout, cart: originalCart}: CartMainProps) {
+export function CartMain({ layout, cart: originalCart }: CartMainProps) {
   const cart = useOptimisticCart(originalCart);
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount = cart && Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
@@ -37,9 +37,9 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
                 ))}
               </ul>
             </div>
-            <div className="cart-summary">
-              <CartSummary cart={cart} layout={layout} />
-            </div>
+          </div>
+          <div className="cart-summary">
+            <CartSummary cart={cart} layout={layout} />
           </div>
         </div>
       )}
@@ -54,8 +54,8 @@ function CartEmpty({
   hidden: boolean;
   layout?: CartMainProps['layout'];
 }) {
-  const {close} = useAside();
-  
+  const { close } = useAside();
+
   return (
     <div hidden={hidden} className="empty-cart text-center py-16">
       <div className="max-w-md mx-auto">
@@ -69,9 +69,9 @@ function CartEmpty({
           Looks like you haven't added anything yet, let's get you started!
         </p>
         <div className="w-full flex justify-center">
-          <Link 
-            to="/collections" 
-            onClick={close} 
+          <Link
+            to="/collections"
+            onClick={close}
             prefetch="viewport"
             className="flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline"
             style={{ textDecoration: 'none', maxWidth: 'fit-content' }}
