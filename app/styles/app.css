@@ -85,9 +85,11 @@ aside header h2 {
 }
 
 aside main {
-  margin: 1rem;
-  max-height: calc(100vh - var(--header-height) - 2rem);
-  overflow-y: auto;
+  margin: 1rem 1rem 0;
+  height: calc(100vh - var(--header-height) - 2rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 aside p {
@@ -258,22 +260,14 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .cart-content {
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 1rem 1rem 0;
-  padding-bottom: 80px; /* Space for fixed checkout button */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.cart-content::-webkit-scrollbar {
-  display: none;
+  padding: 1rem;
 }
 
 .cart-items {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .cart-lines {
@@ -283,20 +277,13 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .cart-summary {
-  padding: 1.5rem 0;
+  padding: 1rem 0 1.25rem;
   border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .checkout-actions {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  padding: 1rem;
-  border-top: 1px solid #e5e7eb;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  z-index: 100;
+  margin-top: 1.5rem;
 }
 
 .cart-line {
