@@ -20,7 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
       style={{ textDecoration: 'none' }}
     >
       {/* Product Image */}
-      <div className="relative h-64 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden rounded-xl mb-4">
+      <div className="relative h-96 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden rounded-xl mb-4">
         {image ? (
           <div className="w-full h-full flex items-center justify-center">
             <Image
@@ -39,7 +39,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </svg>
           </div>
         )}
-       
+
         {/* Wishlist Icon */}
         <button
           className="absolute top-3 right-3 p-2.5 bg-white/95 backdrop-blur-md hover:bg-white rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl border border-gray-100/50"
@@ -58,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-gray-800 transition-colors duration-300">
           {product.title}
         </h3>
-       
+
         {/* Category/Type */}
         <p className="text-sm text-gray-500 font-medium tracking-wide">
           {product.productType || 'Golf Equipment'}
@@ -69,9 +69,8 @@ export function ProductCard({ product }: ProductCardProps) {
             {[...Array(5)].map((_, i) => (
               <svg
                 key={i}
-                className={`w-3.5 h-3.5 flex-shrink-0 ${
-                  i < Math.floor(rating) ? 'text-amber-400 fill-current' : 'text-gray-200'
-                } transition-all duration-200`}
+                className={`w-3.5 h-3.5 flex-shrink-0 ${i < Math.floor(rating) ? 'text-amber-400 fill-current' : 'text-gray-200'
+                  } transition-all duration-200`}
                 viewBox="0 0 20 20"
               >
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -82,7 +81,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {rating.toFixed(1)} ({reviewCount})
           </span>
         </div>
-       
+
         {/* Price */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center space-x-2">
