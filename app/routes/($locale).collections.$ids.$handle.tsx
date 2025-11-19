@@ -235,10 +235,22 @@ export default function Collection() {
             videos={listing.videos}
             className="mb-8"
           />
-          <h1 className="text-5xl font-black mb-4" style={{ fontSize: '3rem', fontWeight: '900' }}>{listing.title}</h1>
-          {listing.subtitle && (
-            <h2 className="text-2xl font-semibold mb-4 text-gray-600">{listing.subtitle}</h2>
-          )}
+         
+    <h1
+  className="text-5xl font-black"
+  style={{ fontSize: '3rem', fontWeight: '900', marginBottom: '4px' }}
+>
+  {listing.title}
+</h1>
+
+<h2
+  className="text-2xl font-semibold text-gray-600"
+  style={{ marginTop: '0px', marginBottom: '6px' }}
+>
+  {listing.subtitle}
+</h2>
+
+
           {listing.description && (
             <p className="text-base text-gray-700 leading-relaxed mb-6">
               {listing.description}
