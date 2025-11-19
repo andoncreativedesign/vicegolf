@@ -7,6 +7,7 @@ import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
 import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
+import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
 import { useEffect } from 'react';
 
 export const meta: Route.MetaFunction = ({ data }) => {
@@ -40,7 +41,17 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
 
   const decodedIds = JSON.parse(decodeURIComponent(ids));
-  const decodedHandle = decodeURIComponent(handle)
+  const decodedHandle = decodeURIComponent(handle);
+
+  console.log('🔍 Debug: URL handle:', handle);
+  console.log('🔍 Debug: Decoded handle:', decodedHandle);
+
+  // Convert space-separated handle to Shopify format (golf-balls)
+  const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
+  console.log('🔍 Debug: Shopify handle format:', shopifyHandle);
+
+  // Debug: Check all listings in Sanity
+  await getAllListings();
 
   const [collection] = await Promise.all<ShopifyCollectionResponse>([
     storefront.query(GET_PRODUCTS_BY_COLLECTION, {
@@ -174,9 +185,13 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   console.log("\n\nupdatedCollection?.products data")
   console.log(updatedCollection?.products)
 
+  // Fetch Sanity listing data for this collection using Shopify handle format
+  const listingData = await getListingByCollectionHandle(shopifyHandle);
+
   return {
     collection: updatedCollection,
-    handle: decodedHandle
+    handle: decodedHandle,
+    listing: listingData
   };
 
 }
@@ -191,20 +206,84 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const { collection, handle } = useLoaderData<typeof loader>();
+  const { collection, handle, listing } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     console.log("collections data get by ids", collection)
-  }, [collection])
+    console.log("listing data from sanity", listing)
+  }, [collection, listing])
 
   const hasProducts = Boolean(
-    collection?.products?.edges?.some((edge) => edge?.node) 
+    collection?.products?.edges?.some((edge) => edge?.node)
   );
 
   return (
     <div className="collection">
-      <h1>{handle}</h1>
-      <p className="collection-description">{collection?.description}</p>
+      {/* Display Sanity listing content if available */}
+      {listing && (
+        <div className="listing-content mb-8">
+          <h1 className="text-4xl font-bold mb-4">{listing.title}</h1>
+          {listing.subtitle && (
+            <h2 className="text-2xl font-semibold mb-4 text-gray-600">{listing.subtitle}</h2>
+          )}
+          {listing.description && (
+            <div className="collection-description mb-6 text-gray-700 max-w-4xl">
+              <p>{listing.description}</p>
+            </div>
+          )}
+
+          {/* Display listing images */}
+          {listing.images && listing.images.length > 0 && (
+            <div className="listing-images mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {listing.images.map((image, index) => (
+                  <div key={index} className="relative aspect-square">
+                    <img
+                      src={image.asset.url}
+                      alt={image.alt || listing.title}
+                      className="w-full h-full object-cover rounded-lg"
+                      loading={index < 2 ? 'eager' : 'lazy'}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Display listing videos */}
+          {listing.videos && listing.videos.length > 0 && (
+            <div className="listing-videos mb-8">
+              <h3 className="text-xl font-semibold mb-4">Videos</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {listing.videos.map((video, index) => (
+                  <div key={index} className="video-container">
+                    {video.title && <h4 className="font-medium mb-2">{video.title}</h4>}
+                    {video.description && <p className="text-gray-600 mb-2">{video.description}</p>}
+                    <video
+                      controls
+                      className="w-full rounded-lg"
+                      preload="metadata"
+                    >
+                      <source src={video.asset.url} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Fallback to original collection header if no listing data */}
+      {!listing && (
+        <>
+          <h1>{handle}</h1>
+          <p className="collection-description">{collection?.description}</p>
+        </>
+      )}
+
+      {/* Products section */}
       {collection?.products && hasProducts && (
         <PaginatedResourceSection<ProductItemFragment>
           connection={collection.products}
