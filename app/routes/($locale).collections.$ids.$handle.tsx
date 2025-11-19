@@ -220,21 +220,11 @@ export default function Collection() {
   );
 
   return (
-    <div className="collection">
+    <div className="collection px-4 md:px-6 lg:px-8">
       {/* Display Sanity listing content if available */}
       {listing && (
         <div className="listing-content mb-8">
-          <h1 className="text-4xl font-bold mb-4">{listing.title}</h1>
-          {listing.subtitle && (
-            <h2 className="text-2xl font-semibold mb-4 text-gray-600">{listing.subtitle}</h2>
-          )}
-          {listing.description && (
-            <div className="collection-description mb-6 text-gray-700 max-w-4xl">
-              <p>{listing.description}</p>
-            </div>
-          )}
-
-          {/* Display listing images */}
+           {/* Display listing images */}
           <ImageList
             images={listing.images}
             className="mb-8"
@@ -245,6 +235,15 @@ export default function Collection() {
             videos={listing.videos}
             className="mb-8"
           />
+          <h1 className="text-4xl font-bold mb-4">{listing.title}</h1>
+          {listing.subtitle && (
+            <h2 className="text-2xl font-semibold mb-4 text-gray-600">{listing.subtitle}</h2>
+          )}
+          {listing.description && (
+            <div className="collection-description mb-6 text-gray-700 max-w-4xl">
+              <p>{listing.description}</p>
+            </div>
+          )}
 
           {/* Fallback to original collection header if no listing data */}
         </div>
