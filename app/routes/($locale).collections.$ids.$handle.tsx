@@ -1,4 +1,4 @@
-import { redirect, useLoaderData } from 'react-router';
+import { redirect, useLoaderData, Link } from 'react-router';
 import type { Route } from './+types/collections.$handle';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
@@ -224,7 +224,7 @@ export default function Collection() {
       {/* Display Sanity listing content if available */}
       {listing && (
         <div className="listing-content mb-8">
-           {/* Display listing images */}
+          {/* Display listing images */}
           <ImageList
             images={listing.images}
             className="mb-8"
@@ -239,11 +239,31 @@ export default function Collection() {
           {listing.subtitle && (
             <h2 className="text-2xl font-semibold mb-4 text-gray-600">{listing.subtitle}</h2>
           )}
-         {listing.description && (
-  <p className="text-base text-gray-700 leading-relaxed mb-6">
-    {listing.description}
-  </p>
-)}
+          {listing.description && (
+            <p className="text-base text-gray-700 leading-relaxed mb-6">
+              {listing.description}
+            </p>
+          )}
+
+          {/* Breadcrumb navigation */}
+          <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+            <ol className="flex items-center space-x-2">
+              <li>
+                <Link
+                  to="/collections"
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Collection
+                </Link>
+              </li>
+              <li className="text-gray-400">{'>'}</li>
+              <li>
+                <span className="text-gray-700 font-medium">
+                  {handle}
+                </span>
+              </li>
+            </ol>
+          </nav>
 
           {/* Fallback to original collection header if no listing data */}
         </div>
@@ -253,6 +273,26 @@ export default function Collection() {
         <>
           <h1>{handle}</h1>
           <p className="collection-description">{collection?.description}</p>
+
+          {/* Breadcrumb navigation */}
+          <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+            <ol className="flex items-center space-x-2">
+              <li>
+                <Link
+                  to="/collections"
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Collection
+                </Link>
+              </li>
+              <li className="text-gray-400">{'>'}</li>
+              <li>
+                <span className="text-gray-700 font-medium">
+                  {handle}
+                </span>
+              </li>
+            </ol>
+          </nav>
         </>
       )}
 
