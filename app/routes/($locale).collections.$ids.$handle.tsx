@@ -235,21 +235,21 @@ export default function Collection() {
             videos={listing.videos}
             className="mb-8"
           />
-         
-        {listing.title && (
-  <h1
-    className="text-5xl font-black mb-2"
-    style={{ fontSize: '3rem', fontWeight: '900' }}
-  >
-    {listing.title}
-  </h1>
-)}
 
-{listing.subtitle && (
-  <h2 className="text-2xl font-semibold mb-2 text-gray-600">
-    {listing.subtitle}
-  </h2>
-)}
+          {listing.title && (
+            <h1
+              className="text-5xl font-black mb-2"
+              style={{ fontSize: '3rem', fontWeight: '900' }}
+            >
+              {listing.title}
+            </h1>
+          )}
+
+          {listing.subtitle && (
+            <h2 className="text-2xl font-semibold mb-2 text-gray-800">
+              {listing.subtitle}
+            </h2>
+          )}
 
           {listing.description && (
             <p className="text-base text-gray-700 leading-relaxed mb-6">
@@ -270,7 +270,7 @@ export default function Collection() {
               </li>
               <li className="text-gray-400">{'>'}</li>
               <li>
-                <span className="text-gray-700 font-medium">
+                <span className="text-gray-900 font-semibold">
                   {handle}
                 </span>
               </li>
@@ -299,7 +299,7 @@ export default function Collection() {
               </li>
               <li className="text-gray-400">{'>'}</li>
               <li>
-                <span className="text-gray-700 font-medium">
+                <span className="text-gray-900 font-semibold">
                   {handle}
                 </span>
               </li>
