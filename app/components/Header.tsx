@@ -134,16 +134,28 @@ export function Header({
   const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     console.log('navigation items - Header', menuItems)
   }, [])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300" style={{ width: '100%', margin: 0, padding: 0 }}>
+      {/* Marquee Banner - Always Visible */}
       <BlackFridayBanner />
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between px-4 py-6 w-full max-w-full mx-auto">
+      
+      {/* Top Header Bar - Collapses on Scroll */}
+      <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
         {/* Left: Country/Currency Selector */}
         <div className="flex items-center space-x-2">
           <CountryCurrencySelector />
@@ -169,8 +181,8 @@ export function Header({
         </div>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="bg-white border-t border-gray-100 w-full">
+      {/* Navigation Menu - Always Visible */}
+      <nav className="bg-white border-t border-gray-100 w-full shadow-sm">
         <div className="w-full px-0">
           {menuItems &&
             <HeaderMenu
