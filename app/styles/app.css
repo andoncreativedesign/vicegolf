@@ -23,6 +23,16 @@ body {
 
 /*
 * --------------------------------------------------
+* pages/Home
+* --------------------------------------------------
+*/
+.home {
+  width: 100%;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+}
+
+/*
+* --------------------------------------------------
 * Non anchor links
 * --------------------------------------------------
 */
@@ -1004,8 +1014,9 @@ button.reset:hover:not(:has(> *)) {
 .products-grid {
   display: grid;
   grid-gap: 2rem;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   margin: 2rem 0;
+  justify-items: center;
   padding: 0;
   list-style: none;
 }
