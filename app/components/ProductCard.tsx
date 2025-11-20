@@ -16,42 +16,25 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/products/${product.handle}`}
-      className="group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-gray-100/30 lg:min-w-[300px]"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-gray-100/30 w-[320px] min-w-[320px]"
       style={{ textDecoration: 'none' }}
     >
       {/* Product Image */}
-      <div className="relative h-96 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden rounded-xl mb-4">
+      <div className="relative h-96 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden mb-4 flex items-center justify-center">
         {image ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <Image
-              data={image}
-              alt={image.altText || product.title}
-              className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
-              sizes="(min-width: 1024px) 300px, 200px"
-              width={300}
-              height={300}
-            />
-          </div>
+          <Image
+            data={image}
+            alt={image.altText || product.title}
+            className="max-w-[260px] max-h-[260px] w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+            sizes="260px"
+            width={260}
+            height={260}
+          />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        )}
-
-        {/* Wishlist Icon */}
-        <button
-          className="absolute top-3 right-3 p-2.5 bg-white/95 backdrop-blur-md hover:bg-white rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl border border-gray-100/50"
-          onClick={(e) => {
-            e.preventDefault();
-            // Handle wishlist toggle
-          }}
-        >
-          <svg className="w-4.5 h-4.5 text-gray-600 hover:text-rose-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-        </button>
+        )}
       </div>
       {/* Product Info */}
       <div className="space-y-3 px-5 pb-5 pt-1">
