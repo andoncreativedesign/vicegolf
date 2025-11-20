@@ -48,8 +48,8 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
   }, [menuItems]);
 
   return (
-    <section className="py-20 bg-gray-50">
-      <div className="px-4 sm:px-6 lg:px-8">
+    <section className="py-20">
+      <div>
         {/* Section Title */}
         <div className="text-center mb-16">
           <h2 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight uppercase">
