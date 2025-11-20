@@ -1,4 +1,4 @@
-import { redirect, useLoaderData } from 'react-router';
+import { redirect, useLoaderData, Link } from 'react-router';
 import type { Route } from './+types/collections.$handle';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
@@ -7,7 +7,10 @@ import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
 import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
+import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
 import { useEffect } from 'react';
+import { ImageList } from '~/components/ImageList';
+import { VideoList } from '~/components/VideoList';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection?.title ?? ''} Collection` }];
@@ -40,7 +43,17 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
 
   const decodedIds = JSON.parse(decodeURIComponent(ids));
-  const decodedHandle = decodeURIComponent(handle)
+  const decodedHandle = decodeURIComponent(handle);
+
+  console.log('🔍 Debug: URL handle:', handle);
+  console.log('🔍 Debug: Decoded handle:', decodedHandle);
+
+  // Convert space-separated handle to Shopify format (golf-balls)
+  const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
+  console.log('🔍 Debug: Shopify handle format:', shopifyHandle);
+
+  // Debug: Check all listings in Sanity
+  await getAllListings();
 
   const [collection] = await Promise.all<ShopifyCollectionResponse>([
     storefront.query(GET_PRODUCTS_BY_COLLECTION, {
@@ -174,9 +187,13 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   console.log("\n\nupdatedCollection?.products data")
   console.log(updatedCollection?.products)
 
+  // Fetch Sanity listing data for this collection using Shopify handle format
+  const listingData = await getListingByCollectionHandle(shopifyHandle);
+
   return {
     collection: updatedCollection,
-    handle: decodedHandle
+    handle: decodedHandle,
+    listing: listingData
   };
 
 }
@@ -191,20 +208,107 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const { collection, handle } = useLoaderData<typeof loader>();
+  const { collection, handle, listing } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     console.log("collections data get by ids", collection)
-  }, [collection])
+    console.log("listing data from sanity", listing)
+  }, [collection, listing])
 
   const hasProducts = Boolean(
-    collection?.products?.edges?.some((edge) => edge?.node) 
+    collection?.products?.edges?.some((edge) => edge?.node)
   );
 
   return (
-    <div className="collection">
-      <h1>{handle}</h1>
-      <p className="collection-description">{collection?.description}</p>
+    <div className="collection px-4 md:px-6 lg:px-8">
+      {/* Display Sanity listing content if available */}
+      {listing && (
+        <div className="listing-content mb-8">
+          {/* Display listing images */}
+          <ImageList
+            images={listing.images}
+            className="mb-8"
+          />
+
+          {/* Display listing videos */}
+          <VideoList
+            videos={listing.videos}
+            className="mb-8"
+          />
+
+          {listing.title && (
+            <h1
+              className="text-5xl font-black mb-2"
+              style={{ fontSize: '3rem', fontWeight: '900' }}
+            >
+              {listing.title}
+            </h1>
+          )}
+
+          {listing.subtitle && (
+            <h2 className="text-2xl font-semibold mb-2 text-gray-800">
+              {listing.subtitle}
+            </h2>
+          )}
+
+          {listing.description && (
+            <p className="text-base text-gray-700 leading-relaxed mb-6">
+              {listing.description}
+            </p>
+          )}
+
+          {/* Breadcrumb navigation */}
+          <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+            <ol className="flex items-center space-x-2">
+              <li>
+                <Link
+                  to="/collections"
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Collection
+                </Link>
+              </li>
+              <li className="text-gray-400">{'>'}</li>
+              <li>
+                <span className="text-gray-900 font-semibold">
+                  {handle}
+                </span>
+              </li>
+            </ol>
+          </nav>
+
+          {/* Fallback to original collection header if no listing data */}
+        </div>
+      )}
+
+      {!listing && (
+        <>
+          <h1>{handle}</h1>
+          <p className="collection-description">{collection?.description}</p>
+
+          {/* Breadcrumb navigation */}
+          <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+            <ol className="flex items-center space-x-2">
+              <li>
+                <Link
+                  to="/collections"
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  Collection
+                </Link>
+              </li>
+              <li className="text-gray-400">{'>'}</li>
+              <li>
+                <span className="text-gray-900 font-semibold">
+                  {handle}
+                </span>
+              </li>
+            </ol>
+          </nav>
+        </>
+      )}
+
+      {/* Products section */}
       {collection?.products && hasProducts && (
         <PaginatedResourceSection<ProductItemFragment>
           connection={collection.products}

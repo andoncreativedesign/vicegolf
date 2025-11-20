@@ -399,6 +399,50 @@ export interface ProductDetails {
   store: StoreProduct;
 }
 
+// Sanity Listing types
+export interface SanityListingImage {
+  _type: 'image';
+  asset: {
+    _id: string;
+    url: string;
+    metadata?: {
+      dimensions?: {
+        width: number;
+        height: number;
+      };
+      lqip?: string;
+    };
+  };
+  alt?: string;
+}
+
+export interface SanityListingVideo {
+  _type: 'file';
+  asset: {
+    _id: string;
+    url: string;
+    metadata?: {
+      dimensions?: {
+        width: number;
+        height: number;
+      };
+    };
+  };
+  title?: string;
+  description?: string;
+}
+
+export interface SanityListing {
+  _id: string;
+  _type: 'listing';
+  title: string;
+  collectionHandle: string;
+  subtitle: string;
+  description: string;
+  images?: SanityListingImage[];
+  videos?: SanityListingVideo[];
+}
+
 export async function getProductDetails(id: string): Promise<ProductDetails | null> {
   try {
     const query = productDetailsQuery(id);
@@ -482,6 +526,98 @@ export async function getRelatedProducts(productId: string, limit: number = 4): 
     return response.data.result || [];
   } catch (error) {
     console.error('Error fetching related products:', error);
+    return [];
+  }
+}
+
+// Query to get listing data by collection handle
+export const listingQuery = (collectionHandle: string) => `
+  *[_type == "listing" && collectionHandle == "${collectionHandle}"][0]{
+    _id,
+    _type,
+    title,
+    collectionHandle,
+    subtitle,
+    description,
+    images[]{
+      _type,
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions,
+          lqip
+        }
+      },
+      alt
+    },
+    videos[]{
+      _type,
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions
+        }
+      },
+      title,
+      description
+    }
+  }
+`;
+
+// Get listing data by collection handle
+export async function getListingByCollectionHandle(collectionHandle: string): Promise<SanityListing | null> {
+  try {
+    console.log('🔍 Debug: Fetching listing for collectionHandle:', collectionHandle);
+    
+    const query = listingQuery(collectionHandle);
+    const response = await axiosSanity.post("/", { query });
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = response.data.result;
+    console.log('🔍 Debug: Sanity result:', result);
+
+    if (!result) {
+      console.log('🔍 Debug: No listing found for handle:', collectionHandle);
+      return null;
+    }
+
+    return result as SanityListing;
+  } catch (error) {
+    console.error('Error fetching listing details:', error);
+    return null;
+  }
+}
+
+// Debug function to check all listings
+export async function getAllListings(): Promise<SanityListing[]> {
+  try {
+    const query = `
+      *[_type == "listing"]{
+        _id,
+        _type,
+        title,
+        collectionHandle,
+        subtitle,
+        description
+      }
+    `;
+    
+    const response = await axiosSanity.post("/", { query });
+    
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = response.data.result;
+    console.log('🔍 Debug: All listings in Sanity:', result);
+    return result || [];
+  } catch (error) {
+    console.error('Error fetching all listings:', error);
     return [];
   }
 }
