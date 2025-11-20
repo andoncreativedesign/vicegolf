@@ -129,7 +129,10 @@ function SearchResultsPredictiveCollections({
   if (!collections.length) return null;
 
   return (
-    <div className="predictive-search-result" key="collections">
+    <div
+      className="predictive-search-result predictive-search-result-collections"
+      key="collections"
+    >
       <h5>Collections</h5>
       <ul>
         {collections.map((collection) => {
@@ -146,8 +149,8 @@ function SearchResultsPredictiveCollections({
                   <Image
                     alt={collection.image.altText ?? ''}
                     src={collection.image.url}
-                    width={50}
-                    height={50}
+                    width={400}
+                    height={400}
                   />
                 )}
                 <div>
@@ -203,7 +206,10 @@ function SearchResultsPredictiveProducts({
   if (!products.length) return null;
 
   return (
-    <div className="predictive-search-result" key="products">
+    <div
+      className="predictive-search-result predictive-search-result-products"
+      key="products"
+    >
       <h5>Products</h5>
       <ul>
         {products.map((product) => {
@@ -222,8 +228,8 @@ function SearchResultsPredictiveProducts({
                   <Image
                     alt={image.altText ?? ''}
                     src={image.url}
-                    width={50}
-                    height={50}
+                    width={400}
+                    height={400}
                   />
                 )}
                 <div>
