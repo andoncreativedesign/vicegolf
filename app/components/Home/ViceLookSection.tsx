@@ -33,7 +33,7 @@ export function ViceLookSection() {
                 url: 'https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-homepage-get-the-look-1.jpg?v=1718636826',
                 altText: 'VICE Golf Balls',
             },
-            url: '/collections/golf-balls',
+            url: '/',
             tooltips: [
                 {
                     id: '1-1',
@@ -58,7 +58,7 @@ export function ViceLookSection() {
                 url: 'https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-homepage-get-the-look-3.jpg?v=1718636826',
                 altText: 'VICE Golf Apparel',
             },
-            url: '/collections/apparel',
+            url: '/',
             tooltips: [
                 {
                     id: '2-1',
@@ -83,7 +83,7 @@ export function ViceLookSection() {
                 url: 'https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-homepage-get-the-look-4.jpg?v=1718643720',
                 altText: 'VICE Golf Gear',
             },
-            url: '/collections/gear',
+            url: '/',
             tooltips: [
                 {
                     id: '3-1',
@@ -146,26 +146,35 @@ export function ViceLookSection() {
                                         }}
                                     >
                                         <div
-                                            className="bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg cursor-pointer"
+                                            className="relative group"
                                             onMouseEnter={() => setActiveTooltip(tooltip.id)}
                                             onMouseLeave={() => setActiveTooltip(null)}
                                         >
-                                            <span className="text-black font-bold">+</span>
-                                        </div>
-                                        {activeTooltip === tooltip.id && (
-                                            <div className="absolute left-1/2 -bottom-2 transform -translate-x-1/2 translate-y-full bg-white p-4 rounded-lg shadow-lg w-64 z-20">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-gray-900">{tooltip.title}</span>
-                                                    <span className="text-sm text-gray-600">{tooltip.category}</span>
-                                                    <div className="flex justify-between items-center mt-2">
-                                                        <span className="text-gray-900 font-medium">{tooltip.price}</span>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                        </svg>
+                                            <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg cursor-pointer">
+                                                <span className="text-black font-bold">+</span>
+                                            </div>
+                                            {activeTooltip === tooltip.id && (
+                                                <div
+                                                    className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-64 z-20"
+                                                    onMouseEnter={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveTooltip(tooltip.id);
+                                                    }}
+                                                    onMouseLeave={() => setActiveTooltip(null)}
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-gray-900">{tooltip.title}</span>
+                                                        <span className="text-sm text-gray-600">{tooltip.category}</span>
+                                                        <div className="flex justify-between items-center mt-2">
+                                                            <span className="text-gray-900 font-medium">{tooltip.price}</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
