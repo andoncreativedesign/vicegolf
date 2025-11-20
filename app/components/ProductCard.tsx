@@ -20,15 +20,23 @@ export function ProductCard({ product }: ProductCardProps) {
       style={{ textDecoration: 'none' }}
     >
       {/* Product Image */}
-      <div className="relative h-96 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden mb-4 flex items-center justify-center">
+      <div className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden mb-4">
         {image ? (
           <Image
             data={image}
             alt={image.altText || product.title}
-            className="max-w-[260px] max-h-[260px] w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
-            sizes="260px"
-            width={260}
-            height={260}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+            sizes="100%"
+            width={320}
+            height={320}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              objectPosition: 'center',
+              padding: 0,
+              margin: 0
+            }}
           />
         ) : (
           <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
