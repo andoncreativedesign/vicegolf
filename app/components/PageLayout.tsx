@@ -1,5 +1,6 @@
 import {Await, Link, useLoaderData} from 'react-router';
 import {Suspense, useId} from 'react';
+import {Search} from 'lucide-react';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -7,7 +8,7 @@ import type {
 } from 'storefrontapi.generated';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
-import { Header } from '~/components/Header';
+import {Header} from '~/components/Header';
 import HeaderMenu from './Header/HeaderMenu';
 import {CartMain} from '~/components/CartMain';
 import {
@@ -15,7 +16,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import type { MenuData } from '~/lib/shopify/product-queries';
+import type {MenuData} from '~/lib/shopify/product-queries';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -62,8 +63,8 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
     <Suspense fallback={<p>Loading cart ...</p>}>
       <Await resolve={cart}>
         {(cartData) => (
-          <Aside 
-            type="cart" 
+          <Aside
+            type="cart"
             heading={
               <span className="text-base font-normal">
                 {`Your Cart${cartData?.totalQuantity ? ` (${cartData.totalQuantity})` : ''}`}
@@ -81,22 +82,25 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 function SearchAside() {
   const queriesDatalistId = useId();
   return (
-    <Aside type="search" heading="SEARCH">
+    <Aside type="search" heading="">
       <div className="predictive-search">
-        <br />
         <SearchFormPredictive>
           {({fetchResults, inputRef}) => (
-            <input
-              name="q"
-              onChange={fetchResults}
-              onFocus={fetchResults}
-              placeholder="Search products..."
-              ref={inputRef}
-              type="search"
-              list={queriesDatalistId}
-              autoComplete="off"
-              autoFocus
-            />
+            <div className="search-input-wrapper">
+              <Search className="search-icon" size={20} />
+              <input
+                name="q"
+                onChange={fetchResults}
+                onFocus={fetchResults}
+                placeholder="Search"
+                ref={inputRef}
+                type="search"
+                list={queriesDatalistId}
+                autoComplete="off"
+                autoFocus
+                className="search-input" // added class to target with CSS
+              />
+            </div>
           )}
         </SearchFormPredictive>
 
@@ -108,7 +112,37 @@ function SearchAside() {
               return <div>Loading...</div>;
             }
 
-            if (!total) {
+            // Show suggestions when no search term
+            if (!term.current && queries.length > 0) {
+              return (
+                <>
+                  <SearchResultsPredictive.Queries
+                    queries={queries}
+                    queriesDatalistId={queriesDatalistId}
+                  />
+                  <div className="suggestions-list">
+                    <h5>Suggestions</h5>
+                    <ul>
+                      {queries.map((suggestion) => {
+                        if (!suggestion) return null;
+                        return (
+                          <li key={suggestion.text} className="suggestion-item">
+                            <Link
+                              onClick={closeSearch}
+                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion.text)}`}
+                            >
+                              {suggestion.text}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </>
+              );
+            }
+
+            if (!total && term.current) {
               return <SearchResultsPredictive.Empty term={term} />;
             }
 
@@ -140,6 +174,7 @@ function SearchAside() {
                 />
                 {term.current && total ? (
                   <Link
+                    className="view-all-results-link"
                     onClick={closeSearch}
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
@@ -164,19 +199,15 @@ function MobileMenuAside({
 }: {
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
-  }) {
-  
-  const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
+}) {
+  const {productsForNav} = useLoaderData<{productsForNav: MenuData}>();
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
       <Aside type="mobile" heading="MENU">
-        <HeaderMenu
-          viewport="mobile"
-          menuItems={menuItems}
-        />
+        <HeaderMenu viewport="mobile" menuItems={menuItems} />
       </Aside>
     )
   );
