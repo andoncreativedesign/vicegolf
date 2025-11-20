@@ -23,7 +23,7 @@ const ClientLogos: React.FC<{brands: BrandItemTransformed[]}> = ({brands}) => {
                 }}
                 sizes="160px"
                 loading="lazy"
-                className="w-40 h-20 object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                className="w-40 h-20 object-contain"
               />
             </div>
           ))}
