@@ -16,11 +16,11 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/products/${product.handle}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-gray-100/30 w-[320px] min-w-[320px]"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
       style={{ textDecoration: 'none' }}
     >
       {/* Product Image */}
-      <div className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden mb-4">
+      <div className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {image ? (
           <Image
             data={image}
@@ -45,8 +45,8 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       {/* Product Info */}
-      <div className="space-y-3 px-5 pb-5 pt-1">
-        <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-gray-800 transition-colors duration-300">
+      <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
+        <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-gray-800 transition-colors duration-300 min-h-[2.8rem] flex items-start">
           {product.title}
         </h3>
 
@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Price */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between pt-1 mt-auto">
           <div className="flex items-center space-x-2">
             {firstVariant?.compareAtPrice && (
               <Money
