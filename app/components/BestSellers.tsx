@@ -35,7 +35,7 @@ export function BestSellers({
     };
 
     return (
-        <div className="best-sellers mt-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="best-sellers w-full">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="uppercase whitespace-pre-wrap max-w-prose text-title3 font-extrabold text-main-900">
                     Our Best Sellers
