@@ -16,6 +16,7 @@ import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useEffect, useRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { UIColorVariant } from '~/lib/shopify/product-queries';
+import ColorVariant from './Product/ColorVariant';
 
 export function ProductForm({
   productOptions,
@@ -33,16 +34,13 @@ export function ProductForm({
   productType?: string;
   productAccordions: AccordionItem[];
   colorVariants?: UIColorVariant[];
-  }) {
-  const location = useLocation()
+}) {
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
   const formRef = useRef<HTMLDivElement>(null);
   const [formHeight, setFormHeight] = useState('auto');
-  const [variantStyle, setVariantStyle] = useState('w-18 h-18 rounded-md');
-  const [selectedVariantHandle, setSelectedVariantHandle] = useState<string>('');
 
   const pricingTiers = [
     { key: '1', label: '1 dozen' },
@@ -72,24 +70,6 @@ export function ProductForm({
   useEffect(() => {
     setFormHeight('600px');
   }, []);
-
-  useEffect(() => {
-    if (productType === 'Golf Balls') {
-      setVariantStyle('w-8 h-8 rounded-full')
-    }
-  }, [productType])
-
-  useEffect(() => {
-    console.log('selectedVariant', selectedVariant)
-  }, [selectedVariant])
-
-  // Add this effect to handle client-side selection
-  useEffect(() => {
-    if (location.pathname) {
-      setSelectedVariantHandle(location.pathname.split('/').pop() || '');
-    }
-  }, []);
-
 
   return (
     <div
@@ -138,44 +118,11 @@ export function ProductForm({
 
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
-        <div className="mb-6">
-          <div className='flex gap-2 items-center mb-3'>
-            <p className="font-semibold text-gray-700">Color:</p>
-            <p className="text-sm text-gray-500">{selectedVariant?.selectedOptions?.[0].value }</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {colorVariants.map((variant) => {
-              const isSelected = variant.handle === location?.pathname?.split('/').pop();
-              return (
-                <Link
-                  key={variant.id}
-                  to={`/products/${variant.handle}`}
-                  className="group block"
-                >
-                  <div className="flex items-center gap-4">
-                    <div 
-                      className={`overflow-hidden bg-gray-100 ${variantStyle} ${
-                        isSelected ? 'ring-1 ring-offset-1 ring-gray-500': 'ring-1 ring-gray-200'
-                      }`}
-                    >
-                      {variant.featuredImage ? (
-                        <img
-                          src={variant.featuredImage.url}
-                          alt={variant.featuredImage.altText || variant.title}
-                          className={`w-full h-full object-cover ${isSelected ? 'opacity-100' : 'group-hover:opacity-90'}`}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                          No img
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        <ColorVariant
+          productType={productType}
+          colorVariants={colorVariants}
+          selectedVariant={selectedVariant}
+        />
       )}
 
       {/* Product Options */}
