@@ -21,7 +21,8 @@ import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
-import { PRODUCTS_BY_FAMILY_QUERY } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 
 type ProductImageType = {
   id: string;
@@ -68,20 +69,53 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   redirectIfHandleIsLocalized(request, { handle, data: product });
 
   // Fetch color variants if product has family metafield
-  let colorVariants = [];
+  let colorVariants: UIColorVariant[] = [];
   if (product.metafield?.value) {
     try {
-      const variantsResponse = await storefront.query(PRODUCTS_BY_FAMILY_QUERY, {
-        variables: { searchQuery: `metafield:custom.family:'${product.metafield.value}'` },
+
+      const FAMILY = product.metafield.value.trim();
+      // const FAMILY = 'vice_pro'
+      const response = await axiosShopifyAdmin.post("", {
+        query: ADMIN_PRODUCTS_BY_FAMILY,
+        variables: {
+          searchQuery: `metafields.custom.family:"${FAMILY}"`,
+        },
       });
-      colorVariants = variantsResponse?.products?.nodes || [];
+
+
+      // colorVariants = response.data?.data.products?.nodes || [];
+      const colorVariantsRes = response.data.data.products.edges || []
+      console.log('\n\ncolor variants')
+      console.log(JSON.stringify(colorVariantsRes))
+      console.log('\n\ncolor variants end')
+
+      function mapColorVariants(edges: any[]): UIColorVariant[] {
+        return edges.map((edge) => {
+          const node = edge.node;
+
+          return {
+            id: node.id,
+            title: node.title,
+            handle: node.handle,
+            featuredImage: node.featuredImage
+              ? {
+                url: node.featuredImage.url,
+                altText: node.featuredImage.altText,
+              }
+              : null,
+          };
+        });
+      }
+
+      colorVariants = mapColorVariants(colorVariantsRes)
+
       // Filter out the current product from variants
       colorVariants = colorVariants.filter((variant: any) => variant.id !== product.id);
 
-      console.log('\n\ncolor variants')
+      // console.log('\n\ncolor variants')
       colorVariants.map((item: any) => {
         if(item.metafield?.value === product.metafield?.value) {
-          console.log('item title',item.title)
+          // console.log('item title',item.title)
         }
         return item
       })

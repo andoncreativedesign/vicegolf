@@ -719,3 +719,53 @@ query ProductsByFamily(
   }
 }
 ` as const;
+
+
+export interface UIColorVariant {
+  id: string;
+  title: string;
+  handle: string;
+  featuredImage: {
+    url: string;
+    altText: string | null;
+  } | null;
+}
+
+export const ADMIN_PRODUCTS_BY_FAMILY = `
+  query ProductsByFamily($searchQuery: String!) {
+    products(first: 20, query: $searchQuery) {
+      edges {
+        node {
+          id
+          title
+          handle
+          productType
+          vendor
+          metafield(namespace: "custom", key: "family") {
+            id
+            namespace
+            key
+            type
+            value
+          }
+          featuredImage {
+            id
+            url
+            altText
+            width
+            height
+          }
+          images(first: 2) {
+            nodes {
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
+    }
+  }
+`;
