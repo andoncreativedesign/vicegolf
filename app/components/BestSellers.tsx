@@ -1,4 +1,5 @@
-import React from 'react';
+import { ProductCard } from './ProductCard';
+import type { ProductFragment } from 'storefrontapi.generated';
 
 type BestSellersProps = {
     /**
@@ -9,32 +10,53 @@ type BestSellersProps = {
     title?: string | null;
 };
 
+// Helper function to create mock product data
+const createMockProduct = (id: number, title: string, price: string): ProductFragment => ({
+    id: `gid://shopify/Product/${id}`,
+    title,
+    handle: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    description: `${title} - Premium quality golf equipment`,
+    productType: 'Golf Equipment',
+    featuredImage: null,
+    images: {
+        nodes: [],
+    },
+    variants: {
+        nodes: [
+            {
+                id: `gid://shopify/ProductVariant/${id * 1000}`,
+                price: {
+                    amount: price.replace(/[^0-9.]/g, ''),
+                    currencyCode: 'USD',
+                },
+                compareAtPrice: {
+                    amount: (parseFloat(price.replace(/[^0-9.]/g, '')) * 1.2).toFixed(2),
+                    currencyCode: 'USD',
+                },
+            },
+        ],
+    },
+});
+
 export function BestSellers({ title = 'BEST SELLERS' }: BestSellersProps) {
-    // Dummy best sellers data
-    const bestSellers = [
-        { id: 1, name: 'Premium Golf Balls (12 Pack)', price: '$49.99' },
-        { id: 2, name: 'Pro Golf Glove', price: '$24.99' },
-        { id: 3, name: 'Golf Tees (50 Pack)', price: '$9.99' },
-        { id: 4, name: 'Golf Towel', price: '$14.99' },
+    // Dummy best sellers data formatted for ProductCard
+    const bestSellers: ProductFragment[] = [
+        createMockProduct(1, 'Premium Golf Balls (12 Pack)', '$49.99'),
+        createMockProduct(2, 'Pro Golf Glove', '$24.99'),
+        createMockProduct(3, 'Golf Tees (50 Pack)', '$9.99'),
+        createMockProduct(4, 'Golf Towel', '$14.99'),
     ];
 
     return (
-        <div className="best-sellers mt-12">
+        <div className="best-sellers mt-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             {title && (
-                <h2 className="text-2xl font-bold mb-6 text-center">{title}</h2>
+                <h2 className="text-2xl font-bold mb-8 text-center text-gray-900">
+                    {title}
+                </h2>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {bestSellers.map((item) => (
-                    <div key={item.id} className="border p-4 rounded-lg text-center">
-                        <div className="h-32 bg-gray-100 mb-3 flex items-center justify-center">
-                            <span className="text-gray-400">Image</span>
-                        </div>
-                        <h3 className="font-medium">{item.name}</h3>
-                        <p className="text-gray-600">{item.price}</p>
-                        <button className="mt-2 bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors">
-                            Add to Cart
-                        </button>
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {bestSellers.map((product) => (
+                    <ProductCard key={product.id} product={product} />
                 ))}
             </div>
         </div>
