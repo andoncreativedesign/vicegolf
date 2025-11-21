@@ -125,16 +125,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
 
       colorVariants = mapColorVariants(colorVariantsRes)
 
-      // Filter out the current product from variants
-      colorVariants = colorVariants.filter((variant: any) => variant.id !== product.id);
-
-      // console.log('\n\ncolor variants')
-      colorVariants.map((item: any) => {
-        if (item.metafield?.value === product.metafield?.value) {
-          // console.log('item title',item.title)
-        }
-        return item
-      })
+      // Include all variants, we'll handle the current product styling in the UI
+      // The current product will be identified by matching the handle
 
     } catch (error) {
       console.error('Error fetching color variants:', error);
