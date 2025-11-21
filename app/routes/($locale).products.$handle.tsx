@@ -91,7 +91,7 @@ export default function Product() {
   const { title, descriptionHtml, images } = product;
   // Memoize the image selection to prevent unnecessary re-renders
   const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(null);
-  
+
   // Initialize selected image when component mounts or variant changes
   useEffect(() => {
     const newSelectedImage = selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
@@ -122,7 +122,7 @@ export default function Product() {
       const productDetails = await getProductDetails(product.id);
       setProductDetails(productDetails);
       console.log('productDetails ', productDetails);
-      
+
       // Reset selected image when product changes
       if (product.images?.nodes?.[0]) {
         setSelectedImage(product.images.nodes[0] as ProductImageType);
@@ -173,12 +173,27 @@ export default function Product() {
             return <PoloProduct product={product} productDetails={productDetails} />;
           case 'golf club set':
             return <GolfClubSetProduct productDetails={productDetails} />;
+          case 'golf bag':
+          case 'golf bags':
+          case 'cap':
+          case 'caps':
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                showBestSellers={true}
+              />
+            );
           case 'tees':
             return <TeeProduct productDetails={productDetails} />
           case 'rangefinder':
             return <RangefinderProduct productDetails={productDetails} />;
           default:
-            return <GolfBallProduct productDetails={productDetails} />;
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                showBestSellers={false}
+              />
+            );
         }
 
 

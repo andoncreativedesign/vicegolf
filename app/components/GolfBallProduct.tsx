@@ -2,13 +2,22 @@ import { useEffect, useState } from 'react';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { ProductDetailContents } from '~/components/Product/ProductDetailContents';
 import { Youtube } from '~/components/Youtube';
+import { BestSellers } from '~/components/BestSellers';
 import type { ProductDetails } from '~/lib/sanity/products';
 
 type GolfBallProductProps = {
   productDetails: ProductDetails | null;
+  /**
+   * Controls whether to show the BestSellers section
+   * @default true
+   */
+  showBestSellers?: boolean;
 };
 
-export function GolfBallProduct({ productDetails }: GolfBallProductProps) {
+export function GolfBallProduct({
+  productDetails,
+  showBestSellers = true
+}: GolfBallProductProps) {
 
   return (
     <>
@@ -24,6 +33,13 @@ export function GolfBallProduct({ productDetails }: GolfBallProductProps) {
       {productDetails && productDetails?.youtubeVideos &&
         <Youtube youtubeVideo={productDetails?.youtubeVideos} />
       }
+
+      {/* Best Sellers Section - Conditionally rendered */}
+      {showBestSellers && (
+        <div className="mt-16">
+          <BestSellers />
+        </div>
+      )}
     </>
   );
 }
