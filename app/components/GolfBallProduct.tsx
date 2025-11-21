@@ -38,7 +38,7 @@ export function GolfBallProduct({
       {/* Best Sellers Section - Conditionally rendered */}
       {showBestSellers && recommendedProducts && recommendedProducts.products?.nodes?.length > 0 && (
         <div className="mt-16">
-          <BestSellers products={recommendedProducts.products.nodes.slice(0, 4)} title={null} />
+          <BestSellers products={recommendedProducts.products.nodes} title={null} />
         </div>
       )}
     </>
