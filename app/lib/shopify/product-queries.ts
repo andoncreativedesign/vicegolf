@@ -741,28 +741,37 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `
           handle
           productType
           vendor
-          metafield(namespace: "custom", key: "family") {
+
+          # Product-level: Product Family metafield
+          family: metafield(namespace: "custom", key: "family") {
             id
             namespace
             key
             type
             value
           }
+
+          # Product-level: Variant Image metafield 
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
+
           featuredImage {
             id
             url
             altText
             width
             height
-          }
-          images(first: 2) {
-            nodes {
-              id
-              url
-              altText
-              width
-              height
-            }
           }
         }
       }

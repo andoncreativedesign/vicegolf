@@ -15,6 +15,7 @@ import { ProductDetailsAccordions } from './ProductDetailsAccordions';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useEffect, useRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
+import type { UIColorVariant } from '~/lib/shopify/product-queries';
 
 export function ProductForm({
   productOptions,
@@ -31,7 +32,7 @@ export function ProductForm({
   description: string;
   productType?: string;
   productAccordions: AccordionItem[];
-  colorVariants?: any[];
+  colorVariants?: UIColorVariant[];
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -39,6 +40,7 @@ export function ProductForm({
   const [selectedTier, setSelectedTier] = useState('1');
   const formRef = useRef<HTMLDivElement>(null);
   const [formHeight, setFormHeight] = useState('auto');
+  const [variantStyle, setVariantStyle] = useState('w-18 h-18 rounded-md');
 
   const pricingTiers = [
     { key: '1', label: '1 dozen' },
@@ -68,6 +70,16 @@ export function ProductForm({
   useEffect(() => {
     setFormHeight('600px');
   }, []);
+
+  useEffect(() => {
+    if (productType === 'Golf Balls') {
+      setVariantStyle('w-10 h-10 rounded-full')
+    }
+  }, [productType])
+
+  useEffect(() => {
+    console.log('selectedVariant', selectedVariant)
+  }, [selectedVariant])
 
   return (
     <div
@@ -117,7 +129,10 @@ export function ProductForm({
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <div className="mb-6">
-          <h5 className="text-sm font-medium text-gray-700 mb-3">Variants:</h5>
+          <div className='flex gap-2 items-center mb-3'>
+            <p className="font-semibold text-gray-700">Color:</p>
+            <p className="text-sm text-gray-500">{selectedVariant?.selectedOptions?.[0].value }</p>
+          </div>
           <div className="flex flex-wrap gap-2">
             {colorVariants.map((variant) => (
               <Link
@@ -125,8 +140,8 @@ export function ProductForm({
                 to={`/products/${variant.handle}`}
                 className="group block"
               >
-                <div className="flex items-center gap-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
-                  <div className="w-16 h-16 overflow-hidden rounded bg-gray-100">
+                <div className="flex items-center gap-2">
+                  <div className={`overflow-hidden bg-gray-100 ${variantStyle}`}>
                     {variant.featuredImage ? (
                       <img
                         src={variant.featuredImage.url}
@@ -145,11 +160,11 @@ export function ProductForm({
           </div>
         </div>
       )}
-      
+
       {/* Product Options */}
       {productOptions.map((option) => {
         if (option.optionValues.length === 1) return null;
-        if(option.name === 'Color') return null;
+        if (option.name === 'Color') return null;
         return (
           <div className="product-options mb-6" key={option.name}>
             <h5 className="text-sm font-medium text-gray-700 mb-3">
@@ -248,7 +263,7 @@ export function ProductForm({
       </div>
 
       {/* Details Accordions */}
-      <ProductDetailsAccordions accordions={productAccordions}/>
+      <ProductDetailsAccordions accordions={productAccordions} />
     </div>
   );
 }

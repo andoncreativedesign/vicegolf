@@ -84,7 +84,12 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
 
 
       // colorVariants = response.data?.data.products?.nodes || [];
-      const colorVariantsRes = response.data.data.products.edges || []
+      // const colorVariantsRes = response.data.data.products.edges || []
+      if (response.data.errors) {
+        throw new Error(JSON.stringify(response?.data?.errors))
+      }
+
+      const colorVariantsRes = response.data.data.products.edges
       console.log('\n\ncolor variants')
       console.log(JSON.stringify(colorVariantsRes))
       console.log('\n\ncolor variants end')
@@ -93,19 +98,30 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         return edges.map((edge) => {
           const node = edge.node;
 
-          return {
-            id: node.id,
-            title: node.title,
-            handle: node.handle,
-            featuredImage: node.featuredImage
+          // Extract variant_image metafield reference (MediaImage)
+          const variantMetaImage = node.variantImage?.reference?.image || null;
+          // Determine best image
+          const finalImage = variantMetaImage
+            ? {
+              url: variantMetaImage.url,
+              altText: variantMetaImage.altText,
+            }
+            : node.featuredImage
               ? {
                 url: node.featuredImage.url,
                 altText: node.featuredImage.altText,
               }
-              : null,
+              : null;
+
+          return {
+            id: node.id,
+            title: node.title,
+            handle: node.handle,
+            featuredImage: finalImage,
           };
         });
       }
+
 
       colorVariants = mapColorVariants(colorVariantsRes)
 
@@ -114,7 +130,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
 
       // console.log('\n\ncolor variants')
       colorVariants.map((item: any) => {
-        if(item.metafield?.value === product.metafield?.value) {
+        if (item.metafield?.value === product.metafield?.value) {
           // console.log('item title',item.title)
         }
         return item
@@ -136,9 +152,9 @@ export default function Product() {
   const { product, colorVariants } = useLoaderData<typeof loader>();
 
   useEffect(() => {
-    console.log('product details from shopify',product)
-    console.log('color variants from shopify',colorVariants)
-  }, [colorVariants,product])
+    console.log('product details from shopify', product)
+    console.log('color variants from shopify', colorVariants)
+  }, [colorVariants, product])
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
@@ -155,7 +171,7 @@ export default function Product() {
   const { title, descriptionHtml, images } = product;
   // Memoize the image selection to prevent unnecessary re-renders
   const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(null);
-  
+
   // Initialize selected image when component mounts or variant changes
   useEffect(() => {
     const newSelectedImage = selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
@@ -186,7 +202,7 @@ export default function Product() {
       const productDetails = await getProductDetails(product.id);
       setProductDetails(productDetails);
       console.log('productDetails ', productDetails);
-      
+
       // Reset selected image when product changes
       if (product.images?.nodes?.[0]) {
         setSelectedImage(product.images.nodes[0] as ProductImageType);
