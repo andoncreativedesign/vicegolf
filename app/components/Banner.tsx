@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 
 interface BannerProps {
   messages?: string[];
@@ -6,104 +6,80 @@ interface BannerProps {
   backgroundColor?: string;
   textColor?: string;
   className?: string;
-  speed?: number; // Time in seconds for one full scroll
+  speed?: number;
   pauseOnHover?: boolean;
 }
 
-export function Banner({ 
+export function Banner({
   messages = [],
-  text = '',
-  backgroundColor = 'bg-black', 
-  textColor = 'text-white',
-  className = '',
+  text = "",
+  backgroundColor = "bg-black",
+  textColor = "text-white",
+  className = "",
   speed = 20,
-  pauseOnHover = true
+  pauseOnHover = true,
 }: BannerProps) {
-  // If text prop is provided, use it as a single message
   const bannerMessages = text ? [text] : messages;
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Handle auto-scrolling of messages
-  useEffect(() => {
-    if (bannerMessages.length <= 1 || isPaused) return;
+  const repeated = useMemo(() => {
+    const repeats = 10;
+    return Array.from({ length: repeats }, () => bannerMessages).flat();
+  }, [bannerMessages]);
 
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerMessages.length);
-    }, speed * 1000);
-
-    return () => clearInterval(interval);
-  }, [bannerMessages.length, speed, isPaused]);
-
-  // If no messages, don't render anything
-  if (bannerMessages.length === 0) return null;
+  if (!bannerMessages.length) return null;
 
   return (
-    <div 
+    <div
       className={`w-full py-2 px-4 overflow-hidden ${backgroundColor} ${textColor} ${className}`}
       style={{ marginLeft: 0, marginRight: 0 }}
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
     >
-      <div className="whitespace-nowrap">
-        {bannerMessages.length > 1 ? (
-          <div 
-            className="inline-block animate-marquee whitespace-nowrap"
-            style={{
-              animationDuration: `${speed * bannerMessages.length}s`,
-              animationPlayState: isPaused ? 'paused' : 'running',
-              paddingLeft: '100%',
-              display: 'inline-block',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {bannerMessages.map((message, index) => (
-              <span key={index} className="inline-block mx-8">
-                {message}
-              </span>
-            ))}
-            {/* Duplicate messages for seamless looping */}
-            {bannerMessages.map((message, index) => (
-              <span key={`duplicate-${index}`} className="inline-block mx-8">
-                {message}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm font-medium text-center">{bannerMessages[0]}</p>
-        )}
+      <div
+        className="flex whitespace-nowrap animate-marquee"
+        style={{
+          animationDuration: `${speed}s`,
+          animationPlayState: isPaused ? "paused" : "running",
+        }}
+      >
+        {repeated.map((msg, i) => (
+          <span key={i} className="mx-8 inline-block">
+            {msg}
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-// Add the animation keyframes to the document's head
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes marquee {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-    .animate-marquee {
-      animation: marquee linear infinite;
-      display: inline-block;
-      white-space: nowrap;
-    }
-  `;
-  document.head.appendChild(style);
+if (typeof document !== "undefined") {
+  if (!document.getElementById("marquee-style")) {
+    const style = document.createElement("style");
+    style.id = "marquee-style";
+    style.textContent = `
+      @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-marquee {
+        animation: marquee linear infinite;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 }
 
-// Default export with Black Friday styling for convenience
 export function BlackFridayBanner() {
   return (
-    <Banner 
+    <Banner
       messages={[
-        "⚡️ Black Friday Deals Are Live ⚡️",
-        "✈️ Free shipping at $150"
+        "⚡ Black Friday Deals Are Live ⚡",
+        "New Balls: Cosmic Collection 🚀",
+        "⚡ Black Friday Deals Are Live ⚡",
       ]}
-      className="font-semibold"
-      speed={15}
+      className="text-[13px] md:text-[15px] font-semibold tracking-wide leading-tight"
+      speed={20}
     />
   );
 }

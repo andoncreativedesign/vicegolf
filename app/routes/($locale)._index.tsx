@@ -15,6 +15,7 @@ import { getHomePageData } from '~/lib/sanity/home';
 import { createCategoryQuery, GET_POPULAR_COLLECTIONS, MULTIPLE_COLLECTIONS_QUERY, RECOMMENDED_PRODUCTS_QUERY, type MenuData } from '~/lib/shopify/product-queries';
 import ClientLogos from '~/components/Home/ClientLogos';
 import ShopByCategories from '~/components/Home/ShopByCategories';
+import { ViceLookSection } from '~/components/Home/ViceLookSection';
 import type { MenuItem } from '~/lib/shopify/product-queries';
 
 export const meta: Route.MetaFunction = () => {
@@ -189,24 +190,26 @@ export default function Homepage() {
 
       {/* <FeaturedCollection collection={data.featuredCollection} /> */}
 
-        <ClientLogos brands={data.homePageData?.brand || []} />
+      <ClientLogos brands={data.homePageData?.brand || []} />
 
-        {data?.homePageData?.homeCategories &&
-          <ShopByCategories
-            menuItems={menu.slice(0, 4)}
-            sanityHomeCategories={data?.homePageData?.homeCategories}
-          />
-        }
+      {data?.homePageData?.homeCategories &&
+        <ShopByCategories
+          menuItems={menu.slice(0, 4)}
+          sanityHomeCategories={data?.homePageData?.homeCategories}
+        />
+      }
 
-        <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+      <HeroSection heroData={data.homePageData?.secondaryHero || null} />
 
-        {data.recommendedProducts?.products?.nodes && (
-          <ProductGrid
-            products={data.recommendedProducts.products.nodes}
-            title="RECOMMENDED PRODUCTS"
-            categoryHandle="recommended"
-          />
-        )}
+      {data.recommendedProducts?.products?.nodes && (
+        <ProductGrid
+          products={data.recommendedProducts.products.nodes}
+          title="RECOMMENDED PRODUCTS"
+          categoryHandle="recommended"
+        />
+      )}
+
+      <ViceLookSection />
 
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>
