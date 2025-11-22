@@ -6,6 +6,7 @@ interface ProductContent1Props {
   showImageLeft?: boolean;
   isTextFull?: boolean;
   isImageFull?: boolean;
+  isDescriptionFull?: boolean;
   imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
   titleClassName?: string;
   descriptionClassName?: string;
@@ -16,6 +17,7 @@ const ProductDetailsContent1 = ({
   showImageLeft = false,
   isTextFull = false,
   isImageFull = false,
+  isDescriptionFull = false,
   imageSize = 'medium',
   titleClassName = '',
   descriptionClassName = ''
@@ -49,7 +51,7 @@ const ProductDetailsContent1 = ({
         )}
       </div>
       {content.description && (
-        <p className={`text-2xl lg:text-3xl leading-relaxed font-normal ${descriptionClassName || 'text-gray-700'} ${isTextFull ? 'max-w-4xl text-center' : 'max-w-xl'} mx-auto lg:mx-0 mb-6 -mt-1`}>
+        <p className={`text-2xl lg:text-3xl leading-relaxed font-normal ${descriptionClassName || 'text-gray-700'} ${isDescriptionFull ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'max-w-xl')} mx-auto lg:mx-0 mb-6 -mt-1`}>
           {content.description}
         </p>
       )}

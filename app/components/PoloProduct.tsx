@@ -54,7 +54,7 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
           return (
             <div
               key={index}
-              className={`${isFirst ? 'pt-8 pb-10' : ''}`}
+              className={`${isFirst ? 'pt-8 pb-10 mb-8' : ''}`}
             >
               <div className="max-w-8xl mx-auto">
                 <div className={isFirst ? 'py-2' : ''}>
@@ -65,6 +65,7 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
                         showImageLeft={isSecond ? true : !isEven}
                         isTextFull={isEven}
                         isImageFull={isSecond ? true : isEven}
+                        isDescriptionFull={isSecond ? true : false}
                         imageSize={isEven ? 'xlarge' : 'large'}
                       />
                     </div>
