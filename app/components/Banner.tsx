@@ -32,6 +32,7 @@ export function Banner({
   return (
     <div
       className={`w-full py-2 px-4 overflow-hidden ${backgroundColor} ${textColor} ${className}`}
+      style={{ marginLeft: 0, marginRight: 0 }}
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
     >
