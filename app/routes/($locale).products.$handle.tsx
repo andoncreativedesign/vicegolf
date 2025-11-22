@@ -1,5 +1,4 @@
-// app/routes/($locale).products.$handle.tsx
-import { redirect, useLoaderData } from 'react-router';
+import { redirect, useLoaderData, Link } from 'react-router';
 import { useCallback, useEffect, useState } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
@@ -22,6 +21,8 @@ import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
+import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 
 type ProductImageType = {
@@ -63,7 +64,73 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     throw new Response(null, { status: 404 });
   }
   redirectIfHandleIsLocalized(request, { handle, data: product });
-  return { product };
+
+  // Fetch color variants if product has family metafield
+  let colorVariants: UIColorVariant[] = [];
+  if (product.metafield?.value) {
+    try {
+
+      const FAMILY = product.metafield.value.trim();
+      // const FAMILY = 'vice_pro'
+      const response = await axiosShopifyAdmin.post("", {
+        query: ADMIN_PRODUCTS_BY_FAMILY,
+        variables: {
+          searchQuery: `metafields.custom.family:"${FAMILY}"`,
+        },
+      });
+
+
+      // colorVariants = response.data?.data.products?.nodes || [];
+      // const colorVariantsRes = response.data.data.products.edges || []
+      if (response.data.errors) {
+        throw new Error(JSON.stringify(response?.data?.errors))
+      }
+
+      const colorVariantsRes = response.data.data.products.edges
+      console.log('\n\ncolor variants')
+      console.log(JSON.stringify(colorVariantsRes))
+      console.log('\n\ncolor variants end')
+
+      function mapColorVariants(edges: any[]): UIColorVariant[] {
+        return edges.map((edge) => {
+          const node = edge.node;
+
+          // Extract variant_image metafield reference (MediaImage)
+          const variantMetaImage = node.variantImage?.reference?.image || null;
+          // Determine best image
+          const finalImage = variantMetaImage
+            ? {
+              url: variantMetaImage.url,
+              altText: variantMetaImage.altText,
+            }
+            : node.featuredImage
+              ? {
+                url: node.featuredImage.url,
+                altText: node.featuredImage.altText,
+              }
+              : null;
+
+          return {
+            id: node.id,
+            title: node.title,
+            handle: node.handle,
+            featuredImage: finalImage,
+          };
+        });
+      }
+
+
+      colorVariants = mapColorVariants(colorVariantsRes)
+
+      // Include all variants, we'll handle the current product styling in the UI
+      // The current product will be identified by matching the handle
+
+    } catch (error) {
+      console.error('Error fetching color variants:', error);
+    }
+  }
+
+  return { product, colorVariants };
 }
 
 async function loadDeferredData({ context }: Route.LoaderArgs) {
@@ -77,7 +144,14 @@ async function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const { product, recommendedProducts } = useLoaderData<typeof loader>();
+  const { product, colorVariants, recommendedProducts } = useLoaderData<typeof loader>();
+
+  useEffect(() => {
+    console.log('product details from shopify', product)
+    console.log('color variants from shopify', colorVariants)
+  }, [colorVariants, product])
+
+  // const { product, recommendedProducts } = useLoaderData<typeof loader>();
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
     getAdjacentAndFirstAvailableVariants(product),
@@ -149,6 +223,7 @@ export default function Product() {
             description={descriptionHtml}
             productType={product.productType}
             productAccordions={productDetails?.accordionItems || []}
+            colorVariants={colorVariants}
           />
         </div>
       </div>
@@ -188,22 +263,22 @@ export default function Product() {
             );
         }
         // ! working code below
-        // switch(productType) {
-        // case 'golf balls':
-        // return <GolfBallProduct product={product} />;
-        // case 'golf club set':
-        // return <GolfClubSetProduct product={product} />;
-        // case 'golf bag':
-        // case 'golf bags':
-        // return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
-        // case 'shoes':
-        // return <ShoesProduct product={product} />;
-        // case 'polo':
-        // case 'polos':
-        // return <PoloProduct product={product} />;
-        // default:
-        // return null;
-        // }
+        //   switch(productType) {
+        //     case 'golf balls':
+        //       return <GolfBallProduct product={product} />;
+        //     case 'golf club set':
+        //       return <GolfClubSetProduct product={product} />;
+        //     case 'golf bag':
+        //     case 'golf bags':
+        //       return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
+        //     case 'shoes':
+        //       return <ShoesProduct product={product} />;
+        //     case 'polo':
+        //     case 'polos':
+        //       return <PoloProduct product={product} />;
+        //     default:
+        //       return null;
+        //   }
       })()}
       {/* Customer Reviews Section (common for all products) */}
       <CustomerReviews />
@@ -274,6 +349,13 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    metafield(namespace: "custom", key: "family") {
+      id
+      namespace
+      key
+      type
+      value
+    }
     images(first: 10) {
       nodes {
         id

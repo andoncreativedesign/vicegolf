@@ -388,6 +388,15 @@ fragment ProductItem on Product {
   title
   productType
   vendor
+  
+  metafield(namespace: "custom", key: "family") {
+    id
+    namespace
+    key
+    type
+    value
+  }
+
   variants(first: 1) {
         nodes {
       id
@@ -650,3 +659,122 @@ fragment ProductCardFragment on Product {
     }
   }
 ` as const;
+
+export const PRODUCTS_BY_FAMILY_QUERY = `#graphql
+fragment ColorVariantProduct on Product {
+  id
+  title
+  handle
+  productType
+  vendor
+  metafield(namespace: "custom", key: "family") {
+    id
+    namespace
+    key
+    type
+    value
+  }
+  featuredImage {
+    id
+    url
+    altText
+    width
+    height
+  }
+  images(first: 2) {
+    nodes {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+  variants(first: 1) {
+    nodes {
+      id
+      availableForSale
+      price {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+    }
+  }
+}
+
+query ProductsByFamily(
+  $searchQuery: String!
+  $country: CountryCode
+  $language: LanguageCode
+  $first: Int = 20
+) @inContext(country: $country, language: $language) {
+  products(first: $first, query: $searchQuery) {
+    nodes {
+      ...ColorVariantProduct
+    }
+  }
+}
+` as const;
+
+
+export interface UIColorVariant {
+  id: string;
+  title: string;
+  handle: string;
+  featuredImage: {
+    url: string;
+    altText: string | null;
+  } | null;
+}
+
+export const ADMIN_PRODUCTS_BY_FAMILY = `
+  query ProductsByFamily($searchQuery: String!) {
+    products(first: 20, query: $searchQuery) {
+      edges {
+        node {
+          id
+          title
+          handle
+          productType
+          vendor
+
+          # Product-level: Product Family metafield
+          family: metafield(namespace: "custom", key: "family") {
+            id
+            namespace
+            key
+            type
+            value
+          }
+
+          # Product-level: Variant Image metafield 
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
+
+          featuredImage {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
+  }
+`;
