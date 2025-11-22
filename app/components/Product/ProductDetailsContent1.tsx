@@ -45,13 +45,13 @@ const ProductDetailsContent1 = ({
     <div className={`space-y-6 ${isTextFull ? 'w-full flex flex-col items-center' : 'flex flex-col justify-center h-full'} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'}`}>
       <div className={`${isTextFull ? 'w-full max-w-4xl' : ''}`}>
         {content.title && (
-          <h3 className={`text-3xl lg:text-4xl font-semibold mb-1 ${titleClassName || 'text-main-900'} ${isTextFull ? 'text-center' : 'text-left'}`}>
+          <h3 className={`text-3xl lg:text-4xl font-semibold mb-1 ${titleClassName || 'text-main-900'} ${isTextFull ? 'text-center' : 'text-center lg:text-left'}`}>
             {content.title}
           </h3>
         )}
       </div>
       {content.description && (
-        <p className={`!text-xl !lg:text-2xl leading-relaxed font-light text-gray-500 ${isDescriptionFull ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'max-w-xl')} mx-auto lg:mx-0 mb-6 -mt-1`}>
+        <p className={`!text-xl !lg:text-2xl leading-relaxed font-light text-gray-500 ${isDescriptionFull ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left max-w-xl')} mx-auto lg:mx-0 mb-6 -mt-1 ${descriptionClassName}`}>
           {content.description}
         </p>
       )}

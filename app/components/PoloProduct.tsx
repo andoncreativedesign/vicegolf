@@ -20,14 +20,12 @@ const ProductSummaryPolo = () => {
             />
           </div>
         </div>
-
         {/* Content section - right side */}
         <div className="w-full lg:w-[50%] flex items-center">
           <div className="w-full space-y-4 lg:space-y-6 text-center lg:text-left">
             <h3 className="text-2xl lg:text-3xl font-bold text-gray-900">The Definitive Golf Polo</h3>
             <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-lg mx-auto lg:mx-0">
               The original performance-focused Vice Golf Polo is a staple of every golfer's wardrobe. Crafted to be the definitive golfing polo, it's specifically engineered with a premium fabric blend featuring sweat-wicking properties to keep you cool when the heat is on. Cut for the course, it provides optimal movement through each swing and is reinforced in high-stress areas to maintain the sleek look and keep you looking sharp if you decide to take things beyond the course.
-
             </p>
           </div>
         </div>
@@ -42,7 +40,6 @@ type PoloProductProps = {
 };
 
 export function PoloProduct({ product, productDetails }: PoloProductProps) {
-
   return (
     <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
       <div className="max-w-8xl mx-auto">
@@ -58,7 +55,7 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
             >
               <div className="max-w-8xl mx-auto">
                 <div className={isFirst ? 'py-2' : ''}>
-                  <div className={isSecond ? 'min-h-[800px]' : 'max-h-[650px] overflow-hidden'}>
+                  <div className={isSecond ? 'min-h-[800px]' : 'lg:max-h-[650px] lg:overflow-hidden'}>
                     <div className={isSecond ? 'flex flex-col space-y-8' : ''}>
                       <ProductDetailsContent1
                         content={item}
@@ -75,7 +72,6 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
             </div>
           );
         })}
-
         {/* Youtube Video Section */}
         {productDetails && productDetails.youtubeVideos && (
           <div className="mt-16 md:mt-20 lg:mt-24">
