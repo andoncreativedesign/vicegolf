@@ -51,7 +51,7 @@ const ProductDetailsContent1 = ({
         )}
       </div>
       {content.description && (
-        <p className={`text-2xl lg:text-3xl leading-relaxed font-normal ${descriptionClassName || 'text-gray-700'} ${isDescriptionFull ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'max-w-xl')} mx-auto lg:mx-0 mb-6 -mt-1`}>
+        <p className={`!text-xl !lg:text-2xl leading-relaxed font-light text-gray-500 ${isDescriptionFull ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'max-w-xl')} mx-auto lg:mx-0 mb-6 -mt-1`}>
           {content.description}
         </p>
       )}
