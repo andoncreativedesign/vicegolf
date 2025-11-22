@@ -23,6 +23,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 
 type ProductImageType = {
   id: string;
@@ -43,7 +44,7 @@ export const meta: Route.MetaFunction = ({ data }) => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = loadDeferredData(args);
+  const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
   return { ...deferredData, ...criticalData };
 }
@@ -51,21 +52,17 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
   const { handle } = params;
   const { storefront } = context;
-
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
-
   const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: { handle, selectedOptions: getSelectedProductOptions(request) },
     }),
   ]);
-
   if (!product?.id) {
     throw new Response(null, { status: 404 });
   }
-
   redirectIfHandleIsLocalized(request, { handle, data: product });
 
   // Fetch color variants if product has family metafield
@@ -136,34 +133,37 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   return { product, colorVariants };
 }
 
-function loadDeferredData({ context, params }: Route.LoaderArgs) {
-  return {};
+async function loadDeferredData({ context }: Route.LoaderArgs) {
+  const recommendedProducts = await context.storefront
+    .query(RECOMMENDED_PRODUCTS_QUERY)
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+  return { recommendedProducts };
 }
 
 export default function Product() {
-  const { product, colorVariants } = useLoaderData<typeof loader>();
+  const { product, colorVariants, recommendedProducts } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     console.log('product details from shopify', product)
     console.log('color variants from shopify', colorVariants)
   }, [colorVariants, product])
 
+  // const { product, recommendedProducts } = useLoaderData<typeof loader>();
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
     getAdjacentAndFirstAvailableVariants(product),
   );
-
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
-
   const productOptions = getProductOptions({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
   });
-
   const { title, descriptionHtml, images } = product;
   // Memoize the image selection to prevent unnecessary re-renders
   const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(null);
-
   // Initialize selected image when component mounts or variant changes
   useEffect(() => {
     const newSelectedImage = selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
@@ -176,7 +176,6 @@ export default function Product() {
     });
   }, [selectedVariant, images]);
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
-
   // Handle image selection with proper object reference
   const handleImageSelect = useCallback((image: ProductImageType) => {
     setSelectedImage(prev => {
@@ -187,26 +186,22 @@ export default function Product() {
       return prev;
     });
   }, []);
-
   // Fetch product details when product changes
   useEffect(() => {
     const fetchProductDetails = async () => {
       const productDetails = await getProductDetails(product.id);
       setProductDetails(productDetails);
       console.log('productDetails ', productDetails);
-
       // Reset selected image when product changes
       if (product.images?.nodes?.[0]) {
         setSelectedImage(product.images.nodes[0] as ProductImageType);
       }
     };
-
     fetchProductDetails();
   }, [product.id]);
-
   return (
-    <div className="product-page-container w-full max-w-7xl mx-auto px-0 sm:px-1 lg:px-2 py-3 md:py-4">
-      <div className="flex flex-col lg:flex-row gap-4 w-full">
+    <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
+      <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-20">
         <div className="w-full lg:w-[55%]">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
@@ -232,12 +227,9 @@ export default function Product() {
           />
         </div>
       </div>
-
       {/* Product-specific sections */}
       {(() => {
-
         const productType = product.productType?.toLowerCase();
-
         switch (productType) {
           case 'polo':
           case 'polos':
@@ -246,15 +238,30 @@ export default function Product() {
             return <PoloProduct product={product} productDetails={productDetails} />;
           case 'golf club set':
             return <GolfClubSetProduct productDetails={productDetails} />;
+          case 'golf bag':
+          case 'golf bags':
+          case 'cap':
+          case 'caps':
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                recommendedProducts={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           case 'tees':
             return <TeeProduct productDetails={productDetails} />
           case 'rangefinder':
             return <RangefinderProduct productDetails={productDetails} />;
           default:
-            return <GolfBallProduct productDetails={productDetails} />;
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                recommendedProducts={recommendedProducts}
+                showBestSellers={false}
+              />
+            );
         }
-
-
         // ! working code below
         //   switch(productType) {
         //     case 'golf balls':
@@ -273,10 +280,8 @@ export default function Product() {
         //       return null;
         //   }
       })()}
-
       {/* Customer Reviews Section (common for all products) */}
       <CustomerReviews />
-
       <Analytics.ProductView
         data={{
           products: [
