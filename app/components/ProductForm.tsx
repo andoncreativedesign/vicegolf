@@ -17,6 +17,8 @@ import { useState, useEffect, useRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
+import ProductOptions from './Product/ProductOptionsSelector';
+import ProductOptionsSelector from './Product/ProductOptionsSelector';
 
 export function ProductForm({
   productOptions,
@@ -126,7 +128,7 @@ export function ProductForm({
       )}
 
       {/* Product Options */}
-      {productOptions.map((option) => {
+      {/* {productOptions.map((option) => {
         if (option.optionValues.length === 1) return null;
         if (option.name === 'Color') return null;
         return (
@@ -187,10 +189,14 @@ export function ProductForm({
             </div>
           </div>
         );
-      })}
+      })} */}
+
+      <ProductOptionsSelector
+        productOptions={productOptions}
+      />
 
       {/* Quantity Selector */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <QuantitySelector
           selectedTier={selectedTier}
           setSelectedTier={setSelectedTier}
@@ -198,7 +204,7 @@ export function ProductForm({
           setQuantity={handleCustomQuantity}
           pricingTiers={pricingTiers}
         />
-      </div>
+      </div> */}
 
       {/* Add to Cart Button */}
       <div className="mb-6">
