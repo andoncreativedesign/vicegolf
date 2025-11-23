@@ -9,7 +9,7 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
   }
 
   return (
-    <div key={option.name} className="space-y-2">
+    <div key={option.name} className="space-y-2 my-2">
       <h5 className="text-sm font-medium text-gray-900">
         {option.name}:
       </h5>

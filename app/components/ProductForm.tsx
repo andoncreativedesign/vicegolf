@@ -17,8 +17,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
-import ProductOptions from './Product/ProductOptionsSelector';
-import ProductOptionsSelector from './Product/ProductOptionsSelector';
+import ProductOptionDozen from './Product/ProductOptionDozen';
 
 export function ProductForm({
   productOptions,
@@ -127,73 +126,71 @@ export function ProductForm({
         />
       )}
 
-      {/* Product Options */}
-      {/* {productOptions.map((option) => {
-        if (option.optionValues.length === 1) return null;
-        if (option.name === 'Color') return null;
-        return (
-          <div className="product-options mb-6" key={option.name}>
-            <h5 className="text-sm font-medium text-gray-700 mb-3">
-              {option.name}:
-            </h5>
-            <div className="grid grid-cols-6 gap-2">
-              {option.optionValues.map((value) => {
-                const {
-                  name,
-                  handle,
-                  variantUriQuery,
-                  selected,
-                  available,
-                  exists,
-                  isDifferentProduct,
-                  swatch,
-                } = value;
+      <div className="space-y-3">
+        {productOptions.map((option, index) => {
+          if (option.optionValues.length === 1) return null;
+          if (option.name === 'Color') return null;
+          if (option.name?.includes('pack size')) return <ProductOptionDozen key={index} option={option} />
+          return (
+            <div className="product-options mb-6" key={option.name}>
+              <h5 className="text-sm font-medium text-gray-700 mb-3">
+                {option.name}:
+              </h5>
+              <div className="grid grid-cols-6 gap-2">
+                {option.optionValues.map((value) => {
+                  const {
+                    name,
+                    handle,
+                    variantUriQuery,
+                    selected,
+                    available,
+                    exists,
+                    isDifferentProduct,
+                    swatch,
+                  } = value;
 
-                if (isDifferentProduct) {
-                  return (
-                    <Link
-                      className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
-                        } ${!available ? 'opacity-40 grayscale' : ''}`}
-                      key={option.name + name}
-                      prefetch="intent"
-                      preventScrollReset
-                      replace
-                      to={`/products/${handle}?${variantUriQuery}`}
-                    >
-                      <ProductOptionSwatch swatch={swatch} name={name} />
-                    </Link>
-                  );
-                } else {
-                  return (
-                    <button
-                      type="button"
-                      className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
-                        } ${!exists ? 'opacity-40 cursor-not-allowed' : ''} ${!available ? 'grayscale' : ''
-                        }`}
-                      key={option.name + name}
-                      disabled={!exists}
-                      onClick={() => {
-                        if (!selected) {
-                          void navigate(`?${variantUriQuery}`, {
-                            replace: true,
-                            preventScrollReset: true,
-                          });
-                        }
-                      }}
-                    >
-                      <ProductOptionSwatch swatch={swatch} name={name} />
-                    </button>
-                  );
-                }
-              })}
+                  if (isDifferentProduct) {
+                    return (
+                      <Link
+                        className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
+                          } ${!available ? 'opacity-40 grayscale' : ''}`}
+                        key={option.name + name}
+                        prefetch="intent"
+                        preventScrollReset
+                        replace
+                        to={`/products/${handle}?${variantUriQuery}`}
+                      >
+                        <ProductOptionSwatch swatch={swatch} name={name} />
+                      </Link>
+                    );
+                  } else {
+                    return (
+                      <button
+                        type="button"
+                        className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
+                          } ${!exists ? 'opacity-40 cursor-not-allowed' : ''} ${!available ? 'grayscale' : ''
+                          }`}
+                        key={option.name + name}
+                        disabled={!exists}
+                        onClick={() => {
+                          if (!selected) {
+                            void navigate(`?${variantUriQuery}`, {
+                              replace: true,
+                              preventScrollReset: true,
+                            });
+                          }
+                        }}
+                      >
+                        <ProductOptionSwatch swatch={swatch} name={name} />
+                      </button>
+                    );
+                  }
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })} */}
-
-      <ProductOptionsSelector
-        productOptions={productOptions}
-      />
+          );
+        })}
+      </div>
 
       {/* Quantity Selector */}
       {/* <div className="mb-6">
