@@ -130,7 +130,11 @@ export function ProductForm({
         {productOptions.map((option, index) => {
           if (option.optionValues.length === 1) return null;
           if (option.name === 'Color') return null;
-          if (option.name?.includes('pack size')) return <ProductOptionDozen key={index} option={option} />
+          if (option.name?.includes('pack size')) return <ProductOptionDozen
+            key={index}
+            option={option}
+            
+          />
           return (
             <div className="product-options mb-6" key={option.name}>
               <h5 className="text-sm font-medium text-gray-700 mb-3">
