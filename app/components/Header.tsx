@@ -157,9 +157,9 @@ export function Header({
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
         {/* Left: Country/Currency Selector */}
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <CountryCurrencySelector />
-        </div>
+        </div> */}
 
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center">
