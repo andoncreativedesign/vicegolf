@@ -234,6 +234,14 @@ export interface MenuItemResource {
     url: string;
     altText: string | null;
   };
+  featuredImage?: {
+    url: string;
+    altText: string | null;
+  };
+  metafield?: {
+    key: string,
+    value: any
+  }
 }
 
 export interface MenuItem {
@@ -254,6 +262,19 @@ export interface MenuData {
   };
 }
 
+export interface SecondaryMenuItem {
+  title: string,
+  type: "COLLECTION" | "PAGE",
+  handle: string
+}
+
+export interface SecondaryMenu {
+  section: string,
+  items: SecondaryMenuItem[]
+}
+
+
+/*
 export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
 query GetMenu($handle: String!) {
   menu(handle: $handle) {
@@ -343,7 +364,140 @@ query GetMenu($handle: String!) {
   }
 }
 `;
+*/
 
+export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
+query GetMenu($handle: String!) {
+  menu(handle: $handle) {
+    id
+    title
+    items {
+      id
+      title
+      type
+      url
+      resourceId
+
+      resource {
+
+        ... on Collection {
+          id
+          handle
+          title
+          image {
+            url
+            altText
+          }
+        }
+
+        ... on Product {
+          id
+          handle
+          title
+          featuredImage {
+            url
+            altText
+          }
+        }
+
+        ... on Page {
+          id
+          handle
+          title
+          metafield(namespace: "custom", key: "menu") {
+            key
+            value
+          }
+        }
+
+      }
+
+      items {
+        id
+        title
+        type
+        url
+        resourceId
+
+        resource {
+          ... on Collection {
+            id
+            handle
+            title
+            image {
+              url
+              altText
+            }
+          }
+
+          ... on Product {
+            id
+            handle
+            title
+            featuredImage {
+              url
+              altText
+            }
+          }
+
+          ... on Page {
+            id
+            handle
+            title
+            metafield(namespace: "custom", key: "menu") {
+              key
+              value
+            }
+          }
+        }
+
+        items {
+          id
+          title
+          type
+          url
+          resourceId
+
+          resource {
+
+            ... on Collection {
+              id
+              handle
+              title
+              image {
+                url
+                altText
+              }
+            }
+
+            ... on Product {
+              id
+              handle
+              title
+              featuredImage {
+                url
+                altText
+              }
+            }
+
+            ... on Page {
+              id
+              handle
+              title
+              metafield(namespace: "custom", key: "menu") {
+                key
+                value
+              }
+            }
+
+          }
+        }
+      }
+    }
+  }
+}
+
+`
 
 
 export const GET_POPULAR_COLLECTIONS = `#graphql

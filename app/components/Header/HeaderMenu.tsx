@@ -1,4 +1,4 @@
-import type { MenuItem } from "~/lib/shopify/product-queries";
+import type { MenuItem, SecondaryMenu } from "~/lib/shopify/product-queries";
 import { Image } from "@shopify/hydrogen"
 import { NavLink } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
@@ -8,7 +8,7 @@ import { ChevronRight } from 'lucide-react';
 
 const HeaderMenu = ({
   viewport,
-  menuItems = []
+  menuItems = [],
 }: {
   viewport: 'desktop' | 'mobile';
   menuItems: MenuItem[];
@@ -41,23 +41,148 @@ const HeaderMenu = ({
     };
   }, []);
 
+  // const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
+
+  //   const getAllResourceIdsOfChild = (items: MenuItem[]) => {
+  //     const ids = items.map(item => item.resourceId || '')
+  //     return JSON.stringify(ids)
+  //   }
+
+  //   return items.map(item => {
+
+  //     let updatedItem = undefined
+  //     const handle = item?.resource?.handle || ''
+  //     if (item.type === "PRODUCT") {
+  //       updatedItem = {
+  //         ...item,
+  //         resource: {
+  //           ...item.resource,
+  //           image: item?.resource?.featuredImage
+  //         },
+  //         url: `/products/${encodeURIComponent(handle)}/`
+  //       };
+  //     } else if (item.type === 'PAGE') {
+  //       updatedItem = {
+  //         ...item,
+  //         resource: {
+  //           ...item.resource,
+  //           metafield: typeof item?.resource?.metafield === 'object' && JSON.parse(item.resource.metafield)
+  //         },
+  //       };
+  //     } else {
+  //       updatedItem = {
+  //         ...item,
+  //         url: item.resourceId
+  //           ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
+  //           : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}/${decodeURIComponent(item.title)}`
+  //       };
+  //     }
+
+
+  //     if (item?.items && item?.items?.length > 0) {
+  //       updatedItem?.items = updateMenuItems(item.items);
+  //     }
+
+  //     return updatedItem;
+  //   });
+  // };
+
+
+  function reconstructMenuObject(value: string | null | undefined): SecondaryMenu[] | null {
+    if (!value || typeof value !== "string") return null;
+
+    const trimmed = value.trim();
+
+    // guard: Shopify sometimes returns "Internal Server Error" or HTML
+    if (trimmed.startsWith("<") || trimmed.startsWith("Internal")) {
+      console.error("Invalid metafield content:", trimmed);
+      return null;
+    }
+
+    // guard: must start with JSON array `[`
+    if (!trimmed.startsWith("[")) {
+      console.error("Not JSON array:", trimmed);
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(trimmed);
+
+      if (!Array.isArray(parsed)) {
+        console.error("Parsed value is not an array:", parsed);
+        return null;
+      }
+
+      return parsed.map((section: any) => ({
+        section: String(section.section || ""),
+        items: Array.isArray(section.items)
+          ? section.items.map((i: any) => ({
+            title: String(i.title || ""),
+            type: i.type === "PAGE" ? "PAGE" : "COLLECTION",
+            handle: String(i.handle || "")
+          }))
+          : []
+      }));
+    } catch (e) {
+      console.error("JSON parse failed:", e);
+      return null;
+    }
+  }
+
+
+
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
 
     const getAllResourceIdsOfChild = (items: MenuItem[]) => {
-      const ids = items.map(item => item.resourceId || '')
-      return JSON.stringify(ids)
-    }
+      const ids = items.map(item => item.resourceId || '');
+      return JSON.stringify(ids);
+    };
 
     return items.map(item => {
-      const updatedItem = {
-        ...item,
-        url: item.resourceId
-          ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
-          : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}/${decodeURIComponent(item.title)}`
-      };
+      let updatedItem: MenuItem;
+      const handle = item?.resource?.handle || '';
 
-      if (item.items && item.items.length > 0) {
-        updatedItem.items = updateMenuItems(item.items);
+      if (item.type === "PRODUCT") {
+        updatedItem = {
+          ...item,
+          resource: {
+            ...item.resource,
+            image: item?.resource?.featuredImage
+          },
+          url: `/products/${encodeURIComponent(handle)}/`
+        };
+      } else if (item.type === 'PAGE') {
+        const reconstructed = reconstructMenuObject(item.resource?.metafield?.value);
+        console.log("reconstructed ", reconstructed)
+
+        updatedItem = {
+          ...item,
+          resource: {
+            id: item.resource?.id || "",
+            handle: item.resource?.handle || "",
+            title: item.resource?.title || "",
+            metafield: {
+              key: item.resource?.metafield?.key || "",
+              value: reconstructed
+            }
+          }
+        };
+
+      } else {
+        updatedItem = {
+          ...item,
+          url: item.resourceId
+            ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
+            : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items || []))}/${decodeURIComponent(item.title)}`
+        };
+      }
+
+      // Handle nested items
+      if (item.items?.length) {
+        updatedItem = {
+          ...updatedItem,
+          items: updateMenuItems(item.items)
+        };
       }
 
       return updatedItem;
@@ -66,7 +191,9 @@ const HeaderMenu = ({
 
   useEffect(() => {
     if (menuItems.length === 0) return;
+    // console.log('menu items on map - ', menuItems[0])
     const updatedMenu = updateMenuItems(menuItems);
+    console.log('updated menuitems reconstructed  - ', updatedMenu)
     setMenu(updatedMenu);
   }, [menuItems]);
 
@@ -109,6 +236,7 @@ const HeaderMenu = ({
               ))}
             </div>
             <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-800">
+             
               <div>
                 <h5 className="font-semibold mb-2">Highlights</h5>
                 <ul className="space-y-1">

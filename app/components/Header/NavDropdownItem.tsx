@@ -51,32 +51,34 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
           ref={containerRef}
           className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar gap-4 py-2 px-1"
         >
-          {menuItem?.items?.map((subItem, subIndex) => (
-            <div key={subItem.id || subIndex} className="flex-shrink-0 w-[calc((100%-5rem)/6)] snap-center">
-              <NavLink
-                prefetch="intent"
-                to={subItem.url}
-                className="flex flex-col gap-2 bg-gray-50 hover:bg-gray-100 rounded-md p-3 transition-colors group w-full h-full"
-                style={{ textDecoration: "none" }}
-              >
-                <div className="w-full">
-                  <h4 className="text-sm font-medium text-gray-900 text-start line-clamp-2">
-                    {subItem.title}
-                  </h4>
-                </div>
-                {subItem.resource?.image?.url && (
-                  <div className="w-full aspect-square rounded-md overflow-hidden flex items-center justify-center mt-2">
-                    <Image
-                      data={subItem.resource.image}
-                      alt={subItem.resource.image.altText || subItem.title}
-                      className="w-full h-full object-contain p-2"
-                      sizes="(min-width: 1024px) 200px, (min-width: 768px) 33.33vw, 50vw"
-                    />
+          {menuItem?.items
+            ?.filter(subItem => subItem.type !== "PAGE")
+            .map((subItem, subIndex) => (
+              <div key={subItem.id || subIndex} className="flex-shrink-0 w-[calc((100%-5rem)/6)] snap-center">
+                <NavLink
+                  prefetch="intent"
+                  to={subItem.url}
+                  className="flex flex-col gap-2 bg-gray-50 hover:bg-gray-100 rounded-md p-3 transition-colors group w-full h-full"
+                  style={{ textDecoration: "none" }}
+                >
+                  <div className="w-full">
+                    <h4 className="text-sm font-medium text-gray-900 text-start line-clamp-2">
+                      {subItem.title}
+                    </h4>
                   </div>
-                )}
-              </NavLink>
-            </div>
-          ))}
+                  {subItem.resource?.image?.url && (
+                    <div className="w-full aspect-square rounded-md overflow-hidden flex items-center justify-center mt-2">
+                      <Image
+                        data={subItem.resource.image}
+                        alt={subItem.resource.image.altText || subItem.title}
+                        className="w-full h-full object-contain p-2"
+                        sizes="(min-width: 1024px) 200px, (min-width: 768px) 33.33vw, 50vw"
+                      />
+                    </div>
+                  )}
+                </NavLink>
+              </div>
+            ))}
         </div>
 
         <div className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800">
