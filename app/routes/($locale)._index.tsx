@@ -1,7 +1,7 @@
 // app/routes/($locale)._index.tsx (updated to include HeroSection and ProductGrids)
-import { Await, useLoaderData, Link, useRouteLoaderData } from 'react-router';
+import { Await, useLoaderData, Link, useRouteLoaderData, useNavigate } from 'react-router';
 import type { Route } from './+types/_index';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { createContentSecurityPolicy, Image } from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
@@ -38,49 +38,39 @@ export async function loader(args: Route.LoaderArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({ context }: Route.LoaderArgs) {
-  const golfBallsHandle = createCategoryQuery('Golf Balls');
-  const golfClubsHandle = createCategoryQuery('Golf Club Set');
-  const apparelHandle = createCategoryQuery('Gloves Men');
-  const gearHandle = createCategoryQuery('Polo');
-  const limitedEditionsHandle = createCategoryQuery('Towels');
-  const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
-  const juniorsHandle = createCategoryQuery('Divot Tool');
+async function loadCriticalData({ context, request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const golfBallsCursor = url.searchParams.get("golfBallsCursor");
+  const isInitialLoad = !golfBallsCursor;
+
+  const golfBallsHandle = createCategoryQuery("Golf Balls");
 
   const [collectionsData, categoryProducts, popularCollections] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
         golfBallsHandle,
-        golfClubsHandle,
-        apparelHandle,
-        gearHandle,
-        limitedEditionsHandle,
-        fittingCustomisationHandle,
-        juniorsHandle,
+        golfBallsCursor: isInitialLoad ? null : golfBallsCursor,
+        golfClubsHandle: createCategoryQuery("Golf Club Set"),
+        apparelHandle: createCategoryQuery("Gloves Men"),
+        gearHandle: createCategoryQuery("Polo"),
+        limitedEditionsHandle: createCategoryQuery("Towels"),
+        fittingCustomisationHandle: createCategoryQuery("Longsleeve"),
+        juniorsHandle: createCategoryQuery("Divot Tool"),
         first: 15,
       },
     }),
     context.storefront.query(GET_POPULAR_COLLECTIONS, {
-      variables: {
-        first: 4,
-      },
+      variables: { first: 4 },
     }),
   ]);
-
-  const collectionsTransformed = popularCollections?.collections?.edges?.map((edge: { node: FeaturedCollectionFragment }) => ({
-    id: edge.node.id,
-    title: edge.node.title,
-    handle: edge.node.handle,
-    description: edge.node.description,
-    image: edge.node.image
-  }))
 
   return {
     featuredCollection: collectionsData.collections.nodes[0],
     categoryProducts,
-    popularCollections: collectionsTransformed,
-    productsForNav: context.productsForNav
+    golfBallsPageInfo: categoryProducts.golfBalls.pageInfo,
+    productsForNav: context.productsForNav,
+    currentCursor: golfBallsCursor,
   };
 }
 
@@ -105,11 +95,40 @@ async function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
-  // const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();  
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>("root");
   const productsForNav = rootData?.productsForNav;
-
   const [menu, setMenu] = useState<MenuItem[]>([])
+
+  // State to manage golf balls products and pagination
+  const [golfBalls, setGolfBalls] = useState<ProductFragment[]>([]);
+  const [currentCursor, setCurrentCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Update products and pagination state when data changes
+  useEffect(() => {
+    if (data.categoryProducts?.golfBalls?.nodes) {
+      if (data.currentCursor) {
+        // Append new products when loading more
+        setGolfBalls(prev => [...prev, ...data.categoryProducts.golfBalls.nodes]);
+      } else {
+        // Set initial products
+        setGolfBalls(data.categoryProducts.golfBalls.nodes);
+      }
+      setCurrentCursor(data.golfBallsPageInfo?.endCursor || null);
+      setHasMore(!!data.golfBallsPageInfo?.hasNextPage);
+      setIsLoading(false);
+    }
+  }, [data.categoryProducts?.golfBalls?.nodes, data.currentCursor, data.golfBallsPageInfo]);
+
+  // Handle infinite scroll
+  const handleLoadMore = useCallback(() => {
+    if (currentCursor && hasMore && !isLoading) {
+      setIsLoading(true);
+      navigate(`?golfBallsCursor=${currentCursor}`, { replace: true });
+    }
+  }, [currentCursor, hasMore, isLoading, navigate]);
 
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
     const getAllResourceIdsOfChild = (items: MenuItem[]) => {
@@ -141,10 +160,6 @@ export default function Homepage() {
     setMenu(updatedMenu);
   }, [menuItems]);
 
-  useEffect(() => {
-    console.log("home page data", data.homePageData?.homeCategories)
-  }, [data])
-
   return (
     <div className="home">
       <HeroSection heroData={data.homePageData?.heroes} />
@@ -152,11 +167,14 @@ export default function Homepage() {
       {/* Product Grids by Category */}
       <div className="py-8 space-y-12">
         {/* Golf Balls Section */}
-        {data.categoryProducts?.golfBalls?.nodes && (
+        {golfBalls.length > 0 && (
           <ProductGrid
-            products={data.categoryProducts.golfBalls.nodes}
+            products={golfBalls}
             title="VICE GOLF BALLS"
             categoryHandle="golf-balls"
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loading={isLoading}
           />
         )}
 

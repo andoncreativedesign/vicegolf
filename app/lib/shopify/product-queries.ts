@@ -101,12 +101,21 @@ query MultipleProductGroups(
   $fittingCustomisationHandle: String!
   $juniorsHandle: String!
   $first: Int = 8
+  $golfBallsCursor: String
 ) {
-  golfBalls: products(first: $first, query: $golfBallsHandle) {
-    nodes {
-      ...ProductCard
-    }
+
+golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
+  nodes {
+    ...ProductCard
   }
+  pageInfo {
+    hasNextPage
+    hasPreviousPage
+    endCursor
+    startCursor
+  }
+}
+
   golfClubs: products(first: $first, query: $golfClubsHandle) {
     nodes {
       ...ProductCard
