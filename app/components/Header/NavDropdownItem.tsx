@@ -1,17 +1,20 @@
 import { Image } from "@shopify/hydrogen"
-import type { MenuItem } from "~/lib/shopify/product-queries"
-import { NavLink } from "react-router"
+import { COLLECTION_PRODUCTS_QUERY, GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS, type MenuItem, type SecondaryMenu, type SecondaryMenuItem } from "~/lib/shopify/product-queries"
+import { NavLink, useFetcher, useNavigate } from "react-router"
 import { useEffect, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { axiosShopifyAdmin } from "~/utils/axiosInsatances"
 
 interface DropdownItemProps {
   menuItem: MenuItem
 }
 
 const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
+  const navigate = useNavigate()
+  const fetcher = useFetcher<{ collection?: { id: string } }>();
 
   useEffect(() => {
-    console.log("menuItem ", menuItem)
+    console.log("menuItem nav dropdown", menuItem)
   }, [menuItem])
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,6 +45,30 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
       return () => container.removeEventListener('scroll', checkScroll);
     }
   }, [menuItem]);
+
+  const handleNavigate = (navItem: SecondaryMenuItem) => {
+    console.log('Navigation item:', navItem);
+    if (navItem.type === "COLLECTION") {
+      fetcher.submit(
+        { handle: navItem.handle },
+        { method: "post", action: "/api/collection" }
+      );
+    } else if (navItem.type === "PAGE") {
+      navigate(`/${navItem.handle}`);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      fetcher.state === "idle"
+      && fetcher.data?.collection?.id
+      && fetcher.data?.collection?.title
+    ) {
+      const { id, title } = fetcher.data.collection
+      console.log("fetcher.data ", id, title)
+      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    }
+  }, [fetcher.state, fetcher.data, navigate]);
 
   return (
     <div className="fixed left-0 right-0 mt-0 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
@@ -81,93 +108,34 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
             ))}
         </div>
 
-        <div className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800">
-          <div>
-            <h5 className="font-semibold mb-2">Highlights</h5>
-            <ul className="space-y-1">
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  All Balls
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Drip Balls
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Shade & Color Balls
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Bundles
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="font-semibold mb-2">Tools</h5>
-            <ul className="space-y-1">
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Ball Customization
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Ball Comparison Tool
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Ball Fitting Tool
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="font-semibold mb-2">About</h5>
-            <ul className="space-y-1">
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  The Story of Vice Golf
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  How we test our golf balls
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Your Yearly Savings with Vice
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="font-semibold mb-2">More</h5>
-            <ul className="space-y-1">
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  eGift Card
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Special Offers
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                  Limited Editions
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-        </div>
+        {menuItem.items
+          ?.filter(item => item.type === "PAGE" && item.resource?.metafield?.value)
+          .map((item, index) => {
+            const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
+            return (
+              <div key={index} className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800">
+                {secondaryMenu.map((menu, menuIndex) => (
+                  <div key={menuIndex}>
+                    <h5 className="font-semibold mb-2">{menu.section}</h5>
+                    <ul className="space-y-1">
+                      {menu?.items?.map((menuItem, itemIndex) => (
+                        <li key={itemIndex}>
+                          <button
+                            onClick={() => handleNavigate(menuItem)}
+                            className="hover:underline text-left w-full cursor-pointer"
+                            style={{ textDecoration: 'none' }}
+                          >
+                            {menuItem.title}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            );
+          })
+        }
 
         <div className="flex justify-end items-center gap-4 mt-4 pt-2">
           {showLeftArrow && (

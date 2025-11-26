@@ -274,98 +274,6 @@ export interface SecondaryMenu {
 }
 
 
-/*
-export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
-query GetMenu($handle: String!) {
-  menu(handle: $handle) {
-    id
-    title
-    items {
-      id
-      title
-      type
-      url
-      resourceId
-      resource {
-        ... on Collection {
-          id
-          handle
-          title
-          image {
-            url
-            altText
-          }
-        }
-        ... on Product {
-          id
-          handle
-          title
-          featuredImage {
-            url
-            altText
-          }
-        }
-      }
-      items {
-        id
-        title
-        type
-        url
-        resourceId
-        resource {
-          ... on Collection {
-            id
-            handle
-            title
-            image {
-              url
-              altText
-            }
-          }
-          ... on Product {
-            id
-            handle
-            title
-            featuredImage {
-              url
-              altText
-            }
-          }
-        }
-        items {
-          id
-          title
-          type
-          url
-          resourceId
-          resource {
-            ... on Collection {
-              id
-              handle
-              title
-              image {
-                url
-                altText
-              }
-            }
-            ... on Product {
-              id
-              handle
-              title
-              featuredImage {
-                url
-                altText
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-`;
-*/
-
 export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
 query GetMenu($handle: String!) {
   menu(handle: $handle) {
@@ -929,6 +837,18 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `
           }
         }
       }
+    }
+  }
+`;
+
+
+export const GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS = `#graphql
+  query CollectionDetails($handle: String!) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
     }
   }
 `;

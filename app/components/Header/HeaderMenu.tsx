@@ -189,7 +189,7 @@ const HeaderMenu = ({
     });
   };
 
-  useEffect(() => {
+  useEffect(() => {  
     if (menuItems.length === 0) return;
     // console.log('menu items on map - ', menuItems[0])
     const updatedMenu = updateMenuItems(menuItems);
@@ -236,7 +236,6 @@ const HeaderMenu = ({
               ))}
             </div>
             <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-800">
-             
               <div>
                 <h5 className="font-semibold mb-2">Highlights</h5>
                 <ul className="space-y-1">
