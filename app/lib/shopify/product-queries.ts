@@ -102,6 +102,7 @@ query MultipleProductGroups(
   $juniorsHandle: String!
   $first: Int = 15
   $golfBallsCursor: String
+  $golfClubsCursor: String
   $gearCursor: String
 ) {
   golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
@@ -114,12 +115,15 @@ query MultipleProductGroups(
     }
   }
 
-  golfClubs: products(first: $first, query: $golfClubsHandle) {
-    nodes {
-      ...ProductCard
-    }
+ golfClubs: products(first: $first, after: $golfClubsCursor, query: $golfClubsHandle) {
+  nodes {
+    ...ProductCard
   }
-
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+}
   apparel: products(first: $first, query: $apparelHandle) {
     nodes {
       ...ProductCard
