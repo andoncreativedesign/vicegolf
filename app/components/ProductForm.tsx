@@ -1,5 +1,5 @@
 // app/components/ProductForm.tsx (updated with imports)
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -15,6 +15,8 @@ import { ProductDetailsAccordions } from './ProductDetailsAccordions';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useEffect, useRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
+import type { UIColorVariant } from '~/lib/shopify/product-queries';
+import ColorVariant from './Product/ColorVariant';
 
 export function ProductForm({
   productOptions,
@@ -23,13 +25,15 @@ export function ProductForm({
   description,
   productType,
   productAccordions,
+  colorVariants,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
   description: string;
   productType?: string;
-  productAccordions: AccordionItem[]
+  productAccordions: AccordionItem[];
+  colorVariants?: UIColorVariant[];
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -112,9 +116,19 @@ export function ProductForm({
         <ProductRating rating={4.8} reviewCount={1145} />
       </div>
 
+      {/* Color Variants Section */}
+      {colorVariants && colorVariants.length > 0 && (
+        <ColorVariant
+          productType={productType}
+          colorVariants={colorVariants}
+          selectedVariant={selectedVariant}
+        />
+      )}
+
       {/* Product Options */}
       {productOptions.map((option) => {
         if (option.optionValues.length === 1) return null;
+        if (option.name === 'Color') return null;
         return (
           <div className="product-options mb-6" key={option.name}>
             <h5 className="text-sm font-medium text-gray-700 mb-3">
@@ -213,7 +227,7 @@ export function ProductForm({
       </div>
 
       {/* Details Accordions */}
-      <ProductDetailsAccordions accordions={productAccordions}/>
+      <ProductDetailsAccordions accordions={productAccordions} />
     </div>
   );
 }

@@ -14,3 +14,16 @@ export const axiosSanity = axios.create({
     Authorization: `Bearer ${SANITY_CONFIG?.token}`,
   },
 });
+
+
+const ADMIN_ACCESS_TOKEN = 'REMOVED_TOKEN'
+const ADMIN_API_URL = `https://tzasu4-jj.myshopify.com/admin/api/2025-01/graphql.json`
+
+export const axiosShopifyAdmin = axios.create({
+  baseURL: ADMIN_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "X-Shopify-Access-Token": ADMIN_ACCESS_TOKEN,
+  }
+});
