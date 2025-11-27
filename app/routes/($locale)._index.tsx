@@ -31,6 +31,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const golfBallsCursor = url.searchParams.get('golfBallsCursor') || null;
   const golfClubsCursor = url.searchParams.get('golfClubsCursor') || null;
+  const apparelCursor = url.searchParams.get('apparelCursor') || null;
   const gearCursor = url.searchParams.get('gearCursor') || null;
   const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
@@ -41,6 +42,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         golfClubsHandle: createCategoryQuery('Golf Club Set'),
         golfClubsCursor,
         apparelHandle: createCategoryQuery('Gloves Men'),
+        apparelCursor,
         gearHandle: createCategoryQuery('Polo'),
         limitedEditionsHandle: createCategoryQuery('Towels'),
         fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
@@ -55,9 +57,11 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     categoryProducts,
     golfBallsPageInfo: categoryProducts.golfBalls.pageInfo,
     golfClubsPageInfo: categoryProducts.golfClubs.pageInfo,
+    apparelPageInfo: categoryProducts.apparel.pageInfo,
     gearPageInfo: categoryProducts.gear.pageInfo,
     currentGolfBallsCursor: golfBallsCursor,
     currentGolfClubsCursor: golfClubsCursor,
+    currentApparelCursor: apparelCursor,
     currentGearCursor: gearCursor,
     productsForNav: context.productsForNav,
   };
@@ -68,7 +72,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
   const recommendedProducts = await context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY, {
       variables: {
-        first: 20,
+        first: 5,
         after: recommendedCursor,
       },
     })
@@ -98,6 +102,11 @@ export default function Homepage() {
   const [currentGolfClubsCursor, setCurrentGolfClubsCursor] = useState<string | null>(null);
   const [hasMoreGolfClubs, setHasMoreGolfClubs] = useState(false);
   const [isLoadingGolfClubs, setIsLoadingGolfClubs] = useState(false);
+  // Apparel State
+  const [apparelProducts, setApparelProducts] = useState<any[]>([]);
+  const [currentApparelCursor, setCurrentApparelCursor] = useState<string | null>(null);
+  const [hasMoreApparel, setHasMoreApparel] = useState(false);
+  const [isLoadingApparel, setIsLoadingApparel] = useState(false);
   // Gear State
   const [gearProducts, setGearProducts] = useState<any[]>([]);
   const [currentGearCursor, setCurrentGearCursor] = useState<string | null>(null);
@@ -132,6 +141,18 @@ export default function Homepage() {
       setHasMoreGolfClubs(!!data.golfClubsPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.golfClubs, data.currentGolfClubsCursor, data.golfClubsPageInfo]);
+  // === Apparel: Initial Load & Pagination ===
+  useEffect(() => {
+    if (data.categoryProducts?.apparel?.nodes) {
+      if (data.currentApparelCursor) {
+        setApparelProducts((prev) => [...prev, ...data.categoryProducts.apparel.nodes]);
+      } else {
+        setApparelProducts(data.categoryProducts.apparel.nodes);
+      }
+      setCurrentApparelCursor(data.apparelPageInfo?.endCursor || null);
+      setHasMoreApparel(!!data.apparelPageInfo?.hasNextPage);
+    }
+  }, [data.categoryProducts?.apparel, data.currentApparelCursor, data.apparelPageInfo]);
   // === Gear: Initial Load ===
   useEffect(() => {
     if (data.categoryProducts?.gear?.nodes) {
@@ -176,6 +197,13 @@ export default function Homepage() {
         setHasMoreGolfClubs(!!newCategoryData.golfClubs.pageInfo?.hasNextPage);
         setIsLoadingGolfClubs(false);
       }
+      // Apparel Load More
+      if (newCategoryData.apparel?.nodes?.length > 0 && fetcher.data.currentApparelCursor) {
+        setApparelProducts((prev) => [...prev, ...newCategoryData.apparel.nodes]);
+        setCurrentApparelCursor(newCategoryData.apparel.pageInfo?.endCursor || null);
+        setHasMoreApparel(!!newCategoryData.apparel.pageInfo?.hasNextPage);
+        setIsLoadingApparel(false);
+      }
       // Gear Load More
       if (newCategoryData.gear?.nodes?.length > 0 && fetcher.data.currentGearCursor) {
         setGearProducts((prev) => [...prev, ...newCategoryData.gear.nodes]);
@@ -210,6 +238,14 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGolfClubsCursor, hasMoreGolfClubs, isLoadingGolfClubs, fetcher]);
+  const handleLoadMoreApparel = useCallback(() => {
+    if (!currentApparelCursor || !hasMoreApparel || isLoadingApparel) return;
+    setIsLoadingApparel(true);
+    fetcher.submit(
+      { apparelCursor: currentApparelCursor },
+      { method: 'get', action: '.' }
+    );
+  }, [currentApparelCursor, hasMoreApparel, isLoadingApparel, fetcher]);
   const handleLoadMoreGear = useCallback(() => {
     if (!currentGearCursor || !hasMoreGear || isLoadingGear) return;
     setIsLoadingGear(true);
@@ -269,12 +305,15 @@ export default function Homepage() {
             loading={isLoadingGolfClubs}
           />
         )}
-        {/* VICE APPAREL */}
-        {data.categoryProducts?.apparel?.nodes && (
+        {/* VICE APPAREL - Infinite Scroll */}
+        {apparelProducts.length > 0 && (
           <ProductGrid
-            products={data.categoryProducts.apparel.nodes}
+            products={apparelProducts}
             title="VICE APPAREL"
             categoryHandle="apparel"
+            onLoadMore={handleLoadMoreApparel}
+            hasMore={hasMoreApparel}
+            loading={isLoadingApparel}
           />
         )}
         {/* VICE GEAR - Now with Infinite Scroll */}

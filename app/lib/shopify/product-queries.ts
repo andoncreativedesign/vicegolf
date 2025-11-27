@@ -101,9 +101,10 @@ query MultipleProductGroups(
   $limitedEditionsHandle: String!
   $fittingCustomisationHandle: String!
   $juniorsHandle: String!
-  $first: Int = 15
+  $first: Int = 5
   $golfBallsCursor: String
   $golfClubsCursor: String
+  $apparelCursor: String
   $gearCursor: String
 ) {
   golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
@@ -125,9 +126,13 @@ query MultipleProductGroups(
     endCursor
   }
 }
-  apparel: products(first: $first, query: $apparelHandle) {
+  apparel: products(first: $first, after: $apparelCursor, query: $apparelHandle) {
     nodes {
       ...ProductCard
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
     }
   }
 
@@ -671,7 +676,7 @@ fragment ProductCardFragment on Product {
     }
   }
 
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $first: Int = 20, $after: String)
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $first: Int = 5, $after: String)
     @inContext(country: $country, language: $language) {
     products(first: $first, after: $after, sortKey: UPDATED_AT, reverse: true) {
       nodes {
