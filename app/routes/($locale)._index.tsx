@@ -1,3 +1,4 @@
+// app\routes\($locale)._index.tsx
 import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher } from 'react-router';
 import type { Route } from './+types/_index';
 import { Suspense, useEffect, useState, useCallback } from 'react';
@@ -17,24 +18,20 @@ import ClientLogos from '~/components/Home/ClientLogos';
 import ShopByCategories from '~/components/Home/ShopByCategories';
 import { ViceLookSection } from '~/components/Home/ViceLookSection';
 import type { MenuItem } from '~/lib/shopify/product-queries';
-
 export const meta: Route.MetaFunction = () => {
   return [{ title: 'Vice Golf | Home' }];
 };
-
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
   const homePageData = await getHomePageData();
   return { ...deferredData, ...criticalData, homePageData };
 }
-
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const golfBallsCursor = url.searchParams.get('golfBallsCursor') || null;
   const golfClubsCursor = url.searchParams.get('golfClubsCursor') || null;
   const gearCursor = url.searchParams.get('gearCursor') || null;
-
   const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
@@ -53,7 +50,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       },
     }),
   ]);
-
   return {
     featuredCollection: collectionsData.collections.nodes[0],
     categoryProducts,
@@ -66,44 +62,52 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     productsForNav: context.productsForNav,
   };
 }
-
-async function loadDeferredData({ context }: Route.LoaderArgs) {
+async function loadDeferredData({ context, request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const recommendedCursor = url.searchParams.get('recommendedCursor') || null;
   const recommendedProducts = await context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
+    .query(RECOMMENDED_PRODUCTS_QUERY, {
+      variables: {
+        first: 20,
+        after: recommendedCursor,
+      },
+    })
     .catch((error: Error) => {
       console.error(error);
       return null;
     });
-
-  return { recommendedProducts };
+  return { 
+    recommendedProducts,
+    currentRecommendedCursor: recommendedCursor,
+    recommendedPageInfo: recommendedProducts?.products?.pageInfo,
+  };
 }
-
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
   const fetcher = useFetcher();
   const productsForNav = rootData?.productsForNav;
-
   const [menu, setMenu] = useState<MenuItem[]>([]);
-
   // Golf Balls State
   const [golfBalls, setGolfBalls] = useState<any[]>([]);
   const [currentGolfBallsCursor, setCurrentGolfBallsCursor] = useState<string | null>(null);
   const [hasMoreGolfBalls, setHasMoreGolfBalls] = useState(false);
   const [isLoadingGolfBalls, setIsLoadingGolfBalls] = useState(false);
-
   // Golf Clubs State
   const [golfClubs, setGolfClubs] = useState<any[]>([]);
   const [currentGolfClubsCursor, setCurrentGolfClubsCursor] = useState<string | null>(null);
   const [hasMoreGolfClubs, setHasMoreGolfClubs] = useState(false);
   const [isLoadingGolfClubs, setIsLoadingGolfClubs] = useState(false);
-
   // Gear State
   const [gearProducts, setGearProducts] = useState<any[]>([]);
   const [currentGearCursor, setCurrentGearCursor] = useState<string | null>(null);
   const [hasMoreGear, setHasMoreGear] = useState(false);
   const [isLoadingGear, setIsLoadingGear] = useState(false);
-
+  // Recommended Products State
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
+  const [currentRecommendedCursor, setCurrentRecommendedCursor] = useState<string | null>(null);
+  const [hasMoreRecommended, setHasMoreRecommended] = useState(false);
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
   // === Golf Balls: Initial Load & Pagination ===
   useEffect(() => {
     if (data.categoryProducts?.golfBalls?.nodes) {
@@ -116,7 +120,6 @@ export default function Homepage() {
       setHasMoreGolfBalls(!!data.golfBallsPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.golfBalls, data.currentGolfBallsCursor, data.golfBallsPageInfo]);
-
   // === Golf Clubs: Initial Load & Pagination ===
   useEffect(() => {
     if (data.categoryProducts?.golfClubs?.nodes) {
@@ -129,7 +132,6 @@ export default function Homepage() {
       setHasMoreGolfClubs(!!data.golfClubsPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.golfClubs, data.currentGolfClubsCursor, data.golfClubsPageInfo]);
-
   // === Gear: Initial Load ===
   useEffect(() => {
     if (data.categoryProducts?.gear?.nodes) {
@@ -142,38 +144,55 @@ export default function Homepage() {
       setHasMoreGear(!!data.gearPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.gear, data.currentGearCursor, data.gearPageInfo]);
-
+  // === Recommended Products: Initial Load & Pagination ===
+  useEffect(() => {
+    if (data.recommendedProducts?.products?.nodes) {
+      if (data.currentRecommendedCursor) {
+        setRecommendedProducts((prev) => [...prev, ...data.recommendedProducts.products.nodes]);
+      } else {
+        setRecommendedProducts(data.recommendedProducts.products.nodes);
+      }
+      setCurrentRecommendedCursor(data.recommendedPageInfo?.endCursor || null);
+      setHasMoreRecommended(!!data.recommendedPageInfo?.hasNextPage);
+    }
+  }, [data.recommendedProducts, data.currentRecommendedCursor, data.recommendedPageInfo]);
   // === Handle fetcher for all sections ===
   useEffect(() => {
-    if (fetcher.state !== 'idle' || !fetcher.data?.categoryProducts) return;
-
-    const newData = fetcher.data.categoryProducts;
-
-    // Golf Balls Load More
-    if (newData.golfBalls?.nodes?.length > 0 && fetcher.data.currentGolfBallsCursor) {
-      setGolfBalls((prev) => [...prev, ...newData.golfBalls.nodes]);
-      setCurrentGolfBallsCursor(newData.golfBalls.pageInfo?.endCursor || null);
-      setHasMoreGolfBalls(!!newData.golfBalls.pageInfo?.hasNextPage);
-      setIsLoadingGolfBalls(false);
+    if (fetcher.state !== 'idle' || !fetcher.data) return;
+    // Handle category products
+    const newCategoryData = fetcher.data.categoryProducts;
+    if (newCategoryData) {
+      // Golf Balls Load More
+      if (newCategoryData.golfBalls?.nodes?.length > 0 && fetcher.data.currentGolfBallsCursor) {
+        setGolfBalls((prev) => [...prev, ...newCategoryData.golfBalls.nodes]);
+        setCurrentGolfBallsCursor(newCategoryData.golfBalls.pageInfo?.endCursor || null);
+        setHasMoreGolfBalls(!!newCategoryData.golfBalls.pageInfo?.hasNextPage);
+        setIsLoadingGolfBalls(false);
+      }
+      // Golf Clubs Load More
+      if (newCategoryData.golfClubs?.nodes?.length > 0 && fetcher.data.currentGolfClubsCursor) {
+        setGolfClubs((prev) => [...prev, ...newCategoryData.golfClubs.nodes]);
+        setCurrentGolfClubsCursor(newCategoryData.golfClubs.pageInfo?.endCursor || null);
+        setHasMoreGolfClubs(!!newCategoryData.golfClubs.pageInfo?.hasNextPage);
+        setIsLoadingGolfClubs(false);
+      }
+      // Gear Load More
+      if (newCategoryData.gear?.nodes?.length > 0 && fetcher.data.currentGearCursor) {
+        setGearProducts((prev) => [...prev, ...newCategoryData.gear.nodes]);
+        setCurrentGearCursor(newCategoryData.gear.pageInfo?.endCursor || null);
+        setHasMoreGear(!!newCategoryData.gear.pageInfo?.hasNextPage);
+        setIsLoadingGear(false);
+      }
     }
-
-    // Golf Clubs Load More
-    if (newData.golfClubs?.nodes?.length > 0 && fetcher.data.currentGolfClubsCursor) {
-      setGolfClubs((prev) => [...prev, ...newData.golfClubs.nodes]);
-      setCurrentGolfClubsCursor(newData.golfClubs.pageInfo?.endCursor || null);
-      setHasMoreGolfClubs(!!newData.golfClubs.pageInfo?.hasNextPage);
-      setIsLoadingGolfClubs(false);
-    }
-
-    // Gear Load More
-    if (newData.gear?.nodes?.length > 0 && fetcher.data.currentGearCursor) {
-      setGearProducts((prev) => [...prev, ...newData.gear.nodes]);
-      setCurrentGearCursor(newData.gear.pageInfo?.endCursor || null);
-      setHasMoreGear(!!newData.gear.pageInfo?.hasNextPage);
-      setIsLoadingGear(false);
+    // Handle recommended products
+    const newRecommendedData = fetcher.data.recommendedProducts;
+    if (newRecommendedData?.products?.nodes?.length > 0 && fetcher.data.currentRecommendedCursor) {
+      setRecommendedProducts((prev) => [...prev, ...newRecommendedData.products.nodes]);
+      setCurrentRecommendedCursor(newRecommendedData.products.pageInfo?.endCursor || null);
+      setHasMoreRecommended(!!newRecommendedData.products.pageInfo?.hasNextPage);
+      setIsLoadingRecommended(false);
     }
   }, [fetcher.state, fetcher.data]);
-
   // === Load More Handlers ===
   const handleLoadMoreGolfBalls = useCallback(() => {
     if (!currentGolfBallsCursor || !hasMoreGolfBalls || isLoadingGolfBalls) return;
@@ -183,7 +202,6 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGolfBallsCursor, hasMoreGolfBalls, isLoadingGolfBalls, fetcher]);
-
   const handleLoadMoreGolfClubs = useCallback(() => {
     if (!currentGolfClubsCursor || !hasMoreGolfClubs || isLoadingGolfClubs) return;
     setIsLoadingGolfClubs(true);
@@ -192,7 +210,6 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGolfClubsCursor, hasMoreGolfClubs, isLoadingGolfClubs, fetcher]);
-
   const handleLoadMoreGear = useCallback(() => {
     if (!currentGearCursor || !hasMoreGear || isLoadingGear) return;
     setIsLoadingGear(true);
@@ -201,12 +218,18 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGearCursor, hasMoreGear, isLoadingGear, fetcher]);
-
+  const handleLoadMoreRecommended = useCallback(() => {
+    if (!currentRecommendedCursor || !hasMoreRecommended || isLoadingRecommended) return;
+    setIsLoadingRecommended(true);
+    fetcher.submit(
+      { recommendedCursor: currentRecommendedCursor },
+      { method: 'get', action: '.' }
+    );
+  }, [currentRecommendedCursor, hasMoreRecommended, isLoadingRecommended, fetcher]);
   // === Menu Transformation ===
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
     const getAllResourceIdsOfChild = (items: MenuItem[]) =>
       JSON.stringify(items.map((i) => i.resourceId || ''));
-
     return items.map((item) => ({
       ...item,
       url: item.resourceId
@@ -215,17 +238,14 @@ export default function Homepage() {
       items: item.items?.length ? updateMenuItems(item.items) : [],
     }));
   };
-
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
   useEffect(() => {
     if (menuItems.length === 0) return;
     setMenu(updateMenuItems(menuItems));
   }, [menuItems]);
-
   return (
     <div className="home">
       <HeroSection heroData={data.homePageData?.heroes} />
-
       <div className="py-8 space-y-12">
         {/* VICE GOLF BALLS - Infinite Scroll */}
         {golfBalls.length > 0 && (
@@ -238,7 +258,6 @@ export default function Homepage() {
             loading={isLoadingGolfBalls}
           />
         )}
-
         {/* VICE GOLF CLUBS - Infinite Scroll */}
         {golfClubs.length > 0 && (
           <ProductGrid
@@ -250,7 +269,6 @@ export default function Homepage() {
             loading={isLoadingGolfClubs}
           />
         )}
-
         {/* VICE APPAREL */}
         {data.categoryProducts?.apparel?.nodes && (
           <ProductGrid
@@ -259,7 +277,6 @@ export default function Homepage() {
             categoryHandle="apparel"
           />
         )}
-
         {/* VICE GEAR - Now with Infinite Scroll */}
         {gearProducts.length > 0 && (
           <ProductGrid
@@ -272,26 +289,24 @@ export default function Homepage() {
           />
         )}
       </div>
-
       <ClientLogos brands={data.homePageData?.brand || []} />
-
       {data?.homePageData?.homeCategories && (
         <ShopByCategories
           menuItems={menu.slice(0, 4)}
           sanityHomeCategories={data?.homePageData?.homeCategories}
         />
       )}
-
       <HeroSection heroData={data.homePageData?.secondaryHero || null} />
-
-      {data.recommendedProducts?.products?.nodes && (
+      {recommendedProducts.length > 0 && (
         <ProductGrid
-          products={data.recommendedProducts.products.nodes}
+          products={recommendedProducts}
           title="RECOMMENDED PRODUCTS"
           categoryHandle="recommended"
+          onLoadMore={handleLoadMoreRecommended}
+          hasMore={hasMoreRecommended}
+          loading={isLoadingRecommended}
         />
       )}
-
       <ViceLookSection />
     </div>
   );

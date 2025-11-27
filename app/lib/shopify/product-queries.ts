@@ -1,3 +1,4 @@
+// app\lib\shopify\product-queries.ts
 export const createCategoryQuery = (handle: string) => {
   return `product_type:'${handle}'`
 }
@@ -670,11 +671,15 @@ fragment ProductCardFragment on Product {
     }
   }
 
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $first: Int = 20, $after: String)
     @inContext(country: $country, language: $language) {
-    products(first: 20, sortKey: UPDATED_AT, reverse: true) {
+    products(first: $first, after: $after, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...ProductCardFragment
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }
