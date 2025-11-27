@@ -37,49 +37,46 @@ export function Footer({
       {/* Modern Newsletter Section */}
       <div className="bg-gray-50 border-b border-gray-200 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center">
             <h2 className="text-3xl font-light tracking-wide text-gray-900 sm:text-4xl uppercase">
               JOIN OUR NEWSLETTER!
             </h2>
             <p className="mt-2 text-base text-gray-600">
               Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
             </p>
-            <div className="mt-6 max-w-md mx-auto w-full relative">
-              <form onSubmit={handleSubmit}>
-                <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <div className="mt-6 flex justify-center">
+              <form onSubmit={handleSubmit} className="w-full max-w-2xl">
+                <div className="relative">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Type in your email"
-                    className="px-6 py-3 w-full h-12 text-base bg-gray-200 text-gray-900 placeholder-gray-500"
-                    style={{
-                      borderRadius: '9999px',
-                      border: 'none',
-                      outline: 'none',
-                      boxShadow: 'none',
-                      WebkitAppearance: 'none',
-                      MozAppearance: 'none',
-                      appearance: 'none'
-                    }}
+                    className="w-full px-8 py-5 pr-56 bg-gray-200 text-gray-800 placeholder-gray-500 text-base focus:outline-none focus:ring-0 border-0"
+                    style={{ borderRadius: '50px', height: '60px' }}
                     required
                   />
                   <button
                     type="submit"
-                    className="bg-black text-white px-6 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap h-12 text-base font-medium flex items-center justify-center gap-2"
-                    style={{ borderRadius: '9999px' }}
+                    className="absolute top-1/2 -translate-y-1/2 bg-black text-white hover:bg-gray-800 transition-colors flex items-center justify-center"
+                    style={{ 
+                      borderRadius: '50px',
+                      right: '4px',
+                      height: '52px',
+                      width: '180px'
+                    }}
                   >
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-6 h-6" strokeWidth={2.5} />
                   </button>
                 </div>
+                <div className="h-6 mt-2">
+                  {isSubmitted && (
+                    <p className="text-green-500 text-sm text-center">
+                      Thank you for subscribing!
+                    </p>
+                  )}
+                </div>
               </form>
-              <div className="h-6 mt-2">
-                {isSubmitted && (
-                  <p className="text-green-500 text-sm text-center">
-                    Thank you for subscribing!
-                  </p>
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -120,7 +117,7 @@ function FooterContent({
         <div>
           <h3 className="font-semibold text-white mb-4">About</h3>
           <ul className="space-y-2">
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Career</NavLink></li>
+            <li><NavLink to="/careers" className="!text-white hover:!text-gray-300 transition-colors">Career</NavLink></li>
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Blog</NavLink></li>
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Press Center</NavLink></li>
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">The Story of Vice Golf</NavLink></li>

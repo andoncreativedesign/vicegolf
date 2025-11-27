@@ -13,7 +13,7 @@ import type { loader } from '~/root';
 import { BlackFridayBanner } from './Banner';
 import type { MenuData } from '~/lib/shopify/product-queries';
 import DropdownItem from './Header/NavDropdownItem';
-import  HeaderMenu  from './Header/HeaderMenu';
+import HeaderMenu from './Header/HeaderMenu';
 
 interface DropdownItem {
   name: string;
@@ -137,7 +137,7 @@ export function Header({
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    console.log('navigation items - Header', menuItems)
+    console.log('navigation items', menuItems)
   }, [])
 
   useEffect(() => {
@@ -153,7 +153,7 @@ export function Header({
     <header className="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300" style={{ width: '100%', margin: 0, padding: 0 }}>
       {/* Marquee Banner - Always Visible */}
       <BlackFridayBanner />
-      
+
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
         {/* Left: Country/Currency Selector */}

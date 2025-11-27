@@ -50,9 +50,10 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
   }, [option.optionValues]);
 
 
-  const getPricePerItem = (price: string, numberOfItems: number, currencyCode: string) => {
+  const getPricePerItem = (price: string, name: string, currencyCode: string) => {
+    const numberOfItems = name.split(' ')[0];
     const priceNum = parseFloat(price);
-    const pricePerItem = (priceNum / numberOfItems).toFixed(2)
+    const pricePerItem = (priceNum / parseInt(numberOfItems)).toFixed(2)
     return `${formatPrice(pricePerItem, currencyCode)}/dz`;
   }
 
@@ -78,7 +79,7 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
       <div className="space-y-4">
         {option.optionValues.map((value, index) => {
 
-          const pricePerDozen = getPricePerItem(value.variant?.price?.amount, index + 1, value.variant?.price?.currencyCode);
+          const pricePerDozen = index === 0 ? null :  getPricePerItem(value.variant?.price?.amount, value?.name, value.variant?.price?.currencyCode);
           const totalPrice = value.variant?.price?.amount
             ? formatPrice(value.variant.price.amount, value.variant.price.currencyCode)
             : null
@@ -116,7 +117,7 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-medium text-gray-900">
+                      <span className="text-base font-bold text-gray-900">
                         {name}
                       </span>
                       {index === option?.optionValues?.length - 1 && (
@@ -143,7 +144,7 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
                         Save {formatPrice(savings, value.variant?.price?.currencyCode || 'USD')}
                       </div>
                     )}
-                    <div className="text-lg font-bold text-[#DA1000]">
+                    <div className={`text-lg font-bold ${index===0 ? 'text-gray-800' : 'text-[#DA1000]'}`}>
                       {totalPrice}
                     </div>
                     {originalPrice && (
