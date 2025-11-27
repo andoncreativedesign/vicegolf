@@ -62,6 +62,8 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
   }
 ` as const;
 
+// app/lib/shopify/product-queries.ts
+
 export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
 fragment ProductCard on Product {
   id
@@ -103,55 +105,37 @@ query MultipleProductGroups(
   $first: Int = 15
   $golfBallsCursor: String
   $gearCursor: String
+  $apparelCursor: String    # ← NEW
 ) {
   golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
-    nodes {
-      ...ProductCard
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    nodes { ...ProductCard }
+    pageInfo { hasNextPage endCursor }
   }
 
   golfClubs: products(first: $first, query: $golfClubsHandle) {
-    nodes {
-      ...ProductCard
-    }
+    nodes { ...ProductCard }
   }
 
-  apparel: products(first: $first, query: $apparelHandle) {
-    nodes {
-      ...ProductCard
-    }
+  apparel: products(first: $first, after: $apparelCursor, query: $apparelHandle) {   # ← NOW PAGINATED
+    nodes { ...ProductCard }
+    pageInfo { hasNextPage endCursor }
   }
 
   gear: products(first: $first, after: $gearCursor, query: $gearHandle) {
-    nodes {
-      ...ProductCard
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    nodes { ...ProductCard }
+    pageInfo { hasNextPage endCursor }
   }
 
   limitedEditions: products(first: $first, query: $limitedEditionsHandle) {
-    nodes {
-      ...ProductCard
-    }
+    nodes { ...ProductCard }
   }
 
   fittingCustomisation: products(first: $first, query: $fittingCustomisationHandle) {
-    nodes {
-      ...ProductCard
-    }
+    nodes { ...ProductCard }
   }
 
   juniors: products(first: $first, query: $juniorsHandle) {
-    nodes {
-      ...ProductCard
-    }
+    nodes { ...ProductCard }
   }
 }
 ` as const;
