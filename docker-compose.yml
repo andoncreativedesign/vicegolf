@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+      # Enable build cache if using BuildKit
+      # args: {}
+    image: bornovtechnologies2024/vice-golf:latest
+    container_name: vice-golf
+    env_file:
+      - .env            # optional: your environment variables
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z localhost ${PORT:-3000} || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
