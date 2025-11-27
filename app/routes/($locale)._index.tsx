@@ -47,7 +47,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         limitedEditionsHandle: createCategoryQuery('Towels'),
         fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
         juniorsHandle: createCategoryQuery('Divot Tool'),
-        first: 5,
+        first: 15,
         gearCursor,
       },
     }),
@@ -72,7 +72,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
   const recommendedProducts = await context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY, {
       variables: {
-        first: 5,
+        first: 15,
         after: recommendedCursor,
       },
     })

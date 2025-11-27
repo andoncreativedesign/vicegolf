@@ -101,7 +101,7 @@ query MultipleProductGroups(
   $limitedEditionsHandle: String!
   $fittingCustomisationHandle: String!
   $juniorsHandle: String!
-  $first: Int = 5
+  $first: Int = 15
   $golfBallsCursor: String
   $golfClubsCursor: String
   $apparelCursor: String
@@ -676,7 +676,7 @@ fragment ProductCardFragment on Product {
     }
   }
 
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $first: Int = 5, $after: String)
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $first: Int = 15, $after: String)
     @inContext(country: $country, language: $language) {
     products(first: $first, after: $after, sortKey: UPDATED_AT, reverse: true) {
       nodes {
