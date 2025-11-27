@@ -46,7 +46,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         limitedEditionsHandle: createCategoryQuery('Towels'),
         fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
         juniorsHandle: createCategoryQuery('Divot Tool'),
-        first: 15,
+        first: 5,
         gearCursor,
       },
     }),
