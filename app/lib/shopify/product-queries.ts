@@ -100,47 +100,54 @@ query MultipleProductGroups(
   $limitedEditionsHandle: String!
   $fittingCustomisationHandle: String!
   $juniorsHandle: String!
-  $first: Int = 8
+  $first: Int = 15
   $golfBallsCursor: String
+  $gearCursor: String
 ) {
-
-golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
-  nodes {
-    ...ProductCard
+  golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
+    nodes {
+      ...ProductCard
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
-  pageInfo {
-    hasNextPage
-    hasPreviousPage
-    endCursor
-    startCursor
-  }
-}
 
   golfClubs: products(first: $first, query: $golfClubsHandle) {
     nodes {
       ...ProductCard
     }
   }
+
   apparel: products(first: $first, query: $apparelHandle) {
     nodes {
       ...ProductCard
     }
   }
-  gear: products(first: $first, query: $gearHandle) {
+
+  gear: products(first: $first, after: $gearCursor, query: $gearHandle) {
     nodes {
       ...ProductCard
     }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
+
   limitedEditions: products(first: $first, query: $limitedEditionsHandle) {
     nodes {
       ...ProductCard
     }
   }
+
   fittingCustomisation: products(first: $first, query: $fittingCustomisationHandle) {
     nodes {
       ...ProductCard
     }
   }
+
   juniors: products(first: $first, query: $juniorsHandle) {
     nodes {
       ...ProductCard
