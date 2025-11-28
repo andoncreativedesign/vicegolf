@@ -12,9 +12,9 @@ const HeaderMenu = ({
 }: {
   viewport: 'desktop' | 'mobile';
   menuItems: MenuItem[];
-  }) => {
+}) => {
   const fetcher = useFetcher()
-  const navigate = useNavigate() 
+  const navigate = useNavigate()
   const { close } = useAside();
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [activeSubmenu, setActiveSubmenu] = useState<MenuItem | null>(null);
@@ -145,14 +145,14 @@ const HeaderMenu = ({
     });
   };
 
-  useEffect(() => {  
+  useEffect(() => {
     if (menuItems.length === 0) return;
     const updatedMenu = updateMenuItems(menuItems);
     console.log('updated menuitems reconstructed  - ', updatedMenu)
     setMenu(updatedMenu);
   }, [menuItems]);
 
-  const handleNavigate = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>,navItem: SecondaryMenuItem) => {
+  const handleNavigate = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, navItem: SecondaryMenuItem) => {
     e.preventDefault()
     if (navItem.type === "COLLECTION") {
       fetcher.submit(
@@ -178,9 +178,9 @@ const HeaderMenu = ({
 
   if (viewport === "mobile") {
     return (
-      <nav className="flex flex-col p-4" role="navigation">
+      <nav className="flex flex-col p-4 overflow-y-scroll" role="navigation">
         {activeSubmenu ? (
-          <>
+          <div>
             <button
               onClick={handleBackToMain}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 text-sm font-medium"
@@ -189,9 +189,9 @@ const HeaderMenu = ({
               Back to Categories
             </button>
             <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
-            
+
             {/* Grid for non-PAGE items */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid grid-cols-2 gap-3 mb-4 overflow-y-scroll">
               {activeSubmenu.items
                 ?.filter(subItem => subItem.type !== "PAGE")
                 .map((subItem) => (
@@ -247,7 +247,7 @@ const HeaderMenu = ({
                   </div>
                 );
               })}
-          </>
+          </div>
         ) : (
           <div className="space-y-1">
             {menu.map((item) => (
