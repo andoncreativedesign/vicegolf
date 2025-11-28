@@ -133,13 +133,17 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   return { product, colorVariants };
 }
 
-async function loadDeferredData({ context }: Route.LoaderArgs) {
-  const recommendedProducts = await context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
+async function loadDeferredData({ context, request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const recommendedCursor = url.searchParams.get('recommendedCursor');
+
+  const recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
+    variables: {
+      first: 15,
+      after: recommendedCursor || undefined,
+    },
+  }).catch(() => null);
+
   return { recommendedProducts };
 }
 
@@ -243,11 +247,11 @@ export default function Product() {
           case 'cap':
           case 'caps':
             return (
-              <GolfBallProduct
-                productDetails={productDetails}
-                recommendedProducts={recommendedProducts}
-                showBestSellers={true}
-              />
+            <GolfBallProduct
+  productDetails={productDetails}
+  initialRecommended={recommendedProducts} 
+  showBestSellers={true}
+/>
             );
           case 'tees':
             return <TeeProduct productDetails={productDetails} />
