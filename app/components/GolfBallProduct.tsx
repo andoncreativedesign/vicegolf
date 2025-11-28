@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { Youtube } from '~/components/Youtube';
 import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
+import ProductDetailsContent2 from '~/components/Product/ProductDetailsContent2';
 import { ProductGrid } from '~/components/ProductGrid';
 import type { ProductDetails } from '~/lib/sanity/products';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -89,6 +90,13 @@ export function GolfBallProduct({
             <Youtube youtubeVideo={productDetails.youtubeVideos} />
           </div>
         )}
+
+        {/* Product Content 2 Section */}
+        {productDetails?.productContent2?.sections?.map((section, index) => (
+          <div key={index} className="mt-16 md:mt-20 lg:mt-24">
+            <ProductDetailsContent2 content={section} />
+          </div>
+        ))}
 
         {/* Best Sellers with Infinite Scroll */}
         {showBestSellers && recommendedProducts.length > 0 && (
