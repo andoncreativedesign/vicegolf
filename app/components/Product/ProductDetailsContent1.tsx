@@ -8,6 +8,7 @@ interface ProductContent1Props {
   isImageFull?: boolean;
   isDescriptionFull?: boolean;
   isFirst?: boolean;
+  isThird?: boolean;
   imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
   titleClassName?: string;
   descriptionClassName?: string;
@@ -20,6 +21,7 @@ const ProductDetailsContent1 = ({
   isImageFull = false,
   isDescriptionFull = false,
   isFirst = false,
+  isThird = false,
   imageSize = 'medium',
   titleClassName = '',
   descriptionClassName = ''
@@ -44,27 +46,31 @@ const ProductDetailsContent1 = ({
   );
 
   const textSection = (
-    <div className={`space-y-4 ${isTextFull ? 'w-full flex flex-col items-center' : 'flex flex-col justify-center h-full w-full pr-0'} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'} ${isFirst ? 'mt-6' : ''}`}>
-      <div className={`${isTextFull ? 'w-full max-w-4xl' : 'w-full'}`}>
+    <div className={`space-y-4 ${isTextFull || isThird ? 'w-full flex flex-col items-center' : 'flex flex-col justify-center h-full w-full pr-0'} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'} ${isFirst ? 'mt-6' : ''}`}>
+      <div className={`${isTextFull || isThird ? 'w-full max-w-4xl' : 'w-full'}`}>
         {content.title && (
-          <h3 className={`text-2xl lg:text-3xl font-semibold ${titleClassName || 'text-main-900'} ${isTextFull ? 'text-center' : 'text-center lg:text-left'}`}>
-            {content.title}
-          </h3>
+          <div className={`${isThird ? 'w-full flex justify-center' : ''}`}>
+            <h3 className={`${titleClassName || (isThird ? 'text-4xl lg:text-5xl font-bold' : 'text-2xl lg:text-3xl font-semibold')} ${isTextFull || isThird ? 'text-center' : 'text-center lg:text-left'}`}>
+              {content.title}
+            </h3>
+          </div>
         )}
       </div>
       {content.description && (
-        <p className={`!text-lg !lg:text-xl leading-relaxed font-light text-gray-500 ${isDescriptionFull ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} mx-0 mb-3 mt-1 ${descriptionClassName}`}>
-          {content.description}
-        </p>
+        <div className={`${isThird ? 'w-full flex justify-center' : ''}`}>
+          <p className={`${isDescriptionFull || isThird ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} !text-lg !lg:text-xl text-gray-500 leading-relaxed font-normal mx-0 mb-3 mt-1`}>
+            {content.description}
+          </p>
+        </div>
       )}
       {content.points && content.points.length > 0 && (
-        <ul className={`space-y-2 ${isTextFull ? 'max-w-2xl text-start' : 'max-w-md'} mx-auto lg:mx-0`}>
+        <ul className={`space-y-2 ${isTextFull ? 'max-w-2xl' : 'max-w-md'} ${isTextFull ? 'text-start' : 'text-center lg:text-left'} mx-auto lg:mx-0`}>
           {content.points.map((point, index) => (
             <li key={index} className="flex items-start group">
-              <span className="text-green-500 mr-4 mt-1 transform group-hover:scale-110 transition-transform shrink-0">
-                ✓
+              <span className="text-yellow-400 mr-4 mt-1 transform group-hover:scale-110 transition-transform shrink-0">
+                •
               </span>
-              <span className="text-gray-700 group-hover:text-gray-900 transition-colors flex-1 font-normal text-base">
+              <span className="text-base text-gray-500 leading-relaxed font-normal flex-1">
                 {point}
               </span>
             </li>
@@ -85,7 +91,7 @@ const ProductDetailsContent1 = ({
 
   // Show layout with images and text
   return (
-    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${isFirst ? 'gap-8 lg:gap-10' : 'gap-6 lg:gap-8'} items-center justify-center mb-1 lg:mb-2`}>
+    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${isFirst ? 'gap-8 lg:gap-10' : 'gap-6 lg:gap-8'} items-center justify-center`}>
       {showImageLeft ? (
         <>
           {imageSection}

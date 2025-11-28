@@ -13,12 +13,14 @@ type GolfBallProductProps = {
   productDetails: ProductDetails | null;
   initialRecommended?: any; // from loader
   showBestSellers?: boolean;
+  isGolfBallProduct?: boolean;
 };
 
 export function GolfBallProduct({
   productDetails,
   initialRecommended,
   showBestSellers = true,
+  isGolfBallProduct = false,
 }: GolfBallProductProps) {
   const fetcher = useFetcher();
 
@@ -62,22 +64,29 @@ export function GolfBallProduct({
     <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
       <div className="max-w-8xl mx-auto">
         {productDetails?.productContent1?.content?.map((item, index) => {
-          const isEven = (index + 1) % 2 === 0;
           const isFirst = index === 0;
           const isSecond = index === 1;
+          const isThird = index === 2;
+
+          // For golf ball products, always show image on the left for the first and second items
+          // For non-golf ball products, alternate the layout
+          const showImageLeft = isGolfBallProduct ? (isFirst || isSecond) : (index % 2 === 0);
 
           return (
             <div key={index} className={isFirst ? 'w-full' : ''}>
-              <div className="w-full min-h-[50vh] flex items-center">
+              <div className="w-full min-h-[30vh] flex items-center">
                 <div className="w-full py-8 mb-0">
                   <ProductDetailsContent1
                     content={item}
-                    showImageLeft={!isEven}
+                    showImageLeft={showImageLeft}
                     isTextFull={false}
                     isImageFull={false}
                     isFirst={isFirst}
+                    isThird={isThird}
                     isDescriptionFull={false}
                     imageSize={isFirst ? "large" : "large"}
+                    titleClassName={isGolfBallProduct ? 'text-4xl lg:text-5xl font-bold' : ''}
+                    descriptionClassName={isGolfBallProduct ? 'text-3xl lg:text-4xl text-yellow-400' : ''}
                   />
                 </div>
               </div>
@@ -93,7 +102,7 @@ export function GolfBallProduct({
 
         {/* Product Content 2 Section */}
         {productDetails?.productContent2?.sections?.map((section, index) => (
-          <div key={index} className="mt-16 md:mt-20 lg:mt-24">
+          <div key={index}>
             <ProductDetailsContent2 content={section} />
           </div>
         ))}
