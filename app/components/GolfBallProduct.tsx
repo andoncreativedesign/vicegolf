@@ -1,8 +1,8 @@
 // app/components/GolfBallProduct.tsx
 import { useState, useEffect, useCallback } from 'react';
 import type { ProductFragment } from 'storefrontapi.generated';
-import { ProductDetailContents } from '~/components/Product/ProductDetailContents';
 import { Youtube } from '~/components/Youtube';
+import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
 import { ProductGrid } from '~/components/ProductGrid';
 import type { ProductDetails } from '~/lib/sanity/products';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -58,31 +58,51 @@ export function GolfBallProduct({
   }, [cursor, hasMore, isLoading, fetcher]);
 
   return (
-    <>
-      {productDetails && (
-        <ProductDetailContents
-          content={productDetails?.productContent1?.content || []}
-          content2={productDetails?.productContent2?.sections?.[0]}
-          imageSize="xlarge"
-        />
-      )}
+    <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+      <div className="max-w-8xl mx-auto">
+        {productDetails?.productContent1?.content?.map((item, index) => {
+          const isEven = (index + 1) % 2 === 0;
+          const isFirst = index === 0;
+          const isSecond = index === 1;
 
-      {productDetails?.youtubeVideos && (
-        <Youtube youtubeVideo={productDetails.youtubeVideos} />
-      )}
+          return (
+            <div key={index} className={isFirst ? 'w-full' : ''}>
+              <div className={`w-full ${isFirst ? 'bg-blue-200' : 'bg-red-200 min-h-[50vh] flex items-center'}`}>
+                <div className="w-full py-8 mb-0">
+                  <ProductDetailsContent1
+                    content={item}
+                    showImageLeft={!isEven}
+                    isTextFull={false}
+                    isImageFull={false}
+                    isFirst={isFirst}
+                    isDescriptionFull={false}
+                    imageSize={isFirst ? "large" : "large"}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
 
-      {/* Best Sellers with Infinite Scroll */}
-      {showBestSellers && recommendedProducts.length > 0 && (
-        <div className="mt-16 max-w-7xl mx-auto px-4">
-          <ProductGrid
-            products={recommendedProducts}
-            title="OUR BEST SELLERS"
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            loading={isLoading}
-          />
-        </div>
-      )}
-    </>
+        {productDetails?.youtubeVideos && (
+          <div className="mt-16 md:mt-20 lg:mt-24">
+            <Youtube youtubeVideo={productDetails.youtubeVideos} />
+          </div>
+        )}
+
+        {/* Best Sellers with Infinite Scroll */}
+        {showBestSellers && recommendedProducts.length > 0 && (
+          <div className="mt-16">
+            <ProductGrid
+              products={recommendedProducts}
+              title="OUR BEST SELLERS"
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loading={isLoading}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
