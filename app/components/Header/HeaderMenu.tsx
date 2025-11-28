@@ -1,6 +1,6 @@
-import type { MenuItem, SecondaryMenu } from "~/lib/shopify/product-queries";
+import type { MenuItem, SecondaryMenu, SecondaryMenuItem } from "~/lib/shopify/product-queries";
 import { Image } from "@shopify/hydrogen"
-import { NavLink } from "react-router"
+import { NavLink, useFetcher, useNavigate } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
 import { useAside } from '~/components/Aside';
 import { useEffect, useState, useRef } from "react";
@@ -12,7 +12,9 @@ const HeaderMenu = ({
 }: {
   viewport: 'desktop' | 'mobile';
   menuItems: MenuItem[];
-}) => {
+  }) => {
+  const fetcher = useFetcher()
+  const navigate = useNavigate() 
   const { close } = useAside();
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [activeSubmenu, setActiveSubmenu] = useState<MenuItem | null>(null);
@@ -40,52 +42,6 @@ const HeaderMenu = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  // const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
-
-  //   const getAllResourceIdsOfChild = (items: MenuItem[]) => {
-  //     const ids = items.map(item => item.resourceId || '')
-  //     return JSON.stringify(ids)
-  //   }
-
-  //   return items.map(item => {
-
-  //     let updatedItem = undefined
-  //     const handle = item?.resource?.handle || ''
-  //     if (item.type === "PRODUCT") {
-  //       updatedItem = {
-  //         ...item,
-  //         resource: {
-  //           ...item.resource,
-  //           image: item?.resource?.featuredImage
-  //         },
-  //         url: `/products/${encodeURIComponent(handle)}/`
-  //       };
-  //     } else if (item.type === 'PAGE') {
-  //       updatedItem = {
-  //         ...item,
-  //         resource: {
-  //           ...item.resource,
-  //           metafield: typeof item?.resource?.metafield === 'object' && JSON.parse(item.resource.metafield)
-  //         },
-  //       };
-  //     } else {
-  //       updatedItem = {
-  //         ...item,
-  //         url: item.resourceId
-  //           ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
-  //           : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}/${decodeURIComponent(item.title)}`
-  //       };
-  //     }
-
-
-  //     if (item?.items && item?.items?.length > 0) {
-  //       updatedItem?.items = updateMenuItems(item.items);
-  //     }
-
-  //     return updatedItem;
-  //   });
-  // };
 
 
   function reconstructMenuObject(value: string | null | undefined): SecondaryMenu[] | null {
@@ -191,11 +147,34 @@ const HeaderMenu = ({
 
   useEffect(() => {  
     if (menuItems.length === 0) return;
-    // console.log('menu items on map - ', menuItems[0])
     const updatedMenu = updateMenuItems(menuItems);
     console.log('updated menuitems reconstructed  - ', updatedMenu)
     setMenu(updatedMenu);
   }, [menuItems]);
+
+  const handleNavigate = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>,navItem: SecondaryMenuItem) => {
+    e.preventDefault()
+    if (navItem.type === "COLLECTION") {
+      fetcher.submit(
+        { handle: navItem.handle },
+        { method: "post", action: "/api/collection" }
+      );
+    } else if (navItem.type === "PAGE") {
+      navigate(`/${navItem.handle}`);
+    }
+  }
+
+  useEffect(() => {
+    if (
+      fetcher.state === "idle"
+      && fetcher.data?.collection?.id
+      && fetcher.data?.collection?.title
+    ) {
+      const { id, title } = fetcher.data.collection
+      console.log("fetcher.data ", id, title)
+      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    }
+  }, [fetcher.state, fetcher.data, navigate]);
 
   if (viewport === "mobile") {
     return (
@@ -210,118 +189,64 @@ const HeaderMenu = ({
               Back to Categories
             </button>
             <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
+            
+            {/* Grid for non-PAGE items */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              {activeSubmenu.items?.map((subItem) => (
-                <NavLink
-                  key={subItem.id}
-                  to={subItem.url}
-                  onClick={close}
-                  className="flex flex-col items-center p-2 rounded-md hover:bg-gray-50 text-gray-700 border border-gray-100"
-                >
-                  {subItem.resource?.image?.url && (
-                    <div className="w-full aspect-square mb-2 overflow-hidden rounded-md bg-gray-50 flex items-center justify-center">
-                      <Image
-                        data={subItem.resource.image}
-                        alt={subItem.resource.image.altText || subItem.title}
-                        className="w-full h-full object-contain p-1"
-                        width={120}
-                        height={120}
-                      />
-                    </div>
-                  )}
-                  <span className="text-sm font-medium text-center line-clamp-2">
-                    {subItem.title}
-                  </span>
-                </NavLink>
-              ))}
+              {activeSubmenu.items
+                ?.filter(subItem => subItem.type !== "PAGE")
+                .map((subItem) => (
+                  <NavLink
+                    key={subItem.id}
+                    to={subItem.url}
+                    onClick={close}
+                    className="flex flex-col items-center p-2 rounded-md hover:bg-gray-50 text-gray-700 border border-gray-100"
+                  >
+                    {subItem.resource?.image?.url && (
+                      <div className="w-full aspect-square mb-2 overflow-hidden rounded-md bg-gray-50 flex items-center justify-center">
+                        <Image
+                          data={subItem.resource.image}
+                          alt={subItem.resource.image.altText || subItem.title}
+                          className="w-full h-full object-contain p-1"
+                          width={120}
+                          height={120}
+                        />
+                      </div>
+                    )}
+                    <span className="text-sm font-medium text-center line-clamp-2">
+                      {subItem.title}
+                    </span>
+                  </NavLink>
+                ))}
             </div>
-            <div className="grid grid-cols-2 gap-6 mt-2 text-sm text-gray-800">
-              <div>
-                <h5 className="font-semibold mb-2">Highlights</h5>
-                <ul className="space-y-1">
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      All Balls
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Drip Balls
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Shade & Color Balls
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Bundles
-                    </NavLink>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h5 className="font-semibold mb-2">Tools</h5>
-                <ul className="space-y-1">
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Ball Customization
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Ball Comparison Tool
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Ball Fitting Tool
-                    </NavLink>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h5 className="font-semibold mb-2 mt-4">About</h5>
-                <ul className="space-y-1">
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      The Story of Vice Golf
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      How we test our golf balls
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Your Yearly Savings with Vice
-                    </NavLink>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h5 className="font-semibold mb-2 mt-4">More</h5>
-                <ul className="space-y-1">
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      eGift Card
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Special Offers
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/" className="hover:underline" style={{ textDecoration: "none" }}>
-                      Limited Editions
-                    </NavLink>
-                  </li>
-                </ul>
-              </div>
-            </div>
+
+            {/* Secondary menu for PAGE items */}
+            {activeSubmenu.items
+              ?.filter(item => item.type === "PAGE" && item.resource?.metafield?.value)
+              .map((item, index) => {
+                const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
+                return (
+                  <div key={index} className="grid grid-cols-2 gap-6 mt-6 text-sm text-gray-800">
+                    {secondaryMenu.map((menu, menuIndex) => (
+                      <div key={menuIndex}>
+                        <h5 className="font-semibold mb-2">{menu.section}</h5>
+                        <ul className="space-y-1">
+                          {menu?.items?.map((menuItem, itemIndex) => (
+                            <li key={itemIndex}>
+                              <button
+                                onClick={(e) => handleNavigate(e, menuItem)}
+                                className="hover:underline text-left w-full cursor-pointer block"
+                                style={{ textDecoration: 'none' }}
+                              >
+                                {menuItem.title}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
           </>
         ) : (
           <div className="space-y-1">
