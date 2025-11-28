@@ -67,7 +67,7 @@ export function GolfBallProduct({
 
           return (
             <div key={index} className={isFirst ? 'w-full' : ''}>
-              <div className={`w-full ${isFirst ? 'bg-blue-200' : 'bg-red-200 min-h-[50vh] flex items-center'}`}>
+              <div className="w-full min-h-[50vh] flex items-center">
                 <div className="w-full py-8 mb-0">
                   <ProductDetailsContent1
                     content={item}
