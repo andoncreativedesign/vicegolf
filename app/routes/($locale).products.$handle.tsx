@@ -312,7 +312,7 @@ export default function Product() {
         //   }
       })()}
       {/* Customer Reviews Section (common for all products) */}
-      <CustomerReviews />
+      {/* <CustomerReviews /> */}
       <Analytics.ProductView
         data={{
           products: [
