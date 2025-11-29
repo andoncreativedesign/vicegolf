@@ -244,6 +244,7 @@ export default function Product() {
           case "glove":
           case "gloves":
           case "gloves men":
+             case "gloves women":
             return (
               <PoloProduct
                 product={product}
