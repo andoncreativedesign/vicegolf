@@ -24,6 +24,8 @@ export function TeeProduct({ productDetails }: PoloProductProps) {
             // showImageLeft={!true}
             isTextFull={true}
             isImageFull={true}
+            descriptionClassName="!text-xl font-light text-gray-600 w-full max-w-[95%] mx-auto px-4"
+            pointsClassName=""
           />
         );
       })}
