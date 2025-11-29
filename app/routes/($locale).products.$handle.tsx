@@ -234,45 +234,72 @@ export default function Product() {
       {/* Product-specific sections */}
       {(() => {
         const productType = product.productType?.toLowerCase();
+
         switch (productType) {
-          case 'polo':
-          case 'polos':
-          case 'shoes':
-          case 'headwear':
-            return <PoloProduct product={product} productDetails={productDetails} />;
-          case 'golf club set':
-            return <GolfClubSetProduct productDetails={productDetails} />;
-          case 'golf bag':
-          case 'golf bags':
-          case 'cap':
-          case 'caps':
+          /** 👇 Clothing category */
+          case "polo":
+          case "polos":
+          case "shoes":
+          case "headwear":
+          case "glove":
+          case "gloves":
+          case "gloves men":
+             case "gloves women":
             return (
-            <GolfBallProduct
-  productDetails={productDetails}
-  initialRecommended={recommendedProducts} 
-  showBestSellers={true}
-/>
+              <PoloProduct
+                product={product}
+                productDetails={productDetails}
+              />
             );
-          case 'tees':
-            return <TeeProduct productDetails={productDetails} />
-          case 'rangefinder':
+
+          /** 👇 Golf club sets */
+          case "golf club set":
+            return <GolfClubSetProduct productDetails={productDetails} />;
+
+          /** 👇 Golf bags + caps */
+          case "golf bag":
+          case "golf bags":
+          case "cap":
+          case "caps":
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+                isGolfBallProduct={false}
+              />
+            );
+
+          /** 👇 Tees */
+          case "tees":
+            return <TeeProduct productDetails={productDetails} />;
+
+          /** 👇 Rangefinder */
+          case "rangefinder":
             return <RangefinderProduct productDetails={productDetails} />;
+
+          /** 👇 Golf balls (main category) */
+          case "golf balls":
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={false}
+                isGolfBallProduct={true}
+              />
+            );
+
+          /** 👇 Default — fallback to golf balls layout */
           default:
             return (
               <GolfBallProduct
                 productDetails={productDetails}
-                recommendedProducts={recommendedProducts}
+                initialRecommended={recommendedProducts}
                 showBestSellers={false}
+                isGolfBallProduct={false}
               />
             );
         }
-        // ! working code below
-        //   switch(productType) {
-        //     case 'golf balls':
-        //       return <GolfBallProduct product={product} />;
-        //     case 'golf club set':
-        //       return <GolfClubSetProduct product={product} />;
-        //     case 'golf bag':
         //     case 'golf bags':
         //       return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
         //     case 'shoes':

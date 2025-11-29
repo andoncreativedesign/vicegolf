@@ -1,8 +1,9 @@
 // app/components/GolfBallProduct.tsx
 import { useState, useEffect, useCallback } from 'react';
 import type { ProductFragment } from 'storefrontapi.generated';
-import { ProductDetailContents } from '~/components/Product/ProductDetailContents';
 import { Youtube } from '~/components/Youtube';
+import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
+import ProductDetailsContent2 from '~/components/Product/ProductDetailsContent2';
 import { ProductGrid } from '~/components/ProductGrid';
 import type { ProductDetails } from '~/lib/sanity/products';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -12,12 +13,14 @@ type GolfBallProductProps = {
   productDetails: ProductDetails | null;
   initialRecommended?: any; // from loader
   showBestSellers?: boolean;
+  isGolfBallProduct?: boolean;
 };
 
 export function GolfBallProduct({
   productDetails,
   initialRecommended,
   showBestSellers = true,
+  isGolfBallProduct = false,
 }: GolfBallProductProps) {
   const fetcher = useFetcher();
 
@@ -58,31 +61,67 @@ export function GolfBallProduct({
   }, [cursor, hasMore, isLoading, fetcher]);
 
   return (
-    <>
-      {productDetails && (
-        <ProductDetailContents
-          content={productDetails?.productContent1?.content || []}
-          content2={productDetails?.productContent2?.sections?.[0]}
-          imageSize="xlarge"
-        />
-      )}
+    <div className={`${isGolfBallProduct ? 'px-10 sm:px-12 lg:px-20 xl:px-24' : 'px-6 sm:px-8 lg:px-12 xl:px-16'}`}>
+      <div className="max-w-8xl mx-auto">
+        {productDetails?.productContent1?.content?.map((item, index) => {
+          const isFirst = index === 0;
+          const isSecond = index === 1;
+          const isThird = index === 2;
 
-      {productDetails?.youtubeVideos && (
-        <Youtube youtubeVideo={productDetails.youtubeVideos} />
-      )}
+          // For golf ball products, show image on the left for the first section, right for the second
+          // For non-golf ball products, alternate the layout
+          const showImageLeft = isGolfBallProduct ? isFirst : (index % 2 === 0);
 
-      {/* Best Sellers with Infinite Scroll */}
-      {showBestSellers && recommendedProducts.length > 0 && (
-        <div className="mt-16 max-w-7xl mx-auto px-4">
-          <ProductGrid
-            products={recommendedProducts}
-            title="OUR BEST SELLERS"
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            loading={isLoading}
-          />
-        </div>
-      )}
-    </>
+          return (
+            <div key={index} className={isFirst ? 'w-full' : ''}>
+              <div className="w-full min-h-[30vh] flex items-center">
+                <div className="w-full py-8 mb-0">
+                  <ProductDetailsContent1
+                    content={item}
+                    showImageLeft={showImageLeft}
+                    isTextFull={false}
+                    isImageFull={false}
+                    isFirst={isFirst}
+                    isSecond={isSecond}
+                    isThird={isThird}
+                    isDescriptionFull={false}
+                    imageSize={isFirst ? "large" : "large"}
+                    titleClassName={isGolfBallProduct ? 'text-4xl lg:text-5xl font-bold' : ''}
+                    descriptionClassName={!isGolfBallProduct ? '!text-xl font-light text-gray-600 w-full max-w-full px-4' : 'text-base text-gray-600 w-[90%] max-w-[90%] ml-auto'}
+                    pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {productDetails?.youtubeVideos && (
+          <div className="mt-16 md:mt-20 lg:mt-24">
+            <Youtube youtubeVideo={productDetails.youtubeVideos} />
+          </div>
+        )}
+
+        {/* Product Content 2 Section */}
+        {productDetails?.productContent2?.sections?.map((section, index) => (
+          <div key={index}>
+            <ProductDetailsContent2 content={section} index={index} />
+          </div>
+        ))}
+
+        {/* Best Sellers with Infinite Scroll */}
+        {showBestSellers && recommendedProducts.length > 0 && (
+          <div className="mt-16">
+            <ProductGrid
+              products={recommendedProducts}
+              title="OUR BEST SELLERS"
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loading={isLoading}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
