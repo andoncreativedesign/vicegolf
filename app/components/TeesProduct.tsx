@@ -11,29 +11,58 @@ type PoloProductProps = {
 };
 
 export function TeeProduct({ productDetails }: PoloProductProps) {
-
   return (
-    <>
-      {/* Reusable What's New Section */}
-      {productDetails?.productContent1?.content?.map((item, index) => {
-        const isEven = (index + 1) % 2 === 0;
-        return (
-          <ProductDetailsContent1
-            key={index}
-            content={item}
-            // showImageLeft={!true}
-            isTextFull={true}
-            isImageFull={true}
-            descriptionClassName="!text-xl font-light text-gray-600 w-full max-w-[95%] mx-auto px-4"
-            pointsClassName=""
-          />
-        );
-      })}
+    <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+      <div className="max-w-8xl mx-auto">
+        {/* Reusable What's New Section */}
+        {productDetails?.productContent1?.content?.map((item, index) => {
+          const isEven = (index + 1) % 2 === 0;
+          const isFirst = index === 0;
+          const isSecond = index === 1;
 
-      {/* Youtube Video Section */}
-      {productDetails && productDetails.youtubeVideos &&
-        <Youtube youtubeVideo={productDetails.youtubeVideos} />
-      }
-    </>
+          return (
+            <div
+              key={index}
+              className={`${isFirst ? 'w-full' : ''}`}
+            >
+              {isFirst ? (
+                <div className="w-full">
+                  <div className="flex flex-col space-y-8 py-8">
+                    <ProductDetailsContent1
+                      content={item}
+                      showImageLeft={true}
+                      isTextFull={true}
+                      isImageFull={true}
+                      isDescriptionFull={true}
+                      imageSize="xlarge"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full">
+                  <div className="flex flex-col space-y-8 py-8">
+                    <ProductDetailsContent1
+                      content={item}
+                      showImageLeft={true}
+                      isTextFull={true}
+                      isImageFull={true}
+                      isDescriptionFull={true}
+                      imageSize="xlarge"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Youtube Video Section */}
+        {productDetails && productDetails.youtubeVideos && (
+          <div className="mt-16 md:mt-20 lg:mt-24">
+            <Youtube youtubeVideo={productDetails.youtubeVideos} />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
