@@ -16,7 +16,7 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
-  // Newsletter section commented out as per request
+ 
   // const [email, setEmail] = useState('');
   // const [isSubmitted, setIsSubmitted] = useState(false);
 
