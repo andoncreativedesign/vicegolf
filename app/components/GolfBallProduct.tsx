@@ -68,9 +68,9 @@ export function GolfBallProduct({
           const isSecond = index === 1;
           const isThird = index === 2;
 
-          // For golf ball products, always show image on the left for the first and second items
+          // For golf ball products, show image on the left for the first section, right for the second
           // For non-golf ball products, alternate the layout
-          const showImageLeft = isGolfBallProduct ? (isFirst || isSecond) : (index % 2 === 0);
+          const showImageLeft = isGolfBallProduct ? isFirst : (index % 2 === 0);
 
           return (
             <div key={index} className={isFirst ? 'w-full' : ''}>
@@ -82,6 +82,7 @@ export function GolfBallProduct({
                     isTextFull={false}
                     isImageFull={false}
                     isFirst={isFirst}
+                    isSecond={isSecond}
                     isThird={isThird}
                     isDescriptionFull={false}
                     imageSize={isFirst ? "large" : "large"}
@@ -104,7 +105,7 @@ export function GolfBallProduct({
         {/* Product Content 2 Section */}
         {productDetails?.productContent2?.sections?.map((section, index) => (
           <div key={index}>
-            <ProductDetailsContent2 content={section} />
+            <ProductDetailsContent2 content={section} index={index} />
           </div>
         ))}
 

@@ -8,6 +8,7 @@ interface ProductContent1Props {
   isImageFull?: boolean;
   isDescriptionFull?: boolean;
   isFirst?: boolean;
+  isSecond?: boolean;
   isThird?: boolean;
   imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
   titleClassName?: string;
@@ -28,6 +29,8 @@ const ProductDetailsContent1 = ({
   descriptionClassName = '',
   pointsClassName = ''
 }: ProductContent1Props) => {
+  const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
+
   const imageSection = (
     <div className={`flex items-center justify-center ${isImageFull || isFirst ? 'w-full' : ''} ${showImageLeft ? 'lg:justify-end' : 'lg:justify-start'} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'}`}>
       <div className={`relative group ${isFirst ? 'w-full' : ''} ${isFirst ? 'max-h-[80vh] overflow-hidden' : ''}`}>
