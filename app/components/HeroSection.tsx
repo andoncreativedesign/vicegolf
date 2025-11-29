@@ -126,17 +126,17 @@ export function HeroSection({ heroData }: HeroSectionProps) {
       {/* Text and CTA */}
       <div className="absolute inset-0 z-20 flex items-center justify-start px-4 sm:pl-6 md:pl-16 text-white">
         <div className="max-w-xl drop-shadow-2xl">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold uppercase mb-2 leading-tight">
+          <h1 className="font-extrabold mb-0 uppercase tracking-tight" style={{ fontSize: '3rem', lineHeight: '1.1' }}>
             {currentSlideData.title}
           </h1>
           {currentSlideData.subtitle && (
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold uppercase mb-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-light mb-3" style={{ lineHeight: '1', marginTop: '0.1rem' }}>
               {currentSlideData.subtitle}
             </h2>
           )}
           <Link
             to={currentSlideData.buttonLink}
-            className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition duration-300 shadow-lg"
+            className="inline-block bg-white text-gray-500 px-6 md:px-10 py-2 md:py-3 rounded-full font-normal text-base md:text-lg hover:bg-gray-100 transition duration-300 shadow-lg mt-3"
             style={{ textDecoration: 'none' }}
           >
             {currentSlideData.buttonText}
