@@ -254,26 +254,13 @@ export default function Product() {
                 isGolfBallProduct={product.productType?.toLowerCase() === 'golf balls'}
               />
             );
-          case 'tees':
-            return <TeeProduct productDetails={productDetails} />;
-          case 'rangefinder':
-            return <RangefinderProduct productDetails={productDetails} />;
           case 'golf balls':
             return (
               <GolfBallProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={true}
-                isGolfBallProduct={product.productType?.toLowerCase() === 'golf balls'}
-              />
-            );
-          default:
-            return (
-              <GolfBallProduct
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
                 showBestSellers={false}
-                isGolfBallProduct={product.productType?.toLowerCase() === 'golf balls'}
+                isGolfBallProduct={true}
               />
             );
         }

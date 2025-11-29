@@ -64,18 +64,16 @@ const ProductDetailsContent1 = ({
         </div>
       )}
       {content.points && content.points.length > 0 && (
-        <ul className={`space-y-2 ${isTextFull ? 'max-w-2xl' : 'max-w-md'} ${isTextFull ? 'text-start' : 'text-center lg:text-left'} mx-auto lg:mx-0`}>
-          {content.points.map((point, index) => (
-            <li key={index} className="flex items-start group">
-              <span className="text-yellow-400 mr-4 mt-1 transform group-hover:scale-110 transition-transform shrink-0">
-                •
-              </span>
-              <span className="text-base text-gray-500 leading-relaxed font-normal flex-1">
-                {point}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="w-[95%] max-w-[95%] mx-auto">
+          <ul className={`space-y-3 w-full ${isTextFull ? 'text-start' : 'text-center lg:text-left'}`}>
+            {content.points.map((point, index) => (
+              <li key={index} className="flex items-start text-base text-gray-700 leading-relaxed font-normal">
+                <span className="text-gray-700 mr-1.5 mt-0.5">•</span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
