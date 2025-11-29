@@ -60,7 +60,7 @@ const ProductDetailsContent1 = ({
       </div>
       {content.description && (
         <div className={`${isThird ? 'w-full flex justify-center' : ''}`}>
-          <p className={`${isDescriptionFull || isThird ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} ${descriptionClassName || 'text-lg lg:text-xl'} text-gray-500 leading-relaxed font-normal mx-0 mb-3 mt-1`}>
+          <p className={`${isDescriptionFull || isThird ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} ${descriptionClassName || 'text-lg lg:text-xl'} ${descriptionClassName ? '' : 'text-gray-500'} leading-relaxed font-normal mx-0 mb-3 mt-1`}>
             {content.description}
           </p>
         </div>
