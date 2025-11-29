@@ -23,14 +23,18 @@ export function VideoSection({ videoContent }: YoutubeProps) {
 
         <div className="w-full">
           <div className="relative w-full aspect-video bg-gray-200">
-            <iframe
-              className="w-full h-full"
-              src={`${videoContent?.video?.asset.url}?autoplay=1&loop=1&playlist=${videoContent.video?.asset._ref}`}
+            <video
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls
               title={videoContent?.title || 'Product Video'}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            >
+              <source src={videoContent?.video?.asset.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </div>
