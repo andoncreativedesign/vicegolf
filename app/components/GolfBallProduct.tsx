@@ -61,7 +61,7 @@ export function GolfBallProduct({
   }, [cursor, hasMore, isLoading, fetcher]);
 
   return (
-    <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+    <div className={`${isGolfBallProduct ? 'px-10 sm:px-12 lg:px-20 xl:px-24' : 'px-6 sm:px-8 lg:px-12 xl:px-16'}`}>
       <div className="max-w-8xl mx-auto">
         {productDetails?.productContent1?.content?.map((item, index) => {
           const isFirst = index === 0;
