@@ -86,7 +86,8 @@ export function GolfBallProduct({
                     isDescriptionFull={false}
                     imageSize={isFirst ? "large" : "large"}
                     titleClassName={isGolfBallProduct ? 'text-4xl lg:text-5xl font-bold' : ''}
-                    descriptionClassName={isGolfBallProduct ? 'text-3xl lg:text-4xl text-yellow-400' : ''}
+                    descriptionClassName={isGolfBallProduct ? 'text-base text-gray-600 w-[90%] max-w-[90%] ml-auto' : ''}
+                    pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
                   />
                 </div>
               </div>

@@ -12,6 +12,7 @@ interface ProductContent1Props {
   imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
   titleClassName?: string;
   descriptionClassName?: string;
+  pointsClassName?: string;
 }
 
 const ProductDetailsContent1 = ({
@@ -24,7 +25,8 @@ const ProductDetailsContent1 = ({
   isThird = false,
   imageSize = 'medium',
   titleClassName = '',
-  descriptionClassName = ''
+  descriptionClassName = '',
+  pointsClassName = ''
 }: ProductContent1Props) => {
   const imageSection = (
     <div className={`flex items-center justify-center ${isImageFull || isFirst ? 'w-full' : ''} ${showImageLeft ? 'lg:justify-end' : 'lg:justify-start'} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'}`}>
@@ -58,17 +60,17 @@ const ProductDetailsContent1 = ({
       </div>
       {content.description && (
         <div className={`${isThird ? 'w-full flex justify-center' : ''}`}>
-          <p className={`${isDescriptionFull || isThird ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} !text-lg !lg:text-xl text-gray-500 leading-relaxed font-normal mx-0 mb-3 mt-1`}>
+          <p className={`${isDescriptionFull || isThird ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} ${descriptionClassName || 'text-lg lg:text-xl'} text-gray-500 leading-relaxed font-normal mx-0 mb-3 mt-1`}>
             {content.description}
           </p>
         </div>
       )}
       {content.points && content.points.length > 0 && (
-        <div className="w-[95%] max-w-[95%] mx-auto">
+        <div className={`w-[95%] max-w-[95%] mx-auto ${pointsClassName}`}>
           <ul className={`space-y-3 w-full ${isTextFull ? 'text-start' : 'text-center lg:text-left'}`}>
             {content.points.map((point, index) => (
-              <li key={index} className="flex items-start text-base text-gray-700 leading-relaxed font-normal">
-                <span className="text-gray-700 mr-1.5 mt-0.5">•</span>
+              <li key={index} className="flex items-start text-base text-gray-600 leading-relaxed font-normal">
+                <span className="text-gray-600 mr-1.5 mt-0.5">•</span>
                 <span>{point}</span>
               </li>
             ))}
