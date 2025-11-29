@@ -232,70 +232,73 @@ export default function Product() {
         </div>
       </div>
       {/* Product-specific sections */}
-   {(() => {
-  const productType = product.productType?.toLowerCase();
+      {(() => {
+        const productType = product.productType?.toLowerCase();
 
-  switch (productType) {
-    /** 👇 Clothing category */
-    case "polo":
-    case "polos":
-    case "shoes":
-    case "headwear":
-      return (
-        <PoloProduct
-          product={product}
-          productDetails={productDetails}
-        />
-      );
+        switch (productType) {
+          /** 👇 Clothing category */
+          case "polo":
+          case "polos":
+          case "shoes":
+          case "headwear":
+          case "glove":
+          case "gloves":
+          case "gloves men":
+            return (
+              <PoloProduct
+                product={product}
+                productDetails={productDetails}
+              />
+            );
 
-    /** 👇 Golf club sets */
-    case "golf club set":
-      return <GolfClubSetProduct productDetails={productDetails} />;
+          /** 👇 Golf club sets */
+          case "golf club set":
+            return <GolfClubSetProduct productDetails={productDetails} />;
 
-    /** 👇 Golf bags + caps */
-    case "golf bag":
-    case "golf bags":
-    case "cap":
-    case "caps":
-      return (
-        <GolfBallProduct
-          productDetails={productDetails}
-          initialRecommended={recommendedProducts}
-          showBestSellers={true}
-          isGolfBallProduct={false}
-        />
-      );
+          /** 👇 Golf bags + caps */
+          case "golf bag":
+          case "golf bags":
+          case "cap":
+          case "caps":
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+                isGolfBallProduct={false}
+              />
+            );
 
-    /** 👇 Tees */
-    case "tees":
-      return <TeeProduct productDetails={productDetails} />;
+          /** 👇 Tees */
+          case "tees":
+            return <TeeProduct productDetails={productDetails} />;
 
-    /** 👇 Rangefinder */
-    case "rangefinder":
-      return <RangefinderProduct productDetails={productDetails} />;
+          /** 👇 Rangefinder */
+          case "rangefinder":
+            return <RangefinderProduct productDetails={productDetails} />;
 
-    /** 👇 Golf balls (main category) */
-    case "golf balls":
-      return (
-        <GolfBallProduct
-          productDetails={productDetails}
-          initialRecommended={recommendedProducts}
-          showBestSellers={false}
-          isGolfBallProduct={true}
-        />
-      );
+          /** 👇 Golf balls (main category) */
+          case "golf balls":
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={false}
+                isGolfBallProduct={true}
+              />
+            );
 
-    /** 👇 Default — fallback to golf balls layout */
-    default:
-      return (
-        <GolfBallProduct
-          productDetails={productDetails}
-          initialRecommended={recommendedProducts}
-          showBestSellers={false}
-          isGolfBallProduct={false}
-        />
-      );
-  }
+          /** 👇 Default — fallback to golf balls layout */
+          default:
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={false}
+                isGolfBallProduct={false}
+              />
+            );
+        }
         //     case 'golf bags':
         //       return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
         //     case 'shoes':
