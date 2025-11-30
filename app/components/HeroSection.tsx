@@ -111,11 +111,6 @@ export function HeroSection({ heroData }: HeroSectionProps) {
               loading={index === 0 ? 'eager' : 'lazy'}
               width={1920}
               height={1080}
-              loaderOptions={{
-                scale: 2,
-                crop: 'center',
-                quality: 85
-              }}
             />
 
             <div className="absolute inset-0 bg-black/25" />

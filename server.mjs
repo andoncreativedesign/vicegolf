@@ -8,6 +8,13 @@ import {createHydrogenContext, InMemoryCache} from '@shopify/hydrogen';
 // Load environment variables
 import 'dotenv/config';
 
+
+
+// Set APP_URL in process.env if not already set (for Hydrogen to pick up)
+if (!process.env.APP_URL && process.env.NODE_ENV === 'development') {
+  console.log('⚠️  APP_URL not found in process.env, this might cause redirect issues');
+}
+
 // Don't capture process.env too early - it needs to be accessed after dotenv loads
 const getEnv = () => ({
   ...process.env,
@@ -15,8 +22,11 @@ const getEnv = () => ({
   PUBLIC_STORE_DOMAIN: process.env.PUBLIC_STORE_DOMAIN || '',
   PUBLIC_STOREFRONT_API_TOKEN: process.env.PUBLIC_STOREFRONT_API_TOKEN || '',
   PUBLIC_STOREFRONT_ID: process.env.PUBLIC_STOREFRONT_ID || '',
+  PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID: process.env.PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID || '',
+  PUBLIC_CUSTOMER_ACCOUNT_API_URL: process.env.PUBLIC_CUSTOMER_ACCOUNT_API_URL || '',
   SESSION_SECRET: process.env.SESSION_SECRET || 'dev-session-secret',
   NODE_ENV: process.env.NODE_ENV || 'development',
+  APP_URL: process.env.APP_URL || '',
 });
 
 let vite;
@@ -31,6 +41,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const app = express();
+
+// Trust proxy to properly handle x-forwarded-* headers from ngrok
+app.set('trust proxy', true);
 
 app.use(compression());
 
@@ -67,6 +80,25 @@ app.all('*', async (req, res, next) => {
     getLoadContext: () => context,
   });
 
+  // Intercept the response to commit session
+  const originalEnd = res.end;
+  res.end = function(...args) {
+    // Commit session before sending response
+    if (context.session.session.data && Object.keys(context.session.session.data).length > 0) {
+      context.session.commit().then(cookie => {
+        if (cookie) {
+          res.setHeader('Set-Cookie', cookie);
+        }
+        originalEnd.apply(res, args);
+      }).catch(err => {
+        console.error('Failed to commit session:', err);
+        originalEnd.apply(res, args);
+      });
+    } else {
+      originalEnd.apply(res, args);
+    }
+  };
+
   return handler(req, res, next);
 });
 
@@ -90,10 +122,22 @@ async function getContext(req) {
   const env = getEnv();
   const session = await AppSession.init(req, [env.SESSION_SECRET]);
 
+  // Get the actual host from the request or use APP_URL
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
+  
+  // Create proper Headers object
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (value) {
+      headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+    }
+  }
+  
   // Create a minimal Request object for Node.js
-  const request = new Request(`http://localhost${req.url}`, {
+  const request = new Request(`${protocol}://${host}${req.url}`, {
     method: req.method,
-    headers: req.headers,
+    headers: headers,
   });
 
   // Ensure required environment variables are present
@@ -106,6 +150,11 @@ async function getContext(req) {
     process.exit(1);
   }
 
+  // Determine the app URL - use APP_URL from env, or construct from request
+  const appUrl = env.APP_URL || `${protocol}://${host}`;
+  
+
+  
   // Create Hydrogen context similar to skeleton, adapted for Node.js
   const hydrogenContext = createHydrogenContext(
     {
@@ -113,6 +162,8 @@ async function getContext(req) {
         ...env,
         // Ensure the store domain is properly formatted
         PUBLIC_STORE_DOMAIN: env.PUBLIC_STORE_DOMAIN.replace(/^https?:\/\//, '').replace(/\/$/, ''),
+        // Override APP_URL to ensure it's used
+        APP_URL: appUrl,
       },
       request,
       cache: new InMemoryCache(),
@@ -249,6 +300,7 @@ class AppSession {
         httpOnly: true,
         path: '/',
         sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production' || process.env.APP_URL?.startsWith('https'),
         secrets,
       },
     });
