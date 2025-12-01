@@ -47,23 +47,24 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
             </ul>
           </div>
         );
-      case 'linkPoints':
-        return (
-          <ul className="px-1 space-y-2">
-            {section.linkPoints?.map((point, idx) => (
-              <li key={idx}>
-                <a
-                  href={point.url}
-                  className="text-sm text-blue-600 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {point.text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        );
+    case 'linkPoints':
+  return (
+    <ul className="space-y-3">
+      {section.linkPoints?.map((point, idx) => (
+        <li key={idx} className="flex items-center gap-3">
+          <span className="text-gray-900">•</span>
+          <a
+            href={point.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-700 hover:text-gray-900 underline underline-offset-4 decoration-1 hover:decoration-2 transition-all"
+          >
+            {point.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
       case 'descriptionSandwich':
         return (
           <div className="px-1">
