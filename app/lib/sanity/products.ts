@@ -43,6 +43,7 @@ accordionItems[]{
   bulletPoints[]{
     groupTitle,
     items[]{
+      customBullet,
       text
     }
   },
@@ -186,10 +187,13 @@ export interface AccordionItem {
   title: string;
   type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich';
   description?: string;
-  descriptionTitle?: string;                    // ← NEW: bold title for inlinePoints
+  descriptionTitle?: string;
   bulletPoints?: Array<{
     groupTitle?: string;
-    items: Array<{ text: string }>;
+    items: Array<{
+      customBullet?: string;
+      text: string;
+    }>;
   }>;
   inlinePoints?: Array<{ title: string; description: string }>;
   linkPoints?: Array<{ text: string; url: string }>;

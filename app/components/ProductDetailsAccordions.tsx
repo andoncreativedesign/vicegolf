@@ -9,6 +9,25 @@ interface ProductDetailsAccordionsProps {
 export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordionsProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
+  // Reusable bullet renderer
+ const renderBulletLine = (bullet: { customBullet?: string; text: string }) => {
+  const hasCustom = bullet.customBullet && bullet.customBullet.trim() !== '';
+
+  return (
+    <div className="flex items-start gap-3 text-sm leading-relaxed">
+      <span
+        className={`font-medium text-gray-900 shrink-0 ${
+          hasCustom ? 'mt-0.5' : 'mt-1'
+        }`}
+        style={{ width: hasCustom ? 'auto' : '1em' }}
+      >
+        {hasCustom ? bullet.customBullet : '•'}
+      </span>
+      <span className="text-gray-700">{bullet.text}</span>
+    </div>
+  );
+};
+
   const renderContent = (item: AccordionItem) => {
     const bulletPoints = item.bulletPoints ?? [];
     const inlinePoints = item.inlinePoints ?? [];
@@ -22,30 +41,30 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
 
       case 'bulletPoints':
         if (bulletPoints.length === 0 && !item.description) return null;
+
         return (
           <div className="space-y-6">
             {item.description && (
               <p className="text-sm text-gray-600 leading-relaxed tracking-wide">{item.description}</p>
             )}
+
             {bulletPoints.map((group, i) => {
               const hasTitle = group.groupTitle?.trim();
               const items = group.items || [];
               if (items.length === 0) return null;
+
               return (
-                <div key={i} className="space-y-3">
+                <div key={i} className="space-y-4">
                   {hasTitle && (
-                    <h4 className="font-semibold text-gray-900 text-sm pt-2 first:pt-0">
+                    <h4 className="font-semibold text-gray-900 text-sm pt-3 first:pt-0">
                       {group.groupTitle}
                     </h4>
                   )}
-                  <ul className={hasTitle ? 'mt-3 space-y-2.5' : 'space-y-2.5'}>
+                  <div className={hasTitle ? 'mt-3 space-y-3' : 'space-y-3'}>
                     {items.map((bullet, j) => (
-                      <li key={j} className="flex gap-3 text-sm text-gray-700 leading-relaxed">
-                        <span className="text-gray-900 mt-0.5">•</span>
-                        <span>{bullet.text}</span>
-                      </li>
+                      <div key={j}>{renderBulletLine(bullet)}</div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               );
             })}
@@ -58,21 +77,14 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
 
         return (
           <div className="space-y-5">
-            {/* Bold Description Title */}
             {item.descriptionTitle && (
               <h4 className="font-bold text-gray-900 text-base leading-tight">
                 {item.descriptionTitle}
               </h4>
             )}
-
-            {/* Main Description */}
             {item.description && (
-              <p className="text-sm text-gray-600 leading-relaxed tracking-wide">
-                {item.description}
-              </p>
+              <p className="text-sm text-gray-600 leading-relaxed tracking-wide">{item.description}</p>
             )}
-
-            {/* Inline Points List */}
             {inlinePoints.length > 0 && (
               <div className="space-y-3 mt-4">
                 {inlinePoints.map((p, i) => (
@@ -110,28 +122,28 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
             {item.description && (
               <p className="text-sm text-gray-600 leading-relaxed tracking-wide">{item.description}</p>
             )}
+
             {bulletPoints.map((group, i) => {
               const hasTitle = group.groupTitle?.trim();
               const items = group.items || [];
               if (items.length === 0) return null;
+
               return (
-                <div key={i} className="space-y-3">
+                <div key={i} className="space-y-4">
                   {hasTitle && (
-                    <h4 className="font-semibold text-gray-900 text-sm pt-2 first:pt-0">
+                    <h4 className="font-semibold text-gray-900 text-sm pt-3 first:pt-0">
                       {group.groupTitle}
                     </h4>
                   )}
-                  <ul className={hasTitle ? 'mt-3 space-y-2.5' : 'space-y-2.5'}>
+                  <div className={hasTitle ? 'mt-3 space-y-3' : 'space-y-3'}>
                     {items.map((bullet, j) => (
-                      <li key={j} className="flex gap-3 text-sm text-gray-700 leading-relaxed">
-                        <span className="text-gray-900 mt-0.5">•</span>
-                        <span>{bullet.text}</span>
-                      </li>
+                      <div key={j}>{renderBulletLine(bullet)}</div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               );
             })}
+
             {item.secondaryDescription && (
               <p className="text-sm text-gray-600 leading-relaxed tracking-wide pt-4">
                 {item.secondaryDescription}
@@ -168,7 +180,7 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
 
             <div
               className={`overflow-hidden transition-all duration-500 px-1 ${
-                isOpen ? 'max-h-[2000px] pb-6' : 'max-h-0'
+                isOpen ? 'max-h-[2200px] pb-6' : 'max-h-0'
               }`}
             >
               {renderContent(item)}
