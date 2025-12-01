@@ -51,6 +51,10 @@ accordionItems[]{
     title,
     description
   },
+  stackedPoints[]{
+    title,
+    description
+  },
   linkPoints[]{
     text,
     url
@@ -181,21 +185,18 @@ export interface ColorTheme {
   mutedForeground?: string;
   border?: string;
 }
-
 export interface AccordionItem {
   _key: string;
   title: string;
-  type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich';
+  type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich' | 'stackedPoints';
   description?: string;
   descriptionTitle?: string;
   bulletPoints?: Array<{
     groupTitle?: string;
-    items: Array<{
-      customBullet?: string;
-      text: string;
-    }>;
+    items: Array<{ customBullet?: string; text: string }>;
   }>;
   inlinePoints?: Array<{ title: string; description: string }>;
+  stackedPoints?: Array<{ title?: string; description: string }>;
   linkPoints?: Array<{ text: string; url: string }>;
   secondaryDescription?: string;
 }
