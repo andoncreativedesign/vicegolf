@@ -22,29 +22,25 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
 
       case 'bulletPoints':
         if (bulletPoints.length === 0 && !item.description) return null;
-
         return (
           <div className="space-y-6">
             {item.description && (
               <p className="text-sm text-gray-600 leading-relaxed tracking-wide">{item.description}</p>
             )}
-
-            {bulletPoints.map((group, groupIdx) => {
+            {bulletPoints.map((group, i) => {
               const hasTitle = group.groupTitle?.trim();
               const items = group.items || [];
-
               if (items.length === 0) return null;
-
               return (
-                <div key={groupIdx} className="space-y-3">
+                <div key={i} className="space-y-3">
                   {hasTitle && (
                     <h4 className="font-semibold text-gray-900 text-sm pt-2 first:pt-0">
                       {group.groupTitle}
                     </h4>
                   )}
                   <ul className={hasTitle ? 'mt-3 space-y-2.5' : 'space-y-2.5'}>
-                    {items.map((bullet, i) => (
-                      <li key={i} className="flex gap-3 text-sm text-gray-700 leading-relaxed">
+                    {items.map((bullet, j) => (
+                      <li key={j} className="flex gap-3 text-sm text-gray-700 leading-relaxed">
                         <span className="text-gray-900 mt-0.5">•</span>
                         <span>{bullet.text}</span>
                       </li>
@@ -57,20 +53,37 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
         );
 
       case 'inlinePoints':
-        return inlinePoints.length > 0 || item.description ? (
-          <div className="space-y-4">
-            {item.description && (
-              <p className="text-sm text-gray-600 leading-relaxed tracking-wide mb-4">{item.description}</p>
+        const hasContent = item.descriptionTitle || item.description || inlinePoints.length > 0;
+        if (!hasContent) return null;
+
+        return (
+          <div className="space-y-5">
+            {/* Bold Description Title */}
+            {item.descriptionTitle && (
+              <h4 className="font-bold text-gray-900 text-base leading-tight">
+                {item.descriptionTitle}
+              </h4>
             )}
-            <div className="space-y-3">
-              {inlinePoints.map((p, i) => (
-                <p key={i} className="text-sm text-gray-700 leading-relaxed">
-                  <strong>{p.title}:</strong> {p.description}
-                </p>
-              ))}
-            </div>
+
+            {/* Main Description */}
+            {item.description && (
+              <p className="text-sm text-gray-600 leading-relaxed tracking-wide">
+                {item.description}
+              </p>
+            )}
+
+            {/* Inline Points List */}
+            {inlinePoints.length > 0 && (
+              <div className="space-y-3 mt-4">
+                {inlinePoints.map((p, i) => (
+                  <p key={i} className="text-sm text-gray-700 leading-relaxed">
+                    <strong className="text-gray-900">{p.title}:</strong> {p.description}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
-        ) : null;
+        );
 
       case 'linkPoints':
         return linkPoints.length > 0 ? (
@@ -97,13 +110,10 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
             {item.description && (
               <p className="text-sm text-gray-600 leading-relaxed tracking-wide">{item.description}</p>
             )}
-
             {bulletPoints.map((group, i) => {
               const hasTitle = group.groupTitle?.trim();
               const items = group.items || [];
-
               if (items.length === 0) return null;
-
               return (
                 <div key={i} className="space-y-3">
                   {hasTitle && (
@@ -122,7 +132,6 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
                 </div>
               );
             })}
-
             {item.secondaryDescription && (
               <p className="text-sm text-gray-600 leading-relaxed tracking-wide pt-4">
                 {item.secondaryDescription}
@@ -159,7 +168,7 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
 
             <div
               className={`overflow-hidden transition-all duration-500 px-1 ${
-                isOpen ? 'max-h-[1600px] pb-6' : 'max-h-0'
+                isOpen ? 'max-h-[2000px] pb-6' : 'max-h-0'
               }`}
             >
               {renderContent(item)}
