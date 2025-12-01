@@ -34,13 +34,12 @@ export const productDetailsQuery = (gid: string) => `
       }
     },
     
-   accordionItems[]{
+ accordionItems[]{
   _key,
   title,
   type,
   description,
   bulletPoints[]{
-    title,
     description
   },
   inlinePoints[]{
@@ -183,18 +182,9 @@ export interface AccordionItem {
   title: string;
   type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich';
   description?: string;
-  bulletPoints?: Array<{
-    title: string;
-    description: string;
-  }>;
-  inlinePoints?: Array<{
-    title: string;
-    description: string;
-  }>;
-  linkPoints?: Array<{
-    text: string;
-    url: string;
-  }>;
+  bulletPoints?: Array<{ description: string }>;
+  inlinePoints?: Array<{ title: string; description: string }>;
+  linkPoints?: Array<{ text: string; url: string }>;
   secondaryDescription?: string;
 }
 
