@@ -1,9 +1,8 @@
 import { Image } from "@shopify/hydrogen"
-import { COLLECTION_PRODUCTS_QUERY, GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS, type MenuItem, type SecondaryMenu, type SecondaryMenuItem } from "~/lib/shopify/product-queries"
+import { type MenuItem, type SecondaryMenu, type SecondaryMenuItem } from "~/lib/shopify/product-queries"
 import { NavLink, useFetcher, useNavigate } from "react-router"
 import { useEffect, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { axiosShopifyAdmin } from "~/utils/axiosInsatances"
 
 interface DropdownItemProps {
   menuItem: MenuItem

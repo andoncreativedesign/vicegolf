@@ -1,3 +1,4 @@
+// app\lib\shopify\product-queries.ts
 export const createCategoryQuery = (handle: string) => {
   return `product_type:'${handle}'`
 }
@@ -100,38 +101,63 @@ query MultipleProductGroups(
   $limitedEditionsHandle: String!
   $fittingCustomisationHandle: String!
   $juniorsHandle: String!
-  $first: Int = 8
+  $first: Int = 15
+  $golfBallsCursor: String
+  $golfClubsCursor: String
+  $apparelCursor: String
+  $gearCursor: String
 ) {
-  golfBalls: products(first: $first, query: $golfBallsHandle) {
+  golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
     nodes {
       ...ProductCard
     }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
-  golfClubs: products(first: $first, query: $golfClubsHandle) {
+
+ golfClubs: products(first: $first, after: $golfClubsCursor, query: $golfClubsHandle) {
+  nodes {
+    ...ProductCard
+  }
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+}
+  apparel: products(first: $first, after: $apparelCursor, query: $apparelHandle) {
     nodes {
       ...ProductCard
     }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
-  apparel: products(first: $first, query: $apparelHandle) {
+
+  gear: products(first: $first, after: $gearCursor, query: $gearHandle) {
     nodes {
       ...ProductCard
     }
-  }
-  gear: products(first: $first, query: $gearHandle) {
-    nodes {
-      ...ProductCard
+    pageInfo {
+      hasNextPage
+      endCursor
     }
   }
+
   limitedEditions: products(first: $first, query: $limitedEditionsHandle) {
     nodes {
       ...ProductCard
     }
   }
+
   fittingCustomisation: products(first: $first, query: $fittingCustomisationHandle) {
     nodes {
       ...ProductCard
     }
   }
+
   juniors: products(first: $first, query: $juniorsHandle) {
     nodes {
       ...ProductCard
@@ -712,11 +738,15 @@ fragment ProductCardFragment on Product {
     }
   }
 
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode, $first: Int = 15, $after: String)
     @inContext(country: $country, language: $language) {
-    products(first: 20, sortKey: UPDATED_AT, reverse: true) {
+    products(first: $first, after: $after, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...ProductCardFragment
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }

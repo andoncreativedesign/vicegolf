@@ -133,13 +133,17 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   return { product, colorVariants };
 }
 
-async function loadDeferredData({ context }: Route.LoaderArgs) {
-  const recommendedProducts = await context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
+async function loadDeferredData({ context, request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const recommendedCursor = url.searchParams.get('recommendedCursor');
+
+  const recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
+    variables: {
+      first: 15,
+      after: recommendedCursor || undefined,
+    },
+  }).catch(() => null);
+
   return { recommendedProducts };
 }
 
@@ -230,45 +234,72 @@ export default function Product() {
       {/* Product-specific sections */}
       {(() => {
         const productType = product.productType?.toLowerCase();
+
         switch (productType) {
-          case 'polo':
-          case 'polos':
-          case 'shoes':
-          case 'headwear':
-            return <PoloProduct product={product} productDetails={productDetails} />;
-          case 'golf club set':
+          /** 👇 Clothing category */
+          case "polo":
+          case "polos":
+          case "shoes":
+          case "headwear":
+          case "glove":
+          case "gloves":
+          case "gloves men":
+             case "gloves women":
+            return (
+              <PoloProduct
+                product={product}
+                productDetails={productDetails}
+              />
+            );
+
+          /** 👇 Golf club sets */
+          case "golf club set":
             return <GolfClubSetProduct productDetails={productDetails} />;
-          case 'golf bag':
-          case 'golf bags':
-          case 'cap':
-          case 'caps':
+
+          /** 👇 Golf bags + caps */
+          case "golf bag":
+          case "golf bags":
+          case "cap":
+          case "caps":
             return (
               <GolfBallProduct
                 productDetails={productDetails}
-                recommendedProducts={recommendedProducts}
+                initialRecommended={recommendedProducts}
                 showBestSellers={true}
+                isGolfBallProduct={false}
               />
             );
-          case 'tees':
-            return <TeeProduct productDetails={productDetails} />
-          case 'rangefinder':
+
+          /** 👇 Tees */
+          case "tees":
+            return <TeeProduct productDetails={productDetails} />;
+
+          /** 👇 Rangefinder */
+          case "rangefinder":
             return <RangefinderProduct productDetails={productDetails} />;
+
+          /** 👇 Golf balls (main category) */
+          case "golf balls":
+            return (
+              <GolfBallProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={false}
+                isGolfBallProduct={true}
+              />
+            );
+
+          /** 👇 Default — fallback to golf balls layout */
           default:
             return (
               <GolfBallProduct
                 productDetails={productDetails}
-                recommendedProducts={recommendedProducts}
+                initialRecommended={recommendedProducts}
                 showBestSellers={false}
+                isGolfBallProduct={false}
               />
             );
         }
-        // ! working code below
-        //   switch(productType) {
-        //     case 'golf balls':
-        //       return <GolfBallProduct product={product} />;
-        //     case 'golf club set':
-        //       return <GolfClubSetProduct product={product} />;
-        //     case 'golf bag':
         //     case 'golf bags':
         //       return <GolfBagProduct product={product} selectedVariant={selectedVariant} />;
         //     case 'shoes':
@@ -281,7 +312,7 @@ export default function Product() {
         //   }
       })()}
       {/* Customer Reviews Section (common for all products) */}
-      <CustomerReviews />
+      {/* <CustomerReviews /> */}
       <Analytics.ProductView
         data={{
           products: [

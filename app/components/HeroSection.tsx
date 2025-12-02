@@ -111,11 +111,6 @@ export function HeroSection({ heroData }: HeroSectionProps) {
               loading={index === 0 ? 'eager' : 'lazy'}
               width={1920}
               height={1080}
-              loaderOptions={{
-                scale: 2,
-                crop: 'center',
-                quality: 85
-              }}
             />
 
             <div className="absolute inset-0 bg-black/25" />
@@ -123,26 +118,44 @@ export function HeroSection({ heroData }: HeroSectionProps) {
         ))}
       </div>
 
-      {/* Text and CTA */}
-      <div className="absolute inset-0 z-20 flex items-center justify-start px-4 sm:pl-6 md:pl-16 text-white">
-        <div className="max-w-xl drop-shadow-2xl">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold uppercase mb-2 leading-tight">
-            {currentSlideData.title}
-          </h1>
-          {currentSlideData.subtitle && (
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold uppercase mb-6">
-              {currentSlideData.subtitle}
-            </h2>
-          )}
-          <Link
-            to={currentSlideData.buttonLink}
-            className="inline-block bg-white text-black px-6 md:px-10 py-3 md:py-4 rounded-full font-semibold text-base md:text-lg hover:bg-gray-100 transition duration-300 shadow-lg"
-            style={{ textDecoration: 'none' }}
-          >
-            {currentSlideData.buttonText}
-          </Link>
-        </div>
-      </div>
+    {/* Text and CTA */}
+<div className="absolute inset-0 z-20 flex items-start justify-start px-4 sm:pl-6 md:pl-16 text-white 
+  pt-60 sm:pt-72 md:pt-80">
+  <div className="max-w-xl drop-shadow-2xl">
+    <h1
+      className="font-extrabold mb-0 uppercase tracking-tight"
+      style={{ fontSize: '3rem', lineHeight: '1.1' }}
+    >
+      {currentSlideData.title}
+    </h1>
+
+    {currentSlideData.subtitle && (
+      <h2
+        className="text-2xl md:text-4xl lg:text-5xl font-thin mb-3"
+        style={{ lineHeight: '1', marginTop: '0.3rem', fontWeight: '200' }}
+      >
+        {currentSlideData.subtitle}
+      </h2>
+    )}
+
+  <Link
+  to={currentSlideData.buttonLink}
+  className="
+    inline-block rounded-full text-center 
+    py-2.5 px-7 md:py-3 md:px-9 
+    disabled:bg-gray-300 disabled:text-gray-500 disabled:border-none 
+    bg-white text-gray-500 font-light text-[15px] tracking-wide 
+    hover:bg-gray-100 transition duration-300 shadow-md mt-3
+    w-auto
+  "
+  style={{ textDecoration: 'none' }}
+>
+  {currentSlideData.buttonText}
+</Link>
+
+  </div>
+</div>
+
 
       {/* Arrows + Dots */}
       {validSlides.length > 1 && (

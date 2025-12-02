@@ -51,12 +51,28 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
           return (
             <div
               key={index}
-              className={`${isFirst ? 'pt-8 pb-10 mb-8' : ''}`}
+              className={`${isFirst ? 'w-full' : ''}`}
             >
-              <div className="max-w-8xl mx-auto">
-                <div className={isFirst ? 'py-2' : ''}>
-                  <div className={isSecond ? 'min-h-[800px]' : 'lg:max-h-[650px] lg:overflow-hidden'}>
-                    <div className={isSecond ? 'flex flex-col space-y-8' : ''}>
+              {isFirst ? (
+                <div className="w-full">
+                  <div className="flex items-center">
+                    <div className="w-full py-8 mb-0">
+                      <ProductDetailsContent1
+                        content={item}
+                        showImageLeft={!isEven}
+                        isTextFull={isEven}
+                        isImageFull={isEven}
+                        isFirst={isFirst}
+                        isDescriptionFull={false}
+                        imageSize={isEven ? 'xlarge' : 'large'}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="max-w-8xl mx-auto">
+                  <div className={isSecond ? 'min-h-[40vh]' : 'min-h-[35vh]'}>
+                    <div className={`${isSecond ? 'flex flex-col space-y-8 h-full py-8' : 'h-full'}`}>
                       <ProductDetailsContent1
                         content={item}
                         showImageLeft={isSecond ? true : !isEven}
@@ -68,7 +84,7 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           );
         })}
