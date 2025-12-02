@@ -6,6 +6,7 @@ import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
+import { VariantProductCard } from '~/components/VariantProductCard';
 import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
 import { useEffect } from 'react';
