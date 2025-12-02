@@ -5,6 +5,7 @@ import { Youtube } from '~/components/Youtube';
 import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
 import ProductDetailsContent2 from '~/components/Product/ProductDetailsContent2';
 import { ProductGrid } from '~/components/ProductGrid';
+import ProductAccordion2 from '~/components/Product/ProductAccordion2';
 import type { ProductDetails } from '~/lib/sanity/products';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { useFetcher } from 'react-router';
@@ -96,18 +97,24 @@ export function GolfBallProduct({
           );
         })}
 
-        {productDetails?.youtubeVideos && (
-          <div className="mt-16 md:mt-20 lg:mt-24">
-            <Youtube youtubeVideo={productDetails.youtubeVideos} />
-          </div>
-        )}
-
         {/* Product Content 2 Section */}
         {productDetails?.productContent2?.sections?.map((section, index) => (
           <div key={index}>
             <ProductDetailsContent2 content={section} index={index} />
           </div>
         ))}
+
+        {productDetails?.accordion2 && (
+          <div className="my-20">
+            <ProductAccordion2 accordion2={productDetails.accordion2} />
+          </div>
+        )}
+
+        {productDetails?.youtubeVideos && (
+          <div className="mt-16 md:mt-20 lg:mt-24">
+            <Youtube youtubeVideo={productDetails.youtubeVideos} />
+          </div>
+        )}
 
         {/* Best Sellers with Infinite Scroll */}
         {showBestSellers && recommendedProducts.length > 0 && (
