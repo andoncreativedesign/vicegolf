@@ -83,12 +83,12 @@ function SearchAside() {
   const queriesDatalistId = useId();
   return (
     <Aside type="search" heading="">
-      <div className="predictive-search">
+      <div className="predictive-search" >
         <SearchFormPredictive>
           {({fetchResults, inputRef}) => (
-            <div className="search-input-wrapper">
-              <Search className="search-icon" size={20} />
-              <input
+            <div className="search-input-wrapper " >
+              <Search className="search-icon" size={18} />
+              <input 
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}

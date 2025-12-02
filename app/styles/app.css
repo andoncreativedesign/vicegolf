@@ -453,7 +453,7 @@ button.reset:hover:not(:has(> *)) {
 /* Search aside header - full width with close button on right */
 .overlay[aria-modal] aside.search-aside header {
   padding: 20px 40px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px  #e5e7eb;
   justify-content: flex-end;
 }
 
@@ -502,10 +502,11 @@ button.reset:hover:not(:has(> *)) {
 
 /* Search input container in search aside */
 .overlay[aria-modal] aside.search-aside .predictive-search-form {
-  padding: 30px 40px;
+  padding: 40px  20px ;
+  display: flex;
   background: white;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 0;
+  border-bottom: 1px  #e5e7eb;
+  margin-left:32%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -515,16 +516,20 @@ button.reset:hover:not(:has(> *)) {
 .overlay[aria-modal] aside.search-aside .search-input-wrapper {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 900px;
+  padding:0 10px;
+  margin: 0 0 20px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 /* Search icon */
 .overlay[aria-modal] aside.search-aside .search-icon {
   position: absolute;
-  left: 20px;
+  left: 35px;
+  font-size: 96px;
+  bottom: 25px;
   color: #666;
   pointer-events: none;
   z-index: 1;
@@ -533,14 +538,12 @@ button.reset:hover:not(:has(> *)) {
 /* Search input - wider, curved, centered */
 .overlay[aria-modal] aside.search-aside .search-input {
   width: 100%;
-  max-width: 1200px;
-  height: 64px;
-  padding: 0 20px 0 56px;
+  height: 46px;
+  padding: 0 30px 0 50px;
   border: 1px solid #e1e1e1;
-  border-radius: 32px;
-  font-size: 18px;
+  border-radius: 25px;
+  font-size: 16px;
   background: #f5f5f5;
-  margin: 0 auto;
   box-shadow: none;
   transition: all 0.2s ease;
   color: #333;
@@ -564,21 +567,30 @@ button.reset:hover:not(:has(> *)) {
 
 /* Suggestions section */
 .overlay[aria-modal] aside.search-aside .predictive-search > div:not(.predictive-search-form) {
-  padding: 20px 40px;
+  padding: 0 40px 30px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* Suggestions list styling */
 .overlay[aria-modal] aside.search-aside .suggestions-list {
-  padding: 30px 40px 40px;
-  text-align: center;
+  padding: 10px 0 0;
+  text-align: left;
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 0 0 25px 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .overlay[aria-modal] aside.search-aside .suggestions-list h5 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  color: #333;
-  margin: 0 0 20px;
-  text-transform: none;
+  color: #666;
+  margin: 0 0 12px;
+  padding: 0 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   letter-spacing: 0;
 }
 
@@ -588,28 +600,36 @@ button.reset:hover:not(:has(> *)) {
   margin: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0;
 }
 
 .overlay[aria-modal] aside.search-aside .suggestion-item {
   width: 100%;
-  max-width: 600px;
   margin: 0;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.overlay[aria-modal] aside.search-aside .suggestion-item:hover {
+  background-color: #f9f9f9;
 }
 
 .overlay[aria-modal] aside.search-aside .suggestion-item:last-child {
   border-bottom: none;
+  border-radius: 0 0 25px 25px;
 }
 
 .overlay[aria-modal] aside.search-aside .suggestion-item a {
   display: block;
   text-decoration: none;
   color: #333;
-  font-size: 16px;
+  font-size: 15px;
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .overlay[aria-modal] aside.search-aside .suggestion-item a:hover {
@@ -970,6 +990,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .search-input:focus {
+    outline: none;
   border-color: #999;
   box-shadow: 0 0 0 1px #999;
 }
