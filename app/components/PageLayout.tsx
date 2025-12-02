@@ -98,7 +98,7 @@ function SearchAside() {
                 list={queriesDatalistId}
                 autoComplete="off"
                 autoFocus
-                className="search-input" // added class to target with CSS
+                className="search-input" 
               />
             </div>
           )}
