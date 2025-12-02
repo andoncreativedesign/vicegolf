@@ -34,12 +34,33 @@ export const productDetailsQuery = (gid: string) => `
       }
     },
     
-    accordionItems[]{
-      _key,
-      title,
-      description
-    },
-
+accordionItems[]{
+  _key,
+  title,
+  type,
+  description,
+  descriptionTitle,
+  bulletPoints[]{
+    groupTitle,
+    items[]{
+      customBullet,
+      text
+    }
+  },
+  inlinePoints[]{
+    title,
+    description
+  },
+  stackedPoints[]{
+    title,
+    description
+  },
+  linkPoints[]{
+    text,
+    url
+  },
+  secondaryDescription
+},
     productContent1->{
       _id,
       _type,
@@ -164,19 +185,21 @@ export interface ColorTheme {
   mutedForeground?: string;
   border?: string;
 }
-
 export interface AccordionItem {
   _key: string;
-  title?: string;
-  description?: any[]; // Portable Text array
+  title: string;
+  type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich' | 'stackedPoints';
+  description?: string;
+  descriptionTitle?: string;
+  bulletPoints?: Array<{
+    groupTitle?: string;
+    items: Array<{ customBullet?: string; text: string }>;
+  }>;
+  inlinePoints?: Array<{ title: string; description: string }>;
+  stackedPoints?: Array<{ title?: string; description: string }>;
+  linkPoints?: Array<{ text: string; url: string }>;
+  secondaryDescription?: string;
 }
-
-export interface ProductContent {
-  _id: string;
-  title?: string;
-  content?: any[]; // Portable Text array
-}
-
 export interface SEO {
   metaTitle?: string;
   metaDescription?: string;
