@@ -97,6 +97,13 @@ export function GolfBallProduct({
           );
         })}
 
+        {/* Product Content 2 Section */}
+        {productDetails?.productContent2?.sections?.map((section, index) => (
+          <div key={index}>
+            <ProductDetailsContent2 content={section} index={index} />
+          </div>
+        ))}
+
         {productDetails?.accordion2 && (
           <div className="my-20">
             <ProductAccordion2 accordion2={productDetails.accordion2} />
@@ -108,13 +115,6 @@ export function GolfBallProduct({
             <Youtube youtubeVideo={productDetails.youtubeVideos} />
           </div>
         )}
-
-        {/* Product Content 2 Section */}
-        {productDetails?.productContent2?.sections?.map((section, index) => (
-          <div key={index}>
-            <ProductDetailsContent2 content={section} index={index} />
-          </div>
-        ))}
 
         {/* Best Sellers with Infinite Scroll */}
         {showBestSellers && recommendedProducts.length > 0 && (
