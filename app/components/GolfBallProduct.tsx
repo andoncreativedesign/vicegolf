@@ -5,6 +5,7 @@ import { Youtube } from '~/components/Youtube';
 import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
 import ProductDetailsContent2 from '~/components/Product/ProductDetailsContent2';
 import { ProductGrid } from '~/components/ProductGrid';
+import ProductAccordion2 from '~/components/Product/ProductAccordion2';
 import type { ProductDetails } from '~/lib/sanity/products';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { useFetcher } from 'react-router';
@@ -95,6 +96,12 @@ export function GolfBallProduct({
             </div>
           );
         })}
+
+        {productDetails?.accordion2 && (
+          <div className="my-20">
+            <ProductAccordion2 accordion2={productDetails.accordion2} />
+          </div>
+        )}
 
         {productDetails?.youtubeVideos && (
           <div className="mt-16 md:mt-20 lg:mt-24">
