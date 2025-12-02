@@ -927,7 +927,7 @@ button.reset:hover:not(:has(> *)) {
   grid-template-columns: repeat(2, 1fr);
   @media (min-width: 45em) {
     grid-template-columns: repeat(4, 1fr);
-  }
+   }
 }
 
 .recommended-product img {
