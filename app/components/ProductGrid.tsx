@@ -126,9 +126,9 @@ export function ProductGrid({
           {(hasMore || loading) && (
             <div className="flex-shrink-0 flex items-center justify-center" style={{ minWidth: '300px' }}>
               <div className="relative w-12 h-12">
-                <div className="w-full h-full border-4 border-gray-100 rounded-full"></div>
-                <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
-                <div className="absolute top-1 left-1 right-1 bottom-1 border-2 border-gray-50 rounded-full"></div>
+                <div className="w-full h-full bg-white rounded-full shadow-lg">
+                  <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 border-t-transparent rounded-full animate-spin"></div>
+                </div>
               </div>
             </div>
           )}

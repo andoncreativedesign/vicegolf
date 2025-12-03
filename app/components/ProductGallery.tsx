@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import './ProductGallery.animations.css';
 
 type ProductImageType = {
   id: string;
@@ -21,6 +22,47 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle thumbnail slide-in animation
+  useEffect(() => {
+    if (!thumbnailContainerRef.current) return;
+    
+    const container = thumbnailContainerRef.current;
+    const thumbnails = container.querySelectorAll('button');
+    
+    // Add slide-in animation to each thumbnail with staggered delay
+    thumbnails.forEach((thumb, index) => {
+      (thumb as HTMLElement).style.animation = `slideIn 0.3s ease-out ${index * 0.05}s forwards`;
+    });
+    
+    // Scroll to active thumbnail
+    const activeThumbnail = thumbnails[currentIndex];
+    if (activeThumbnail) {
+      // For vertical layout on desktop
+      if (window.innerWidth >= 768) {
+        const containerHeight = container.offsetHeight;
+        const thumbHeight = activeThumbnail.offsetHeight;
+        const scrollTop = activeThumbnail.offsetTop - (containerHeight - thumbHeight) / 2;
+        
+        container.scrollTo({
+          top: scrollTop,
+          behavior: 'smooth'
+        });
+      } 
+      // For horizontal layout on mobile
+      else {
+        const containerWidth = container.offsetWidth;
+        const thumbWidth = activeThumbnail.offsetWidth;
+        const scrollLeft = activeThumbnail.offsetLeft - (containerWidth - thumbWidth) / 2;
+        
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [currentIndex]);
 
   useEffect(() => {
     if (!selectedImage) return;
@@ -36,10 +78,13 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     setIsAnimating(true);
     setDirection(dir === 'next' ? 'right' : 'left');
     
-    const newIndex = 
-      dir === 'next'
-        ? (currentIndex + 1) % images.length
-        : (currentIndex - 1 + images.length) % images.length;
+    // Calculate new index based on direction
+    let newIndex;
+    if (dir === 'next') {
+      newIndex = (currentIndex + 1) % images.length;
+    } else {
+      newIndex = (currentIndex - 1 + images.length) % images.length;
+    }
     
     // Start the slide out animation
     if (imageContainerRef.current) {
@@ -96,17 +141,25 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && (
-        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] scrollbar-hide">
+        <div 
+          ref={thumbnailContainerRef}
+          className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] scrollbar-hide"
+          style={{ 
+            scrollBehavior: 'smooth',
+            opacity: 0,
+            animation: 'fadeIn 0.3s ease-out 0.2s forwards'
+          }}
+        >
           {images.map((image) => {
             const isActive = mainImage.id === image.id;
             return (
               <button
                 key={image.id}
                 onClick={() => onImageSelect(image)}
-                className={`relative flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 shadow-sm hover:shadow-md ${
                   isActive
-                    ? 'border-black shadow-md scale-[1.03]'
-                    : 'border-transparent hover:border-gray-300'
+                    ? 'ring-1 ring-white scale-[1.03] shadow-md'
+                    : 'hover:ring-0 hover:ring-white'
                 }`}
               >
                 <Image
@@ -122,16 +175,16 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
       )}
 
       {/* Main Image */}
-      <div className="relative flex-1 group bg-white rounded-2xl shadow-sm overflow-hidden aspect-square">
+      <div className="relative flex-1 group bg-white rounded-none shadow-lg overflow-hidden aspect-square">
         <div 
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
         >
-          <div className="w-full h-full flex items-center justify-center p-4">
+          <div className="w-full h-full">
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.02]"
+              className="w-full h-full object-cover"
               aspectRatio="1/1"
               sizes="(min-width: 45em) 50vw, 100vw"
             />
