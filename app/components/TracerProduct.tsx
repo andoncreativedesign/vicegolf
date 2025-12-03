@@ -1,25 +1,29 @@
 import type { ProductFragment } from 'storefrontapi.generated';
 import type { ProductDetails } from '~/lib/sanity/products';
+import ProductDetailsContent1 from './Product/ProductDetailsContent1';
 
-interface TracerProductProps {
+type TracerProductProps = {
     product: ProductFragment;
     productDetails: ProductDetails | null;
-    initialRecommended?: any;
-    showBestSellers?: boolean;
-}
+};
 
-export function TracerProduct({
-    product,
-    productDetails,
-    initialRecommended,
-    showBestSellers = false,
-}: TracerProductProps) {
+export function TracerProduct({ productDetails }: TracerProductProps) {
+    const firstContent = productDetails?.productContent1?.content?.[0];
+
+    if (!firstContent) return null;
+
     return (
-        <div className="tracer-product">
-            {/* Add your Tracer-specific product content here */}
-            <div className="container mx-auto px-4 py-12">
-                <h2 className="text-3xl font-bold mb-6">Vice Pro Tracer</h2>
-                {/* Add your Tracer product details, images, etc. */}
+        <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+            <div className="max-w-8xl mx-auto py-8">
+                <ProductDetailsContent1
+                    content={firstContent}
+                    showImageLeft={false}
+                    isTextFull={true}
+                    isImageFull={true}
+                    isDescriptionFull={true}
+                    imageSize="xlarge"
+                    isFirst={true}
+                />
             </div>
         </div>
     );
