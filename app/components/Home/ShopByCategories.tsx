@@ -52,7 +52,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
       <div>
         {/* Section Title */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight uppercase">
+          <h2 className="text-2xl sm:text-3xl font-medium mb-8 lg:mb-12" style={{ fontSize: '2rem' }}>
             SHOP BY CATEGORIES
           </h2>
         </div>
