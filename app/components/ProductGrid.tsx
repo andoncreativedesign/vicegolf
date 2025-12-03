@@ -76,7 +76,7 @@ export function ProductGrid({
     <section className={`py-6 ${className}`}>
       {title && (
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+          <h2 className="text-4xl font-black text-black uppercase tracking-wide">
             {title}
           </h2>
           <div className="flex items-center space-x-2">
