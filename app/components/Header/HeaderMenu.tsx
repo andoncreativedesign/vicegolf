@@ -153,7 +153,9 @@ const HeaderMenu = ({
   }, [menuItems]);
 
   const handleNavigate = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, navItem: SecondaryMenuItem) => {
-    e.preventDefault()
+    e.preventDefault();
+    close(); // Close the menu immediately when any link is clicked
+
     if (navItem.type === "COLLECTION") {
       fetcher.submit(
         { handle: navItem.handle },
@@ -172,6 +174,7 @@ const HeaderMenu = ({
     ) {
       const { id, title } = fetcher.data.collection
       console.log("fetcher.data ", id, title)
+      close(); // Ensure menu is closed before navigation
       navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
     }
   }, [fetcher.state, fetcher.data, navigate]);

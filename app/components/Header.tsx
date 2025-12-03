@@ -156,10 +156,10 @@ export function Header({
 
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
-        {/* Left: Country/Currency Selector */}
-        {/* <div className="flex items-center space-x-2">
-          <CountryCurrencySelector />
-        </div> */}
+        {/* Left: Mobile Menu Toggle */}
+        <div className="flex items-center">
+          <HeaderMenuMobileToggle />
+        </div>
 
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center">
@@ -177,7 +177,6 @@ export function Header({
           <SearchToggle />
           <AccountToggle isLoggedIn={isLoggedIn} />
           <CartToggle cart={cart} />
-          <HeaderMenuMobileToggle />
         </div>
       </div>
 

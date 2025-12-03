@@ -51,14 +51,14 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
     <section className="py-20">
       <div>
         {/* Section Title */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight uppercase">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-medium mb-8 lg:mb-12" style={{ fontSize: '2rem' }}>
             SHOP BY CATEGORIES
           </h2>
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {menuItems?.map((category) => {
             const matchedSanityCategory = getSanityCategory(category.title);
             const fallbackShopifyImage = category?.resource?.image;
@@ -69,7 +69,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
               <div
                 key={category.id}
                 onClick={() => handleCategoryClick(category.url)}
-                className="relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
+                className="relative cursor-pointer overflow-hidden rounded-md bg-white shadow-sm"
               >
                 {/* Category Image */}
                 <div className="aspect-[4/2.4] overflow-hidden relative">
@@ -94,9 +94,9 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
                 </div>
 
                 {/* Category Info */}
-                <div className="absolute inset-0 flex flex-col justify-start p-6">
+                <div className="absolute inset-0 flex flex-col justify-start pt-6 pl-8">
                   <div className="relative z-10">
-                    <h3 className="text-2xl font-semibold text-black mb-2 tracking-tight">
+                    <h3 className="font-black text-title1 md:text-title2 text-gray-900 mb-2 tracking-tight uppercase" style={{ fontWeight: '900' }}>
                       {category.title}
                     </h3>
                     {description && (

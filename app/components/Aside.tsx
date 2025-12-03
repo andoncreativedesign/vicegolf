@@ -33,7 +33,7 @@ export function Aside({
   heading: React.ReactNode;
   className?: string; // added to allow custom classes to be forwarded
 }) {
-  const {type: activeType, close} = useAside();
+  const { type: activeType, close } = useAside();
   const expanded = type === activeType;
   useEffect(() => {
     const abortController = new AbortController();
@@ -45,7 +45,7 @@ export function Aside({
             close();
           }
         },
-        {signal: abortController.signal},
+        { signal: abortController.signal },
       );
     }
     return () => abortController.abort();
@@ -54,18 +54,20 @@ export function Aside({
     <div
       aria-modal
       className={`overlay ${expanded ? 'expanded' : ''}`}
-      style={{zIndex: 9999}}
+      style={{ zIndex: 9999 }}
       role="dialog"
     >
       <button className="close-outside" onClick={close} />
       <aside
-        style={{zIndex: 9999}}
+        style={{ zIndex: 9999 }}
         className={[
           type === 'search' ? 'search-aside' : '',
+          type === 'mobile' ? 'mobile-menu' : '',
           /* existing classes */
         ]
           .concat(className || [])
           .join(' ')}
+        data-type={type}
         {...rest}
       >
         <header>
@@ -80,7 +82,7 @@ export function Aside({
   );
 }
 const AsideContext = createContext<AsideContextValue | null>(null);
-Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
+Aside.Provider = function AsideProvider({ children }: { children: ReactNode }) {
   const [type, setType] = useState<AsideType>('closed');
   return (
     <AsideContext.Provider
