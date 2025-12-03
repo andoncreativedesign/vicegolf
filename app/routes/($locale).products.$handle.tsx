@@ -282,7 +282,14 @@ export default function Product() {
           /** 👇 Divot Tool */
           case "divot tool":
           case "divot tools":
-            return <DivotToolProduct product={product} productDetails={productDetails} />;
+            return (
+              <DivotToolProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
 
           /** 👇 Golf balls (main category) */
           case "golf balls":
