@@ -155,11 +155,11 @@ export function Header({
       <BlackFridayBanner />
 
       {/* Top Header Bar - Collapses on Scroll */}
-      <div className={`flex items-center px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
-        {/* Left: Mobile Menu Toggle */}
-        <div className="lg:hidden mr-2">
-          <HeaderMenuMobileToggle />
-        </div>
+      <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
+        {/* Left: Country/Currency Selector */}
+        {/* <div className="flex items-center space-x-2">
+          <CountryCurrencySelector />
+        </div> */}
 
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center">
@@ -177,6 +177,7 @@ export function Header({
           <SearchToggle />
           <AccountToggle isLoggedIn={isLoggedIn} />
           <CartToggle cart={cart} />
+          <HeaderMenuMobileToggle />
         </div>
       </div>
 
