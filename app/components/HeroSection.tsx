@@ -1,6 +1,6 @@
 // app/components/HeroSection.tsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, useFetcher, useNavigate } from 'react-router';
 import { Image } from '@shopify/hydrogen';
 import type { HeroItemTransformed } from '~/lib/sanity/home';
 
@@ -14,7 +14,7 @@ interface HeroSlide {
   subtitle?: string;
   description: string;
   buttonText: string;
-  buttonLink: string;
+  handle: string;
 }
 
 const fallbackSlides: HeroSlide[] = [
@@ -28,7 +28,7 @@ const fallbackSlides: HeroSlide[] = [
     subtitle: 'EARLY ACCESS',
     description: 'Sign up now and be first in line for exclusive Black Friday drops and deals!',
     buttonText: 'Sign Me Up',
-    buttonLink: '/account/register',
+    handle: '/account/register',
   },
   {
     id: 'slide-2',
@@ -39,7 +39,7 @@ const fallbackSlides: HeroSlide[] = [
     title: 'Summer Essentials Await',
     description: 'Beat the heat with lightweight fabrics and vibrant colors. Limited time offer.',
     buttonText: 'Explore More',
-    buttonLink: '/collections/summer',
+    handle: '/collections/summer',
   },
   {
     id: 'slide-3',
@@ -50,7 +50,7 @@ const fallbackSlides: HeroSlide[] = [
     title: 'Exclusive Deals Inside',
     description: 'Unlock member perks and get early access to sales. Join today!',
     buttonText: 'Join Now',
-    buttonLink: '/account/register',
+    handle: '/account/register',
   },
 ];
 
@@ -70,12 +70,14 @@ export function HeroSection({ heroData }: HeroSectionProps) {
       subtitle: item.description,
       description: item.description || 'Discover amazing products',
       buttonText: item.buttonText || 'Shop Now',
-      buttonLink: '/collections',
+      handle: item.handle,
     })) || [];
 
   const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
   const validSlides = slides.length > 0 ? slides : fallbackSlides;
 
+  const fetcher = useFetcher()
+  const navigate = useNavigate()
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -92,6 +94,27 @@ export function HeroSection({ heroData }: HeroSectionProps) {
   const goToSlide = (index: number) => setCurrentSlide(index);
 
   const currentSlideData = validSlides[currentSlide];
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, item: HeroSlide) => {
+    e.preventDefault()
+    if (!item.handle) return
+    fetcher.submit(
+      { handle: item.handle },
+      { method: "post", action: "/api/collection" }
+    );
+  }
+
+  useEffect(() => {
+    if (
+      fetcher.state === "idle"
+      && fetcher.data?.collection?.id
+      && fetcher.data?.collection?.title
+    ) {
+      const { id, title } = fetcher.data.collection
+      console.log("fetcher.data hero section", id, title)
+      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    }
+  }, [fetcher.state, fetcher.data, navigate]);
 
   return (
     <section className="relative w-full overflow-hidden mb-8 h-[80vh] min-h-[500px] max-h-[90vh] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
@@ -118,43 +141,40 @@ export function HeroSection({ heroData }: HeroSectionProps) {
         ))}
       </div>
 
-    {/* Text and CTA */}
-<div className="absolute inset-0 z-20 flex items-start justify-start px-4 sm:pl-6 md:pl-16 text-white 
-  pt-60 sm:pt-72 md:pt-80">
-  <div className="max-w-xl drop-shadow-2xl">
-    <h1
-      className="font-extrabold mb-0 uppercase tracking-tight"
-      style={{ fontSize: '3rem', lineHeight: '1.1' }}
-    >
-      {currentSlideData.title}
-    </h1>
+      {/* Text and CTA */}
+      <div className="absolute inset-0 z-20 flex items-start justify-start px-4 sm:pl-6 md:pl-16 text-white pt-60 sm:pt-72 md:pt-80">
+        <div className="max-w-xl drop-shadow-2xl">
+          <h1
+            className="font-extrabold mb-0 uppercase tracking-tight"
+            style={{ fontSize: '3rem', lineHeight: '1.1' }}
+          >
+            {currentSlideData.title}
+          </h1>
 
-    {currentSlideData.subtitle && (
-      <h2
-        className="text-2xl md:text-4xl lg:text-5xl font-thin mb-3"
-        style={{ lineHeight: '1', marginTop: '0.3rem', fontWeight: '200' }}
-      >
-        {currentSlideData.subtitle}
-      </h2>
-    )}
+          {currentSlideData.subtitle && (
+            <h2
+              className="text-2xl md:text-4xl lg:text-5xl font-thin mb-3"
+              style={{ lineHeight: '1', marginTop: '0.3rem', fontWeight: '200' }}
+            >
+              {currentSlideData.subtitle}
+            </h2>
+          )}
 
-  <Link
-  to={currentSlideData.buttonLink}
-  className="
-    inline-block rounded-full text-center 
-    py-2.5 px-7 md:py-3 md:px-9 
-    disabled:bg-gray-300 disabled:text-gray-500 disabled:border-none 
-    bg-white text-gray-500 font-light text-[15px] tracking-wide 
-    hover:bg-gray-100 transition duration-300 shadow-md mt-3
-    w-auto
-  "
-  style={{ textDecoration: 'none' }}
->
-  {currentSlideData.buttonText}
-</Link>
+          <button
+            onClick={(e) => handleClick(e, currentSlideData)}
+            className="
+              inline-block rounded-full text-center cursor-pointer
+              py-2.5 px-7 md:py-3 md:px-9 
+              bg-white text-gray-500 font-light text-[15px] tracking-wide 
+              hover:bg-gray-100 transition duration-300 shadow-md mt-3
+              w-auto
+            "
+          >
+            {currentSlideData.buttonText}
+          </button>
 
-  </div>
-</div>
+        </div>
+      </div>
 
 
       {/* Arrows + Dots */}

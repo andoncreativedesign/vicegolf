@@ -7,7 +7,7 @@ export const homePageQuery = `*[_type == "home"][0]{
     heroes[] {
       title,
       description,
-      buttonText,
+      handle,
       content[0]{
         image{
           asset->{
@@ -21,7 +21,7 @@ export const homePageQuery = `*[_type == "home"][0]{
     secondaryHero[] {
       title,
       description,
-      buttonText,
+      handle,
       buttonLink,
       backgroundImage{
         asset->{
@@ -98,6 +98,7 @@ export interface HeroItemTransformed {
   description?: string;
   buttonText?: string;
   image?: string
+  handle: string
 }
 
 
@@ -146,14 +147,14 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
       heroes: result.result.heroes?.map((hero: any) => ({
         title: hero.title,
         description: hero.description,
-        buttonText: hero.buttonText,
+        handle: hero.handle,
         image: hero.content?.image?.asset?.url
       })),
       secondaryHero: result.result.secondaryHero?.map((hero: any) => ({
         title: hero.title,
         description: hero.description,
         buttonText: hero.buttonText,
-        buttonLink: hero.buttonLink,
+        handle: hero.handle,
         image: hero.backgroundImage?.asset?.url,
       })),
       brand: result.result.brand?.map((brand: any) => ({
