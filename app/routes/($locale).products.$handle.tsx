@@ -257,9 +257,16 @@ export default function Product() {
           case "golf club set":
             return <GolfClubSetProduct productDetails={productDetails} />;
 
-          /** 👇 Golf bags + caps */
+          /** 👇 Golf bags */
           case "golf bag":
           case "golf bags":
+            return (
+              <GolfBagProduct
+                product={product}
+              />
+            );
+
+          /** 👇 Caps */
           case "cap":
           case "caps":
             return (
