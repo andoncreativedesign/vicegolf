@@ -18,6 +18,7 @@ import { ShoesProduct } from '~/components/ShoesProduct';
 import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
+import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
@@ -244,7 +245,9 @@ export default function Product() {
           case "glove":
           case "gloves":
           case "gloves men":
-             case "gloves women":
+          case "gloves women":
+          case "longsleeve":
+
             return (
               <PoloProduct
                 product={product}
@@ -256,9 +259,19 @@ export default function Product() {
           case "golf club set":
             return <GolfClubSetProduct productDetails={productDetails} />;
 
-          /** 👇 Golf bags + caps */
+          /** 👇 Golf bags */
           case "golf bag":
           case "golf bags":
+            return (
+              <GolfBagProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
+
+          /** 👇 Caps */
           case "cap":
           case "caps":
             return (
@@ -277,6 +290,18 @@ export default function Product() {
           /** 👇 Rangefinder */
           case "rangefinder":
             return <RangefinderProduct productDetails={productDetails} />;
+
+          /** 👇 Divot Tool */
+          case "divot tool":
+          case "divot tools":
+            return (
+              <DivotToolProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
 
           /** 👇 Golf balls (main category) */
           case "golf balls":
