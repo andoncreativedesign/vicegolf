@@ -58,7 +58,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {menuItems?.map((category) => {
             const matchedSanityCategory = getSanityCategory(category.title);
             const fallbackShopifyImage = category?.resource?.image;
@@ -69,7 +69,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
               <div
                 key={category.id}
                 onClick={() => handleCategoryClick(category.url)}
-                className="relative cursor-pointer overflow-hidden rounded-md bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
+                className="relative cursor-pointer overflow-hidden rounded-md bg-white shadow-sm"
               >
                 {/* Category Image */}
                 <div className="aspect-[4/2.4] overflow-hidden relative">
