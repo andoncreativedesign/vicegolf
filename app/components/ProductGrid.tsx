@@ -113,7 +113,7 @@ export function ProductGrid({
       <div className="relative">
         <div
           ref={scrollContainerRef}
-          className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
+          className="flex space-x-4 overflow-x-auto scrollbar-hide pb-5"
           onScroll={checkScrollButtons}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
