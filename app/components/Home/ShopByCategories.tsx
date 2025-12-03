@@ -94,9 +94,9 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
                 </div>
 
                 {/* Category Info */}
-                <div className="absolute inset-0 flex flex-col justify-start pt-4 pl-8">
+                <div className="absolute inset-0 flex flex-col justify-start pt-6 pl-8">
                   <div className="relative z-10">
-                    <h3 className="font-extrabold text-title3 md:text-copy md:font-bold text-main-900 mb-2 tracking-tight uppercase">
+                    <h3 className="font-black text-title1 md:text-title2 text-gray-900 mb-2 tracking-tight uppercase" style={{ fontWeight: '900' }}>
                       {category.title}
                     </h3>
                     {description && (
