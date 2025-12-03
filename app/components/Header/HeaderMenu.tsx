@@ -153,13 +153,15 @@ const HeaderMenu = ({
   }, [menuItems]);
 
   const handleNavigate = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, navItem: SecondaryMenuItem) => {
-    e.preventDefault()
+    e.preventDefault();
     if (navItem.type === "COLLECTION") {
       fetcher.submit(
         { handle: navItem.handle },
         { method: "post", action: "/api/collection" }
       );
+      close(); // Close menu when collection is clicked
     } else if (navItem.type === "PAGE") {
+      close(); // Close menu before navigation
       navigate(`/${navItem.handle}`);
     }
   }
@@ -233,8 +235,11 @@ const HeaderMenu = ({
                           {menu?.items?.map((menuItem, itemIndex) => (
                             <li key={itemIndex}>
                               <button
-                                onClick={(e) => handleNavigate(e, menuItem)}
-                                className="hover:underline text-left w-full cursor-pointer block"
+                                onClick={(e) => {
+                                  handleNavigate(e, menuItem);
+                                  close(); // Ensure menu closes on click
+                                }}
+                                className="hover:underline text-left w-full cursor-pointer block py-1 px-2 -mx-2 hover:bg-gray-50 rounded"
                                 style={{ textDecoration: 'none' }}
                               >
                                 {menuItem.title}
