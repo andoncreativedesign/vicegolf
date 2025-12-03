@@ -51,7 +51,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
     <section className="py-20">
       <div>
         {/* Section Title */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-3xl font-medium mb-8 lg:mb-12" style={{ fontSize: '2rem' }}>
             SHOP BY CATEGORIES
           </h2>
@@ -69,7 +69,7 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
               <div
                 key={category.id}
                 onClick={() => handleCategoryClick(category.url)}
-                className="relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
+                className="relative cursor-pointer overflow-hidden rounded-md bg-white shadow-sm hover:shadow-xl transition-shadow duration-300"
               >
                 {/* Category Image */}
                 <div className="aspect-[4/2.4] overflow-hidden relative">
@@ -94,9 +94,9 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
                 </div>
 
                 {/* Category Info */}
-                <div className="absolute inset-0 flex flex-col justify-start p-6">
+                <div className="absolute inset-0 flex flex-col justify-start pt-4 pl-8">
                   <div className="relative z-10">
-                    <h3 className="text-2xl font-semibold text-black mb-2 tracking-tight">
+                    <h3 className="font-extrabold text-title3 md:text-copy md:font-bold text-main-900 mb-2 tracking-tight uppercase">
                       {category.title}
                     </h3>
                     {description && (
