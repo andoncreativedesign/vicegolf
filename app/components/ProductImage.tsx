@@ -28,7 +28,7 @@ export function ProductImage({ image, galleryImages = [], onImageChange }: Produ
   const currentImage = galleryImages[index] || image;
 
   return (
-    <div className="relative group rounded-2xl overflow-hidden bg-white shadow-sm w-full max-w-[550px] mx-auto">
+    <div className="relative group overflow-hidden bg-white shadow-lg w-full max-w-[550px] mx-auto">
       <div className="relative pt-[100%] w-full">
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <Image

@@ -9,14 +9,14 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
-  // Generate mock rating (in real app, this would come from reviews data)
-  const rating = 4.5 + Math.random() * 0.5; // Random rating between 4.5-5.0
-  const reviewCount = Math.floor(Math.random() * 50) + 10; // Random review count 10-60
+  
+  const rating = 4.5 + Math.random() * 0.5; 
+  const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   return (
     <Link
       to={`/products/${product.handle}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-md  border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
       style={{ textDecoration: 'none' }}
     >
       {/* Product Image */}
@@ -25,7 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <Image
             data={image}
             alt={image.altText || product.title}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+            className="w-full h-full object-contain "
             sizes="100%"
             width={320}
             height={320}
@@ -46,7 +46,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       {/* Product Info */}
       <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
-        <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-gray-800 transition-colors duration-300 min-h-[2.8rem] flex items-start">
+        <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2  min-h-[2.8rem] flex items-start">
           {product.title}
         </h3>
 
