@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import { Image } from '@shopify/hydrogen-react';
 import type { BrandItemTransformed } from '~/lib/sanity/home';
 
-const ClientLogos: React.FC<{brands: BrandItemTransformed[]}> = ({brands}) => {
+const ClientLogos: React.FC<{ brands: BrandItemTransformed[] }> = ({ brands }) => {
 
   return (
     <section className="py-12 lg:py-16">
       <div className="text-center">
-        <h2 className="text-lg sm:text-xl text-gray-600 font-medium mb-8 lg:mb-12">
+        <h2 className="text-2xl sm:text-3xl font-medium mb-8 lg:mb-12" style={{ fontSize: '2rem' }}>
           As Seen In
         </h2>
 
