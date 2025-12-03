@@ -19,6 +19,7 @@ import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
+import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
@@ -153,7 +154,15 @@ export default function Product() {
 
   useEffect(() => {
     console.log('product details from shopify', product)
+    console.log('product metafields:', product.metafields)
     console.log('color variants from shopify', colorVariants)
+
+    // Debug metafields for Tracer product
+    const isTracer = product.metafields?.some(
+      (field: { key?: string; value?: string }) =>
+        field?.key === 'category_variant' && field?.value === 'tracer'
+    );
+    console.log('Is Tracer product:', isTracer);
   }, [colorVariants, product])
 
   // const { product, recommendedProducts } = useLoaderData<typeof loader>();
@@ -235,6 +244,23 @@ export default function Product() {
       {/* Product-specific sections */}
       {(() => {
         const productType = product.productType?.toLowerCase();
+
+        // Check for Tracer product using metafield
+        const isTracerProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'tracer'
+        );
+
+        if (isTracerProduct) {
+          return (
+            <TracerProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
+            />
+          );
+        }
 
         switch (productType) {
           /** 👇 Clothing category */
@@ -406,6 +432,16 @@ const PRODUCT_FRAGMENT = `#graphql
     encodedVariantExistence
     encodedVariantAvailability
     metafield(namespace: "custom", key: "family") {
+      id
+      namespace
+      key
+      type
+      value
+    }
+    metafields(identifiers: [
+      {namespace: "custom", key: "family"}
+      {namespace: "custom", key: "category_variant"}
+    ]) {
       id
       namespace
       key
