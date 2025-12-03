@@ -322,6 +322,10 @@ query GetMenu($handle: String!) {
             url
             altText
           }
+          metafield(namespace: "custom", key: "exclude_collections_from_nav") {
+            key
+            value
+          }
         }
 
         ... on Product {
@@ -362,6 +366,10 @@ query GetMenu($handle: String!) {
               url
               altText
             }
+            metafield(namespace: "custom", key: "exclude_collections_from_nav") {
+              key
+              value
+            }
           }
 
           ... on Product {
@@ -401,6 +409,10 @@ query GetMenu($handle: String!) {
               image {
                 url
                 altText
+              }
+              metafield(namespace: "custom", key: "exclude_collections_from_nav") {
+                key
+                value
               }
             }
 

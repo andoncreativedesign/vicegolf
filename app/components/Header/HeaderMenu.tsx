@@ -90,7 +90,10 @@ const HeaderMenu = ({
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
 
     const getAllResourceIdsOfChild = (items: MenuItem[]) => {
-      const ids = items.map(item => item.resourceId || '');
+      const ids = items
+        .filter(item => item.type === "COLLECTION")
+        .map(item => item.resourceId || '');
+      
       return JSON.stringify(ids);
     };
 
