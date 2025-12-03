@@ -78,7 +78,15 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
           className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar gap-4 py-2 px-1"
         >
           {menuItem?.items
-            ?.filter(subItem => subItem.type !== "PAGE")
+            // ?.filter(subItem => subItem.type !== "PAGE")
+            ?.filter(subItem => {
+              const isPage = subItem.type === "PAGE";
+              const isHidden = subItem.resource?.metafield?.key === 'exclude_collections_from_nav'
+                ? JSON.parse(subItem.resource?.metafield?.value || 'false')
+                : false;
+
+              return !isPage && !isHidden;
+            })
             .map((subItem, subIndex) => (
               <div key={subItem.id || subIndex} className="flex-shrink-0 w-[calc((100%-5rem)/6)] snap-center">
                 <NavLink
