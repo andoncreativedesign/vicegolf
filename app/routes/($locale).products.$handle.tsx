@@ -18,6 +18,7 @@ import { ShoesProduct } from '~/components/ShoesProduct';
 import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
+import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
@@ -244,7 +245,7 @@ export default function Product() {
           case "glove":
           case "gloves":
           case "gloves men":
-             case "gloves women":
+          case "gloves women":
             return (
               <PoloProduct
                 product={product}
@@ -277,6 +278,11 @@ export default function Product() {
           /** 👇 Rangefinder */
           case "rangefinder":
             return <RangefinderProduct productDetails={productDetails} />;
+
+          /** 👇 Divot Tool */
+          case "divot tool":
+          case "divot tools":
+            return <DivotToolProduct product={product} productDetails={productDetails} />;
 
           /** 👇 Golf balls (main category) */
           case "golf balls":
