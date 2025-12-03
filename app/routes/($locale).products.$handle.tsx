@@ -263,6 +263,9 @@ export default function Product() {
             return (
               <GolfBagProduct
                 product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
               />
             );
 
