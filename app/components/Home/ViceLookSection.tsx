@@ -167,7 +167,7 @@ export function ViceLookSection() {
     return (
         <section className="w-full">
             <div className="w-full">
-                <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide mb-6">{title}</h2>
+                <h2 className="text-base sm:text-lg font-extrabold tracking-tight mb-6 lg:mb-10 uppercase" style={{ fontSize: '1.375rem', fontWeight: '800' }}>{title}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {items.map((item) => (
                         <div
@@ -242,7 +242,7 @@ export function ViceLookSection() {
                                                     </div>
                                                 </button>
                                             )}
-                                            
+
                                         </div>
                                     </div>
                                 ))}
