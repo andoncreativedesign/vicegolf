@@ -71,7 +71,7 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="fixed left-0 right-0 mt-0 bg-red-600 border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
+    <div className="fixed left-0 right-0 mt-0 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
       <div className="relative w-full px-16 sm:px-20 lg:px-24 py-4">
 
         <div
@@ -150,7 +150,7 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
           .map((item, index) => {
             const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
             return (
-              <div key={index} className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800">
+              <div key={index} className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800 p-4">
                 {secondaryMenu.map((menu, menuIndex) => (
                   <div key={menuIndex}>
                     <h5 className="font-semibold mb-2">{menu.section}</h5>
