@@ -24,81 +24,50 @@ export function TowelJuniorProduct({ product, productDetails }: TowelJuniorProdu
     }, [product.id, productDetails]);
 
     return (
-        <div className="towel-junior-container px-6 sm:px-8 lg:px-12 xl:px-16">
+        <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
             <div className="max-w-8xl mx-auto">
-                {/* Hero Section */}
-                <section className="py-12 md:py-16 lg:py-20">
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8">
-                        Towel Junior
-                    </h1>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <p className="text-lg mb-6">
-                                The perfect golf towel for young golfers. Designed with junior players in mind, our Towel Junior
-                                combines functionality with fun designs that kids love.
-                            </p>
-                            <ul className="space-y-3 mb-8">
-                                <li className="flex items-start">
-                                    <span className="text-green-600 mr-2">✓</span>
-                                    <span>Perfect size for junior golf bags</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-green-600 mr-2">✓</span>
-                                    <span>Super absorbent microfiber material</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-green-600 mr-2">✓</span>
-                                    <span>Fun, vibrant designs</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-green-600 mr-2">✓</span>
-                                    <span>Durable construction</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="bg-gray-100 aspect-square rounded-lg flex items-center justify-center">
-                            <span className="text-gray-400">Towel Junior Image</span>
-                        </div>
-                    </div>
-                </section>
+                {/* Dynamic Content Sections – Alternating: Text first → Image first → Text first... */}
+                {productDetailsState?.productContent1?.content?.map((item, index) => {
+                    const isEvenIndex = index % 2 === 0; // 0, 2, 4 → Image Left (Text Right)
+                    const isFirst = index === 0;
 
-                {/* Features Section */}
-                <section className="py-12 md:py-16 lg:py-20 bg-gray-50 rounded-lg my-12">
-                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Designed for Young Golfers</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                title: 'Perfect Fit',
-                                description: 'Specially sized for junior golf bags and smaller hands.'
-                            },
-                            {
-                                title: 'Fun Designs',
-                                description: 'Colorful patterns that young golfers will love.'
-                            },
-                            {
-                                title: 'Durable',
-                                description: 'Built to withstand the rigors of junior golf.'
-                            }
-                        ].map((feature, index) => (
-                            <div key={index} className="p-6 bg-white rounded-lg shadow-sm">
-                                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                                <p className="text-gray-600">{feature.description}</p>
+                    // For the very first section, force full-width treatment
+                    if (isFirst) {
+                        return (
+                            <div key={index} className="w-full py-8">
+                                <ProductDetailsContent1
+                                    content={item}
+                                    showImageLeft={true}        // Image Left → Text Right
+                                    isTextFull={false}
+                                    isImageFull={false}
+                                    isFirst={true}
+                                    isDescriptionFull={false}
+                                    imageSize="xlarge"
+                                />
                             </div>
-                        ))}
-                    </div>
-                </section>
+                        );
+                    }
 
-                {/* Dynamic Content Sections */}
-                {productDetailsState?.productContent1?.content?.map((item, index) => (
-                    <div key={index} className="py-12">
-                        <ProductDetailsContent1 content={item} />
-                    </div>
-                ))}
+                    return (
+                        <div key={index} className="py-12">
+                            <ProductDetailsContent1
+                                content={item}
+                                showImageLeft={isEvenIndex}   // Even index (0,2,4) → Image Left (Text Right) → showImageLeft = true
+                                // Odd index (1,3,5) → Text Left (Image Right) → showImageLeft = false
+                                isTextFull={false}
+                                isImageFull={false}
+                                isFirst={false}
+                                isDescriptionFull={false}
+                                imageSize="xlarge"
+                            />
+                        </div>
+                    );
+                })}
 
-                {/* Video Section */}
-                {productDetailsState?.youtubeVideoId && (
-                    <div className="py-12">
-                        <Youtube videoId={productDetailsState.youtubeVideoId} />
+                {/* YouTube Section */}
+                {productDetailsState?.youtubeVideos && (
+                    <div className="mt-16 md:mt-20 lg:mt-24">
+                        <Youtube youtubeVideo={productDetailsState.youtubeVideos} />
                     </div>
                 )}
             </div>
