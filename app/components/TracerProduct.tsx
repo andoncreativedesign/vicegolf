@@ -24,40 +24,42 @@ export function TracerProduct({ product, productDetails, initialRecommended, sho
         <div className="px-10 sm:px-12 lg:px-20 xl:px-24">
             <div className="max-w-8xl mx-auto space-y-8">
                 {/* First Product Content */}
-                <div className="w-full min-h-[30vh] flex items-center">
-                    <div className="w-full py-8">
+                <div className="w-full">
+                    <div className="w-full">
                         <ProductDetailsContent1
                             content={firstContent}
                             showImageLeft={false}
-                            isTextFull={false}
-                            isImageFull={false}
+                            isTextFull={true}
+                            isImageFull={true}
                             isFirst={true}
                             isSecond={false}
-                            isDescriptionFull={false}
-                            imageSize="large"
-                            titleClassName="text-4xl lg:text-5xl font-bold"
-                            descriptionClassName="text-base text-gray-600 w-[90%] max-w-[90%] ml-auto"
-                            pointsClassName="w-[90%] max-w-[90%]"
+                            isThird={false}
+                            isDescriptionFull={true}
+                            imageSize="xlarge"
+                            titleClassName="text-4xl lg:text-5xl font-bold text-center"
+                            descriptionClassName="text-base text-gray-600 w-full max-w-full text-center"
+                            pointsClassName="w-full max-w-full text-center"
                         />
                     </div>
                 </div>
 
                 {/* Second Product Content */}
                 {secondContent && (
-                    <div className="w-full min-h-[30vh] flex items-center">
-                        <div className="w-full py-8">
+                    <div className="w-full">
+                        <div className="w-full">
                             <ProductDetailsContent1
                                 content={secondContent}
-                                showImageLeft={true}
-                                isTextFull={false}
-                                isImageFull={false}
+                                showImageLeft={false}
+                                isTextFull={true}
+                                isImageFull={true}
                                 isFirst={false}
                                 isSecond={true}
-                                isDescriptionFull={false}
-                                imageSize="large"
-                                titleClassName="text-4xl lg:text-5xl font-bold"
-                                descriptionClassName="text-base text-gray-600 w-[90%] max-w-[90%]"
-                                pointsClassName="w-[90%] max-w-[90%]"
+                                isThird={false}
+                                isDescriptionFull={true}
+                                imageSize="xlarge"
+                                titleClassName="text-4xl lg:text-5xl font-bold text-center"
+                                descriptionClassName="text-base text-gray-600 w-full max-w-full text-center"
+                                pointsClassName="w-full max-w-full text-center"
                             />
                         </div>
                     </div>
