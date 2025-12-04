@@ -105,8 +105,8 @@ fieldset {
 
 form {
   max-width: 100%;
-  @media (min-width: 768px) {
-    max-width: 400px;
+  @media (min-width: 780px) {
+    max-width: 669px;
   }
 }
 

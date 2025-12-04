@@ -137,7 +137,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
       )}
 
       {/* Main Image */}
-      <div className="relative flex-1 group bg-white rounded-none shadow-lg overflow-hidden aspect-square">
+      <div className="relative flex-1 group rounded-none overflow-hidden aspect-square">
         <div 
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"

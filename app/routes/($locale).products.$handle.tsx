@@ -206,7 +206,7 @@ export default function Product() {
   }, [product.id]);
   return (
     <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
-      <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-20">
+      <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-17">
         <div className="w-full lg:w-[55%]">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
