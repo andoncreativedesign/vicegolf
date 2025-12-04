@@ -80,7 +80,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
       console.error(error);
       return null;
     });
-  return { 
+  return {
     recommendedProducts,
     currentRecommendedCursor: recommendedCursor,
     recommendedPageInfo: recommendedProducts?.products?.pageInfo,
@@ -335,7 +335,12 @@ export default function Homepage() {
           sanityHomeCategories={data?.homePageData?.homeCategories}
         />
       )}
-      <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+      <HeroSection
+        heroData={data.homePageData?.secondaryHero || null}
+        textColor="text-black"
+        buttonBgColor="bg-black"
+        buttonTextColor="text-white"
+      />
       {recommendedProducts.length > 0 && (
         <ProductGrid
           products={recommendedProducts}

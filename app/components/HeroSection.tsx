@@ -56,9 +56,17 @@ const fallbackSlides: HeroSlide[] = [
 
 interface HeroSectionProps {
   heroData?: HeroItemTransformed[] | null;
+  textColor?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
 }
 
-export function HeroSection({ heroData }: HeroSectionProps) {
+export function HeroSection({
+  heroData,
+  textColor = 'text-white',
+  buttonBgColor = 'bg-white',
+  buttonTextColor = 'text-black'
+}: HeroSectionProps) {
   const heroSlides: HeroSlide[] =
     heroData?.map((item, index) => ({
       id: `hero-${index}-${item.title?.replace(/\s+/g, '-').toLowerCase() || index}`,
@@ -142,10 +150,10 @@ export function HeroSection({ heroData }: HeroSectionProps) {
       </div>
 
       {/* Text and CTA */}
-      <div className="absolute inset-0 z-20 flex items-start justify-start px-4 sm:pl-6 md:pl-16 text-white pt-60 sm:pt-72 md:pt-80">
+      <div className={`absolute inset-0 z-20 flex items-start justify-start px-4 sm:pl-6 md:pl-16 ${textColor} pt-60 sm:pt-72 md:pt-80`}>
         <div className="max-w-xl drop-shadow-2xl">
           <h1
-            className="font-extrabold mb-0 uppercase tracking-tight"
+            className={`font-extrabold mb-0 uppercase tracking-tight ${textColor}`}
             style={{ fontSize: '3rem', lineHeight: '1.1' }}
           >
             {currentSlideData.title}
@@ -153,7 +161,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
 
           {currentSlideData.subtitle && (
             <h2
-              className="text-2xl md:text-4xl lg:text-5xl font-thin mb-3"
+              className={`text-2xl md:text-4xl lg:text-5xl font-thin mb-3 ${textColor}`}
               style={{ lineHeight: '1', marginTop: '0.3rem', fontWeight: '200' }}
             >
               {currentSlideData.subtitle}
@@ -162,13 +170,7 @@ export function HeroSection({ heroData }: HeroSectionProps) {
 
           <button
             onClick={(e) => handleClick(e, currentSlideData)}
-            className="
-              inline-block rounded-full text-center cursor-pointer
-              py-2.5 px-7 md:py-3 md:px-9 
-              bg-white text-gray-500 font-light text-[15px] tracking-wide 
-              hover:bg-gray-100 transition duration-300 shadow-md mt-3
-              w-auto
-            "
+            className={`px-8 py-3 ${buttonBgColor} ${buttonTextColor} font-medium rounded-full hover:opacity-90 transition-opacity`}
           >
             {currentSlideData.buttonText}
           </button>
