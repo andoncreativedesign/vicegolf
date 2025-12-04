@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import { LuUser } from 'react-icons/lu';
 import { Await, NavLink, useAsyncValue, useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import {
   type CartViewPayload,
@@ -155,7 +156,7 @@ export function Header({
       {/* <BlackFridayBanner /> */}
 
       {/* Top Header Bar - Collapses on Scroll */}
-      <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
+      <div className={`flex items-center justify-between px-12 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
         {/* Left: Mobile Menu Toggle */}
         <div className="flex items-center">
           <HeaderMenuMobileToggle />
@@ -182,7 +183,7 @@ export function Header({
 
       {/* Navigation Menu - Always Visible */}
       <nav className="bg-white border-t border-gray-100 w-full shadow-sm">
-        <div className="w-full px-0">
+        <div className="w-full px-12">
           {menuItems &&
             <HeaderMenu
               viewport="desktop"
@@ -252,7 +253,7 @@ function CartBadge({ count }: { count: number | null }) {
 
       {/* Badge with count */}
       {count !== null && count > 0 && (
-        <span className="absolute -top-1 -right-1 bg-black text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+        <span className="absolute bottom-0 right-0 bg-gray-700 text-white text-[10px] font-medium rounded-full h-4 w-4 flex items-center justify-center min-w-[16px] translate-x-1 -translate-y-0.5">
           {count > 99 ? '99+' : count}
         </span>
       )}
@@ -298,9 +299,7 @@ function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
             aria-label={loggedIn ? "Account" : "Login"}
             title={loggedIn ? "My Account" : "Sign In"}
           >
-            <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <LuUser className="w-6 h-6 text-gray-700 hover:text-black" />
           </NavLink>
         )}
       </Await>
@@ -311,9 +310,7 @@ function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
 function AccountIcon() {
   return (
     <div className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
-      <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
+      <LuUser className="w-6 h-6 text-gray-700 hover:text-black" />
     </div>
   );
 }
