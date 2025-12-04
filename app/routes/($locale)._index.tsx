@@ -281,7 +281,10 @@ export default function Homepage() {
   }, [menuItems]);
   return (
     <div className="home">
-      <HeroSection heroData={data.homePageData?.heroes} />
+      <HeroSection
+        heroData={data.homePageData?.heroes}
+        // bgColor="bg-red-500/30"
+      />
       <div className="py-8 space-y-12">
         {/* VICE GOLF BALLS - Infinite Scroll */}
         {golfBalls.length > 0 && (
@@ -340,6 +343,8 @@ export default function Homepage() {
         textColor="text-black"
         buttonBgColor="bg-black"
         buttonTextColor="text-white"
+        // bgColor="bg-blue-500/30"
+        center={true}
       />
       {recommendedProducts.length > 0 && (
         <ProductGrid

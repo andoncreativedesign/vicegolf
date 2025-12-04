@@ -59,13 +59,17 @@ interface HeroSectionProps {
   textColor?: string;
   buttonBgColor?: string;
   buttonTextColor?: string;
+  bgColor?: string;
+  center?: boolean;
 }
 
 export function HeroSection({
   heroData,
   textColor = 'text-white',
   buttonBgColor = 'bg-white',
-  buttonTextColor = 'text-black'
+  buttonTextColor = 'text-black',
+  bgColor = 'bg-transparent',
+  center = false
 }: HeroSectionProps) {
   const heroSlides: HeroSlide[] =
     heroData?.map((item, index) => ({
@@ -150,19 +154,19 @@ export function HeroSection({
       </div>
 
       {/* Text and CTA */}
-      <div className={`absolute inset-0 z-20 flex items-start justify-start px-4 sm:pl-6 md:pl-16 ${textColor} pt-60 sm:pt-72 md:pt-80`}>
-        <div className="max-w-xl drop-shadow-2xl">
+      <div className={`absolute inset-0 z-20 flex ${center ? 'items-center' : 'items-start'} justify-start px-4 sm:pl-6 md:pl-16 ${textColor} ${center ? '' : 'pt-56 sm:pt-72 md:pt-80'}`}>
+        <div className={`max-w-xl p-8 rounded-lg ${bgColor} bg-opacity-90 drop-shadow-2xl`}>
           <h1
-            className={`font-extrabold mb-0 uppercase tracking-tight ${textColor}`}
-            style={{ fontSize: '3rem', lineHeight: '1.1' }}
+            className={`font-extrabold uppercase tracking-tight ${textColor}`}
+            style={{ fontSize: '3rem', lineHeight: '1.1', marginBottom: '0.5rem' }}
           >
             {currentSlideData.title}
           </h1>
 
           {currentSlideData.subtitle && (
             <h2
-              className={`text-2xl md:text-4xl lg:text-5xl font-thin mb-3 ${textColor}`}
-              style={{ lineHeight: '1', marginTop: '0.3rem', fontWeight: '200' }}
+              className={`text-2xl md:text-4xl lg:text-5xl font-thin mb-6 ${textColor}`}
+              style={{ lineHeight: '1.1', fontWeight: '200' }}
             >
               {currentSlideData.subtitle}
             </h2>
