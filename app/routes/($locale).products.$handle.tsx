@@ -19,9 +19,12 @@ import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
+import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
+import { TowelProduct } from '~/components/TowelProduct';
+import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -153,7 +156,15 @@ export default function Product() {
 
   useEffect(() => {
     console.log('product details from shopify', product)
+    console.log('product metafields:', product.metafields)
     console.log('color variants from shopify', colorVariants)
+
+    // Debug metafields for Tracer product
+    const isTracer = product.metafields?.some(
+      (field: { key?: string; value?: string }) =>
+        field?.key === 'category_variant' && field?.value === 'tracer'
+    );
+    console.log('Is Tracer product:', isTracer);
   }, [colorVariants, product])
 
   // const { product, recommendedProducts } = useLoaderData<typeof loader>();
@@ -236,6 +247,38 @@ export default function Product() {
       {(() => {
         const productType = product.productType?.toLowerCase();
 
+        // Check for Tracer product using metafield
+        const isTracerProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'tracer'
+        );
+
+        // Check for Towel Junior product using metafield
+        const isTowelJuniorProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Towel Junior'
+        );
+
+        if (isTracerProduct) {
+          return (
+            <TracerProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
+            />
+          );
+        }
+
+        if (isTowelJuniorProduct) {
+          return (
+            <TowelJuniorProduct
+              product={product}
+              productDetails={productDetails}
+            />
+          );
+        }
+
         switch (productType) {
           /** 👇 Clothing category */
           case "polo":
@@ -300,6 +343,16 @@ export default function Product() {
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
                 showBestSellers={true}
+              />
+            );
+
+          /** 👇 Towels */
+          case "towel":
+          case "towels":
+            return (
+              <TowelProduct
+                product={product}
+                productDetails={productDetails}
               />
             );
 
@@ -406,6 +459,16 @@ const PRODUCT_FRAGMENT = `#graphql
     encodedVariantExistence
     encodedVariantAvailability
     metafield(namespace: "custom", key: "family") {
+      id
+      namespace
+      key
+      type
+      value
+    }
+    metafields(identifiers: [
+      {namespace: "custom", key: "family"}
+      {namespace: "custom", key: "category_variant"}
+    ]) {
       id
       namespace
       key
