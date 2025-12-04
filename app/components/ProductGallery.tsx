@@ -24,46 +24,6 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
 
-  // Handle thumbnail slide-in animation
-  useEffect(() => {
-    if (!thumbnailContainerRef.current) return;
-    
-    const container = thumbnailContainerRef.current;
-    const thumbnails = container.querySelectorAll('button');
-    
-    // Add slide-in animation to each thumbnail with staggered delay
-    thumbnails.forEach((thumb, index) => {
-      (thumb as HTMLElement).style.animation = `slideIn 0.3s ease-out ${index * 0.05}s forwards`;
-    });
-    
-    // Scroll to active thumbnail
-    const activeThumbnail = thumbnails[currentIndex];
-    if (activeThumbnail) {
-      // For vertical layout on desktop
-      if (window.innerWidth >= 768) {
-        const containerHeight = container.offsetHeight;
-        const thumbHeight = activeThumbnail.offsetHeight;
-        const scrollTop = activeThumbnail.offsetTop - (containerHeight - thumbHeight) / 2;
-        
-        container.scrollTo({
-          top: scrollTop,
-          behavior: 'smooth'
-        });
-      } 
-      // For horizontal layout on mobile
-      else {
-        const containerWidth = container.offsetWidth;
-        const thumbWidth = activeThumbnail.offsetWidth;
-        const scrollLeft = activeThumbnail.offsetLeft - (containerWidth - thumbWidth) / 2;
-        
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        });
-      }
-    }
-  }, [currentIndex]);
-
   useEffect(() => {
     if (!selectedImage) return;
     const index = images.findIndex((img) => img.id === selectedImage.id);
@@ -137,25 +97,27 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
   const mainImage = selectedImage || images[0];
   const hasMultiple = images.length > 1;
 
+  const handleThumbnailClick = (image: ProductImageType) => {
+    const index = images.findIndex(img => img.id === image.id);
+    if (index !== -1) {
+      setCurrentIndex(index);
+      onImageSelect(image);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && (
-        <div 
-          ref={thumbnailContainerRef}
-          className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] scrollbar-hide"
-          style={{ 
-            scrollBehavior: 'smooth',
-            opacity: 0,
-            animation: 'fadeIn 0.3s ease-out 0.2s forwards'
-          }}
+        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] 
+          [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
             const isActive = mainImage.id === image.id;
             return (
               <button
                 key={image.id}
-                onClick={() => onImageSelect(image)}
+                onClick={() => handleThumbnailClick(image)}
                 className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 shadow-sm hover:shadow-md ${
                   isActive
                     ? 'ring-1 ring-white scale-[1.03] shadow-md'
