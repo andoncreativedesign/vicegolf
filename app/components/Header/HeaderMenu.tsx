@@ -93,7 +93,7 @@ const HeaderMenu = ({
       const ids = items
         .filter(item => item.type === "COLLECTION")
         .map(item => item.resourceId || '');
-      
+
       return JSON.stringify(ids);
     };
 
@@ -287,7 +287,7 @@ const HeaderMenu = ({
   return (
     <div className="relative w-full" ref={menuRef}>
       <nav
-        className="hidden lg:flex items-center justify-center space-x-8 py-4 w-full"
+        className="hidden lg:flex items-center justify-center space-x-16 py-4 w-full"
         role="navigation"
       >
         {menu?.map((item) => (
