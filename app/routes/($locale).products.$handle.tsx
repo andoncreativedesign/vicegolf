@@ -23,6 +23,7 @@ import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
+import { TowelProduct } from '~/components/TowelProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -326,6 +327,16 @@ export default function Product() {
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
                 showBestSellers={true}
+              />
+            );
+
+          /** 👇 Towels */
+          case "towel":
+          case "towels":
+            return (
+              <TowelProduct
+                product={product}
+                productDetails={productDetails}
               />
             );
 
