@@ -156,7 +156,7 @@ export function Header({
       {/* <BlackFridayBanner /> */}
 
       {/* Top Header Bar - Collapses on Scroll */}
-      <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
+      <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
         {/* Left: Mobile Menu Toggle */}
         <div className="flex items-center">
           <HeaderMenuMobileToggle />
@@ -182,7 +182,7 @@ export function Header({
       </div>
 
       {/* Navigation Menu - Visible only on desktop */}
-      <nav className="hidden md:block bg-blue-500 md:bg-white border-t border-gray-100 w-full shadow-sm">
+      <nav className="hidden md:block w-full py-3">
         <div className="w-full px-2">
           {menuItems &&
             <HeaderMenu

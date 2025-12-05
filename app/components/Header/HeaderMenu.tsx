@@ -283,8 +283,7 @@ const HeaderMenu = ({
               to={item.url}
               onMouseEnter={() => item.items?.length > 0 && setActiveSubmenu(item)}
               className={({ isActive }) =>
-                `flex items-center gap-1 text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${isActive ? "text-black border-b-2 border-black pb-1" : "text-gray-700 hover:text-black"
-                }`
+                `flex items-center gap-1 text-sm uppercase font-medium tracking-wide transition-colors duration-200 ${isActive ? "text-black" : "text-gray-700 hover:text-black"}`
               }
               style={{ textDecoration: "none" }}
             >
