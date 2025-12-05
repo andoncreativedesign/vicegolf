@@ -48,7 +48,7 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
-      <main className="bg-white">{children}</main>
+      <main className="bg-white pt-[120px] md:pt-[140px]">{children}</main>
       <Footer
         footer={footer}
         header={header}

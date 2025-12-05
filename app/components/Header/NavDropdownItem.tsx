@@ -6,9 +6,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface DropdownItemProps {
   menuItem: MenuItem
+  onClose?: () => void
 }
 
-const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
+const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   const navigate = useNavigate()
   const fetcher = useFetcher<{ collection?: { id: string } }>();
 
@@ -48,6 +49,8 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
 
   const handleNavigate = (navItem: SecondaryMenuItem) => {
     console.log('Navigation item:', navItem);
+    if (onClose) onClose();
+
     if (navItem.type === "COLLECTION") {
       fetcher.submit(
         { handle: navItem.handle },
@@ -93,6 +96,7 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
                 <NavLink
                   prefetch="intent"
                   to={subItem.url}
+                  onClick={() => onClose && onClose()}
                   className="flex flex-col items-start bg-white hover:bg-gray-50 rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
                   style={{ textDecoration: "none" }}
                 >
