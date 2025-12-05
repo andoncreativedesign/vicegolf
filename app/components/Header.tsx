@@ -151,7 +151,7 @@ export function Header({
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300" style={{ width: '100%', margin: 0, padding: 0 }}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 px-4" style={{ width: '100%', margin: 0 }}>
       {/* Marquee Banner - Always Visible */}
       {/* <BlackFridayBanner /> */}
 
@@ -391,11 +391,10 @@ function CountryCurrencySelector() {
               {filteredCountries.map((country) => (
                 <button
                   key={country.code}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${
-                    selectedCountry.code === country.code
-                      ? 'bg-gray-100 text-gray-900 font-medium'
-                      : 'text-gray-700'
-                  }`}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code
+                    ? 'bg-gray-100 text-gray-900 font-medium'
+                    : 'text-gray-700'
+                    }`}
                   onClick={() => handleCountrySelect(country)}
                 >
                   <div
