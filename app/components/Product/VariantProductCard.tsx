@@ -65,6 +65,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [currentImage, setCurrentImage] = useState(image?.url || '');
+  const [selectedVariantHandle, setSelectedVariantHandle] = useState(product.handle);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hoverDelayTimeout, setHoverDelayTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isOverVariants, setIsOverVariants] = useState(false);
 
   // Get all available variants including the main product
   const allVariants = useMemo(() => {
@@ -105,6 +109,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     setSelectedVariant(index);
+    setSelectedVariantHandle(variant.handle)
     if (variant.image?.url) {
       setCurrentImage(variant.image?.url);
     }
@@ -149,39 +154,65 @@ export function VariantProductCard({ product }: ProductCardProps) {
       console.log('product card golf balls', product)
   }, [product])
 
+  // Add this effect to clean up the timeout when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (hoverDelayTimeout) {
+        clearTimeout(hoverDelayTimeout);
+      }
+    };
+  }, [hoverDelayTimeout]);
+
+
   return (
     <div className="block bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full relative group">
-      <Link
-        to={`/products/${product.handle}`}
-        className="block relative"
-        style={{ textDecoration: 'none' }}
-      >
+      <div className="block relative" >
 
         <div
           className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden"
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => {
-            setIsHovering(false);
+          onMouseEnter={() => {
+            // Clear any pending timeouts when entering
+            if (hoverDelayTimeout) {
+              clearTimeout(hoverDelayTimeout);
+              setHoverDelayTimeout(null);
+            }
+            setIsHovering(true);
           }}
+          onMouseLeave={() => {
+            // Only hide if not over variants
+            const timeout = setTimeout(() => {
+              if (!isOverVariants) {
+                setIsHovering(false);
+              }
+            }, 300);
+            setHoverDelayTimeout(timeout);
+          }}
+
         >
-          <div className="w-full h-full">
-            {image && (
-              <Image
-                src={currentImage || image.url}
-                alt={image.altText || product.title}
-                className="w-full h-full object-contain transition-transform duration-300"
-                sizes="100%"
-                width={320}
-                height={320}
-              />
-            )}
-          </div>
+          <Link
+            to={`/products/${selectedVariantHandle}`}
+            style={{ textDecoration: 'none' }}
+          >
+            <div className="w-full h-full">
+              {image && (
+                <Image
+                  src={currentImage || image.url}
+                  alt={image.altText || product.title}
+                  className="w-full h-full object-contain transition-transform duration-300"
+                  sizes="100%"
+                  width={320}
+                  height={320}
+                />
+              )}
+            </div>
+          </Link>
+
         </div>
 
         {/* all other variants */}
         {!isGolfBall && isHovering && allVariants.length > 1 && (
           <div
-            className="absolute bottom-26 left-0 right-0 z-30 p-3 bg-white/90 backdrop-blur-sm shadow-lg"
+            className="absolute bottom-17 left-0 right-0 z-30 p-3 bg-white/90 backdrop-blur-sm shadow-lg"
             onClick={(e) => e.preventDefault()}
           >
             <div className="grid grid-cols-5 gap-2 w-full">
@@ -193,89 +224,45 @@ export function VariantProductCard({ product }: ProductCardProps) {
                   return 0;
                 })
                 ?.map((variant, index) => (
-                <button
-                  key={variant.id}
-                  className={`aspect-square rounded-lg overflow-hidden ring-1 transition-all cursor-pointer ${selectedVariant === index
-                      ? 'ring-2 ring-blue-500 scale-105'
-                      : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
-                    }`}
-                  onClick={(e) => handleVariantSelect(e, variant, index)}
-                  onMouseEnter={() => {
-                    if (variant.image?.url) {
-                      setCurrentImage(variant.image.url);
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (allVariants[selectedVariant]?.image?.url) {
-                      setCurrentImage(allVariants[selectedVariant].image.url);
-                    }
-                  }}
-                >
-                  {variant.variantImage?.url ? (
-                    <Image
-                      src={variant.variantImage.url}
-                      alt={variant.title}
-                      width={56}
-                      height={56}
-                      className="w-full h-full object-contain hover:opacity-80 transition-opacity"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-[10px] text-gray-400">No Image</span>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ball variants */}
-        {isGolfBall && allVariants.length > 1 && (
-          <div className="px-5 pt-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Options:</span>
-              <div className="flex flex-wrap gap-2">
-                {allVariants
-                  .sort((a, b) => {
-                    // Move current variant to the start
-                    if (a.handle === product.handle) return -1;
-                    if (b.handle === product.handle) return 1;
-                    return 0;
-                  })
-                  .map((variant, index) => (
                   <button
                     key={variant.id}
-                    type="button"
+                    className={`aspect-square rounded-lg overflow-hidden ring-1 transition-all cursor-pointer ${selectedVariant === index
+                      ? 'ring-2 ring-blue-500 scale-105'
+                      : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
+                      }`}
                     onClick={(e) => handleVariantSelect(e, variant, index)}
                     onMouseEnter={() => {
-                      if (variant.image?.url) {
-                        setCurrentImage(variant.image.url);
+                      setIsOverVariants(true);
+                      // Clear any pending hide timeout
+                      if (hoverDelayTimeout) {
+                        clearTimeout(hoverDelayTimeout);
+                        setHoverDelayTimeout(null);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (allVariants[selectedVariant]?.image?.url) {
-                        setCurrentImage(allVariants[selectedVariant].image.url);
-                      }
+                      setIsOverVariants(false);
+                      // Start the hide timeout when leaving the variants
+                      const timeout = setTimeout(() => {
+                        setIsHovering(false);
+                      }, 1000);
+                      setHoverDelayTimeout(timeout);
                     }}
-                    className={`w-6 h-6 rounded-full overflow-hidden ring-1 transition-all duration-200 ${selectedVariant === index
-                      ? 'ring-2 ring-blue-500 scale-110'
-                      : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
-                      }`}
-                    title={variant.title}
                   >
                     {variant.variantImage?.url ? (
-                      <img
+                      <Image
                         src={variant.variantImage.url}
                         alt={variant.title}
-                        className="w-full h-full object-cover"
+                        width={56}
+                        height={56}
+                        className="w-full h-full object-contain hover:opacity-80 transition-opacity"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-100" />
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span className="text-[10px] text-gray-400">No Image</span>
+                      </div>
                     )}
                   </button>
                 ))}
-              </div>
             </div>
           </div>
         )}
@@ -310,6 +297,57 @@ export function VariantProductCard({ product }: ProductCardProps) {
             </span>
           </div> */}
 
+          
+          {/* ball variants */}
+          {isGolfBall && allVariants.length > 1 && (
+            <div className="pt-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-700">Options:</span>
+                <div className="flex flex-wrap gap-2">
+                  {allVariants
+                    .sort((a, b) => {
+                      // Move current variant to the start
+                      if (a.handle === product.handle) return -1;
+                      if (b.handle === product.handle) return 1;
+                      return 0;
+                    })
+                    .map((variant, index) => (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        onClick={(e) => handleVariantSelect(e, variant, index)}
+                        onMouseEnter={() => {
+                          if (variant.image?.url) {
+                            setCurrentImage(variant.image.url);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (allVariants[selectedVariant]?.image?.url) {
+                            setCurrentImage(allVariants[selectedVariant].image.url);
+                          }
+                        }}
+                        className={`w-6 h-6 rounded-full overflow-hidden ring-1 transition-all duration-200 ${selectedVariant === index
+                          ? 'ring-2 ring-blue-500 scale-110'
+                          : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
+                          }`}
+                        title={variant.title}
+                      >
+                        {variant.variantImage?.url ? (
+                          <img
+                            src={variant.variantImage.url}
+                            alt={variant.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-100" />
+                        )}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {firstVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
@@ -326,7 +364,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
             </div>
           )}
         </div>
-      </Link>
+      </div>
     </div>
   );
 }
