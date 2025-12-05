@@ -71,29 +71,66 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const [isOverVariants, setIsOverVariants] = useState(false);
 
   // Get all available variants including the main product
-  const allVariants = useMemo(() => {
-    const variants = [{
-      ...product,
-      isMain: true,
-      id: product.handle,
-      image: product.featuredImage || product.images?.nodes?.[0],
-      variantImage: product.variantImage || product.featuredImage,
-    }];
+  // const allVariants = useMemo(() => {
+  //   const variants = [{
+  //     ...product,
+  //     isMain: true,
+  //     id: product.handle,
+  //     image: product.featuredImage || product.images?.nodes?.[0],
+  //     variantImage: product.variantImage || product.featuredImage,
+  //   }];
 
-    if (product.variantFamilyProducts?.length > 0) {
-      product.variantFamilyProducts.forEach(variant => {
-        variants.push({
-          ...variant,
-          isMain: false,
-          id: variant.handle,
-          image: variant.featuredImage || variant.images?.nodes?.[0],
-          variantImage: variant.variantImage || variant.featuredImage,
-        });
+  //   if (product.variantFamilyProducts?.length > 0) {
+  //     product.variantFamilyProducts.forEach(variant => {
+  //       variants.push({
+  //         ...variant,
+  //         isMain: false,
+  //         id: variant.handle,
+  //         image: variant.featuredImage || variant.images?.nodes?.[0],
+  //         variantImage: variant.variantImage || variant.featuredImage,
+  //       });
+  //     });
+  //   }
+
+  //   // console.log('variant length - ', product.handle, product.variantFamilyProducts.length)
+  //   console.log('variant 123123123- ', product.handle, variants)
+
+  //   return variants;
+  // }, [product]);
+
+
+  const allVariants = useMemo(() => {
+    // Create a Set to track unique variant handles
+    const seenHandles = new Set();
+    const variants = [];
+
+    // Add main product first if not already in the set
+    if (!seenHandles.has(product.handle)) {
+      seenHandles.add(product.handle);
+      variants.push({
+        ...product,
+        isMain: true,
+        id: product.handle,
+        image: product.featuredImage || product.images?.nodes?.[0],
+        variantImage: product.variantImage || product.featuredImage,
       });
     }
 
-    // console.log('variant length - ', product.handle, product.variantFamilyProducts.length)
-    console.log('variant 123123123- ', product.handle, variants)
+    // Add variant family products, skipping any duplicates
+    if (product.variantFamilyProducts?.length > 0) {
+      product.variantFamilyProducts.forEach(variant => {
+        if (!seenHandles.has(variant.handle)) {
+          seenHandles.add(variant.handle);
+          variants.push({
+            ...variant,
+            isMain: false,
+            id: variant.handle,
+            image: variant.featuredImage || variant.images?.nodes?.[0],
+            variantImage: variant.variantImage || variant.featuredImage,
+          });
+        }
+      });
+    }
 
     return variants;
   }, [product]);
