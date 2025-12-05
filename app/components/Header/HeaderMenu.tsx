@@ -202,15 +202,14 @@ const HeaderMenu = ({
           <div>
             <button
               onClick={handleBackToMain}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 text-sm font-medium"
+              className="font-semibold text-main-900 flex items-center text-copy mb-4"
             >
-              <CaretIcon className="rotate-180" />
-              Back to Categories
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="transparent" stroke="currentColor" className="w-5 h-5 transition rotate-90 w-8 h-8 -ml-2.5"><title>Caret</title><path d="M14 8L10 12L6 8" strokeWidth="1.25"></path></svg>Back
             </button>
             <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
 
             {/* Grid for non-PAGE items */}
-            <div className="grid grid-cols-2 gap-3 mb-4 overflow-y-scroll">
+            <div className="grid grid-cols-2 gap-3 mb-4 overflow-y-auto w-full max-h-[calc(100vh-200px)] pr-2">
               {activeSubmenu.items
                 ?.filter(subItem => subItem.type !== "PAGE")
                 .map((subItem) => (
@@ -218,10 +217,13 @@ const HeaderMenu = ({
                     key={subItem.id}
                     to={subItem.url}
                     onClick={close}
-                    className="flex flex-col items-center p-2 rounded-md hover:bg-gray-50 text-gray-700 border border-gray-100"
+                    className="flex flex-col items-center p-0 rounded-md hover:bg-gray-50 text-gray-700 border-0 relative"
                   >
                     {subItem.resource?.image?.url && (
-                      <div className="w-full aspect-square mb-2 overflow-hidden rounded-md bg-gray-50 flex items-center justify-center">
+                      <div className="w-full aspect-square mb-2 overflow-hidden rounded-none bg-gray-50 flex items-center justify-center relative">
+                        <span className="text-black text-xs font-semibold absolute top-2 left-3 max-w-[90%] line-clamp-1">
+                          {subItem.title}
+                        </span>
                         <Image
                           data={subItem.resource.image}
                           alt={subItem.resource.image.altText || subItem.title}
@@ -231,9 +233,6 @@ const HeaderMenu = ({
                         />
                       </div>
                     )}
-                    <span className="text-sm font-medium text-center line-clamp-2">
-                      {subItem.title}
-                    </span>
                   </NavLink>
                 ))}
             </div>
