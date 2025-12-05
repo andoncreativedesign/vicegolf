@@ -224,9 +224,9 @@ const HeaderMenu = ({
                   </NavLink>
                 ))}
             </div>
-
+            {/* secondary container phase2 */}
             {/* Secondary menu for PAGE items */}
-            {activeSubmenu.items
+            {/* {activeSubmenu.items
               ?.filter(item => item.type === "PAGE" && item.resource?.metafield?.value)
               .map((item, index) => {
                 const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
@@ -252,7 +252,7 @@ const HeaderMenu = ({
                     ))}
                   </div>
                 );
-              })}
+              })} */}
           </div>
         ) : (
           <div className="space-y-1">
