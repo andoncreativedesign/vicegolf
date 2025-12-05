@@ -145,7 +145,8 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
           </div>
         )}
 
-        {menuItem.items
+        {/* secondary link container phase 2 */}
+        {/* {menuItem.items
           ?.filter(item => item.type === "PAGE" && item.resource?.metafield?.value)
           .map((item, index) => {
             const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
@@ -172,7 +173,7 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
               </div>
             );
           })
-        }
+        } */}
 
       </div>
 
