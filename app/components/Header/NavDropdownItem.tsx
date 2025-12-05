@@ -71,7 +71,7 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="fixed left-0 right-0 mt-0 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
+    <div className="fixed left-0 right-0 mt-4 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
       <div className="relative w-full px-16 sm:px-20 lg:px-24 py-4">
 
         <div
@@ -93,7 +93,7 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
                 <NavLink
                   prefetch="intent"
                   to={subItem.url}
-                  className="flex flex-col items-start bg-gray-50 hover:bg-gray-100 rounded-md p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
+                  className="flex flex-col items-start bg-gray-50 hover:bg-gray-100 rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
                   style={{ textDecoration: "none" }}
                 >
                   <div className="w-full">
