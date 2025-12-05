@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import { LuUser } from 'react-icons/lu';
 import { Await, NavLink, useAsyncValue, useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import {
   type CartViewPayload,
@@ -150,19 +151,22 @@ export function Header({
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300" style={{ width: '100%', margin: 0, padding: 0 }}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 px-4" style={{ width: '100%', margin: 0 }}>
       {/* Marquee Banner - Always Visible */}
-      <BlackFridayBanner />
+      {/* <BlackFridayBanner /> */}
 
       {/* Top Header Bar - Collapses on Scroll */}
-      <div className={`flex items-center justify-between px-4 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
-        {/* Left: Mobile Menu Toggle */}
-        <div className="flex items-center">
+      <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
+        {/* Left: Mobile Menu Toggle and Country Selector */}
+        <div className="flex items-center space-x-2">
           <HeaderMenuMobileToggle />
+          <div className="hidden md:block">
+            <CountryCurrencySelector />
+          </div>
         </div>
 
         {/* Center: Logo */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center pl-12 md:pl-0">
           <NavLink prefetch="intent" to="/" className="flex items-center">
             <img
               src="/vice_logo.svg"
@@ -180,9 +184,9 @@ export function Header({
         </div>
       </div>
 
-      {/* Navigation Menu - Always Visible */}
-      <nav className="bg-white border-t border-gray-100 w-full shadow-sm">
-        <div className="w-full px-0">
+      {/* Navigation Menu - Visible only on desktop */}
+      <nav className="hidden md:block w-full py-3">
+        <div className="w-full px-2">
           {menuItems &&
             <HeaderMenu
               viewport="desktop"
@@ -252,7 +256,7 @@ function CartBadge({ count }: { count: number | null }) {
 
       {/* Badge with count */}
       {count !== null && count > 0 && (
-        <span className="absolute -top-1 -right-1 bg-black text-white text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+        <span className="absolute bottom-0 right-0 bg-gray-700 text-white text-[10px] font-medium rounded-full h-4 w-4 flex items-center justify-center min-w-[16px] translate-x-1 -translate-y-0.5">
           {count > 99 ? '99+' : count}
         </span>
       )}
@@ -278,13 +282,14 @@ function CartBanner() {
 
 // Country/Currency data - Specified countries
 const countries = [
-  { code: 'US', name: 'United States', currency: 'USD', symbol: '$' },
-  { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$' },
-  { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€' },
-  { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.' },
-  { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£' },
-  { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr' },
-];
+  { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
+  { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
+  { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
+  { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.', url: 'https://www.vicegolf.ch' },
+  { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£', url: 'https://www.vicegolf.co.uk' },
+  { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr', url: 'https://www.vicegolf.se' },
+  { code: 'AT', name: 'Austria', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.at' }, // Added Austria
+] as const;
 
 function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
   return (
@@ -298,9 +303,7 @@ function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
             aria-label={loggedIn ? "Account" : "Login"}
             title={loggedIn ? "My Account" : "Sign In"}
           >
-            <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <LuUser className="w-6 h-6 text-gray-700 hover:text-black" />
           </NavLink>
         )}
       </Await>
@@ -311,13 +314,10 @@ function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
 function AccountIcon() {
   return (
     <div className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
-      <svg className="w-6 h-6 text-gray-700 hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
+      <LuUser className="w-6 h-6 text-gray-700 hover:text-black" />
     </div>
   );
 }
-
 function CountryCurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default to US
@@ -343,23 +343,17 @@ function CountryCurrencySelector() {
     }
   }, [isOpen]);
 
-  const handleCountrySelect = (country: typeof countries[0]) => {
+  const handleCountrySelect = (country: typeof countries[number]) => {
     setSelectedCountry(country);
     setIsOpen(false);
     setSearchTerm('');
-    // Here you would typically update the store's locale/currency
-    console.log('Selected country:', country);
-  };
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      setSearchTerm('');
-    }
+    // Redirect to the selected country site
+    window.location.href = country.url;
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-[9999]">
       <button
         className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 p-2 rounded-md hover:bg-gray-50"
         onClick={() => setIsOpen(!isOpen)}
@@ -389,28 +383,17 @@ function CountryCurrencySelector() {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-20"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
 
           {/* Dropdown Content */}
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-30 max-h-80 overflow-y-auto">
-            {/* Search Input */}
-            <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
-              <input
-                type="text"
-                placeholder="Search countries or currencies..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+          <div className="fixed top-[var(--header-height, 80px)] left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[calc(100vh-var(--header-height,80px))] overflow-y-auto">
             <div className="py-2">
               {filteredCountries.map((country) => (
                 <button
                   key={country.code}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code
+                    ? 'bg-gray-100 text-gray-900 font-medium'
+                    : 'text-gray-700'
                     }`}
                   onClick={() => handleCountrySelect(country)}
                 >
@@ -426,7 +409,11 @@ function CountryCurrencySelector() {
                   </div>
                   {selectedCountry.code === country.code && (
                     <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   )}
                 </button>

@@ -4,6 +4,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { ProductDetailContents } from './Product/ProductDetailContents';
 import ProductDetailsContent1 from './Product/ProductDetailsContent1';
 import { Youtube } from './Youtube';
+import { BestSellers } from './BestSellers';
 
 const ProductSummaryPolo = () => {
   return (
@@ -35,11 +36,31 @@ const ProductSummaryPolo = () => {
 };
 
 type PoloProductProps = {
-  product: ProductFragment;
+  product: {
+    id: string;
+    productType?: string;
+    tags?: string[];
+    [key: string]: any; // Allow other product properties
+  };
   productDetails: ProductDetails | null;
+  initialRecommended?: any;
+  showBestSellers?: boolean;
 };
 
-export function PoloProduct({ product, productDetails }: PoloProductProps) {
+export function PoloProduct({
+  product,
+  productDetails,
+  initialRecommended,
+  showBestSellers = false
+}: PoloProductProps) {
+  // Debug recommended products
+  useEffect(() => {
+    console.log('Initial recommended products:', initialRecommended);
+    if (initialRecommended?.nodes) {
+      console.log('Recommended products nodes:', initialRecommended.nodes);
+    }
+  }, [initialRecommended]);
+
   return (
     <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
       <div className="max-w-8xl mx-auto">
@@ -94,6 +115,17 @@ export function PoloProduct({ product, productDetails }: PoloProductProps) {
             <Youtube youtubeVideo={productDetails.youtubeVideos} />
           </div>
         )}
+        {showBestSellers &&
+          initialRecommended?.products?.nodes?.length > 0 &&
+          (product.productType?.toLowerCase().includes('polo') ||
+            product.tags?.some((tag: any) => typeof tag === 'string' && tag.toLowerCase().includes('polo'))) && (
+            <div className="mt-16 md:mt-20 lg:mt-24 px-4 sm:px-6 lg:px-8">
+              <BestSellers
+                products={initialRecommended.products.nodes}
+                title={null}
+              />
+            </div>
+          )}
       </div>
     </div>
   );

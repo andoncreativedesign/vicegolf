@@ -80,7 +80,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
       console.error(error);
       return null;
     });
-  return { 
+  return {
     recommendedProducts,
     currentRecommendedCursor: recommendedCursor,
     recommendedPageInfo: recommendedProducts?.products?.pageInfo,
@@ -281,7 +281,10 @@ export default function Homepage() {
   }, [menuItems]);
   return (
     <div className="home">
-      <HeroSection heroData={data.homePageData?.heroes} />
+      <HeroSection
+        heroData={data.homePageData?.heroes}
+        // bgColor="bg-red-500/30"
+      />
       <div className="py-8 space-y-12">
         {/* VICE GOLF BALLS - Infinite Scroll */}
         {golfBalls.length > 0 && (
@@ -335,7 +338,14 @@ export default function Homepage() {
           sanityHomeCategories={data?.homePageData?.homeCategories}
         />
       )}
-      <HeroSection heroData={data.homePageData?.secondaryHero || null} />
+      <HeroSection
+        heroData={data.homePageData?.secondaryHero || null}
+        textColor="text-black"
+        buttonBgColor="bg-black"
+        buttonTextColor="text-white"
+        // bgColor="bg-blue-500/30"
+        center={true}
+      />
       {recommendedProducts.length > 0 && (
         <ProductGrid
           products={recommendedProducts}

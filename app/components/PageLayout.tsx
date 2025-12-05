@@ -1,22 +1,22 @@
-import {Await, Link, useLoaderData} from 'react-router';
-import {Suspense, useId} from 'react';
-import {Search} from 'lucide-react';
+import { Await, Link, useLoaderData } from 'react-router';
+import { Suspense, useId } from 'react';
+import { Search } from 'lucide-react';
 import type {
   CartApiQueryFragment,
   FooterQuery,
   HeaderQuery,
 } from 'storefrontapi.generated';
-import {Aside} from '~/components/Aside';
-import {Footer} from '~/components/Footer';
-import {Header} from '~/components/Header';
+import { Aside } from '~/components/Aside';
+import { Footer } from '~/components/Footer';
+import { Header } from '~/components/Header';
 import HeaderMenu from './Header/HeaderMenu';
-import {CartMain} from '~/components/CartMain';
+import { CartMain } from '~/components/CartMain';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
-import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import type {MenuData} from '~/lib/shopify/product-queries';
+import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
+import type { MenuData } from '~/lib/shopify/product-queries';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -48,7 +48,7 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
-      <main style={{ paddingTop: '140px' }}>{children}</main>
+      <main className="bg-white pt-[120px] md:pt-[140px]">{children}</main>
       <Footer
         footer={footer}
         header={header}
@@ -58,7 +58,7 @@ export function PageLayout({
   );
 }
 
-function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
+function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
   return (
     <Suspense fallback={<p>Loading cart ...</p>}>
       <Await resolve={cart}>
@@ -85,10 +85,10 @@ function SearchAside() {
     <Aside type="search" heading="">
       <div className="predictive-search" >
         <SearchFormPredictive>
-          {({fetchResults, inputRef}) => (
+          {({ fetchResults, inputRef }) => (
             <div className="search-input-wrapper " >
               <Search className="search-icon" size={18} />
-              <input 
+              <input
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
@@ -98,15 +98,15 @@ function SearchAside() {
                 list={queriesDatalistId}
                 autoComplete="off"
                 autoFocus
-                className="search-input" 
+                className="search-input"
               />
             </div>
           )}
         </SearchFormPredictive>
 
         <SearchResultsPredictive>
-          {({items, total, term, state, closeSearch}) => {
-            const {articles, collections, pages, products, queries} = items;
+          {({ items, total, term, state, closeSearch }) => {
+            const { articles, collections, pages, products, queries } = items;
 
             if (state === 'loading' && term.current) {
               return <div>Loading...</div>;
@@ -200,13 +200,13 @@ function MobileMenuAside({
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
 }) {
-  const {productsForNav} = useLoaderData<{productsForNav: MenuData}>();
+  const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
+      <Aside type="mobile" heading="">
         <HeaderMenu viewport="mobile" menuItems={menuItems} />
       </Aside>
     )

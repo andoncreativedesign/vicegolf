@@ -283,6 +283,15 @@ export default function Product() {
           /** 👇 Clothing category */
           case "polo":
           case "polos":
+            return (
+              <PoloProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
+
           case "shoes":
           case "headwear":
           case "glove":
@@ -290,11 +299,12 @@ export default function Product() {
           case "gloves men":
           case "gloves women":
           case "longsleeve":
-
             return (
               <PoloProduct
                 product={product}
                 productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={false}
               />
             );
 
