@@ -3,6 +3,7 @@ import { Image, Money } from '@shopify/hydrogen';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from './ProductCard';
+import { VariantProductCard } from './Product/VariantProductCard';
 
 interface ProductGridProps {
   products: ProductFragment[];
@@ -119,7 +120,10 @@ export function ProductGrid({
         >
           {products.map((product) => (
             <div key={product.id} className="flex-shrink-0">
-              <ProductCard product={product} />
+              {product?.family
+                ? <VariantProductCard product={product} />
+                : <ProductCard product={product} />
+              }
             </div>
           ))}
 

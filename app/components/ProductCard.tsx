@@ -1,4 +1,5 @@
 import { Image, Money } from "@shopify/hydrogen";
+import { useEffect } from "react";
 import { Link } from "react-router";
 import type { ProductFragment } from "storefrontapi.generated";
 
@@ -9,8 +10,8 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
-  
-  const rating = 4.5 + Math.random() * 0.5; 
+
+  const rating = 4.5 + Math.random() * 0.5;
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   return (
