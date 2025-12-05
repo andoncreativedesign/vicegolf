@@ -155,7 +155,7 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-700 hover:text-gray-900 text-sm leading-relaxed tracking-wide font-light underline underline-offset-2 decoration-gray-300 hover:decoration-gray-700 transition-colors"
+                  className="text-gray-700 hover:text-gray-900 text-sm leading-relaxed tracking-wide font-light underline underline-offset-2 decoration-gray-300 hover:decoration-black-700 transition-colors"
                 >
                   {link.text}
                 </a>
@@ -218,7 +218,7 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
               onClick={() => setOpenIndex(isOpen ? null : index)}
               className="flex w-full items-center justify-between py-6 text-left hover:bg-gray-50/50 transition-all duration-200 group px-4 md:px-0"
             >
-              <span className="text-[15px] font-semibold text-gray-900 tracking-tight leading-tight">
+              <span className="text-[15px] font-semibold text-gray-00 tracking-tight leading-tight">
                 {item.title}
               </span>
               <ChevronDown
