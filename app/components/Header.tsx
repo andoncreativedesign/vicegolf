@@ -282,13 +282,14 @@ function CartBanner() {
 
 // Country/Currency data - Specified countries
 const countries = [
-  { code: 'US', name: 'United States', currency: 'USD', symbol: '$' },
-  { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$' },
-  { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€' },
-  { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.' },
-  { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£' },
-  { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr' },
-];
+  { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
+  { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
+  { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
+  { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.', url: 'https://www.vicegolf.ch' },
+  { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£', url: 'https://www.vicegolf.co.uk' },
+  { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr', url: 'https://www.vicegolf.se' },
+  { code: 'AT', name: 'Austria', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.at' }, // Added Austria
+] as const;
 
 function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
   return (
@@ -317,7 +318,6 @@ function AccountIcon() {
     </div>
   );
 }
-
 function CountryCurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default to US
@@ -343,19 +343,13 @@ function CountryCurrencySelector() {
     }
   }, [isOpen]);
 
-  const handleCountrySelect = (country: typeof countries[0]) => {
+  const handleCountrySelect = (country: typeof countries[number]) => {
     setSelectedCountry(country);
     setIsOpen(false);
     setSearchTerm('');
-    // Here you would typically update the store's locale/currency
-    console.log('Selected country:', country);
-  };
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      setSearchTerm('');
-    }
+    // Redirect to the selected country site
+    window.location.href = country.url;
   };
 
   return (
@@ -389,19 +383,19 @@ function CountryCurrencySelector() {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-20"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
 
           {/* Dropdown Content */}
-          <div className="fixed top-[var(--header-height)] left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[calc(100vh-var(--header-height))] overflow-y-auto">
+          <div className="fixed top-[var(--header-height, 80px)] left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[calc(100vh-var(--header-height,80px))] overflow-y-auto">
             <div className="py-2">
               {filteredCountries.map((country) => (
                 <button
                   key={country.code}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                    }`}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 ${
+                    selectedCountry.code === country.code
+                      ? 'bg-gray-100 text-gray-900 font-medium'
+                      : 'text-gray-700'
+                  }`}
                   onClick={() => handleCountrySelect(country)}
                 >
                   <div
@@ -416,7 +410,11 @@ function CountryCurrencySelector() {
                   </div>
                   {selectedCountry.code === country.code && (
                     <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   )}
                 </button>
