@@ -70,10 +70,26 @@ export function Aside({
         data-type={type}
         {...rest}
       >
-        <header>
+        <header className="relative w-full flex items-center min-h-[60px]">
           {heading && <h3 className="text-2xl font-bold text-gray-900">{heading}</h3>}
-          <button className="close reset" onClick={close} aria-label="Close">
-            {type === 'search' ? 'Close' : <>&times;</>}
+          <button
+            className="close reset absolute p-2 hover:bg-gray-100 rounded-full transition-colors"
+            onClick={close}
+            aria-label="Close panel"
+            style={{ top: '1rem', right: '2rem' }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              stroke="currentColor"
+              className="w-5 h-5 text-gray-800"
+              aria-hidden="true"
+            >
+              <title>Close</title>
+              <line x1="4.44194" y1="4.30806" x2="15.7556" y2="15.6218" strokeWidth="1.25" />
+              <line y1="-0.625" x2="16" y2="-0.625" transform="matrix(-0.707107 0.707107 0.707107 0.707107 16 4.75)" strokeWidth="1.25" />
+            </svg>
           </button>
         </header>
         <main>{children}</main>
