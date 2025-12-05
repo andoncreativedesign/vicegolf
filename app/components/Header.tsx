@@ -156,14 +156,14 @@ export function Header({
       {/* <BlackFridayBanner /> */}
 
       {/* Top Header Bar - Collapses on Scroll */}
-      <div className={`flex items-center justify-between px-12 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
+      <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-6 h-auto opacity-100'}`}>
         {/* Left: Mobile Menu Toggle */}
         <div className="flex items-center">
           <HeaderMenuMobileToggle />
         </div>
 
         {/* Center: Logo */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center pl-12 md:pl-0">
           <NavLink prefetch="intent" to="/" className="flex items-center">
             <img
               src="/vice_logo.svg"
@@ -181,9 +181,9 @@ export function Header({
         </div>
       </div>
 
-      {/* Navigation Menu - Always Visible */}
-      <nav className="bg-white border-t border-gray-100 w-full shadow-sm">
-        <div className="w-full px-12">
+      {/* Navigation Menu - Visible only on desktop */}
+      <nav className="hidden md:block bg-blue-500 md:bg-white border-t border-gray-100 w-full shadow-sm">
+        <div className="w-full px-2">
           {menuItems &&
             <HeaderMenu
               viewport="desktop"

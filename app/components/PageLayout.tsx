@@ -48,7 +48,7 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
-      <main style={{ paddingTop: '140px' }}>{children}</main>
+      <main className="bg-white">{children}</main>
       <Footer
         footer={footer}
         header={header}
