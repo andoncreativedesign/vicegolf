@@ -617,7 +617,7 @@ export interface UIColorVariant {
   } | null;
 }
 
-export const ADMIN_PRODUCTS_BY_FAMILY = `
+export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
   query ProductsByFamily($searchQuery: String!) {
     products(first: 20, query: $searchQuery) {
       edges {
@@ -665,54 +665,9 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `
   }
 `;
 
-// export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `
-//   query ProductsByFamily($searchQuery: String!) {
-//     products(first: 20, query: $searchQuery) {
-//       edges {
-//         node {
-//           id
-//           title
-//           handle
-//           productType
-//           vendor
-//           featuredImage {
-//             id
-//             url
-//             altText
-//             width
-//             height
-//           }
-
-//           variants(first: 1) {
-//             nodes {
-//               id
-//               availableForSale
-//               price {
-//                 amount
-//                 currencyCode
-//               }
-//               compareAtPrice {
-//                 amount
-//                 currencyCode
-//               }
-//             }
-//           }
-
-//           #Product-level: Product Family metafield
-//           family: metafield(namespace: "custom", key: "family") {
-//             id
-//             namespace
-//             key
-//             type
-//             value
-//           }
-//         }
-//       }
-//     }
-//   }
-// `;
-
-export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `
+/* 
+//  ! working qury
+export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
   query ProductsByFamily($searchQuery: String!) {
     products(first: 20, query: $searchQuery) {
       edges {
@@ -738,11 +693,94 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `
             type
             value
           }
+
+          # Product-level: Variant Image metafield
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
+
         }
       }
     }
   }
 `;
+*/
+
+
+export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
+  query ProductsByFamily($searchQuery: String!) {
+    products(first: 20, query: $searchQuery) {
+      edges {
+        node {
+          id
+          handle
+          title
+          productType
+          vendor
+
+          # MAIN: Variant image metafield (file_reference)
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            id
+            type
+            reference {
+              __typename
+
+              # MediaImage file
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+
+              # File-based uploads (Admin API 2025 returns File)
+              ... on File {
+                id
+                preview {
+                  image {
+                    url
+                    altText
+                    width
+                    height
+                  }
+                }
+              }
+            }
+          }
+
+          # Featured image
+          featuredImage {
+            url
+            altText
+            width
+            height
+          }
+
+          # Product family tag/metafield
+          family: metafield(namespace: "custom", key: "family") {
+            key
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+
+
 
 
 export const GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS = `#graphql

@@ -26,6 +26,10 @@ type ProductCardProps = {
       url: string;
       altText?: string;
     };
+    variantImage?: {
+      url: string;
+      altText?: string;
+    };
     images?: {
       nodes: Array<{
         url: string;
@@ -69,6 +73,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
       isMain: true,
       id: product.handle,
       image: product.featuredImage || product.images?.nodes?.[0],
+      variantImage: product.variantImage || product.featuredImage,
     }];
 
     if (product.variantFamilyProducts?.length > 0) {
@@ -78,9 +83,13 @@ export function VariantProductCard({ product }: ProductCardProps) {
           isMain: false,
           id: variant.handle,
           image: variant.featuredImage || variant.images?.nodes?.[0],
+          variantImage: variant.variantImage || variant.featuredImage,
         });
       });
     }
+
+    // console.log('variant length - ', product.handle, product.variantFamilyProducts.length)
+    console.log('variant 123123123- ', product.handle, variants)
 
     return variants;
   }, [product]);
@@ -97,7 +106,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     setSelectedVariant(index);
     if (variant.image?.url) {
-      setCurrentImage(variant.image.url);
+      setCurrentImage(variant.image?.url);
     }
   };
 
@@ -169,13 +178,21 @@ export function VariantProductCard({ product }: ProductCardProps) {
           </div>
         </div>
 
+        {/* all other variants */}
         {!isGolfBall && isHovering && allVariants.length > 1 && (
           <div
             className="absolute bottom-26 left-0 right-0 z-30 p-3 bg-white/90 backdrop-blur-sm shadow-lg"
             onClick={(e) => e.preventDefault()}
           >
             <div className="grid grid-cols-5 gap-2 w-full">
-              {allVariants.map((variant, index) => (
+              {allVariants
+                .sort((a, b) => {
+                  // Move current variant to the start
+                  if (a.handle === product.handle) return -1;
+                  if (b.handle === product.handle) return 1;
+                  return 0;
+                })
+                ?.map((variant, index) => (
                 <button
                   key={variant.id}
                   className={`aspect-square rounded-lg overflow-hidden ring-1 transition-all cursor-pointer ${selectedVariant === index
@@ -194,9 +211,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
                     }
                   }}
                 >
-                  {variant.image?.url ? (
+                  {variant.variantImage?.url ? (
                     <Image
-                      src={variant.image.url}
+                      src={variant.variantImage.url}
                       alt={variant.title}
                       width={56}
                       height={56}
@@ -213,13 +230,20 @@ export function VariantProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        {/* Replace the entire isGolfBall block with this */}
+        {/* ball variants */}
         {isGolfBall && allVariants.length > 1 && (
           <div className="px-5 pt-3">
             <div className="flex items-center space-x-2">
               <span className="text-sm font-medium text-gray-700">Options:</span>
               <div className="flex flex-wrap gap-2">
-                {allVariants.map((variant, index) => (
+                {allVariants
+                  .sort((a, b) => {
+                    // Move current variant to the start
+                    if (a.handle === product.handle) return -1;
+                    if (b.handle === product.handle) return 1;
+                    return 0;
+                  })
+                  .map((variant, index) => (
                   <button
                     key={variant.id}
                     type="button"
@@ -234,15 +258,15 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         setCurrentImage(allVariants[selectedVariant].image.url);
                       }
                     }}
-                    className={`w-8 h-8 rounded-full overflow-hidden ring-1 transition-all duration-200 ${selectedVariant === index
+                    className={`w-6 h-6 rounded-full overflow-hidden ring-1 transition-all duration-200 ${selectedVariant === index
                       ? 'ring-2 ring-blue-500 scale-110'
                       : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
                       }`}
                     title={variant.title}
                   >
-                    {variant.image?.url ? (
+                    {variant.variantImage?.url ? (
                       <img
-                        src={variant.image.url}
+                        src={variant.variantImage.url}
                         alt={variant.title}
                         className="w-full h-full object-cover"
                       />

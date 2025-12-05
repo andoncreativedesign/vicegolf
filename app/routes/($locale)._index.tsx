@@ -148,9 +148,18 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       },
     });
  
+    
     if (response.data.errors) {
       throw new Error(JSON.stringify(response?.data?.errors))
     }
+
+    console.log('\n\ncategoryProducts.golfBalls.nodes')
+    response.data?.data?.products?.edges.forEach((item) => {
+      if(item.node.family){ 
+        console.log(item.node.family)
+        console.log('image = ', item.node.variantImage?.reference?.image)
+      }
+    })
 
     const colorVariantsRes = response.data?.data?.products?.edges || [];
     
@@ -185,10 +194,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       } : null
     }));
 
-    // console.log('\n\nProcessed products for family', fam.value);
-    // console.log(JSON.stringify(products, null, 2));
-    // console.log('\n\nEnd of processed products');
-
     familyGroups[fam.value] = products;
   }
 
@@ -219,7 +224,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
 
   // console.log('\n\ncategoryProducts.golfBalls.nodes')
   // categoryProducts.golfBalls.nodes.forEach((item) => {
-  //   if (item.variantFamilyProducts.length > 0) {
+  //   // if (item.variantFamilyProducts.length > 0) {
+  //   if (item.family) {
   //     console.log(JSON.stringify(item))
   //   }
   // })
