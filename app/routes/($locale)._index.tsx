@@ -9,8 +9,9 @@ import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
 import { getHomePageData } from '~/lib/sanity/home';
 import {
+  ADMIN_PRODUCTS_BY_FAMILY,
+  ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
   createCategoryQuery,
-  MULTIPLE_COLLECTIONS_QUERY,
   RECOMMENDED_PRODUCTS_QUERY,
   type MenuData,
 } from '~/lib/shopify/product-queries';
@@ -18,21 +19,79 @@ import ClientLogos from '~/components/Home/ClientLogos';
 import ShopByCategories from '~/components/Home/ShopByCategories';
 import { ViceLookSection } from '~/components/Home/ViceLookSection';
 import type { MenuItem } from '~/lib/shopify/product-queries';
+import {
+  FAMILY_GROUP_QUERY,
+  FEATURED_COLLECTION_QUERY,
+  MULTIPLE_COLLECTIONS_QUERY
+} from '~/lib/shopify/collection-queries';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+
 export const meta: Route.MetaFunction = () => {
   return [{ title: 'Vice Golf | Home' }];
 };
+
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
   const homePageData = await getHomePageData();
   return { ...deferredData, ...criticalData, homePageData };
 }
+
+// async function loadCriticalData({ context, request }: Route.LoaderArgs) {
+//   const url = new URL(request.url);
+//   const golfBallsCursor = url.searchParams.get('golfBallsCursor') || null;
+//   const golfClubsCursor = url.searchParams.get('golfClubsCursor') || null;
+//   const apparelCursor = url.searchParams.get('apparelCursor') || null;
+//   const gearCursor = url.searchParams.get('gearCursor') || null;
+//   const [collectionsData, categoryProducts] = await Promise.all([
+//     context.storefront.query(FEATURED_COLLECTION_QUERY),
+//     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
+//       variables: {
+//         golfBallsHandle: createCategoryQuery('Golf Balls'),
+//         golfBallsCursor,
+//         golfClubsHandle: createCategoryQuery('Golf Club Set'),
+//         golfClubsCursor,
+//         apparelHandle: createCategoryQuery('Gloves Men'),
+//         apparelCursor,
+//         gearHandle: createCategoryQuery('Polo'),
+//         limitedEditionsHandle: createCategoryQuery('Towels'),
+//         fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
+//         juniorsHandle: createCategoryQuery('Divot Tool'),
+//         first: 15,
+//         gearCursor,
+//       },
+//     }),
+//   ]);
+
+//   // console.log('\n\n golfballs')
+//   // console.log(JSON.stringify(categoryProducts.golfBalls.nodes))
+
+
+
+//   return {
+//     featuredCollection: collectionsData.collections.nodes[0],
+//     categoryProducts,
+//     golfBallsPageInfo: categoryProducts.golfBalls.pageInfo,
+//     golfClubsPageInfo: categoryProducts.golfClubs.pageInfo,
+//     apparelPageInfo: categoryProducts.apparel.pageInfo,
+//     gearPageInfo: categoryProducts.gear.pageInfo,
+//     currentGolfBallsCursor: golfBallsCursor,
+//     currentGolfClubsCursor: golfClubsCursor,
+//     currentApparelCursor: apparelCursor,
+//     currentGearCursor: gearCursor,
+//     productsForNav: context.productsForNav,
+//   };
+// }
+
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
+
   const golfBallsCursor = url.searchParams.get('golfBallsCursor') || null;
   const golfClubsCursor = url.searchParams.get('golfClubsCursor') || null;
   const apparelCursor = url.searchParams.get('apparelCursor') || null;
   const gearCursor = url.searchParams.get('gearCursor') || null;
+
+  // 1️⃣ Fetch main data
   const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
@@ -52,6 +111,126 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       },
     }),
   ]);
+
+  // 2️⃣ Extract products from ALL categories that include family metafields
+  const allProducts = [
+    ...categoryProducts.golfBalls.nodes,
+    ...categoryProducts.golfClubs.nodes,
+    ...categoryProducts.apparel.nodes,
+    ...categoryProducts.gear.nodes,
+  ];
+
+  // 3️⃣ Extract unique family values
+  const families = [
+    ...new Set(allProducts.map(p => p.family?.value).filter(Boolean)),
+  ];
+
+  console.log("\n\nfamilies ")
+  console.log(families)
+
+  // 4️⃣ Build Shopify search queries for each family
+  const familyQueries = families.map(fam => ({
+    value: fam,
+    query: `metafields.custom.family:"${fam}"`,
+  }));
+
+  // 5️⃣ Run a family group query for EACH family
+  const familyGroups: Record<string, any[]> = {};
+
+  for (const fam of familyQueries) {
+    // const res = await context.storefront.query(FAMILY_GROUP_QUERY, {
+    //   variables: { query: fam.query },
+    // });
+    const response = await axiosShopifyAdmin.post("", {
+      query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
+      variables: {
+        searchQuery: `metafields.custom.family:"${fam.value}"`,
+      },
+    });
+ 
+    
+    if (response.data.errors) {
+      throw new Error(JSON.stringify(response?.data?.errors))
+    }
+
+    console.log('\n\ncategoryProducts.golfBalls.nodes')
+    response.data?.data?.products?.edges.forEach((item) => {
+      if(item.node.family){ 
+        console.log(item.node.family)
+        console.log('image = ', item.node.variantImage?.reference?.image)
+      }
+    })
+
+    const colorVariantsRes = response.data?.data?.products?.edges || [];
+    
+    // Transform the product data to match the expected format
+    const products = colorVariantsRes.map(({ node }) => ({
+      ...node,
+      id: node.id,
+      title: node.title,
+      productType: node.productType,
+      vendor: node.vendor,
+      handle: node.handle,
+      featuredImage: node.featuredImage ? {
+        id: node.featuredImage.id,
+        url: node.featuredImage.url,
+        altText: node.featuredImage.altText,
+        width: node.featuredImage.width,
+        height: node.featuredImage.height
+      } : null,
+      variantImage: node.variantImage?.reference?.image ? {
+        id: node.variantImage.reference.id,
+        url: node.variantImage.reference.image.url,
+        altText: node.variantImage.reference.image.altText,
+        width: node.variantImage.reference.image.width,
+        height: node.variantImage.reference.image.height
+      } : null,
+      family: node.family ? {
+        id: node.family.id,
+        namespace: node.family.namespace,
+        key: node.family.key,
+        type: node.family.type,
+        value: node.family.value
+      } : null
+    }));
+
+    familyGroups[fam.value] = products;
+  }
+
+  // 6️⃣ Attach grouped variants to each product
+  function attachFamilyGroups(products) {
+    // console.log("\n\nobj assinged to family")
+    const updatedProduct =  products.map(p => {
+      const obj =  {
+        ...p,
+        variantFamilyProducts: familyGroups[p.family?.value] || [],
+      }
+      if (obj?.variantFamilyProducts?.length > 0) {
+        // console.log(obj)
+      }
+      return obj
+    });
+    // console.log("\n\nend obj assinged to family")
+    return updatedProduct
+  }
+
+  // console.log('\n\nfamilyGroups')
+  // console.log(familyGroups[familyQueries?.[0].value]?.[0])
+
+  categoryProducts.golfBalls.nodes = attachFamilyGroups(categoryProducts.golfBalls.nodes);
+  categoryProducts.golfClubs.nodes = attachFamilyGroups(categoryProducts.golfClubs.nodes);
+  categoryProducts.apparel.nodes = attachFamilyGroups(categoryProducts.apparel.nodes);
+  categoryProducts.gear.nodes = attachFamilyGroups(categoryProducts.gear.nodes);
+
+  // console.log('\n\ncategoryProducts.golfBalls.nodes')
+  // categoryProducts.golfBalls.nodes.forEach((item) => {
+  //   // if (item.variantFamilyProducts.length > 0) {
+  //   if (item.family) {
+  //     console.log(JSON.stringify(item))
+  //   }
+  // })
+
+  // 7️⃣ Return final combined output
   return {
     featuredCollection: collectionsData.collections.nodes[0],
     categoryProducts,
@@ -66,6 +245,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     productsForNav: context.productsForNav,
   };
 }
+
+
 async function loadDeferredData({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const recommendedCursor = url.searchParams.get('recommendedCursor') || null;
@@ -86,6 +267,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
     recommendedPageInfo: recommendedProducts?.products?.pageInfo,
   };
 }
+
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
@@ -117,6 +299,7 @@ export default function Homepage() {
   const [currentRecommendedCursor, setCurrentRecommendedCursor] = useState<string | null>(null);
   const [hasMoreRecommended, setHasMoreRecommended] = useState(false);
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
+
   // === Golf Balls: Initial Load & Pagination ===
   useEffect(() => {
     if (data.categoryProducts?.golfBalls?.nodes) {
@@ -129,6 +312,7 @@ export default function Homepage() {
       setHasMoreGolfBalls(!!data.golfBallsPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.golfBalls, data.currentGolfBallsCursor, data.golfBallsPageInfo]);
+
   // === Golf Clubs: Initial Load & Pagination ===
   useEffect(() => {
     if (data.categoryProducts?.golfClubs?.nodes) {
@@ -141,6 +325,7 @@ export default function Homepage() {
       setHasMoreGolfClubs(!!data.golfClubsPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.golfClubs, data.currentGolfClubsCursor, data.golfClubsPageInfo]);
+
   // === Apparel: Initial Load & Pagination ===
   useEffect(() => {
     if (data.categoryProducts?.apparel?.nodes) {
@@ -153,6 +338,7 @@ export default function Homepage() {
       setHasMoreApparel(!!data.apparelPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.apparel, data.currentApparelCursor, data.apparelPageInfo]);
+
   // === Gear: Initial Load ===
   useEffect(() => {
     if (data.categoryProducts?.gear?.nodes) {
@@ -165,6 +351,7 @@ export default function Homepage() {
       setHasMoreGear(!!data.gearPageInfo?.hasNextPage);
     }
   }, [data.categoryProducts?.gear, data.currentGearCursor, data.gearPageInfo]);
+
   // === Recommended Products: Initial Load & Pagination ===
   useEffect(() => {
     if (data.recommendedProducts?.products?.nodes) {
@@ -177,6 +364,7 @@ export default function Homepage() {
       setHasMoreRecommended(!!data.recommendedPageInfo?.hasNextPage);
     }
   }, [data.recommendedProducts, data.currentRecommendedCursor, data.recommendedPageInfo]);
+
   // === Handle fetcher for all sections ===
   useEffect(() => {
     if (fetcher.state !== 'idle' || !fetcher.data) return;
@@ -222,6 +410,7 @@ export default function Homepage() {
     }
   }, [fetcher.state, fetcher.data]);
   // === Load More Handlers ===
+
   const handleLoadMoreGolfBalls = useCallback(() => {
     if (!currentGolfBallsCursor || !hasMoreGolfBalls || isLoadingGolfBalls) return;
     setIsLoadingGolfBalls(true);
@@ -230,6 +419,7 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGolfBallsCursor, hasMoreGolfBalls, isLoadingGolfBalls, fetcher]);
+
   const handleLoadMoreGolfClubs = useCallback(() => {
     if (!currentGolfClubsCursor || !hasMoreGolfClubs || isLoadingGolfClubs) return;
     setIsLoadingGolfClubs(true);
@@ -238,6 +428,7 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGolfClubsCursor, hasMoreGolfClubs, isLoadingGolfClubs, fetcher]);
+
   const handleLoadMoreApparel = useCallback(() => {
     if (!currentApparelCursor || !hasMoreApparel || isLoadingApparel) return;
     setIsLoadingApparel(true);
@@ -246,6 +437,7 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentApparelCursor, hasMoreApparel, isLoadingApparel, fetcher]);
+
   const handleLoadMoreGear = useCallback(() => {
     if (!currentGearCursor || !hasMoreGear || isLoadingGear) return;
     setIsLoadingGear(true);
@@ -254,6 +446,7 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentGearCursor, hasMoreGear, isLoadingGear, fetcher]);
+
   const handleLoadMoreRecommended = useCallback(() => {
     if (!currentRecommendedCursor || !hasMoreRecommended || isLoadingRecommended) return;
     setIsLoadingRecommended(true);
@@ -262,6 +455,7 @@ export default function Homepage() {
       { method: 'get', action: '.' }
     );
   }, [currentRecommendedCursor, hasMoreRecommended, isLoadingRecommended, fetcher]);
+
   // === Menu Transformation ===
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
     const getAllResourceIdsOfChild = (items: MenuItem[]) =>
@@ -274,11 +468,13 @@ export default function Homepage() {
       items: item.items?.length ? updateMenuItems(item.items) : [],
     }));
   };
+
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
   useEffect(() => {
     if (menuItems.length === 0) return;
     setMenu(updateMenuItems(menuItems));
   }, [menuItems]);
+
   return (
     <div className="home">
       <HeroSection
@@ -406,124 +602,7 @@ function RecommendedProducts({
     </div>
   );
 }
-const ALL_PRODUCTS_QUERY = `#graphql
-  fragment ProductFragment on Product {
-    id
-    title
-    description
-    handle
-    productType
-    vendor
-    tags
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-      maxVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    featuredImage {
-      url
-      altText
-      width
-      height
-    }
-    images(first: 10) {
-      nodes {
-        url
-        altText
-        width
-        height
-      }
-    }
-    variants(first: 100) {
-      nodes {
-        id
-        title
-        availableForSale
-        selectedOptions {
-          name
-          value
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        image {
-          url
-          altText
-        }
-        sku
-        barcode
-        quantityAvailable
-      }
-    }
-    options {
-      name
-      values
-    }
-    collections(first: 10) {
-      nodes {
-        id
-        title
-        handle
-      }
-    }
-    createdAt
-    updatedAt
-    publishedAt
-  }
-  query AllProducts(
-    $first: Int = 250
-    $after: String
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    products(first: $first, after: $after) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-      edges {
-        cursor
-        node {
-          ...ProductFragment
-        }
-      }
-    }
-  }
-` as const;
-const FEATURED_COLLECTION_QUERY = `#graphql
-  fragment FeaturedCollection on Collection {
-    id
-    title
-    image {
-      id
-      url
-      altText
-      width
-      height
-    }
-    handle
-  }
-  query FeaturedCollection($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...FeaturedCollection
-      }
-    }
-  }
-` as const;
+
 // const RECOMMENDED_PRODUCTS_QUERY = `#graphql
 // fragment RecommendedProduct on Product {
 // id

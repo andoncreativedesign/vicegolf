@@ -63,189 +63,6 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
   }
 ` as const;
 
-export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
-fragment ProductCard on Product {
-  id
-  title
-  handle
-  productType
-  vendor
-  featuredImage {
-    id
-    url
-    altText
-    width
-    height
-  }
-  variants(first: 1) {
-    nodes {
-      id
-      availableForSale
-      price {
-        amount
-        currencyCode
-      }
-      compareAtPrice {
-        amount
-        currencyCode
-      }
-    }
-  }
-}
-
-query MultipleProductGroups(
-  $golfBallsHandle: String!
-  $golfClubsHandle: String!
-  $apparelHandle: String!
-  $gearHandle: String!
-  $limitedEditionsHandle: String!
-  $fittingCustomisationHandle: String!
-  $juniorsHandle: String!
-  $first: Int = 15
-  $golfBallsCursor: String
-  $golfClubsCursor: String
-  $apparelCursor: String
-  $gearCursor: String
-) {
-  golfBalls: products(first: $first, after: $golfBallsCursor, query: $golfBallsHandle) {
-    nodes {
-      ...ProductCard
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-
- golfClubs: products(first: $first, after: $golfClubsCursor, query: $golfClubsHandle) {
-  nodes {
-    ...ProductCard
-  }
-  pageInfo {
-    hasNextPage
-    endCursor
-  }
-}
-  apparel: products(first: $first, after: $apparelCursor, query: $apparelHandle) {
-    nodes {
-      ...ProductCard
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-
-  gear: products(first: $first, after: $gearCursor, query: $gearHandle) {
-    nodes {
-      ...ProductCard
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-
-  limitedEditions: products(first: $first, query: $limitedEditionsHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-
-  fittingCustomisation: products(first: $first, query: $fittingCustomisationHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-
-  juniors: products(first: $first, query: $juniorsHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-}
-` as const;
-
-/* 
-export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
-fragment ProductCard on Product {
-  id
-  title
-  handle
-  productType
-  vendor
-  featuredImage {
-    id
-    url
-    altText
-    width
-    height
-  }
-  variants(first: 1) {
-    nodes {
-      id
-      availableForSale
-      price {
-        amount
-        currencyCode
-      }
-      compareAtPrice {
-        amount
-        currencyCode
-      }
-    }
-  }
-}
-
-query MultipleProductGroups(
-  $golfBallsHandle: String!
-  $golfClubsHandle: String!
-  $apparelHandle: String!
-  $gearHandle: String!
-  $limitedEditionsHandle: String!
-  $fittingCustomisationHandle: String!
-  $juniorsHandle: String!
-  $first: Int = 8
-) {
-  golfBalls: products(first: $first, query: $golfBallsHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-  golfClubs: products(first: $first, query: $golfClubsHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-  apparel: products(first: $first, query: $apparelHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-  gear: products(first: $first, query: $gearHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-  limitedEditions: products(first: $first, query: $limitedEditionsHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-  fittingCustomisation: products(first: $first, query: $fittingCustomisationHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-  juniors: products(first: $first, query: $juniorsHandle) {
-    nodes {
-      ...ProductCard
-    }
-  }
-}
-`;
-*/
-
 
 export interface MenuItemImage {
   url: string;
@@ -529,38 +346,6 @@ fragment ProductItem on Product {
 }`;
 
 
-// export const GET_PRODUCTS_BY_COLLECTION = `#graphql
-// ${MONEY_FRAGMENT}
-// ${PRODUCT_FRAGMENT_FOR_COLLECTION}
-
-// query ProductsByType(
-//   $handle: String!
-//   $country: CountryCode
-//   $language: LanguageCode
-//   $first: Int
-//   $startCursor: String
-//   $endCursor: String
-// ) @inContext(country: $country, language: $language) {
-//   products(
-//     first: $first
-//     before: $startCursor
-//     after: $endCursor
-//     query: $handle
-//   ) {
-//     nodes {
-//       ...ProductItem
-//     }
-//     pageInfo {
-//       hasPreviousPage
-//       hasNextPage
-//       endCursor
-//       startCursor
-//     }
-//   }
-// }
-// `;
-
-
 export interface ShopifyCollectionResponse {
   nodes: ShopifyCollection[];
 }
@@ -667,9 +452,6 @@ query GetProductsByCollectionIds(
   }
 }
 `;
-
-
-
 
 const PRODUCT_CARD_FRAGMENT = `
 fragment ProductCardFragment on Product {
@@ -835,7 +617,7 @@ export interface UIColorVariant {
   } | null;
 }
 
-export const ADMIN_PRODUCTS_BY_FAMILY = `
+export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
   query ProductsByFamily($searchQuery: String!) {
     products(first: 20, query: $searchQuery) {
       edges {
@@ -882,6 +664,123 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `
     }
   }
 `;
+
+/* 
+//  ! working qury
+export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
+  query ProductsByFamily($searchQuery: String!) {
+    products(first: 20, query: $searchQuery) {
+      edges {
+        node {
+          id
+          title
+          handle
+          productType
+          vendor
+
+          featuredImage {
+            id
+            url
+            altText
+            width
+            height
+          }
+
+          family: metafield(namespace: "custom", key: "family") {
+            id
+            namespace
+            key
+            type
+            value
+          }
+
+          # Product-level: Variant Image metafield
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+`;
+*/
+
+
+export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
+  query ProductsByFamily($searchQuery: String!) {
+    products(first: 20, query: $searchQuery) {
+      edges {
+        node {
+          id
+          handle
+          title
+          productType
+          vendor
+
+          # MAIN: Variant image metafield (file_reference)
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            id
+            type
+            reference {
+              __typename
+
+              # MediaImage file
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+
+              # File-based uploads (Admin API 2025 returns File)
+              ... on File {
+                id
+                preview {
+                  image {
+                    url
+                    altText
+                    width
+                    height
+                  }
+                }
+              }
+            }
+          }
+
+          # Featured image
+          featuredImage {
+            url
+            altText
+            width
+            height
+          }
+
+          # Product family tag/metafield
+          family: metafield(namespace: "custom", key: "family") {
+            key
+            value
+          }
+        }
+      }
+    }
+  }
+`;
+
+
 
 
 export const GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS = `#graphql

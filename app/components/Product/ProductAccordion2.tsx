@@ -10,7 +10,7 @@ interface ProductAccordion2Props {
 const ProductAccordion2 = ({ accordion2 }: ProductAccordion2Props) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  if (!accordion2 || accordion2.items.length === 0) return null;
+  if (!accordion2 || accordion2.items?.length === 0) return null;
 
   const imageUrl = accordion2.sectionImage?.asset.url;
   const lqip = accordion2.sectionImage?.asset.metadata.lqip;
@@ -28,7 +28,7 @@ const ProductAccordion2 = ({ accordion2 }: ProductAccordion2Props) => {
           {/* Left: Accordion */}
           <div className="p-8 lg:p-12">
             <div className="border-t border-gray-100">
-              {accordion2.items.map((item, index) => {
+              {accordion2?.items?.map((item, index) => {
                 const isOpen = openIndex === index;
 
                 return (
