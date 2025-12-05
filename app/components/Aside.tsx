@@ -63,6 +63,7 @@ export function Aside({
         className={[
           type === 'search' ? 'search-aside' : '',
           type === 'mobile' ? 'mobile-menu' : '',
+          'w-[85%] h-full overflow-y-auto',
           /* existing classes */
         ]
           .concat(className || [])
@@ -70,7 +71,7 @@ export function Aside({
         data-type={type}
         {...rest}
       >
-        <header className="relative w-full flex items-center min-h-[60px]">
+        <header className="relative w-full flex items-center min-h-[60px] px-4">
           {heading && <h3 className="text-2xl font-bold text-gray-900">{heading}</h3>}
           <button
             className="close reset absolute p-2 hover:bg-gray-100 rounded-full transition-colors"

@@ -4,7 +4,20 @@ import { NavLink, useFetcher, useNavigate } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
 import { useAside } from '~/components/Aside';
 import { useEffect, useState, useRef } from "react";
-import { ChevronRight } from 'lucide-react';
+// Custom SVG Caret component
+const CaretIcon = ({ className = "" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="transparent"
+    stroke="currentColor"
+    className={`w-5 h-5 transition -rotate-90 w-8 h-8 ${className}`}
+    aria-hidden="true"
+  >
+    <title>Caret</title>
+    <path d="M14 8L10 12L6 8" strokeWidth={1.25} />
+  </svg>
+);
 
 const HeaderMenu = ({
   viewport,
@@ -184,14 +197,14 @@ const HeaderMenu = ({
 
   if (viewport === "mobile") {
     return (
-      <nav className="flex flex-col p-4 overflow-y-scroll" role="navigation">
+      <nav className="w-full" role="navigation">
         {activeSubmenu ? (
           <div>
             <button
               onClick={handleBackToMain}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 text-sm font-medium"
             >
-              <ChevronRight className="w-4 h-4 rotate-180" />
+              <CaretIcon className="rotate-180" />
               Back to Categories
             </button>
             <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
@@ -224,55 +237,26 @@ const HeaderMenu = ({
                   </NavLink>
                 ))}
             </div>
-            {/* secondary container phase2 */}
-            {/* Secondary menu for PAGE items */}
-            {/* {activeSubmenu.items
-              ?.filter(item => item.type === "PAGE" && item.resource?.metafield?.value)
-              .map((item, index) => {
-                const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
-                return (
-                  <div key={index} className="grid grid-cols-2 gap-6 mt-6 text-sm text-gray-800">
-                    {secondaryMenu.map((menu, menuIndex) => (
-                      <div key={menuIndex}>
-                        <h5 className="font-semibold mb-2">{menu.section}</h5>
-                        <ul className="space-y-1">
-                          {menu?.items?.map((menuItem, itemIndex) => (
-                            <li key={itemIndex}>
-                              <button
-                                onClick={(e) => handleNavigate(e, menuItem)}
-                                className="hover:underline text-left w-full cursor-pointer block"
-                                style={{ textDecoration: 'none' }}
-                              >
-                                {menuItem.title}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })} */}
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="w-full">
             {menu.map((item) => (
-              <div key={item.id} className="border-b border-gray-100">
+              <div key={item.id} className="">
                 {item.items?.length > 0 ? (
                   <button
                     onClick={(e) => handleSubmenuOpen(item, e)}
-                    className="w-full flex justify-between items-center py-3 px-2 text-left text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="text-left text-xl font-semibold w-full flex justify-between items-center py-1.5 px-2 text-gray-700 hover:bg-gray-50"
                   >
-                    <span className="font-medium">{item.title}</span>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <span className="uppercase">{item.title}</span>
+                    <CaretIcon className="text-black" />
                   </button>
                 ) : (
                   <NavLink
                     to={item.url}
                     onClick={close}
-                    className="block py-3 px-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="block w-full py-1.5 px-2 text-xl font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    {item.title}
+                    <span className="uppercase">{item.title}</span>
                   </NavLink>
                 )}
               </div>
