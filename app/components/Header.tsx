@@ -157,9 +157,12 @@ export function Header({
 
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
-        {/* Left: Mobile Menu Toggle */}
-        <div className="flex items-center">
+        {/* Left: Mobile Menu Toggle and Country Selector */}
+        <div className="flex items-center space-x-2">
           <HeaderMenuMobileToggle />
+          <div className="hidden md:block">
+            <CountryCurrencySelector />
+          </div>
         </div>
 
         {/* Center: Logo */}
@@ -356,7 +359,7 @@ function CountryCurrencySelector() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-[9999]">
       <button
         className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 p-2 rounded-md hover:bg-gray-50"
         onClick={() => setIsOpen(!isOpen)}
@@ -392,17 +395,7 @@ function CountryCurrencySelector() {
           />
 
           {/* Dropdown Content */}
-          <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-30 max-h-80 overflow-y-auto">
-            {/* Search Input */}
-            <div className="sticky top-0 bg-white p-2 border-b border-gray-100">
-              <input
-                type="text"
-                placeholder="Search countries or currencies..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+          <div className="fixed top-[var(--header-height)] left-0 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[calc(100vh-var(--header-height))] overflow-y-auto">
             <div className="py-2">
               {filteredCountries.map((country) => (
                 <button

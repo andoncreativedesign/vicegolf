@@ -74,7 +74,7 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="fixed left-0 right-0 mt-6 bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
+    <div className="fixed left-0 right-0 mt-6 bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 w-screen">
       <div className="relative w-full px-16 sm:px-20 lg:px-24 py-4">
 
         <div

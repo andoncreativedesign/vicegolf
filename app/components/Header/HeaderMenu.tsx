@@ -268,7 +268,7 @@ const HeaderMenu = ({
 
   // ====== DESKTOP VIEW ======
   return (
-    <div className="relative w-full" ref={menuRef}>
+    <div className="relative w-full z-30" ref={menuRef}>
       <nav
         className="hidden lg:flex items-center justify-center space-x-16 py-4 w-full"
         role="navigation"
