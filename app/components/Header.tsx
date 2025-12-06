@@ -265,7 +265,7 @@ function AccountIcon() {
     </div>
   );
 }
-function CountryCurrencySelector() {
+export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default to US
   const [searchTerm, setSearchTerm] = useState('');
@@ -334,8 +334,8 @@ function CountryCurrencySelector() {
           <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
 
           {/* Dropdown Content */}
-          <div className="fixed top-[var(--header-height, 80px)] left-4 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[calc(100vh-var(--header-height,80px))] overflow-y-auto px-4">
-            <div className="py-2">
+          <div className={`fixed ${isMobile ? 'bottom-16 left-4 right-4' : 'top-[var(--header-height, 80px)] left-4 w-64'} bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[50vh] overflow-y-auto px-4`}>
+            <div className={`py-2 ${isMobile ? 'flex flex-col-reverse' : ''}`}>
               {filteredCountries.map((country) => (
                 <button
                   key={country.code}

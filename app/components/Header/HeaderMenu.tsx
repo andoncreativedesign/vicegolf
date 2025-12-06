@@ -4,6 +4,8 @@ import { NavLink, useFetcher, useNavigate } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
 import { useAside } from '~/components/Aside';
 import { useEffect, useState, useRef } from "react";
+import { CountryCurrencySelector } from '../Header';
+
 // Custom SVG Caret component
 const CaretIcon = ({ className = "" }) => (
   <svg
@@ -197,71 +199,81 @@ const HeaderMenu = ({
 
   if (viewport === "mobile") {
     return (
-      <nav className="w-full" role="navigation">
-        {activeSubmenu ? (
-          <div>
-            <button
-              onClick={handleBackToMain}
-              className="font-semibold text-main-900 flex items-center text-copy mb-4"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="transparent" stroke="currentColor" className="w-5 h-5 transition rotate-90 w-8 h-8 -ml-2.5"><title>Caret</title><path d="M14 8L10 12L6 8" strokeWidth="1.25"></path></svg>Back
-            </button>
-            <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
+      <nav className="w-full h-full flex flex-col relative" role="navigation">
+        <div className="flex-1 overflow-y-auto pb-24">
+          {activeSubmenu ? (
+            <div>
+              <button
+                onClick={handleBackToMain}
+                className="font-semibold text-main-900 flex items-center text-copy mb-4"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="transparent" stroke="currentColor" className="w-5 h-5 transition rotate-90 w-8 h-8 -ml-2.5"><title>Caret</title><path d="M14 8L10 12L6 8" strokeWidth="1.25"></path></svg>Back
+              </button>
+              <h3 className="text-lg font-semibold mb-3">{activeSubmenu.title}</h3>
 
-            {/* Grid for non-PAGE items */}
-            <div className="grid grid-cols-2 gap-3 mb-4 overflow-y-auto w-full max-h-[calc(100vh-200px)] pr-2">
-              {activeSubmenu.items
-                ?.filter(subItem => subItem.type !== "PAGE")
-                .map((subItem) => (
-                  <NavLink
-                    key={subItem.id}
-                    to={subItem.url}
-                    onClick={close}
-                    className="flex flex-col items-center p-0 rounded-md hover:bg-gray-50 text-gray-700 border-0 relative"
-                  >
-                    {subItem.resource?.image?.url && (
-                      <div className="w-full aspect-square mb-2 overflow-hidden rounded-none bg-gray-50 flex items-center justify-center relative">
-                        <span className="text-black text-xs font-semibold absolute top-2 left-3 max-w-[90%] line-clamp-1">
-                          {subItem.title}
-                        </span>
-                        <Image
-                          data={subItem.resource.image}
-                          alt={subItem.resource.image.altText || subItem.title}
-                          className="w-full h-full object-contain p-1"
-                          width={120}
-                          height={120}
-                        />
-                      </div>
-                    )}
-                  </NavLink>
-                ))}
-            </div>
-          </div>
-        ) : (
-          <div className="w-full">
-            {menu.map((item) => (
-              <div key={item.id} className="">
-                {item.items?.length > 0 ? (
-                  <button
-                    onClick={(e) => handleSubmenuOpen(item, e)}
-                    className="text-left text-xl font-semibold w-full flex justify-between items-center py-1.5 px-2 text-gray-700 hover:bg-gray-50"
-                  >
-                    <span className="uppercase">{item.title}</span>
-                    <CaretIcon className="text-black" />
-                  </button>
-                ) : (
-                  <NavLink
-                    to={item.url}
-                    onClick={close}
-                    className="block w-full py-1.5 px-2 text-xl font-semibold text-gray-700 hover:bg-gray-50"
-                  >
-                    <span className="uppercase">{item.title}</span>
-                  </NavLink>
-                )}
+              {/* Grid for non-PAGE items */}
+              <div className="grid grid-cols-2 gap-3 mb-4 w-full pr-2">
+                {activeSubmenu.items
+                  ?.filter(subItem => subItem.type !== "PAGE")
+                  .map((subItem) => (
+                    <NavLink
+                      key={subItem.id}
+                      to={subItem.url}
+                      onClick={close}
+                      className="flex flex-col items-center p-0 rounded-md hover:bg-gray-50 text-gray-700 border-0 relative"
+                    >
+                      {subItem.resource?.image?.url && (
+                        <div className="w-full aspect-square mb-2 overflow-hidden rounded-none bg-gray-50 flex items-center justify-center relative">
+                          <span className="text-black text-xs font-semibold absolute top-2 left-3 max-w-[90%] line-clamp-1">
+                            {subItem.title}
+                          </span>
+                          <Image
+                            data={subItem.resource.image}
+                            alt={subItem.resource.image.altText || subItem.title}
+                            className="w-full h-full object-contain p-1"
+                            width={120}
+                            height={120}
+                          />
+                        </div>
+                      )}
+                    </NavLink>
+                  ))}
               </div>
-            ))}
+            </div>
+          ) : (
+            <div className="w-full">
+              {menu.map((item) => (
+                <div key={item.id} className="">
+                  {item.items?.length > 0 ? (
+                    <button
+                      onClick={(e) => handleSubmenuOpen(item, e)}
+                      className="text-left text-xl font-semibold w-full flex justify-between items-center py-1.5 px-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <span className="uppercase">{item.title}</span>
+                      <CaretIcon className="text-black" />
+                    </button>
+                  ) : (
+                    <NavLink
+                      to={item.url}
+                      onClick={close}
+                      className="block w-full py-1.5 px-2 text-xl font-semibold text-gray-700 hover:bg-gray-50"
+                    >
+                      <span className="uppercase">{item.title}</span>
+                    </NavLink>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Country Selector for Mobile - Fixed at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">SELECT COUNTRY</h3>
+          <div className="relative z-50">
+            <CountryCurrencySelector isMobile={true} />
           </div>
-        )}
+        </div>
       </nav>
     );
   }
