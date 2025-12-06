@@ -774,13 +774,14 @@ button.reset:hover:not(:has(> *)) {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin: 0;
   padding: 0;
   list-style: none;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1400px;
+  margin: 0 auto 80px auto;
+  padding-bottom: 20px;
 }
 
 /* Product card in search results */
