@@ -1,7 +1,7 @@
-
 import { Image, Money } from "@shopify/hydrogen";
 import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
+import { AedIcon } from '../ui/AedIcon';
 
 type ColorOption = {
   id: string;
@@ -389,13 +389,17 @@ export function VariantProductCard({ product }: ProductCardProps) {
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
                 {firstVariant.compareAtPrice && (
-                  <span className="text-sm text-gray-400 line-through">
-                    {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)} {firstVariant.compareAtPrice.currencyCode}
-                  </span>
+                  <div className="flex items-center text-sm text-gray-400 line-through">
+                    <AedIcon className="mr-0.5" />
+                    {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)}
+                  </div>
                 )}
-                <span className="text-xl font-bold text-red-600">
-                  {parseFloat(firstVariant.price.amount).toFixed(2)} {firstVariant.price.currencyCode}
-                </span>
+                <div className="flex items-center">
+                  <AedIcon className="mr-1" />
+                  <span className="text-xl font-bold text-red-600">
+                    {parseFloat(firstVariant.price.amount).toFixed(2)}
+                  </span>
+                </div>
               </div>
               <span className="text-xs text-gray-400">from 6 dozen</span>
             </div>

@@ -2,6 +2,7 @@ import { Image, Money } from "@shopify/hydrogen";
 import { useEffect } from "react";
 import { Link } from "react-router";
 import type { ProductFragment } from "storefrontapi.generated";
+import { AedIcon } from "./ui/AedIcon";
 
 interface ProductCardProps {
   product: ProductFragment;
@@ -82,16 +83,20 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center justify-between pt-1 mt-auto">
           <div className="flex items-center space-x-2">
             {firstVariant?.compareAtPrice && (
-              <Money
-                data={firstVariant.compareAtPrice}
-                className="text-sm text-gray-400 line-through font-medium tracking-wide"
-              />
+              <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
+                <AedIcon className="mr-0.5" />
+                <span>
+                  {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)}
+                </span>
+              </div>
             )}
             {firstVariant?.price && (
-              <Money
-                data={firstVariant.price}
-                className="text-xl font-bold text-red-600 tracking-tight"
-              />
+              <div className="flex items-center">
+                <AedIcon className="mr-1" />
+                <span className="text-xl font-bold text-red-600 tracking-tight">
+                  {parseFloat(firstVariant.price.amount).toFixed(2)}
+                </span>
+              </div>
             )}
           </div>
           {/* <span className="text-xs text-gray-400 font-medium tracking-wide">from 6 dozen</span> */}
