@@ -139,9 +139,9 @@ function FooterContent({
         <div>
           <h3 className="font-semibold text-white mb-4">Legal</h3>
           <ul className="space-y-2">
-            <li><NavLink to="/pages/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors">Privacy Policy</NavLink></li>
-            <li><NavLink to="/pages/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors">Terms of Service</NavLink></li>
-            <li><NavLink to="/pages/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors">Cookie Settings</NavLink></li>
+            <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors">Privacy Policy</NavLink></li>
+            <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors">Terms of Service</NavLink></li>
+            <li><NavLink to="/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors">Cookie Settings</NavLink></li>
           </ul>
         </div>
 
