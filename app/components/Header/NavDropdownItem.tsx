@@ -97,16 +97,16 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
                   prefetch="intent"
                   to={subItem.url}
                   onClick={() => onClose && onClose()}
-                  className="flex flex-col items-start bg-white hover:bg-gray-50 rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
+                  className="flex flex-col items-start bg-[#fcfcfc] hover:bg-gray-50 rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
                   style={{ textDecoration: "none" }}
                 >
-                  <div className="w-full bg-white">
+                  <div className="w-full bg-[#fcfcfc]">
                     <h4 className="text-sm font-medium text-gray-800 text-start line-clamp-2 p-2">
                       {subItem.title}
                     </h4>
                   </div>
                   {subItem.resource?.image?.url && (
-                    <div className="w-full h-[180px] flex items-center justify-center bg-white">
+                    <div className="w-full h-[180px] flex items-center justify-center bg-[#fcfcfc]">
                       <Image
                         data={subItem.resource.image}
                         alt={subItem.resource.image.altText || subItem.title}
