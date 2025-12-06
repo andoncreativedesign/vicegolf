@@ -316,7 +316,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
           {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
         </span>
         <span className="sm:hidden">
-          {selectedCountry.currency} {selectedCountry.symbol}
+          {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
         </span>
         <svg
           className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}

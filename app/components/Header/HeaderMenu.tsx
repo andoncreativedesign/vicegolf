@@ -269,7 +269,6 @@ const HeaderMenu = ({
 
         {/* Country Selector for Mobile - Fixed at bottom */}
         <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">SELECT COUNTRY</h3>
           <div className="relative z-50">
             <CountryCurrencySelector isMobile={true} />
           </div>
