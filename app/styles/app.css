@@ -1052,34 +1052,30 @@ button.reset:hover:not(:has(> *)) {
 
 /* Main search results container */
 .overlay[aria-modal] aside.search-aside .predictive-search > div:not(.predictive-search-form) {
-  padding: 20px 40px 30px;
+  padding: 20px 0 30px;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
   display: flex;
+  justify-content: space-between;
   gap: 30px;
 }
 
 /* Left section */
 .search-left-section {
-  flex: 0 0 200px; /* Reduced width */
-  padding: 20px;
+  flex: 0 0 30%;
+  padding: 0;
   border-right: 1px solid #e5e7eb;
 }
 
 /* Middle section */
 .search-middle-section {
-  flex: 1; /* Takes remaining space */
-  min-width: 0; /* Allows the section to shrink below its content width */
-  padding: 0 20px;
-  max-width: calc(100% - 350px); /* Adjusted to account for side sections */
-}
-
-/* Right section */
-.search-right-section {
-  flex: 0 0 150px; /* Reduced width */
-  padding: 20px 10px;
-  border-left: 1px solid #e5e7eb;
+  flex: 0 0 68%;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 /* Suggestions list styling */
