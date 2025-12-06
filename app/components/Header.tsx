@@ -105,10 +105,11 @@ export function Header({
 
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
-        {/* Left: Mobile Menu Toggle and Country Selector */}
-        <div className="flex items-center space-x-2">
+        {/* Left: Mobile Menu Toggle */}
+        <div className="flex items-center">
           <HeaderMenuMobileToggle />
-          <div className="hidden md:block">
+          {/* Country selector is now only in the mobile menu */}
+          <div className="hidden lg:block ml-4">
             <CountryCurrencySelector />
           </div>
         </div>
