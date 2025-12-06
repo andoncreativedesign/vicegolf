@@ -15,12 +15,14 @@ export function ProductCard({ product }: ProductCardProps) {
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   return (
-    <Link
-      to={`/products/${product.handle}`}
+    <div
       className="group block bg-white rounded-2xl overflow-hidden shadow-md  border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
-      style={{ textDecoration: 'none' }}
     >
       {/* Product Image */}
+      <Link
+        to={`/products/${product.handle}`}
+        style={{ textDecoration: 'none' }}
+      >
       <div className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {image ? (
           <Image
@@ -45,6 +47,8 @@ export function ProductCard({ product }: ProductCardProps) {
           </svg>
         )}
       </div>
+      </Link>
+
       {/* Product Info */}
       <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
         <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2  min-h-[2.8rem] flex items-start">
@@ -56,7 +60,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.productType || 'Golf Equipment'}
         </p>
         {/* Rating */}
-        <div className="flex items-center space-x-1.5 pt-1">
+        {/* <div className="flex items-center space-x-1.5 pt-1">
           <div className="flex items-center space-x-0.5">
             {[...Array(5)].map((_, i) => (
               <svg
@@ -72,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="text-xs text-gray-500 font-medium tracking-tight">
             {rating.toFixed(1)} ({reviewCount})
           </span>
-        </div>
+        </div> */}
 
         {/* Price */}
         <div className="flex items-center justify-between pt-1 mt-auto">
@@ -90,10 +94,10 @@ export function ProductCard({ product }: ProductCardProps) {
               />
             )}
           </div>
-          <span className="text-xs text-gray-400 font-medium tracking-wide">from 6 dozen</span>
+          {/* <span className="text-xs text-gray-400 font-medium tracking-wide">from 6 dozen</span> */}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
