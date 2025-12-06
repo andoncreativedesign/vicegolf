@@ -130,69 +130,78 @@ function SearchAside() {
             if (!term.current) {
               return (
                 <div className="suggestions-container">
-                  <div className="trending-searches">
-                    <h5>Trending Searches</h5>
-                    <div className="trending-tags">
-                      {trendingSearches.map((searchTerm, index) => (
-                        <Link
-                          key={index}
-                          to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchTerm)}`}
-                          className="trending-tag"
-                          onClick={closeSearch}
-                        >
-                          {searchTerm}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Left Section - Empty but keeps the green background */}
+                  <div className="search-left-section"></div>
 
-                  <div className="popular-products">
-                    <h5>Popular Products</h5>
-                    <div className="product-grid">
-                      {products.slice(0, 4).map((product) => {
-                        const productUrl = `/products/${product.handle}`;
-                        const price = product?.selectedOrFirstAvailableVariant?.price;
-                        const image = product?.selectedOrFirstAvailableVariant?.image;
-
-                        return (
+                  {/* Middle Section */}
+                  <div className="search-middle-section">
+                    <div className="trending-searches">
+                      <h5>Trending Searches</h5>
+                      <div className="trending-tags">
+                        {trendingSearches.map((searchTerm, index) => (
                           <Link
-                            key={product.id}
-                            to={productUrl}
-                            className="product-card"
+                            key={index}
+                            to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchTerm)}`}
+                            className="trending-tag"
                             onClick={closeSearch}
                           >
-                            <div className="product-image-container">
-                              {image ? (
-                                <Image
-                                  data={{
-                                    url: image.url,
-                                    altText: image.altText || product.title,
-                                    width: 240,
-                                    height: 240,
-                                  }}
-                                  className="product-image"
-                                  loading="eager"
-                                  loaderOptions={{
-                                    scale: 2,
-                                    crop: 'center',
-                                  }}
-                                />
-                              ) : (
-                                <div className="product-image-placeholder" />
-                              )}
-                            </div>
-                            <div className="product-info">
-                              <div className="product-category">Golf Balls</div>
-                              <div className="product-title">{product.title}</div>
-                              <div className="product-price">
-                                {price && <Money data={price} />}
-                              </div>
-                            </div>
+                            {searchTerm}
                           </Link>
-                        );
-                      })}
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="popular-products">
+                      <h5>Popular Products</h5>
+                      <div className="product-grid">
+                        {products.slice(0, 4).map((product) => {
+                          const productUrl = `/products/${product.handle}`;
+                          const price = product?.selectedOrFirstAvailableVariant?.price;
+                          const image = product?.selectedOrFirstAvailableVariant?.image;
+
+                          return (
+                            <Link
+                              key={product.id}
+                              to={productUrl}
+                              className="product-card"
+                              onClick={closeSearch}
+                            >
+                              <div className="product-image-container">
+                                {image ? (
+                                  <Image
+                                    data={{
+                                      url: image.url,
+                                      altText: image.altText || product.title,
+                                      width: 240,
+                                      height: 240,
+                                    }}
+                                    className="product-image"
+                                    loading="eager"
+                                    loaderOptions={{
+                                      scale: 2,
+                                      crop: 'center',
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="product-image-placeholder" />
+                                )}
+                              </div>
+                              <div className="product-info">
+                                <div className="product-category">Golf Balls</div>
+                                <div className="product-title">{product.title}</div>
+                                <div className="product-price">
+                                  {price && <Money data={price} />}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Right Section - Empty but keeps the yellow background */}
+                  <div className="search-right-section"></div>
                 </div>
               );
             }
@@ -200,82 +209,82 @@ function SearchAside() {
             // Show search results when there's a search term
             return (
               <div className="search-results-container">
-                <div className="search-results-grid">
-                  <div className="suggested-searches">
-                    <h5>SUGGESTED SEARCHES</h5>
-                    <ul className="suggestions-list">
-                      {queries.map((suggestion, index) => (
-                        <li key={suggestion?.text || index} className="suggestion-item">
-                          <Link
-                            onClick={closeSearch}
-                            to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion?.text || '')}`}
-                            className="suggestion-link"
-                          >
-                            {suggestion?.text}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                {/* Left Section - Suggested Searches */}
+                <div className="search-left-section">
+                  {queries.length > 0 && (
+                    <div className="suggested-searches">
+                      <h5>SUGGESTED SEARCHES</h5>
+                      <ul className="suggestions-list">
+                        {queries.map((suggestion, index) => (
+                          <li key={suggestion?.text || index} className="suggestion-item">
+                            <Link
+                              onClick={closeSearch}
+                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion?.text || '')}`}
+                              className="suggestion-link"
+                            >
+                              {suggestion?.text}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
 
-                  <div className="product-results">
-                    <div className="products-grid">
-                      {products.slice(0, 3).map((product) => {
-                        const productUrl = `/products/${product.handle}`;
-                        const price = product?.selectedOrFirstAvailableVariant?.price;
-                        const image = product?.selectedOrFirstAvailableVariant?.image;
+                {/* Middle Section */}
+                <div className="search-middle-section">
+                  <div className="search-results-grid">
 
-                        return (
-                          <Link
-                            key={product.id}
-                            to={productUrl}
-                            className="product-card"
-                            onClick={closeSearch}
-                          >
-                            <div className="product-image-container">
-                              {image ? (
-                                <Image
-                                  data={{
-                                    url: image.url,
-                                    altText: image.altText || product.title,
-                                    width: 240,
-                                    height: 240,
-                                  }}
-                                  className="product-image"
-                                  loading="eager"
-                                  loaderOptions={{
-                                    scale: 2,
-                                    crop: 'center',
-                                  }}
-                                />
-                              ) : (
-                                <div className="product-image-placeholder" />
-                              )}
-                            </div>
-                            <div className="product-info">
-                              <div className="product-title">{product.title}</div>
-                              <div className="product-price">
-                                {price ? <Money data={price} /> : 'AED 0.00'}
+                    <div className="product-results">
+                      <div className="products-grid">
+                        {products.slice(0, 3).map((product) => {
+                          const productUrl = `/products/${product.handle}`;
+                          const price = product?.selectedOrFirstAvailableVariant?.price;
+                          const image = product?.selectedOrFirstAvailableVariant?.image;
+
+                          return (
+                            <Link
+                              key={product.id}
+                              to={productUrl}
+                              className="product-card"
+                              onClick={closeSearch}
+                            >
+                              <div className="product-image-container">
+                                {image ? (
+                                  <Image
+                                    data={{
+                                      url: image.url,
+                                      altText: image.altText || product.title,
+                                      width: 240,
+                                      height: 240,
+                                    }}
+                                    className="product-image"
+                                    loading="eager"
+                                    loaderOptions={{
+                                      scale: 2,
+                                      crop: 'center',
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="product-image-placeholder" />
+                                )}
                               </div>
-                            </div>
-                          </Link>
-                        );
-                      })}
+                              <div className="product-info">
+                                <div className="product-title">{product.title}</div>
+                                <div className="product-price">
+                                  {price ? <Money data={price} /> : 'AED 0.00'}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {term.current && total > 3 && (
-                  <div className="view-all-results">
-                    <Link
-                      className="view-all-link"
-                      onClick={closeSearch}
-                      to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                    >
-                      View all results for "{term.current}" →
-                    </Link>
-                  </div>
-                )}
+                {/* Right Section - Empty but keeps the yellow background */}
+                <div className="search-right-section"></div>
               </div>
             );
           }}
