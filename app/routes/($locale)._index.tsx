@@ -49,20 +49,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
-      // variables: {
-      //   golfBallsHandle: createCategoryQuery('Golf Balls'),
-      //   golfBallsCursor,
-      //   golfClubsHandle: createCategoryQuery('Golf Club Set'),
-      //   golfClubsCursor,
-      //   apparelHandle: createCategoryQuery('apparel'),
-      //   apparelCursor,
-      //   gearHandle: createCategoryQuery('Polo'),
-      //   limitedEditionsHandle: createCategoryQuery('Towels'),
-      //   fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
-      //   juniorsHandle: createCategoryQuery('Divot Tool'),
-      //   first: 15,
-      //   gearCursor,
-      // },
       variables: {
         golfBallsHandle: createCategoryQuery('golf-balls'),
         golfBallsCursor,
@@ -81,13 +67,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   ]);
 
   // 2️⃣ Extract products from ALL categories that include family metafields
-  // const allProducts = [
-  //   ...categoryProducts.golfBalls.nodes,
-  //   ...categoryProducts.golfClubs.nodes,
-  //   ...categoryProducts.apparel.nodes,
-  //   ...categoryProducts.gear.nodes,
-  // ];
-
   const allProducts = [
     ...(categoryProducts?.golfBalls?.products?.nodes || []),
     ...(categoryProducts?.golfClubs?.products?.nodes || []),
@@ -116,9 +95,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const familyGroups: Record<string, any[]> = {};
 
   for (const fam of familyQueries) {
-    // const res = await context.storefront.query(FAMILY_GROUP_QUERY, {
-    //   variables: { query: fam.query },
-    // });
     const response = await axiosShopifyAdmin.post("", {
       query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
       variables: {
@@ -195,11 +171,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
 
   // console.log('\n\nfamilyGroups')
   // console.log(familyGroups[familyQueries?.[0].value]?.[0])
-
-  // categoryProducts.golfBalls.nodes = attachFamilyGroups(categoryProducts.golfBalls.nodes);
-  // categoryProducts.golfClubs.nodes = attachFamilyGroups(categoryProducts.golfClubs.nodes);
-  // categoryProducts.apparel.nodes = attachFamilyGroups(categoryProducts.apparel.nodes);
-  // categoryProducts.gear.nodes = attachFamilyGroups(categoryProducts.gear.nodes);
 
   const updateNodes = (category:any) => {
     const products = category?.products?.nodes || [];
