@@ -46,7 +46,7 @@ export const FEATURED_COLLECTION_QUERY = `#graphql
   }
 ` as const;
 
-
+/* ! working query
 export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
 fragment ProductCard on Product {
   id
@@ -160,6 +160,167 @@ query MultipleProductGroups(
   }
 }
 ` as const;
+*/
+
+export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
+fragment ProductCard on Product {
+  id
+  title
+  handle
+  productType
+  vendor
+  featuredImage {
+    id
+    url
+    altText
+    width
+    height
+  }
+  
+  variants(first: 1) {
+    nodes {
+      id
+      availableForSale
+      price {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+      compareAtPrice {
+        amount
+        currencyCode
+      }
+    }
+  }
+
+  #Product-level: Product Family metafield
+  family: metafield(namespace: "custom", key: "family") {
+    id
+    namespace
+    key
+    type
+    value
+  }
+}
+
+query MultipleProductGroups(
+  $golfBallsHandle: String!
+  $golfClubsHandle: String!
+  $apparelHandle: String!
+  $gearHandle: String!
+  $limitedEditionsHandle: String!
+  $fittingCustomisationHandle: String!
+  $juniorsHandle: String!
+  $first: Int = 15
+  $golfBallsCursor: String
+  $golfClubsCursor: String
+  $apparelCursor: String
+  $gearCursor: String
+) {
+
+  golfBalls: collection(handle: $golfBallsHandle) {
+    id
+    title
+    products(first: $first, after: $golfBallsCursor) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+
+  golfClubs: collection(handle: $golfClubsHandle) {
+    id
+    title
+    products(first: $first, after: $golfClubsCursor) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+
+  apparel: collection(handle: $apparelHandle) {
+    id
+    title
+    products(first: $first, after: $apparelCursor) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+
+  gear: collection(handle: $gearHandle) {
+    id
+    title
+    products(first: $first, after: $gearCursor) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+
+  limitedEditions: collection(handle: $limitedEditionsHandle) {
+    id
+    title
+    products(first: $first) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+
+  fittingCustomisation: collection(handle: $fittingCustomisationHandle) {
+    id
+    title
+    products(first: $first) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+
+  juniors: collection(handle: $juniorsHandle) {
+    id
+    title
+    products(first: $first) {
+      nodes {
+        ...ProductCard
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+` as const;
+
 
 export const FAMILY_GROUP_QUERY = `#graphql
   query FamilyGroupQuery($query: String!) {

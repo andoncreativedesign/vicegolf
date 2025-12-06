@@ -40,7 +40,8 @@ export function ProductGrid({
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+      const isAtEnd = scrollLeft >= scrollWidth - clientWidth - 1;
+      setCanScrollRight(!isAtEnd || (hasMore && !loading));
     }
   };
 
@@ -72,6 +73,13 @@ export function ProductGrid({
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, [onLoadMore, hasMore, loading]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      checkScrollButtons();
+    }
+  }, [products, hasMore]);
+
 
   return (
     <section className={`py-6 ${className}`}>
