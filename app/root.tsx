@@ -201,8 +201,9 @@ export default function App() {
     >
       <PageLayout {...data}>
         <Outlet />
+         <CustomToastContainer />
       </PageLayout>
-      <CustomToastContainer />
+     
     </Analytics.Provider>
   );
 }
