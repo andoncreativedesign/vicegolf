@@ -1,5 +1,5 @@
 import { Await, Link, useLoaderData } from 'react-router';
-import { Suspense, useId } from 'react';
+import { Suspense, useId, useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Image, Money } from '@shopify/hydrogen';
 import type {
@@ -94,6 +94,16 @@ function SearchAside() {
     'Drip Golf Balls',
     'White Golf Balls'
   ];
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8; // 4 columns x 2 rows
+
+  const closeSearch = () => {
+    setIsSearchOpen(false);
+    setCurrentPage(1); // Reset to first page when closing search
+    document.body.style.overflow = '';
+  };
 
   return (
     <Aside type="search" heading="">
@@ -237,47 +247,49 @@ function SearchAside() {
 
                     <div className="product-results">
                       <div className="products-grid">
-                        {products.slice(0, 3).map((product) => {
-                          const productUrl = `/products/${product.handle}`;
-                          const price = product?.selectedOrFirstAvailableVariant?.price;
-                          const image = product?.selectedOrFirstAvailableVariant?.image;
+                        {products
+                          .slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage)
+                          .map((product) => {
+                            const productUrl = `/products/${product.handle}`;
+                            const price = product?.selectedOrFirstAvailableVariant?.price;
+                            const image = product?.selectedOrFirstAvailableVariant?.image;
 
-                          return (
-                            <Link
-                              key={product.id}
-                              to={productUrl}
-                              className="product-card"
-                              onClick={closeSearch}
-                            >
-                              <div className="product-image-container">
-                                {image ? (
-                                  <Image
-                                    data={{
-                                      url: image.url,
-                                      altText: image.altText || product.title,
-                                      width: 240,
-                                      height: 240,
-                                    }}
-                                    className="product-image"
-                                    loading="eager"
-                                    loaderOptions={{
-                                      scale: 2,
-                                      crop: 'center',
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="product-image-placeholder" />
-                                )}
-                              </div>
-                              <div className="product-info">
-                                <div className="product-title">{product.title}</div>
-                                <div className="product-price">
-                                  {price ? <Money data={price} /> : 'AED 0.00'}
+                            return (
+                              <Link
+                                key={product.id}
+                                to={productUrl}
+                                className="product-card"
+                                onClick={closeSearch}
+                              >
+                                <div className="product-image-container">
+                                  {image ? (
+                                    <Image
+                                      data={{
+                                        url: image.url,
+                                        altText: image.altText || product.title,
+                                        width: 240,
+                                        height: 240,
+                                      }}
+                                      className="product-image"
+                                      loading="eager"
+                                      loaderOptions={{
+                                        scale: 2,
+                                        crop: 'center',
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="product-image-placeholder" />
+                                  )}
                                 </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
+                                <div className="product-info">
+                                  <div className="product-title">{product.title}</div>
+                                  <div className="product-price">
+                                    {price ? <Money data={price} /> : 'AED 0.00'}
+                                  </div>
+                                </div>
+                              </Link>
+                            );
+                          })}
                       </div>
                     </div>
                   </div>
