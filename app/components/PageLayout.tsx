@@ -1,6 +1,7 @@
 import { Await, Link, useLoaderData } from 'react-router';
 import { Suspense, useId } from 'react';
 import { Search } from 'lucide-react';
+import { Image, Money } from '@shopify/hydrogen';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -81,12 +82,25 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
 
 function SearchAside() {
   const queriesDatalistId = useId();
+
+  // Trending search terms
+  const trendingSearches = [
+    'Junior golf',
+    'Golf Rangefinder',
+    'Golf Bags',
+    'Golf Balls',
+    'Vice Golf VGI02',
+    'Vice Golf VGI01',
+    'Drip Golf Balls',
+    'White Golf Balls'
+  ];
+
   return (
     <Aside type="search" heading="">
-      <div className="predictive-search" >
+      <div className="predictive-search">
         <SearchFormPredictive>
           {({ fetchResults, inputRef }) => (
-            <div className="search-input-wrapper " >
+            <div className="search-input-wrapper">
               <Search className="search-icon" size={18} />
               <input
                 name="q"
@@ -106,85 +120,163 @@ function SearchAside() {
 
         <SearchResultsPredictive>
           {({ items, total, term, state, closeSearch }) => {
-            const { articles, collections, pages, products, queries } = items;
+            const { products, queries } = items;
 
             if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
+              return <div className="search-loading">Searching...</div>;
             }
 
-            // Show suggestions when no search term
-            if (!term.current && queries.length > 0) {
+            // Show trending searches and popular products when no search term
+            if (!term.current) {
               return (
-                <>
-                  <SearchResultsPredictive.Queries
-                    queries={queries}
-                    queriesDatalistId={queriesDatalistId}
-                  />
-                  <div className="suggestions-list">
-                    <h5>Suggestions</h5>
-                    <ul>
-                      {queries.map((suggestion) => {
-                        if (!suggestion) return null;
+                <div className="suggestions-container">
+                  <div className="trending-searches">
+                    <h5>Trending Searches</h5>
+                    <div className="trending-tags">
+                      {trendingSearches.map((searchTerm, index) => (
+                        <Link
+                          key={index}
+                          to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchTerm)}`}
+                          className="trending-tag"
+                          onClick={closeSearch}
+                        >
+                          {searchTerm}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="popular-products">
+                    <h5>Popular Products</h5>
+                    <div className="product-grid">
+                      {products.slice(0, 4).map((product) => {
+                        const productUrl = `/products/${product.handle}`;
+                        const price = product?.selectedOrFirstAvailableVariant?.price;
+                        const image = product?.selectedOrFirstAvailableVariant?.image;
+
                         return (
-                          <li key={suggestion.text} className="suggestion-item">
-                            <Link
-                              onClick={closeSearch}
-                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion.text)}`}
-                            >
-                              {suggestion.text}
-                            </Link>
-                          </li>
+                          <Link
+                            key={product.id}
+                            to={productUrl}
+                            className="product-card"
+                            onClick={closeSearch}
+                          >
+                            <div className="product-image-container">
+                              {image ? (
+                                <Image
+                                  data={{
+                                    url: image.url,
+                                    altText: image.altText || product.title,
+                                    width: 240,
+                                    height: 240,
+                                  }}
+                                  className="product-image"
+                                  loading="eager"
+                                  loaderOptions={{
+                                    scale: 2,
+                                    crop: 'center',
+                                  }}
+                                />
+                              ) : (
+                                <div className="product-image-placeholder" />
+                              )}
+                            </div>
+                            <div className="product-info">
+                              <div className="product-category">Golf Balls</div>
+                              <div className="product-title">{product.title}</div>
+                              <div className="product-price">
+                                {price && <Money data={price} />}
+                              </div>
+                            </div>
+                          </Link>
                         );
                       })}
-                    </ul>
+                    </div>
                   </div>
-                </>
+                </div>
               );
             }
 
-            if (!total && term.current) {
-              return <SearchResultsPredictive.Empty term={term} />;
-            }
-
+            // Show search results when there's a search term
             return (
-              <>
-                <SearchResultsPredictive.Queries
-                  queries={queries}
-                  queriesDatalistId={queriesDatalistId}
-                />
-                <SearchResultsPredictive.Products
-                  products={products}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Collections
-                  collections={collections}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Pages
-                  pages={pages}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Articles
-                  articles={articles}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                {term.current && total ? (
-                  <Link
-                    className="view-all-results-link"
-                    onClick={closeSearch}
-                    to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                  >
-                    <p>
-                      View all results for <q>{term.current}</q>
-                      &nbsp; →
-                    </p>
-                  </Link>
-                ) : null}
-              </>
+              <div className="search-results-container">
+                <div className="search-results-grid">
+                  <div className="suggested-searches">
+                    <h5>SUGGESTED SEARCHES</h5>
+                    <ul className="suggestions-list">
+                      {queries.map((suggestion, index) => (
+                        <li key={suggestion?.text || index} className="suggestion-item">
+                          <Link
+                            onClick={closeSearch}
+                            to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion?.text || '')}`}
+                            className="suggestion-link"
+                          >
+                            {suggestion?.text}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="product-results">
+                    <div className="products-grid">
+                      {products.slice(0, 3).map((product) => {
+                        const productUrl = `/products/${product.handle}`;
+                        const price = product?.selectedOrFirstAvailableVariant?.price;
+                        const image = product?.selectedOrFirstAvailableVariant?.image;
+
+                        return (
+                          <Link
+                            key={product.id}
+                            to={productUrl}
+                            className="product-card"
+                            onClick={closeSearch}
+                          >
+                            <div className="product-image-container">
+                              {image ? (
+                                <Image
+                                  data={{
+                                    url: image.url,
+                                    altText: image.altText || product.title,
+                                    width: 240,
+                                    height: 240,
+                                  }}
+                                  className="product-image"
+                                  loading="eager"
+                                  loaderOptions={{
+                                    scale: 2,
+                                    crop: 'center',
+                                  }}
+                                />
+                              ) : (
+                                <div className="product-image-placeholder" />
+                              )}
+                            </div>
+                            <div className="product-info">
+                              <div className="product-title">{product.title}</div>
+                              <div className="product-price">
+                                {price ? <Money data={price} /> : 'AED 0.00'}
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {term.current && total > 3 && (
+                  <div className="view-all-results">
+                    <Link
+                      className="view-all-link"
+                      onClick={closeSearch}
+                      to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                    >
+                      View all results for "{term.current}" →
+                    </Link>
+                  </div>
+                )}
+              </div>
             );
           }}
         </SearchResultsPredictive>
