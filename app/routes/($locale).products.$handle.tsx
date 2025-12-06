@@ -215,8 +215,51 @@ export default function Product() {
     };
     fetchProductDetails();
   }, [product.id]);
+
+  // Format product type for display and URL
+  const formatProductType = (type: string) => {
+    if (!type) return { display: '', url: '' };
+    
+    // Handle special cases and formatting
+    const formatted = type
+      .split(/[\s_]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+      
+    // Create URL-friendly version
+    const urlFriendly = type.toLowerCase().replace(/\s+/g, '-');
+    
+    return {
+      display: formatted,
+      url: urlFriendly
+    };
+  };
+
+  const productType = formatProductType(product.productType || '');
+
   return (
     <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
+      {/* Breadcrumbs */}
+      <nav className="text-[18px] font-normal  px-4 sm:px-6 lg:px-16 pt-10  pb-2 text-sm text-gray-900">
+        <div className="flex items-center flex-wrap gap-1">
+          <span className="mx-1"></span>
+          {productType.display ? (
+            <>
+              <Link 
+                to={`/collections/${productType}`} 
+                className="hover:text-gray-600 transition-colors"
+              >
+                {productType.display}
+              </Link>
+              <span className="mx-1 text-gray-400">&gt;</span>
+            </>
+          ) : null}
+          <span className="font-semibold text-gray-900 font-medium line-clamp-1" title={title}>
+            {title}
+          </span>
+        </div>
+      </nav>
+      
       <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-20">
         <div className="w-full lg:w-[55%]">
           {images?.nodes?.length > 0 ? (
