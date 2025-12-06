@@ -1,12 +1,16 @@
 import type { MappedProductOptions } from "@shopify/hydrogen";
 import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router";
+import { AedIcon } from '../ui/AedIcon';
 
-const formatPrice = (amount: string, currencyCode: string) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currencyCode,
-  }).format(parseFloat(amount));
+const currencyOptions = {
+  style: 'decimal',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+};
+
+const formatPrice = (amount: string) => {
+  return new Intl.NumberFormat('en-US', currencyOptions).format(parseFloat(amount));
 };
 
 const calculateSavings = (price: string, compareAtPrice: string | null) => {
@@ -131,7 +135,10 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
 
                     {pricePerDozen && (
                       <div className="text-sm text-gray-500 mt-0.5">
-                        {pricePerDozen}
+                        <span className="flex items-center">
+                          <AedIcon className="mr-1" />
+                          {pricePerDozen}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -141,15 +148,21 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
                   <div className="relative">
                     {savings && (
                       <div className="absolute text-sm -top-7 -right-2 bg-[#DA1000] text-white font-semibold px-2 py-0.5 rounded-md border border-red-700 shadow-sm whitespace-nowrap">
-                        Save {formatPrice(savings, value.variant?.price?.currencyCode || 'USD')}
+                        Save <span className="flex items-center"><AedIcon className="mx-0.5" />{savings}</span>
                       </div>
                     )}
                     <div className={`text-lg font-bold ${index===0 ? 'text-gray-800' : 'text-[#DA1000]'}`}>
-                      {totalPrice}
+                      <span className="flex items-center">
+                        <AedIcon className="mr-1" />
+                        {formatPrice(value.variant.price.amount)}
+                      </span>
                     </div>
                     {originalPrice && (
                       <div className="line-through text-sm text-gray-500">
-                        {originalPrice}
+                        <span className="flex items-center">
+                          <AedIcon className="mr-1" />
+                          {originalPrice}
+                        </span>
                       </div>
                     )}
                   </div>

@@ -112,10 +112,10 @@ export function ProductForm({
         />
       )}
 
-      {/* Ratings */}
+      {/* Ratings
       <div className="mb-8">
         <ProductRating rating={4.8} reviewCount={1145} />
-      </div>
+      </div> */}
 
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
