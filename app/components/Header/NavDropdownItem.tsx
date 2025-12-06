@@ -6,9 +6,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface DropdownItemProps {
   menuItem: MenuItem
+  onClose?: () => void
 }
 
-const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
+const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   const navigate = useNavigate()
   const fetcher = useFetcher<{ collection?: { id: string } }>();
 
@@ -23,8 +24,9 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
   const checkScroll = () => {
     if (containerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
-      setShowLeftArrow(scrollLeft > 0);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+      const canScroll = scrollWidth > clientWidth;
+      setShowLeftArrow(canScroll && scrollLeft > 0);
+      setShowRightArrow(canScroll && scrollLeft < scrollWidth - clientWidth - 1);
     }
   };
 
@@ -47,6 +49,8 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
 
   const handleNavigate = (navItem: SecondaryMenuItem) => {
     console.log('Navigation item:', navItem);
+    if (onClose) onClose();
+
     if (navItem.type === "COLLECTION") {
       fetcher.submit(
         { handle: navItem.handle },
@@ -70,34 +74,43 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="fixed left-0 right-0 mt-0 bg-white border-t border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 w-screen">
-      <div className="relative w-full px-4 sm:px-6 lg:px-8 py-4">
+    <div className="fixed left-0 right-0 mt-6 bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 w-screen">
+      <div className="relative w-full px-16 sm:px-20 lg:px-24 py-4">
 
         <div
           ref={containerRef}
           className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar gap-4 py-2 px-1"
         >
           {menuItem?.items
-            ?.filter(subItem => subItem.type !== "PAGE")
+            // ?.filter(subItem => subItem.type !== "PAGE")
+            ?.filter(subItem => {
+              const isPage = subItem.type === "PAGE";
+              const isHidden = subItem.resource?.metafield?.key === 'exclude_collections_from_nav'
+                ? JSON.parse(subItem.resource?.metafield?.value || 'false')
+                : false;
+
+              return !isPage && !isHidden;
+            })
             .map((subItem, subIndex) => (
-              <div key={subItem.id || subIndex} className="flex-shrink-0 w-[calc((100%-5rem)/6)] snap-center">
+              <div key={subItem.id || subIndex} className="flex-shrink-0 snap-center">
                 <NavLink
                   prefetch="intent"
                   to={subItem.url}
-                  className="flex flex-col gap-2 bg-gray-50 hover:bg-gray-100 rounded-md p-3 transition-colors group w-full h-full"
+                  onClick={() => onClose && onClose()}
+                  className="flex flex-col items-start bg-[#fcfcfc] hover:bg-gray-50 rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
                   style={{ textDecoration: "none" }}
                 >
-                  <div className="w-full">
-                    <h4 className="text-sm font-medium text-gray-900 text-start line-clamp-2">
+                  <div className="w-full bg-[#fcfcfc]">
+                    <h4 className="text-sm font-medium text-gray-800 text-start line-clamp-2 p-2">
                       {subItem.title}
                     </h4>
                   </div>
                   {subItem.resource?.image?.url && (
-                    <div className="w-full aspect-square rounded-md overflow-hidden flex items-center justify-center mt-2">
+                    <div className="w-full h-[180px] flex items-center justify-center bg-[#fcfcfc]">
                       <Image
                         data={subItem.resource.image}
                         alt={subItem.resource.image.altText || subItem.title}
-                        className="w-full h-full object-contain p-2"
+                        className="w-full h-full object-cover"
                         sizes="(min-width: 1024px) 200px, (min-width: 768px) 33.33vw, 50vw"
                       />
                     </div>
@@ -107,12 +120,42 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
             ))}
         </div>
 
-        {menuItem.items
+        {(showLeftArrow || showRightArrow) && (
+          <div className="flex justify-end mt-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => scroll('left')}
+                disabled={!showLeftArrow}
+                className={`rounded-full p-2 shadow-md z-10 transition-all ${showLeftArrow
+                  ? 'bg-gray-200 hover:bg-gray-300 hover:scale-110 cursor-pointer text-gray-700'
+                  : 'bg-gray-50 cursor-not-allowed text-gray-300'
+                  }`}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                disabled={!showRightArrow}
+                className={`rounded-full p-2 shadow-md z-10 transition-all ${showRightArrow
+                  ? 'bg-gray-200 hover:bg-gray-300 hover:scale-110 cursor-pointer text-gray-700'
+                  : 'bg-gray-50 cursor-not-allowed text-gray-300'
+                  }`}
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* secondary link container phase 2 */}
+        {/* {menuItem.items
           ?.filter(item => item.type === "PAGE" && item.resource?.metafield?.value)
           .map((item, index) => {
             const secondaryMenu = item?.resource?.metafield?.value as SecondaryMenu[];
             return (
-              <div key={index} className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800">
+              <div key={index} className="grid grid-cols-6 gap-8 mt-6 text-sm text-gray-800 p-4">
                 {secondaryMenu.map((menu, menuIndex) => (
                   <div key={menuIndex}>
                     <h5 className="font-semibold mb-2">{menu.section}</h5>
@@ -134,29 +177,8 @@ const NavDropdownItem = ({ menuItem }: DropdownItemProps) => {
               </div>
             );
           })
-        }
+        } */}
 
-        <div className="flex justify-end items-center gap-4 mt-4 pt-2">
-          {showLeftArrow && (
-            <button
-              onClick={() => scroll('left')}
-              className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 z-10 transition-all hover:scale-110"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-600" />
-            </button>
-          )}
-
-          {showRightArrow && (
-            <button
-              onClick={() => scroll('right')}
-              className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 z-10 transition-all hover:scale-110"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-600" />
-            </button>
-          )}
-        </div>
       </div>
 
       <style>{`

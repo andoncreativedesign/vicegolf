@@ -1,6 +1,8 @@
 import { Image, Money } from "@shopify/hydrogen";
+import { useEffect } from "react";
 import { Link } from "react-router";
 import type { ProductFragment } from "storefrontapi.generated";
+import { AedIcon } from "./ui/AedIcon";
 
 interface ProductCardProps {
   product: ProductFragment;
@@ -9,23 +11,25 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
-  // Generate mock rating (in real app, this would come from reviews data)
-  const rating = 4.5 + Math.random() * 0.5; // Random rating between 4.5-5.0
-  const reviewCount = Math.floor(Math.random() * 50) + 10; // Random review count 10-60
+
+  const rating = 4.5 + Math.random() * 0.5;
+  const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   return (
-    <Link
-      to={`/products/${product.handle}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-out border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
-      style={{ textDecoration: 'none' }}
+    <div
+      className="group block bg-white rounded-2xl overflow-hidden shadow-md  border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
     >
       {/* Product Image */}
+      <Link
+        to={`/products/${product.handle}`}
+        style={{ textDecoration: 'none' }}
+      >
       <div className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {image ? (
           <Image
             data={image}
             alt={image.altText || product.title}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+            className="w-full h-full object-contain "
             sizes="100%"
             width={320}
             height={320}
@@ -44,9 +48,11 @@ export function ProductCard({ product }: ProductCardProps) {
           </svg>
         )}
       </div>
+      </Link>
+
       {/* Product Info */}
       <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
-        <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 group-hover:text-gray-800 transition-colors duration-300 min-h-[2.8rem] flex items-start">
+        <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2  min-h-[2.8rem] flex items-start">
           {product.title}
         </h3>
 
@@ -55,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.productType || 'Golf Equipment'}
         </p>
         {/* Rating */}
-        <div className="flex items-center space-x-1.5 pt-1">
+        {/* <div className="flex items-center space-x-1.5 pt-1">
           <div className="flex items-center space-x-0.5">
             {[...Array(5)].map((_, i) => (
               <svg
@@ -71,27 +77,32 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="text-xs text-gray-500 font-medium tracking-tight">
             {rating.toFixed(1)} ({reviewCount})
           </span>
-        </div>
+        </div> */}
 
         {/* Price */}
         <div className="flex items-center justify-between pt-1 mt-auto">
           <div className="flex items-center space-x-2">
             {firstVariant?.compareAtPrice && (
-              <Money
-                data={firstVariant.compareAtPrice}
-                className="text-sm text-gray-400 line-through font-medium tracking-wide"
-              />
+              <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
+                <AedIcon className="mr-0.5" />
+                <span>
+                  {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)}
+                </span>
+              </div>
             )}
             {firstVariant?.price && (
-              <Money
-                data={firstVariant.price}
-                className="text-xl font-bold text-red-600 tracking-tight"
-              />
+              <div className="flex items-center">
+                <AedIcon className="mr-1" />
+                <span className="text-xl font-bold text-red-600 tracking-tight">
+                  {parseFloat(firstVariant.price.amount).toFixed(2)}
+                </span>
+              </div>
             )}
           </div>
-          <span className="text-xs text-gray-400 font-medium tracking-wide">from 6 dozen</span>
+          {/* <span className="text-xs text-gray-400 font-medium tracking-wide">from 6 dozen</span> */}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
+

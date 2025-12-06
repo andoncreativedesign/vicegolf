@@ -18,9 +18,13 @@ import { ShoesProduct } from '~/components/ShoesProduct';
 import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
+import { DivotToolProduct } from '~/components/DivotToolProduct';
+import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
+import { TowelProduct } from '~/components/TowelProduct';
+import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -152,7 +156,15 @@ export default function Product() {
 
   useEffect(() => {
     console.log('product details from shopify', product)
+    console.log('product metafields:', product.metafields)
     console.log('color variants from shopify', colorVariants)
+
+    // Debug metafields for Tracer product
+    const isTracer = product.metafields?.some(
+      (field: { key?: string; value?: string }) =>
+        field?.key === 'category_variant' && field?.value === 'tracer'
+    );
+    console.log('Is Tracer product:', isTracer);
   }, [colorVariants, product])
 
   // const { product, recommendedProducts } = useLoaderData<typeof loader>();
@@ -203,8 +215,51 @@ export default function Product() {
     };
     fetchProductDetails();
   }, [product.id]);
+
+  // Format product type for display and URL
+  const formatProductType = (type: string) => {
+    if (!type) return { display: '', url: '' };
+    
+    // Handle special cases and formatting
+    const formatted = type
+      .split(/[\s_]+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+      
+    // Create URL-friendly version
+    const urlFriendly = type.toLowerCase().replace(/\s+/g, '-');
+    
+    return {
+      display: formatted,
+      url: urlFriendly
+    };
+  };
+
+  const productType = formatProductType(product.productType || '');
+
   return (
     <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
+      {/* Breadcrumbs */}
+      <nav className="text-[18px] font-normal  px-4 sm:px-6 lg:px-16 pt-10  pb-2 text-sm text-gray-900">
+        <div className="flex items-center flex-wrap gap-1">
+          <span className="mx-1"></span>
+          {productType.display ? (
+            <>
+              <Link 
+                to={`/collections/${productType}`} 
+                className="hover:text-gray-600 transition-colors"
+              >
+                {productType.display}
+              </Link>
+              <span className="mx-1 text-gray-400">&gt;</span>
+            </>
+          ) : null}
+          <span className="font-semibold text-gray-900 font-medium line-clamp-1" title={title}>
+            {title}
+          </span>
+        </div>
+      </nav>
+      
       <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-20">
         <div className="w-full lg:w-[55%]">
           {images?.nodes?.length > 0 ? (
@@ -235,20 +290,64 @@ export default function Product() {
       {(() => {
         const productType = product.productType?.toLowerCase();
 
+        // Check for Tracer product using metafield
+        const isTracerProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'tracer'
+        );
+
+        // Check for Towel Junior product using metafield
+        const isTowelJuniorProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Towel Junior'
+        );
+
+        if (isTracerProduct) {
+          return (
+            <TracerProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
+            />
+          );
+        }
+
+        if (isTowelJuniorProduct) {
+          return (
+            <TowelJuniorProduct
+              product={product}
+              productDetails={productDetails}
+            />
+          );
+        }
+
         switch (productType) {
           /** 👇 Clothing category */
           case "polo":
           case "polos":
+            return (
+              <PoloProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
+
           case "shoes":
           case "headwear":
           case "glove":
           case "gloves":
           case "gloves men":
-             case "gloves women":
+          case "gloves women":
+          case "longsleeve":
             return (
               <PoloProduct
                 product={product}
                 productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={false}
               />
             );
 
@@ -256,9 +355,19 @@ export default function Product() {
           case "golf club set":
             return <GolfClubSetProduct productDetails={productDetails} />;
 
-          /** 👇 Golf bags + caps */
+          /** 👇 Golf bags */
           case "golf bag":
           case "golf bags":
+            return (
+              <GolfBagProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
+
+          /** 👇 Caps */
           case "cap":
           case "caps":
             return (
@@ -277,6 +386,28 @@ export default function Product() {
           /** 👇 Rangefinder */
           case "rangefinder":
             return <RangefinderProduct productDetails={productDetails} />;
+
+          /** 👇 Divot Tool */
+          case "divot tool":
+          case "divot tools":
+            return (
+              <DivotToolProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
+
+          /** 👇 Towels */
+          case "towel":
+          case "towels":
+            return (
+              <TowelProduct
+                product={product}
+                productDetails={productDetails}
+              />
+            );
 
           /** 👇 Golf balls (main category) */
           case "golf balls":
@@ -312,7 +443,7 @@ export default function Product() {
         //   }
       })()}
       {/* Customer Reviews Section (common for all products) */}
-      <CustomerReviews />
+      {/* <CustomerReviews /> */}
       <Analytics.ProductView
         data={{
           products: [
@@ -381,6 +512,16 @@ const PRODUCT_FRAGMENT = `#graphql
     encodedVariantExistence
     encodedVariantAvailability
     metafield(namespace: "custom", key: "family") {
+      id
+      namespace
+      key
+      type
+      value
+    }
+    metafields(identifiers: [
+      {namespace: "custom", key: "family"}
+      {namespace: "custom", key: "category_variant"}
+    ]) {
       id
       namespace
       key

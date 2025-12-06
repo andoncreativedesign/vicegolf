@@ -6,11 +6,14 @@ import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
+import { VariantProductCard } from '~/components/Product/VariantProductCard';
 import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
 import { useEffect } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.collection?.title ?? ''} Collection` }];
@@ -30,6 +33,9 @@ export async function loader(args: Route.LoaderArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
+
+// ! working code
+/* 
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
   const { ids, handle } = params;
 
@@ -76,46 +82,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       status: 404,
     });
   }
-
-  // const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection => {
-  //   if (!collections?.nodes?.length) {
-  //     return null;
-  //   }
-
-  //   // If there's only one collection, return it as is
-  //   if (collections.nodes.length === 1) {
-  //     return collections.nodes[0];
-  //   }
-
-  //   // Get the first collection to use as a base
-  //   const baseCollection = { ...collections.nodes[0] };
-
-  //   // Combine all products from all collections
-  //   const allEdges = collections.nodes.flatMap(collection =>
-  //     collection.products?.edges || []
-  //   );
-
-  //   // Create a map to deduplicate products by ID
-  //   const uniqueProducts = new Map();
-
-  //   allEdges.forEach(edge => {
-  //     if (edge?.node?.id && !uniqueProducts.has(edge.node.id)) {
-  //       uniqueProducts.set(edge.node.id, edge);
-  //     }
-  //   });
-
-  //   // Update the base collection with combined products
-  //   return {
-  //     ...baseCollection,
-  //     products: {
-  //       ...baseCollection.products,
-  //       edges: Array.from(uniqueProducts.values())
-  //     }
-  //   };
-  // }
-
-
-  // In your loadCriticalData function:
 
   const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection | null => {
     try {
@@ -197,6 +163,264 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   };
 
 }
+*/
+
+async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
+  const { ids, handle } = params;
+
+  const { storefront } = context;
+  const paginationVariables = getPaginationVariables(request, {
+    pageBy: 8,
+  });
+
+  if (!ids) {
+    throw redirect('/collections');
+  }
+
+  const decodedIds = JSON.parse(decodeURIComponent(ids));
+  const decodedHandle = decodeURIComponent(handle);
+
+  console.log('🔍 Debug: URL handle:', handle);
+  console.log('🔍 Debug: Decoded handle:', decodedHandle);
+
+  // Convert space-separated handle to Shopify format (golf-balls)
+  const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
+  console.log('🔍 Debug: Shopify handle format:', shopifyHandle);
+
+  // Debug: Check all listings in Sanity
+  await getAllListings();
+
+  const [collection] = await Promise.all<ShopifyCollectionResponse>([
+    storefront.query(GET_PRODUCTS_BY_COLLECTION, {
+      variables: {
+        // handle: createCategoryQuery(decodedIds),
+        ids: decodedIds,
+        ...paginationVariables
+      },
+      // Add other queries here, so that they are loaded in parallel
+    }),
+  ]);
+
+
+  console.log('\n\ngolf collection ')
+  console.log(JSON.stringify(collection.nodes[0].products.edges))
+
+
+  if (!collection) {
+    throw new Response(`Collection ${decodedHandle} not found`, {
+      status: 404,
+    });
+  }
+
+  const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection | null => {
+    try {
+      // Check if collections or nodes exist
+      if (!collections?.nodes?.length) {
+        console.log('No collections found');
+        return null;
+      }
+
+      console.log('Processing collections:', JSON.stringify(collections.nodes, null, 2));
+
+      // Filter out any null/undefined collections
+      const validCollections = collections.nodes.filter(
+        collection => collection?.products?.edges?.length > 0
+      );
+
+      if (validCollections.length === 0) {
+        console.log('No valid collections with products found');
+        return null;
+      }
+
+      // If there's only one valid collection, return it as is
+      if (validCollections.length === 1) {
+        console.log('Single collection found, returning as is');
+        return validCollections[0];
+      }
+
+      // Get the first collection to use as a base
+      const baseCollection = { ...validCollections[0] };
+
+      // Combine all products from all valid collections
+      const allEdges = validCollections.flatMap(collection => {
+        if (!collection?.products?.edges) return [];
+        return collection.products.edges.filter(edge => edge?.node);
+      });
+
+      // Create a map to deduplicate products by ID
+      const uniqueProducts = new Map();
+      allEdges.forEach(edge => {
+        if (edge?.node?.id) {
+          uniqueProducts.set(edge.node.id, edge);
+        }
+      });
+
+      console.log(`Combined ${allEdges.length} products into ${uniqueProducts.size} unique products`);
+
+      // Update the base collection with combined products
+      const result = {
+        ...baseCollection,
+        products: {
+          ...baseCollection.products,
+          edges: Array.from(uniqueProducts.values()),
+          pageInfo: baseCollection.products?.pageInfo || {
+            hasNextPage: false,
+            hasPreviousPage: false
+          }
+        }
+      };
+
+      return result;
+    } catch (error) {
+      console.error('Error combining collections:', error);
+      return null;
+    }
+  };
+
+  const updatedCollection = combineCollectionProducts(collection);
+  const listingData = await getListingByCollectionHandle(shopifyHandle);
+  console.log("\n\nupdatedCollection data 213123")
+  console.log(JSON.stringify(updatedCollection?.products?.edges?.[0]))
+
+  // 3️⃣ Extract unique family values from metafields
+  const families = [
+    ...new Set(
+      updatedCollection?.products?.edges
+        ?.map(edge => {
+          // Get family from metafield if available, otherwise use the direct family value
+          const familyValue = edge?.node?.metafield?.value ||
+            edge?.node?.family?.value;
+          return familyValue;
+        })
+        .filter(Boolean) || []
+    ),
+  ];
+
+  // console.log("\n\nExtracted families from metafields:", families);
+  // console.log("\n\nfamilies collection.id.handle ")
+  // console.log(families)
+
+  // 4️⃣ Build Shopify search queries for each family
+  const familyQueries = families.map(fam => ({
+    value: fam,
+    query: `metafields.custom.family:"${fam}"`,
+  }));
+
+  // 5️⃣ Run a family group query for EACH family
+  const familyGroups: Record<string, any[]> = {};
+
+  for (const fam of familyQueries) {
+    const response = await axiosShopifyAdmin.post("", {
+      query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
+      variables: {
+        searchQuery: `metafields.custom.family:"${fam.value}"`,
+      },
+    });
+
+    if (response.data.errors) {
+      throw new Error(JSON.stringify(response?.data?.errors))
+    }
+
+    // console.log('\n\ncategoryProducts.golfBalls.nodes')
+    // response.data?.data?.products?.edges.forEach((item) => {
+    //   if(item.node.family){ 
+    //     console.log(item.node.family)
+    //     console.log('image = ', item.node.variantImage?.reference?.image)
+    //   }
+    // })
+
+    const colorVariantsRes = response.data?.data?.products?.edges || [];
+
+    // Transform the product data to match the expected format
+    const products = colorVariantsRes.map(({ node }) => ({
+      ...node,
+      id: node.id,
+      title: node.title,
+      productType: node.productType,
+      vendor: node.vendor,
+      handle: node.handle,
+      featuredImage: node.featuredImage ? {
+        id: node.featuredImage.id,
+        url: node.featuredImage.url,
+        altText: node.featuredImage.altText,
+        width: node.featuredImage.width,
+        height: node.featuredImage.height
+      } : null,
+      variantImage: node.variantImage?.reference?.image ? {
+        id: node.variantImage.reference.id,
+        url: node.variantImage.reference.image.url,
+        altText: node.variantImage.reference.image.altText,
+        width: node.variantImage.reference.image.width,
+        height: node.variantImage.reference.image.height
+      } : null,
+      family: node.family ? {
+        id: node.family.id,
+        namespace: node.family.namespace,
+        key: node.family.key,
+        type: node.family.type,
+        value: node.family.value
+      } : null
+    }));
+
+    familyGroups[fam.value] = products;
+  }
+
+  // 6️⃣ Attach grouped variants to each product
+  function attachFamilyGroups(products) {
+
+    // console.log("\n\nobj assinged to family")
+    const updatedProduct = products?.map(p => {
+      const obj = {
+        ...p,
+        variantFamilyProducts: familyGroups[p.family?.value] || [],
+      }
+      if (obj?.variantFamilyProducts?.length > 0) {
+        // console.log(obj)
+      }
+      return obj
+    });
+    // console.log("\n\nend obj assinged to family")
+    return updatedProduct
+  }
+
+  // console.log('\n\nfamilyGroups')
+  // console.log(familyGroups[familyQueries?.[0].value]?.[0])
+
+  const updateNodes = (edge: any) => {
+    const product = edge.node;
+    const variantFamilyProducts = familyGroups[product.metafield?.value || product.family?.value] || [];
+    return {
+      ...edge,
+      node: {
+        ...product,
+        variantFamilyProducts
+      }
+    };
+  };
+
+
+  const updatedEdges = updatedCollection?.products?.edges?.map(updateNodes) || [];
+  const updatedCollectionWithVariants = {
+    ...updatedCollection,
+    products: {
+      ...updatedCollection?.products,
+      edges: updatedEdges
+    }
+  };
+  console.log('\n\n updatedCollection')
+  console.log(updatedCollection?.products.edges[0].node)
+  console.log('\n\nproductsWithColorVariants')
+  console.log(updatedCollectionWithVariants.products.edges[0].node)
+  // Fetch Sanity listing data for this collection using Shopify handle format
+
+  return {
+    // collection: updatedCollection,
+    collection: updatedCollectionWithVariants,
+    handle: decodedHandle,
+    listing: listingData
+  };
+}
+
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -315,13 +539,27 @@ export default function Collection() {
           resourcesClassName="products-grid"
         >
           {({ node: product, index }) => (
-            product ? (
-              <ProductCard
+            // product ? (
+            //   <ProductCard
+            //     key={product.id}
+            //     product={product}
+            //     loading={index < 8 ? 'eager' : undefined}
+            //   />
+            // ) : null
+
+            product?.metafield?.value
+              ? <VariantProductCard
                 key={product.id}
                 product={product}
                 loading={index < 8 ? 'eager' : undefined}
               />
-            ) : null
+              : <ProductCard
+                  key={product.id}
+                  product={product}
+                  loading={index < 8 ? 'eager' : undefined}
+            />
+            
+            // <div>{JSON.stringify(product?.metafield?.value)}</div>
           )}
         </PaginatedResourceSection>
       )}

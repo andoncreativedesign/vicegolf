@@ -27,3 +27,11 @@ export const axiosShopifyAdmin = axios.create({
     "X-Shopify-Access-Token": ADMIN_ACCESS_TOKEN,
   }
 });
+
+export const axiosShopifyAdminCustomerApi = axios.create({
+  baseURL: 'https://tzasu4-jj.myshopify.com/admin/api/2025-01',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN, // Reusing the same access token from above
+  },
+});

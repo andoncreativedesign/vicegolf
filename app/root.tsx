@@ -123,7 +123,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       cache: storefront.CacheLong(),
       variables: {
         handle: "customer-account-main-menu",
-        country: "IN", 
+        country: "IN",
         language: "EN",
       }
     }),
@@ -201,8 +201,9 @@ export default function App() {
     >
       <PageLayout {...data}>
         <Outlet />
+         <CustomToastContainer />
       </PageLayout>
-      <CustomToastContainer />
+     
     </Analytics.Provider>
   );
 }

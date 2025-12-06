@@ -3,6 +3,7 @@ import { Image, Money } from '@shopify/hydrogen';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from './ProductCard';
+import { VariantProductCard } from './Product/VariantProductCard';
 
 interface ProductGridProps {
   products: ProductFragment[];
@@ -39,7 +40,8 @@ export function ProductGrid({
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+      const isAtEnd = scrollLeft >= scrollWidth - clientWidth - 1;
+      setCanScrollRight(!isAtEnd || (hasMore && !loading));
     }
   };
 
@@ -72,11 +74,18 @@ export function ProductGrid({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [onLoadMore, hasMore, loading]);
 
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      checkScrollButtons();
+    }
+  }, [products, hasMore]);
+
+
   return (
     <section className={`py-6 ${className}`}>
       {title && (
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+          <h2 className="text-base sm:text-lg font-extrabold tracking-tight mb-6 lg:mb-10" style={{ fontSize: '1.375rem', fontWeight: '800' }}>
             {title}
           </h2>
           <div className="flex items-center space-x-2">
@@ -113,22 +122,25 @@ export function ProductGrid({
       <div className="relative">
         <div
           ref={scrollContainerRef}
-          className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
+          className="flex space-x-4 overflow-x-auto scrollbar-hide pb-5"
           onScroll={checkScrollButtons}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product) => (
             <div key={product.id} className="flex-shrink-0">
-              <ProductCard product={product} />
+              {product?.family
+                ? <VariantProductCard product={product} />
+                : <ProductCard product={product} />
+              }
             </div>
           ))}
 
           {(hasMore || loading) && (
             <div className="flex-shrink-0 flex items-center justify-center" style={{ minWidth: '300px' }}>
               <div className="relative w-12 h-12">
-                <div className="w-full h-full border-4 border-gray-100 rounded-full"></div>
-                <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
-                <div className="absolute top-1 left-1 right-1 bottom-1 border-2 border-gray-50 rounded-full"></div>
+                <div className="w-full h-full bg-white rounded-full shadow-lg">
+                  <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 border-t-transparent rounded-full animate-spin"></div>
+                </div>
               </div>
             </div>
           )}

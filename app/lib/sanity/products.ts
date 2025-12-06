@@ -1,3 +1,4 @@
+// app/lib/sanity/products.ts
 import { HttpStatusCode } from "axios";
 import { axiosSanity } from "~/utils/axiosInsatances";
 
@@ -33,11 +34,54 @@ export const productDetailsQuery = (gid: string) => `
         }
       }
     },
-    
+
+    // === MAIN ACCORDION (existing) ===
     accordionItems[]{
       _key,
       title,
-      description
+      type,
+      description,
+      descriptionTitle,
+      bulletPoints[]{
+        groupTitle,
+        items[]{
+          customBullet,
+          text
+        }
+      },
+      inlinePoints[]{
+        title,
+        description
+      },
+      stackedPoints[]{
+        title,
+        description
+      },
+      linkPoints[]{
+        text,
+        url
+      },
+      secondaryDescription
+    },
+
+    // === NEW: ACCORDION 2 – Technical Specs Section ===
+    accordion2 {
+      sectionTitle,
+      description,
+      sectionImage {
+        asset->{
+          _id,
+          url,
+          metadata {
+            lqip,
+            dimensions
+          }
+        }
+      },
+      items[]{
+        title,
+        description
+      }
     },
 
     productContent1->{
@@ -85,7 +129,6 @@ export const productDetailsQuery = (gid: string) => `
       }
     },
 
-    
     store {
       id,
       gid,
@@ -132,140 +175,49 @@ export const productDetailsQuery = (gid: string) => `
         }
       }
     }
-
   }
 `;
 
+// ==================== TYPES ====================
 
-
-
-// Types for the product details
 export interface SanityImageAsset {
   _id: string;
   url: string;
-  altText?: string;
-}
-
-export interface ColorTheme {
-  _id: string;
-  title?: string;
-  primary?: string;
-  primaryForeground?: string;
-  secondary?: string;
-  secondaryForeground?: string;
-  accent?: string;
-  accentForeground?: string;
-  destructive?: string;
-  destructiveForeground?: string;
-  ring?: string;
-  background?: string;
-  foreground?: string;
-  muted?: string;
-  mutedForeground?: string;
-  border?: string;
+  metadata?: {
+    lqip?: string;
+    dimensions?: { width: number; height: number };
+  };
 }
 
 export interface AccordionItem {
   _key: string;
-  title?: string;
-  description?: any[]; // Portable Text array
-}
-
-export interface ProductContent {
-  _id: string;
-  title?: string;
-  content?: any[]; // Portable Text array
-}
-
-export interface SEO {
-  metaTitle?: string;
-  metaDescription?: string;
-  shareTitle?: string;
-  shareDescription?: string;
-  shareGraphic?: {
-    asset: SanityImageAsset;
-  };
-}
-
-export interface ProductVariant {
-  _id: string;
   title: string;
-  price: number;
-  compareAtPrice?: number;
-  available: boolean;
-  sku?: string;
-  barcode?: string;
-  selectedOptions: {
-    name: string;
-    value: string;
-  }[];
-  image?: {
-    asset: SanityImageAsset;
-  };
+  type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich' | 'stackedPoints';
+  description?: string;
+  descriptionTitle?: string;
+  bulletPoints?: Array<{
+    groupTitle?: string;
+    items: Array<{ customBullet?: string; text: string }>;
+  }>;
+  inlinePoints?: Array<{ title: string; description: string }>;
+  stackedPoints?: Array<{ title?: string; description: string }>;
+  linkPoints?: Array<{ text: string; url: string }>;
+  secondaryDescription?: string;
 }
 
-export interface ProductOption {
-  _key: string;
-  name: string;
-  values: string[];
-}
-
-export interface StoreProduct {
-  _id: string;
-  status: 'active' | 'draft' | 'archived';
-  isDeleted: boolean;
+// NEW: Accordion2 – Technical Specs
+export interface Accordion2Item {
   title: string;
-  slug: {
-    current: string;
-  };
-  descriptionHtml?: string;
-  priceRange: {
-    minVariantPrice: number;
-    maxVariantPrice: number;
-  };
-  variants: ProductVariant[];
-  options: ProductOption[];
-  images: {
+  description: string;
+}
+
+export interface Accordion2 {
+  sectionTitle: string;
+  description?: string;
+  sectionImage?: {
     asset: SanityImageAsset;
-  }[];
-  tags: string[];
-  collections: {
-    _id: string;
-    title: string;
-    handle: string;
-  }[];
-}
-
-export interface SanityImage {
-  _id: string;
-  url: string;
-  metadata: {
-    dimensions: {
-      width: number;
-      height: number;
-      aspectRatio: number;
-    };
-    lqip?: string;
-    palette?: any;
   };
-}
-
-export interface BlockContent {
-  _type: string;
-  [key: string]: any;
-}
-
-export interface SanityImage {
-  _id: string;
-  url: string;
-  metadata: {
-    dimensions: {
-      width: number;
-      height: number;
-      aspectRatio: number;
-    };
-    lqip?: string;
-  };
+  items: Accordion2Item[];
 }
 
 export interface ProductContent1Item {
@@ -274,7 +226,7 @@ export interface ProductContent1Item {
   points?: string[];
   images?: Array<{
     alt?: string;
-    asset: SanityImage;
+    asset: SanityImageAsset;
   }>;
 }
 
@@ -286,7 +238,7 @@ export interface ProductContent1 {
 
 export interface ProductContent2Section {
   images: Array<{
-    asset: SanityImage;
+    asset: SanityImageAsset;
     alt?: string;
   }>;
   contentItems: Array<{
@@ -311,16 +263,7 @@ export interface StoreVariant {
     price: number;
     availableForSale: boolean;
     image?: {
-      asset: {
-        url: string;
-        metadata: {
-          dimensions: {
-            width: number;
-            height: number;
-            aspectRatio: number;
-          };
-        };
-      };
+      asset: { url: string; metadata: { dimensions: { width: number; height: number } } };
     };
   };
 }
@@ -349,23 +292,14 @@ export interface YoutubeVideo {
   links: string[];
 }
 
-export interface SanityVideoAsset {
-  _type: 'sanity.fileAsset';
-  url: string;
-  metadata: {
-    dimensions: {
-      width: number;
-      height: number;
-    };
-  };
-}
-
 export interface VideoContentItem {
-  _key?: string;
   title?: string;
   description?: string;
   video?: {
-    asset: SanityVideoAsset;
+    asset: {
+      url: string;
+      metadata: { dimensions: { width: number; height: number } };
+    };
   };
 }
 
@@ -374,7 +308,7 @@ export interface ProductDetails {
   _type: string;
   titleProxy?: string;
   slugProxy?: string;
-  body?: BlockContent[];
+  body?: any[];
   colorTheme?: {
     _id: string;
     title: string;
@@ -383,15 +317,10 @@ export interface ProductDetails {
   seo?: {
     title?: string;
     description?: string;
-    image?: {
-      asset: SanityImage;
-    };
+    image?: { asset: SanityImageAsset };
   };
-  accordionItems?: Array<{
-    _key: string;
-    title: string;
-    description: string;
-  }>;
+  accordionItems?: AccordionItem[];
+  accordion2?: Accordion2;                    // ← NEW
   productContent1?: ProductContent1;
   productContent2?: ProductContent2;
   youtubeVideos?: YoutubeVideo;
@@ -399,49 +328,7 @@ export interface ProductDetails {
   store: StoreProduct;
 }
 
-// Sanity Listing types
-export interface SanityListingImage {
-  _type: 'image';
-  asset: {
-    _id: string;
-    url: string;
-    metadata?: {
-      dimensions?: {
-        width: number;
-        height: number;
-      };
-      lqip?: string;
-    };
-  };
-  alt?: string;
-}
-
-export interface SanityListingVideo {
-  _type: 'file';
-  asset: {
-    _id: string;
-    url: string;
-    metadata?: {
-      dimensions?: {
-        width: number;
-        height: number;
-      };
-    };
-  };
-  title?: string;
-  description?: string;
-}
-
-export interface SanityListing {
-  _id: string;
-  _type: 'listing';
-  title: string;
-  collectionHandle: string;
-  subtitle: string;
-  description: string;
-  images?: SanityListingImage[];
-  videos?: SanityListingVideo[];
-}
+// ==================== FETCH FUNCTIONS ====================
 
 export async function getProductDetails(id: string): Promise<ProductDetails | null> {
   try {
@@ -453,18 +340,15 @@ export async function getProductDetails(id: string): Promise<ProductDetails | nu
     }
 
     const result = response.data.result;
-
-    if (!result) {
-      return null;
-    }
+    if (!result) return null;
 
     return result as ProductDetails;
   } catch (error) {
     console.error('Error fetching product details:', error);
-    console.log(JSON.stringify(error))
     return null;
   }
 }
+
 
 // Get related products based on product tags or collections
 export async function getRelatedProducts(productId: string, limit: number = 4): Promise<ProductDetails[]> {
