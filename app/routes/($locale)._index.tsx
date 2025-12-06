@@ -37,52 +37,6 @@ export async function loader(args: Route.LoaderArgs) {
   return { ...deferredData, ...criticalData, homePageData };
 }
 
-// async function loadCriticalData({ context, request }: Route.LoaderArgs) {
-//   const url = new URL(request.url);
-//   const golfBallsCursor = url.searchParams.get('golfBallsCursor') || null;
-//   const golfClubsCursor = url.searchParams.get('golfClubsCursor') || null;
-//   const apparelCursor = url.searchParams.get('apparelCursor') || null;
-//   const gearCursor = url.searchParams.get('gearCursor') || null;
-//   const [collectionsData, categoryProducts] = await Promise.all([
-//     context.storefront.query(FEATURED_COLLECTION_QUERY),
-//     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
-//       variables: {
-//         golfBallsHandle: createCategoryQuery('Golf Balls'),
-//         golfBallsCursor,
-//         golfClubsHandle: createCategoryQuery('Golf Club Set'),
-//         golfClubsCursor,
-//         apparelHandle: createCategoryQuery('Gloves Men'),
-//         apparelCursor,
-//         gearHandle: createCategoryQuery('Polo'),
-//         limitedEditionsHandle: createCategoryQuery('Towels'),
-//         fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
-//         juniorsHandle: createCategoryQuery('Divot Tool'),
-//         first: 15,
-//         gearCursor,
-//       },
-//     }),
-//   ]);
-
-//   // console.log('\n\n golfballs')
-//   // console.log(JSON.stringify(categoryProducts.golfBalls.nodes))
-
-
-
-//   return {
-//     featuredCollection: collectionsData.collections.nodes[0],
-//     categoryProducts,
-//     golfBallsPageInfo: categoryProducts.golfBalls.pageInfo,
-//     golfClubsPageInfo: categoryProducts.golfClubs.pageInfo,
-//     apparelPageInfo: categoryProducts.apparel.pageInfo,
-//     gearPageInfo: categoryProducts.gear.pageInfo,
-//     currentGolfBallsCursor: golfBallsCursor,
-//     currentGolfClubsCursor: golfClubsCursor,
-//     currentApparelCursor: apparelCursor,
-//     currentGearCursor: gearCursor,
-//     productsForNav: context.productsForNav,
-//   };
-// }
-
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
 
@@ -95,30 +49,54 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const [collectionsData, categoryProducts] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
+      // variables: {
+      //   golfBallsHandle: createCategoryQuery('Golf Balls'),
+      //   golfBallsCursor,
+      //   golfClubsHandle: createCategoryQuery('Golf Club Set'),
+      //   golfClubsCursor,
+      //   apparelHandle: createCategoryQuery('apparel'),
+      //   apparelCursor,
+      //   gearHandle: createCategoryQuery('Polo'),
+      //   limitedEditionsHandle: createCategoryQuery('Towels'),
+      //   fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
+      //   juniorsHandle: createCategoryQuery('Divot Tool'),
+      //   first: 15,
+      //   gearCursor,
+      // },
       variables: {
-        golfBallsHandle: createCategoryQuery('Golf Balls'),
+        golfBallsHandle: createCategoryQuery('golf-balls'),
         golfBallsCursor,
-        golfClubsHandle: createCategoryQuery('Golf Club Set'),
+        golfClubsHandle: createCategoryQuery(''),
         golfClubsCursor,
-        apparelHandle: createCategoryQuery('Gloves Men'),
+        apparelHandle: createCategoryQuery('apparel'),
         apparelCursor,
-        gearHandle: createCategoryQuery('Polo'),
-        limitedEditionsHandle: createCategoryQuery('Towels'),
-        fittingCustomisationHandle: createCategoryQuery('Longsleeve'),
-        juniorsHandle: createCategoryQuery('Divot Tool'),
-        first: 15,
+        gearHandle: createCategoryQuery('gear'),
         gearCursor,
+        limitedEditionsHandle: createCategoryQuery(''),
+        fittingCustomisationHandle: createCategoryQuery(''),
+        juniorsHandle: createCategoryQuery(''),
+        first: 15,
       },
     }),
   ]);
 
   // 2️⃣ Extract products from ALL categories that include family metafields
+  // const allProducts = [
+  //   ...categoryProducts.golfBalls.nodes,
+  //   ...categoryProducts.golfClubs.nodes,
+  //   ...categoryProducts.apparel.nodes,
+  //   ...categoryProducts.gear.nodes,
+  // ];
+
   const allProducts = [
-    ...categoryProducts.golfBalls.nodes,
-    ...categoryProducts.golfClubs.nodes,
-    ...categoryProducts.apparel.nodes,
-    ...categoryProducts.gear.nodes,
+    ...(categoryProducts?.golfBalls?.products?.nodes || []),
+    ...(categoryProducts?.golfClubs?.products?.nodes || []),
+    ...(categoryProducts?.apparel?.products?.nodes || []),
+    ...(categoryProducts?.gear?.products?.nodes || []),
   ];
+
+  console.log("\n\n alll products ")
+  console.log(allProducts[0])
 
   // 3️⃣ Extract unique family values
   const families = [
@@ -153,13 +131,13 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       throw new Error(JSON.stringify(response?.data?.errors))
     }
 
-    console.log('\n\ncategoryProducts.golfBalls.nodes')
-    response.data?.data?.products?.edges.forEach((item) => {
-      if(item.node.family){ 
-        console.log(item.node.family)
-        console.log('image = ', item.node.variantImage?.reference?.image)
-      }
-    })
+    // console.log('\n\ncategoryProducts.golfBalls.nodes')
+    // response.data?.data?.products?.edges.forEach((item) => {
+    //   if(item.node.family){ 
+    //     console.log(item.node.family)
+    //     console.log('image = ', item.node.variantImage?.reference?.image)
+    //   }
+    // })
 
     const colorVariantsRes = response.data?.data?.products?.edges || [];
     
@@ -199,8 +177,9 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
 
   // 6️⃣ Attach grouped variants to each product
   function attachFamilyGroups(products) {
+
     // console.log("\n\nobj assinged to family")
-    const updatedProduct =  products.map(p => {
+    const updatedProduct =  products?.map(p => {
       const obj =  {
         ...p,
         variantFamilyProducts: familyGroups[p.family?.value] || [],
@@ -217,10 +196,26 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   // console.log('\n\nfamilyGroups')
   // console.log(familyGroups[familyQueries?.[0].value]?.[0])
 
-  categoryProducts.golfBalls.nodes = attachFamilyGroups(categoryProducts.golfBalls.nodes);
-  categoryProducts.golfClubs.nodes = attachFamilyGroups(categoryProducts.golfClubs.nodes);
-  categoryProducts.apparel.nodes = attachFamilyGroups(categoryProducts.apparel.nodes);
-  categoryProducts.gear.nodes = attachFamilyGroups(categoryProducts.gear.nodes);
+  // categoryProducts.golfBalls.nodes = attachFamilyGroups(categoryProducts.golfBalls.nodes);
+  // categoryProducts.golfClubs.nodes = attachFamilyGroups(categoryProducts.golfClubs.nodes);
+  // categoryProducts.apparel.nodes = attachFamilyGroups(categoryProducts.apparel.nodes);
+  // categoryProducts.gear.nodes = attachFamilyGroups(categoryProducts.gear.nodes);
+
+  const updateNodes = (category:any) => {
+    const products = category?.products?.nodes || [];
+    const pageInfo = category?.products?.pageInfo ;
+    return {
+      ...category,
+      nodes: attachFamilyGroups(products) || [],
+      pageInfo
+    };
+  };
+
+  // Update each category with null checks
+  categoryProducts.golfBalls = updateNodes(categoryProducts.golfBalls || {});
+  categoryProducts.golfClubs = updateNodes(categoryProducts.golfClubs || {});
+  categoryProducts.apparel = updateNodes(categoryProducts.apparel || {});
+  categoryProducts.gear = updateNodes(categoryProducts.gear || {});
 
   // console.log('\n\ncategoryProducts.golfBalls.nodes')
   // categoryProducts.golfBalls.nodes.forEach((item) => {
@@ -229,6 +224,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   //     console.log(JSON.stringify(item))
   //   }
   // })
+
+  console.log('\n\ncategoryProducts.golfBalls.nodes')
+  console.log(categoryProducts.golfBalls.products.pageInfo)
+  console.log('\n\ncategoryProducts.golfBalls.nodes end')
 
   // 7️⃣ Return final combined output
   return {

@@ -1,6 +1,7 @@
 // app\lib\shopify\product-queries.ts
 export const createCategoryQuery = (handle: string) => {
-  return `product_type:'${handle}'`
+  // return `product_type:'${handle}'`
+  return handle
 }
 
 // GraphQL queries for fetching products by collection
