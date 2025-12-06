@@ -397,7 +397,6 @@ export function VariantProductCard({ product }: ProductCardProps) {
                   {parseFloat(firstVariant.price.amount).toFixed(2)} {firstVariant.price.currencyCode}
                 </span>
               </div>
-              <span className="text-xs text-gray-400">from 6 dozen</span>
             </div>
           )}
         </div>

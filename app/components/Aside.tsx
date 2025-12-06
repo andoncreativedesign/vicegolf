@@ -63,7 +63,7 @@ export function Aside({
         className={[
           type === 'search' ? 'search-aside' : '',
           type === 'mobile' ? 'mobile-menu' : '',
-          'w-[85%] h-full overflow-y-auto',
+          type !== 'search' && type !== 'mobile' ? 'w-[85%] h-full overflow-y-auto' : '',
           /* existing classes */
         ]
           .concat(className || [])
