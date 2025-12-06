@@ -249,7 +249,7 @@ export default function Product() {
         </div>
       </nav>
       
-      <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-17">
+      <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-20">
         <div className="w-full lg:w-[55%]">
           {images?.nodes?.length > 0 ? (
             <ProductGallery

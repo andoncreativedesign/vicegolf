@@ -69,13 +69,13 @@ export function ProductForm({
   };
 
   useEffect(() => {
-    setFormHeight('546px');
+    setFormHeight('600px');
   }, []);
 
   return (
     <div
       ref={formRef}
-      className="product-form bg-white p-4 md:p-5 scrollbar-hide w-full max-w-[780px] mx-auto"
+      className="product-form bg-white p-4 md:p-5 scrollbar-hide w-full max-w-[500px] mx-auto"
       style={{
         height: formHeight,
         overflowY: 'auto',

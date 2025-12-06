@@ -27,7 +27,7 @@ export function AddToCartButton({
             type="submit"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
-            className="w-full max-w-[800px]  bg-black text-white py-3 px-4 rounded-full font-medium text-sm md:text-base transition-all duration-300
+            className="w-full bg-black text-white py-4 px-6 rounded-full font-medium text-base transition-all duration-300
                       hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2
                       disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
