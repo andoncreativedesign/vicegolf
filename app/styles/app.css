@@ -819,9 +819,9 @@ button.reset:hover:not(:has(> *)) {
 .products-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0 !important;
+  gap: 20px !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 15px !important;
   list-style: none;
   width: 100% !important;
   max-width: 100% !important;
