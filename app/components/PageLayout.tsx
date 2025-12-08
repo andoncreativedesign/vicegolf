@@ -160,58 +160,8 @@ function SearchAside() {
                         ))}
                       </div>
                     </div>
-
-                    <div className="popular-products">
-                      <h5>Popular Products</h5>
-                      <div className="product-grid">
-                        {products.slice(0, 4).map((product) => {
-                          const productUrl = `/products/${product.handle}`;
-                          const price = product?.selectedOrFirstAvailableVariant?.price;
-                          const image = product?.selectedOrFirstAvailableVariant?.image;
-
-                          return (
-                            <Link
-                              key={product.id}
-                              to={productUrl}
-                              className="product-card"
-                              onClick={closeSearch}
-                            >
-                              <div className="product-image-container">
-                                {image ? (
-                                  <Image
-                                    data={{
-                                      url: image.url,
-                                      altText: image.altText || product.title,
-                                      width: 240,
-                                      height: 240,
-                                    }}
-                                    className="product-image"
-                                    loading="eager"
-                                    loaderOptions={{
-                                      scale: 2,
-                                      crop: 'center',
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="product-image-placeholder" />
-                                )}
-                              </div>
-                              <div className="product-info">
-                                <div className="product-category">Golf Balls</div>
-                                <div className="product-title">{product.title}</div>
-                                <div className="product-price">
-                                  {price && <Money data={price} />}
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
                   </div>
 
-                  {/* Right Section - Empty but keeps the yellow background */}
-                  <div className="search-right-section"></div>
                 </div>
               );
             }
@@ -295,14 +245,12 @@ function SearchAside() {
                   </div>
                 </div>
 
-                {/* Right Section - Empty but keeps the yellow background */}
-                <div className="search-right-section"></div>
               </div>
             );
           }}
-        </SearchResultsPredictive>
-      </div>
-    </Aside>
+        </SearchResultsPredictive >
+      </div >
+    </Aside >
   );
 }
 
