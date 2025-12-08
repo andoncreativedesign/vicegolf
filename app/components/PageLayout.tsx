@@ -82,7 +82,6 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
 
 function SearchAside() {
   const queriesDatalistId = useId();
-  const [searchValue, setSearchValue] = useState('');
 
   // Trending search terms
   const trendingSearches = [
@@ -103,7 +102,6 @@ function SearchAside() {
   const closeSearch = () => {
     setIsSearchOpen(false);
     setCurrentPage(1); // Reset to first page when closing search
-    setSearchValue('');
     document.body.style.overflow = '';
   };
 
@@ -111,51 +109,23 @@ function SearchAside() {
     <Aside type="search" heading="">
       <div className="predictive-search">
         <SearchFormPredictive>
-          {({ fetchResults, inputRef, goToSearch }) => {
-            const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-              setSearchValue(e.target.value);
-              fetchResults(e);
-            };
-            
-            const clearInput = () => {
-              if (inputRef.current) {
-                inputRef.current.value = '';
-                setSearchValue('');
-                inputRef.current.focus();
-                fetchResults({ target: inputRef.current } as React.ChangeEvent<HTMLInputElement>);
-              }
-            };
-            
-            return (
-              <div className="search-input-wrapper">
-                <Search className="search-icon" size={18} />
-                <input
-                  name="q"
-                  onChange={handleChange}
-                  onFocus={fetchResults}
-                  placeholder="Search"
-                  ref={inputRef}
-                  type="search"
-                  list={queriesDatalistId}
-                  autoComplete="off"
-                  autoFocus
-                  className="search-input"
-                />
-                {searchValue && (
-                  <button
-                    type="button"
-                    onClick={clearInput}
-                    className="search-clear-button"
-                    aria-label="Clear search"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                )}
-              </div>
-            );
-          }}
+          {({ fetchResults, inputRef }) => (
+            <div className="search-input-wrapper">
+              <Search className="search-icon" size={18} />
+              <input
+                name="q"
+                onChange={fetchResults}
+                onFocus={fetchResults}
+                placeholder="Search"
+                ref={inputRef}
+                type="search"
+                list={queriesDatalistId}
+                autoComplete="off"
+                autoFocus
+                className="search-input"
+              />
+            </div>
+          )}
         </SearchFormPredictive>
 
         <SearchResultsPredictive>
@@ -170,8 +140,11 @@ function SearchAside() {
             if (!term.current) {
               return (
                 <div className="suggestions-container">
-                  {/* Left Section - Trending Searches */}
-                  <div className="search-left-section">
+                  {/* Left Section - Empty but keeps the green background */}
+                  <div className="search-left-section"></div>
+
+                  {/* Middle Section */}
+                  <div className="search-middle-section">
                     <div className="trending-searches">
                       <h5>Trending Searches</h5>
                       <div className="trending-tags">
@@ -189,56 +162,6 @@ function SearchAside() {
                     </div>
                   </div>
 
-                  {/* Right Section - Popular Products */}
-                  <div className="search-middle-section">
-                    <div className="popular-products">
-                      <h5>Popular Products</h5>
-                      <div className="product-grid">
-                        {products.slice(0, 4).map((product) => {
-                          const productUrl = `/products/${product.handle}`;
-                          const price = product?.selectedOrFirstAvailableVariant?.price;
-                          const image = product?.selectedOrFirstAvailableVariant?.image;
-
-                          return (
-                            <Link
-                              key={product.id}
-                              to={productUrl}
-                              className="product-card"
-                              onClick={closeSearch}
-                            >
-                              <div className="product-image-container">
-                                {image ? (
-                                  <Image
-                                    data={{
-                                      url: image.url,
-                                      altText: image.altText || product.title,
-                                      width: 240,
-                                      height: 240,
-                                    }}
-                                    className="product-image"
-                                    loading="eager"
-                                    loaderOptions={{
-                                      scale: 2,
-                                      crop: 'center',
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="product-image-placeholder" />
-                                )}
-                              </div>
-                              <div className="product-info">
-                                <div className="product-category">Golf Balls</div>
-                                <div className="product-title">{product.title}</div>
-                                <div className="product-price">
-                                  {price && <Money data={price} />}
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               );
             }
@@ -322,14 +245,12 @@ function SearchAside() {
                   </div>
                 </div>
 
-                {/* Right Section - Empty but keeps the yellow background */}
-                <div className="search-right-section"></div>
               </div>
             );
           }}
-        </SearchResultsPredictive>
-      </div>
-    </Aside>
+        </SearchResultsPredictive >
+      </div >
+    </Aside >
   );
 }
 
