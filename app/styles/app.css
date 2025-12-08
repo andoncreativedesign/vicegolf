@@ -15,8 +15,17 @@ img {
   border-radius: 4px;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
 html,
 body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
   font-family: var(--font-primary);
   font-weight: 400; /* Adjust weight as needed */
   overflow-x: hidden;
@@ -795,6 +804,12 @@ button.reset:hover:not(:has(> *)) {
   margin: 0 !important;
   background: white;
   width: 100% !important;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.product-results::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
   max-width: 100% !important;
   overflow-y: auto;
   max-height: 80vh;
