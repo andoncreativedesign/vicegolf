@@ -240,7 +240,7 @@ export default function Product() {
   return (
     <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
       {/* Breadcrumbs */}
-      <nav className="text-[18px] font-normal  px-4 sm:px-6 lg:px-16 pt-10  pb-2 text-sm text-gray-900">
+      <div className="text-[18px] font-normal  px-4 sm:px-6 md:px-20 lg:px-32 pt-10 text-sm text-gray-900">
         <div className="flex items-center flex-wrap gap-1">
           <span className="mx-1"></span>
           {productType.display ? (
@@ -258,10 +258,10 @@ export default function Product() {
             {title}
           </span>
         </div>
-      </nav>
+      </div>
       
-      <div className="flex flex-col lg:flex-row gap-8 w-full p-10 md:p-16 lg:p-20">
-        <div className="w-full lg:w-[55%]">
+      <div className="flex flex-col lg:flex-row gap-1 w-full p-10 justify-center items-center lg:items-start">
+        <div className="">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
@@ -274,7 +274,7 @@ export default function Product() {
             </div>
           )}
         </div>
-        <div className="w-full lg:w-[45%]">
+        <div className="">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
