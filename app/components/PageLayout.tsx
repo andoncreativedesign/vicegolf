@@ -7,7 +7,7 @@ import type {
   FooterQuery,
   HeaderQuery,
 } from 'storefrontapi.generated';
-import { Aside, useAside } from '~/components/Aside';
+import { Aside } from '~/components/Aside';
 import { Footer } from '~/components/Footer';
 import { Header } from '~/components/Header';
 import HeaderMenu from './Header/HeaderMenu';
@@ -82,26 +82,17 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
 
 function SearchAside() {
   const queriesDatalistId = useId();
-  const [searchValue, setSearchValue] = useState('');
-  const aside = useAside();
 
   // Trending search terms
   const trendingSearches = [
-    'Vice Tracer Balls',
+    'Junior golf',
+    'Golf Rangefinder',
+    'Golf Bags',
+    'Golf Balls',
     'Vice Golf VGI02',
     'Vice Golf VGI01',
-    'Vice Pro(st) Edition',
-    'High Visibility Golf Balls',
-    'Vice x TCAF Edition'
-  ];
-
-  // Suggested searches for when no term is entered
-  const suggestedSearches = [
-    'vice',
-    'vice pro',
-    'vice aero carry bag',
-    'vice shine junior',
-    'vice pro st'
+    'Drip Golf Balls',
+    'White Golf Balls'
   ];
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -111,72 +102,30 @@ function SearchAside() {
   const closeSearch = () => {
     setIsSearchOpen(false);
     setCurrentPage(1); // Reset to first page when closing search
-    setSearchValue('');
     document.body.style.overflow = '';
-    aside.close();
   };
 
   return (
     <Aside type="search" heading="">
-      <div className="search-header-with-close">
-        <button
-          type="button"
-          onClick={closeSearch}
-          className="search-close-button-top"
-          aria-label="Close search"
-        >
-          Close
-        </button>
-      </div>
       <div className="predictive-search">
         <SearchFormPredictive>
-          {({ fetchResults, inputRef, goToSearch }) => {
-            const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-              setSearchValue(e.target.value);
-              fetchResults(e);
-            };
-            
-            const clearInput = () => {
-              if (inputRef.current) {
-                inputRef.current.value = '';
-                setSearchValue('');
-                inputRef.current.focus();
-                fetchResults({ target: inputRef.current } as React.ChangeEvent<HTMLInputElement>);
-              }
-            };
-            
-            return (
-              <div className="search-form-container">
-                <div className="search-input-wrapper">
-                  <Search className="search-icon" size={20} />
-                  <input
-                    name="q"
-                    onChange={handleChange}
-                    onFocus={fetchResults}
-                    placeholder="Search"
-                    ref={inputRef}
-                    type="search"
-                    list={queriesDatalistId}
-                    autoComplete="off"
-                    autoFocus
-                    className="search-input"
-                  />
-                  {searchValue && (
-                    <button
-                      type="button"
-                      onClick={clearInput}
-                      className="search-clear-button"
-                      aria-label="Clear search"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          }}
+          {({ fetchResults, inputRef }) => (
+            <div className="search-input-wrapper">
+              <Search className="search-icon" size={18} />
+              <input
+                name="q"
+                onChange={fetchResults}
+                onFocus={fetchResults}
+                placeholder="Search"
+                ref={inputRef}
+                type="search"
+                list={queriesDatalistId}
+                autoComplete="off"
+                autoFocus
+                className="search-input"
+              />
+            </div>
+          )}
         </SearchFormPredictive>
 
         <SearchResultsPredictive>
@@ -187,24 +136,82 @@ function SearchAside() {
               return <div className="search-loading">Searching...</div>;
             }
 
-            // Show suggestions when no search term
+            // Show trending searches and popular products when no search term
             if (!term.current) {
               return (
-                <div className="suggestions-section">
-                  <h5 className="suggestions-heading">Suggestions</h5>
-                  <ul className="suggestions-list">
-                    {suggestedSearches.map((suggestion, index) => (
-                      <li key={index} className="suggestion-item">
-                        <Link
-                          to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion)}`}
-                          className="suggestion-link"
-                          onClick={closeSearch}
-                        >
-                          {suggestion}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="suggestions-container">
+                  {/* Left Section - Empty but keeps the green background */}
+                  <div className="search-left-section"></div>
+
+                  {/* Middle Section */}
+                  <div className="search-middle-section">
+                    <div className="trending-searches">
+                      <h5>Trending Searches</h5>
+                      <div className="trending-tags">
+                        {trendingSearches.map((searchTerm, index) => (
+                          <Link
+                            key={index}
+                            to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchTerm)}`}
+                            className="trending-tag"
+                            onClick={closeSearch}
+                          >
+                            {searchTerm}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="popular-products">
+                      <h5>Popular Products</h5>
+                      <div className="product-grid">
+                        {products.slice(0, 4).map((product) => {
+                          const productUrl = `/products/${product.handle}`;
+                          const price = product?.selectedOrFirstAvailableVariant?.price;
+                          const image = product?.selectedOrFirstAvailableVariant?.image;
+
+                          return (
+                            <Link
+                              key={product.id}
+                              to={productUrl}
+                              className="product-card"
+                              onClick={closeSearch}
+                            >
+                              <div className="product-image-container">
+                                {image ? (
+                                  <Image
+                                    data={{
+                                      url: image.url,
+                                      altText: image.altText || product.title,
+                                      width: 240,
+                                      height: 240,
+                                    }}
+                                    className="product-image"
+                                    loading="eager"
+                                    loaderOptions={{
+                                      scale: 2,
+                                      crop: 'center',
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="product-image-placeholder" />
+                                )}
+                              </div>
+                              <div className="product-info">
+                                <div className="product-category">Golf Balls</div>
+                                <div className="product-title">{product.title}</div>
+                                <div className="product-price">
+                                  {price && <Money data={price} />}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Section - Empty but keeps the yellow background */}
+                  <div className="search-right-section"></div>
                 </div>
               );
             }
@@ -212,28 +219,32 @@ function SearchAside() {
             // Show search results when there's a search term
             return (
               <div className="search-results-container">
-                {/* Left Section - Trending Searches */}
+                {/* Left Section - Suggested Searches */}
                 <div className="search-left-section">
-                  <div className="trending-searches">
-                    <h5>Trending Searches</h5>
-                    <div className="trending-tags">
-                      {trendingSearches.map((searchTerm, index) => (
-                        <Link
-                          key={index}
-                          to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchTerm)}`}
-                          className="trending-tag"
-                          onClick={closeSearch}
-                        >
-                          {searchTerm}
-                        </Link>
-                      ))}
+                  {queries.length > 0 && (
+                    <div className="suggested-searches">
+                      <h5>SUGGESTED SEARCHES</h5>
+                      <ul className="suggestions-list">
+                        {queries.map((suggestion, index) => (
+                          <li key={suggestion?.text || index} className="suggestion-item">
+                            <Link
+                              onClick={closeSearch}
+                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion?.text || '')}`}
+                              className="suggestion-link"
+                            >
+                              {suggestion?.text}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Right Section - Products Grid */}
+                {/* Middle Section */}
                 <div className="search-middle-section">
                   <div className="search-results-grid">
+
                     <div className="product-results">
                       <div className="products-grid">
                         {products
@@ -283,6 +294,9 @@ function SearchAside() {
                     </div>
                   </div>
                 </div>
+
+                {/* Right Section - Empty but keeps the yellow background */}
+                <div className="search-right-section"></div>
               </div>
             );
           }}
