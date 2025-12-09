@@ -7,7 +7,7 @@ import type {
   FooterQuery,
   HeaderQuery,
 } from 'storefrontapi.generated';
-import { Aside } from '~/components/Aside';
+import { Aside, useAside } from '~/components/Aside';
 import { Footer } from '~/components/Footer';
 import { Header } from '~/components/Header';
 import HeaderMenu from './Header/HeaderMenu';
@@ -82,175 +82,141 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
 
 function SearchAside() {
   const queriesDatalistId = useId();
+  const { close } = useAside();
 
   // Trending search terms
   const trendingSearches = [
-    'Junior golf',
-    'Golf Rangefinder',
-    'Golf Bags',
-    'Golf Balls',
-    'Vice Golf VGI02',
-    'Vice Golf VGI01',
-    'Drip Golf Balls',
-    'White Golf Balls'
+    'Vice Pro Plus',
+    'Vice Pro',
+    'Vice Golf Pure 2024',
+    'Vice Drive',
+    'Vice Tour'
   ];
-
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 8; // 4 columns x 2 rows
-
-  const closeSearch = () => {
-    setIsSearchOpen(false);
-    setCurrentPage(1); // Reset to first page when closing search
-    document.body.style.overflow = '';
-  };
 
   return (
     <Aside type="search" heading="">
-      <div className="predictive-search">
-        <SearchFormPredictive>
-          {({ fetchResults, inputRef }) => (
-            <div className="search-input-wrapper">
-              <Search className="search-icon" size={18} />
-              <input
-                name="q"
-                onChange={fetchResults}
-                onFocus={fetchResults}
-                placeholder="Search"
-                ref={inputRef}
-                type="search"
-                list={queriesDatalistId}
-                autoComplete="off"
-                autoFocus
-                className="search-input"
-              />
-            </div>
-          )}
-        </SearchFormPredictive>
+      <div className="search-container w-full h-full flex flex-col bg-white">
+        <div className="search-header w-full flex items-center justify-between gap-4 p-4 border-b border-gray-100">
+          <div className="flex-1 relative">
+            <SearchFormPredictive>
+              {({ fetchResults, inputRef }) => (
+                <div className="relative flex items-center w-full">
+                  <span className="absolute left-4 text-gray-500 z-10">
+                    <Search size={20} />
+                  </span>
+                  <input
+                    name="q"
+                    onChange={fetchResults}
+                    onFocus={fetchResults}
+                    placeholder="Search"
+                    ref={inputRef}
+                    type="search"
+                    list={queriesDatalistId}
+                    autoComplete="off"
+                    autoFocus
+                    className="w-full bg-gray-100 border-0 rounded-full py-3.5 pl-12 pr-4 text-base md:text-lg focus:ring-0 focus:bg-gray-50 transition-colors placeholder:text-gray-500"
+                  />
+                </div>
+              )}
+            </SearchFormPredictive>
+          </div>
+          <button
+            onClick={close}
+            className="text-gray-900 font-medium hover:text-gray-600 transition-colors px-2 whitespace-nowrap"
+          >
+            Close
+          </button>
+        </div>
 
-        <SearchResultsPredictive>
-          {({ items, total, term, state, closeSearch }) => {
-            const { products, queries } = items;
+        <div className="search-body flex-1 overflow-y-auto">
+          <SearchResultsPredictive>
+            {({ items, total, term, state, closeSearch }) => {
+              const { products, queries } = items;
+              const isLoading = state === 'loading' && term.current;
+              const hasTerm = !!term.current;
 
-            if (state === 'loading' && term.current) {
-              return <div className="search-loading">Searching...</div>;
-            }
+              if (isLoading) {
+                return (
+                  <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                );
+              }
 
-            // Show trending searches and popular products when no search term
-            if (!term.current) {
               return (
-                <div className="suggestions-container">
-                  {/* Left Section - Empty but keeps the green background */}
-                  <div className="search-left-section"></div>
-
-                  {/* Middle Section */}
-                  <div className="search-middle-section">
-                    <div className="trending-searches">
-                      <h5>Trending Searches</h5>
-                      <div className="trending-tags">
-                        {trendingSearches.map((searchTerm, index) => (
-                          <Link
-                            key={index}
-                            to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchTerm)}`}
-                            className="trending-tag"
-                            onClick={closeSearch}
-                          >
-                            {searchTerm}
-                          </Link>
-                        ))}
+                <div className="max-w-[1400px] mx-auto px-6 py-8">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                    {/* Left Column: Suggestions/Trending */}
+                    <div className="md:col-span-3">
+                      <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
+                        {hasTerm ? 'Suggestions' : 'Trending Searches'}
+                      </h3>
+                      <div className="flex flex-col gap-2">
+                        {(hasTerm ? queries : trendingSearches.map(t => ({ text: t }))).map((item, i) => {
+                          const text = typeof item === 'string' ? item : item.text;
+                          if (!text) return null;
+                          return (
+                            <Link
+                              key={i}
+                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(text)}`}
+                              onClick={close}
+                              className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
+                            >
+                              {text}
+                            </Link>
+                          );
+                        })}
                       </div>
                     </div>
-                  </div>
 
+                    {/* Right Column: Products */}
+                    <div className="md:col-span-9">
+                      {products.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          {products.map((product) => (
+                            <Link
+                              key={product.id}
+                              to={`/products/${product.handle}`}
+                              onClick={close}
+                              className="group block"
+                            >
+                              <div className="aspect-square bg-gray-50 rounded-lg mb-4 overflow-hidden relative">
+                                {product.selectedOrFirstAvailableVariant?.image && (
+                                  <Image
+                                    data={product.selectedOrFirstAvailableVariant.image}
+                                    className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
+                                    sizes="(min-width: 768px) 25vw, 50vw"
+                                  />
+                                )}
+                              </div>
+                              <h4 className="font-bold text-gray-900 mb-1 group-hover:text-gray-600 transition-colors">
+                                {product.title}
+                              </h4>
+                              <p className="text-gray-500 text-sm">
+                                {product.productType}
+                              </p>
+                              <p className="font-medium text-gray-900 mt-1">
+                                <Money data={product.selectedOrFirstAvailableVariant?.price!} />
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        hasTerm && (
+                          <div className="text-center py-12 text-gray-500">
+                            <p>No results found for "{term.current}"</p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
                 </div>
               );
-            }
-
-            // Show search results when there's a search term
-            return (
-              <div className="search-results-container">
-                {/* Left Section - Suggested Searches */}
-                <div className="search-left-section">
-                  {queries.length > 0 && (
-                    <div className="suggested-searches">
-                      <h5>SUGGESTED SEARCHES</h5>
-                      <ul className="suggestions-list">
-                        {queries.map((suggestion, index) => (
-                          <li key={suggestion?.text || index} className="suggestion-item">
-                            <Link
-                              onClick={closeSearch}
-                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(suggestion?.text || '')}`}
-                              className="suggestion-link"
-                            >
-                              {suggestion?.text}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {/* Middle Section */}
-                <div className="search-middle-section">
-                  <div className="search-results-grid">
-
-                    <div className="product-results">
-                      <div className="products-grid">
-                        {products
-                          .slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage)
-                          .map((product) => {
-                            const productUrl = `/products/${product.handle}`;
-                            const price = product?.selectedOrFirstAvailableVariant?.price;
-                            const image = product?.selectedOrFirstAvailableVariant?.image;
-
-                            return (
-                              <Link
-                                key={product.id}
-                                to={productUrl}
-                                className="product-card"
-                                onClick={closeSearch}
-                              >
-                                <div className="product-image-container">
-                                  {image ? (
-                                    <Image
-                                      data={{
-                                        url: image.url,
-                                        altText: image.altText || product.title,
-                                        width: 240,
-                                        height: 240,
-                                      }}
-                                      className="product-image"
-                                      loading="eager"
-                                      loaderOptions={{
-                                        scale: 2,
-                                        crop: 'center',
-                                      }}
-                                    />
-                                  ) : (
-                                    <div className="product-image-placeholder" />
-                                  )}
-                                </div>
-                                <div className="product-info">
-                                  <div className="product-title">{product.title}</div>
-                                  <div className="product-price">
-                                    {price ? <Money data={price} /> : 'AED 0.00'}
-                                  </div>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            );
-          }}
-        </SearchResultsPredictive >
-      </div >
-    </Aside >
+            }}
+          </SearchResultsPredictive>
+        </div>
+      </div>
+    </Aside>
   );
 }
 
