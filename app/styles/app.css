@@ -535,7 +535,42 @@ button.reset:hover:not(:has(> *)) {
   opacity: 1;
 }
 
+/* Hide scrollbar in search overlay */
+.search-aside .search-body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
 
+.search-aside .search-body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Remove link styling from product cards */
+.search-aside a.no-underline {
+  text-decoration: none !important;
+}
+
+.search-aside a.no-underline h4,
+.search-aside a.no-underline p {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.search-aside a.no-underline:hover h4,
+.search-aside a.no-underline:hover p {
+  text-decoration: none !important;
+}
+
+/* Remove underlines from all search aside links (Suggestions/Trending) */
+.search-aside a {
+  text-decoration: none !important;
+}
+
+.search-aside a:hover,
+.search-aside a:focus,
+.search-aside a:active {
+  text-decoration: none !important;
+}
 
 .overlay[aria-modal] aside header {
   display: flex;
