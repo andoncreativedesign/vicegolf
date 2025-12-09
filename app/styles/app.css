@@ -517,6 +517,24 @@ button.reset:hover:not(:has(> *)) {
   box-sizing: border-box !important;
 }
 
+/* Style the search input clear button (X) */
+.search-aside input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E");
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.search-aside input[type="search"]::-webkit-search-cancel-button:hover {
+  opacity: 1;
+}
+
 
 
 .overlay[aria-modal] aside header {

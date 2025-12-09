@@ -160,67 +160,91 @@ function SearchAside() {
             return (
               <div className="max-w-[1500px] mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-                  {/* Left Column: Suggestions/Trending */}
+                  {/* Left Column: Only show Suggestions when user is typing */}
                   <div className="md:col-span-3">
-                    <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
-                      {hasTerm ? 'Suggestions' : 'Trending Searches'}
-                    </h3>
-                    <div className="flex flex-col gap-2">
-                      {(hasTerm ? queries : trendingSearches.map(t => ({ text: t }))).map((item, i) => {
-                        const text = typeof item === 'string' ? item : item.text;
-                        if (!text) return null;
-                        return (
-                          <Link
-                            key={i}
-                            to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(text)}`}
-                            onClick={close}
-                            className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
-                          >
-                            {text}
-                          </Link>
-                        );
-                      })}
-                    </div>
+                    {hasTerm && (
+                      <>
+                        <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
+                          Suggestions
+                        </h3>
+                        <div className="flex flex-col gap-2">
+                          {queries.map((item, i) => {
+                            const text = typeof item === 'string' ? item : item.text;
+                            if (!text) return null;
+                            return (
+                              <Link
+                                key={i}
+                                to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(text)}`}
+                                onClick={close}
+                                className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
+                              >
+                                {text}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
                   </div>
 
-                  {/* Right Column: Products (Section B) */}
+                  {/* Center Column: Products when searching, Trending when not */}
                   <div className="md:col-span-8 w-[90%]">
-                    {products.length > 0 ? (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {products.map((product) => (
-                          <Link
-                            key={product.id}
-                            to={`/products/${product.handle}`}
-                            onClick={close}
-                            className="group block"
-                          >
-                            <div className="aspect-square bg-gray-50 rounded-lg mb-4 overflow-hidden relative">
-                              {product.selectedOrFirstAvailableVariant?.image && (
-                                <Image
-                                  data={product.selectedOrFirstAvailableVariant.image}
-                                  className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
-                                  sizes="(min-width: 768px) 25vw, 50vw"
-                                />
-                              )}
-                            </div>
-                            <h4 className="font-bold text-gray-900 mb-1 group-hover:text-gray-600 transition-colors">
-                              {product.title}
-                            </h4>
-                            <p className="text-gray-500 text-sm">
-                              {product.productType}
-                            </p>
-                            <p className="font-medium text-gray-900 mt-1">
-                              <Money data={product.selectedOrFirstAvailableVariant?.price!} />
-                            </p>
-                          </Link>
-                        ))}
-                      </div>
-                    ) : (
-                      hasTerm && (
+                    {hasTerm ? (
+                      // Show products when user is searching
+                      products.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          {products.map((product) => (
+                            <Link
+                              key={product.id}
+                              to={`/products/${product.handle}`}
+                              onClick={close}
+                              className="group block"
+                            >
+                              <div className="aspect-square bg-gray-50 rounded-lg mb-4 overflow-hidden relative">
+                                {product.selectedOrFirstAvailableVariant?.image && (
+                                  <Image
+                                    data={product.selectedOrFirstAvailableVariant.image}
+                                    className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
+                                    sizes="(min-width: 768px) 25vw, 50vw"
+                                  />
+                                )}
+                              </div>
+                              <h4 className="font-bold text-gray-900 mb-1 group-hover:text-gray-600 transition-colors">
+                                {product.title}
+                              </h4>
+                              <p className="text-gray-500 text-sm">
+                                {product.productType}
+                              </p>
+                              <p className="font-medium text-gray-900 mt-1">
+                                <Money data={product.selectedOrFirstAvailableVariant?.price!} />
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
                         <div className="text-center py-12 text-gray-500">
                           <p>No results found for "{term.current}"</p>
                         </div>
                       )
+                    ) : (
+                      // Show Trending Searches when no search term
+                      <>
+                        <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
+                          Trending Searches
+                        </h3>
+                        <div className="flex flex-col gap-2">
+                          {trendingSearches.map((text, i) => (
+                            <Link
+                              key={i}
+                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(text)}`}
+                              onClick={close}
+                              className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
+                            >
+                              {text}
+                            </Link>
+                          ))}
+                        </div>
+                      </>
                     )}
                   </div>
 
