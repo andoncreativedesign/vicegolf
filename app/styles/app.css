@@ -160,8 +160,8 @@ aside main {
 /* Search aside main - full width, auto height */
 .overlay[aria-modal] aside.search-aside main {
   margin: 0;
-  height: auto;
-  max-height: calc(70vh - var(--header-height));
+  height: 100%;
+  max-height: 100%;
   overflow-y: auto;
   padding: 0;
   flex: 1;
@@ -457,7 +457,7 @@ button.reset:hover:not(:has(> *)) {
   transform: translateX(0);
 }
 
-/* Search aside - full width, reduced height */
+/* Search aside - full width, moderate height */
 .overlay[aria-modal] aside.search-aside {
   position: absolute;
   top: 0;
@@ -465,23 +465,111 @@ button.reset:hover:not(:has(> *)) {
   left: auto;
   width: 100%;
   max-width: 100%;
-  padding:0  5px 0 3% ;
+  padding: 0;
   height: auto;
-  max-height: 50vh;
   min-height: 200px;
+  /* Default desktop style */
+  max-height: 65vh; /* Decreased height */
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+  
+  /* Restored Base Styles */
   background: white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  transform: translateX(100%);
+  transform: translateX(100%); /* Slide from right */
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
   margin: 0;
-  border-radius: 0;
-  overflow: hidden;
+}
+
+/* Mobile Search Full Screen */
+@media (max-width: 48em) {
+  .overlay[aria-modal] aside.search-aside {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
 }
 
 .overlay[aria-modal].expanded aside.search-aside {
   transform: translateX(0);
+}
+
+/* Hide default aside header for search */
+.overlay[aria-modal] aside.search-aside > header {
+  display: none !important;
+}
+
+/* Force search form to full width */
+.search-aside form,
+.search-aside .predictive-search-form {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+.search-aside input[type="search"] {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Style the search input clear button (X) */
+.search-aside input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E");
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.search-aside input[type="search"]::-webkit-search-cancel-button:hover {
+  opacity: 1;
+}
+
+/* Hide scrollbar in search overlay */
+.search-aside .search-body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.search-aside .search-body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Remove link styling from product cards */
+.search-aside a.no-underline {
+  text-decoration: none !important;
+}
+
+.search-aside a.no-underline h4,
+.search-aside a.no-underline p {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.search-aside a.no-underline:hover h4,
+.search-aside a.no-underline:hover p {
+  text-decoration: none !important;
+}
+
+/* Remove underlines from all search aside links (Suggestions/Trending) */
+.search-aside a {
+  text-decoration: none !important;
+}
+
+.search-aside a:hover,
+.search-aside a:focus,
+.search-aside a:active {
+  text-decoration: none !important;
 }
 
 .overlay[aria-modal] aside header {
@@ -497,28 +585,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Search aside header - full width with close button on right */
-.overlay[aria-modal] aside.search-aside header {
-  padding: 10px 60px;
-  border-bottom: 1px  #e5e7eb;
-  justify-content: flex-end;
-}
 
-.overlay[aria-modal] aside.search-aside header h3 {
-  display: none;
-}
-
-.overlay[aria-modal] aside.search-aside header .close {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  padding: 8px 16px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.overlay[aria-modal] aside.search-aside header .close:hover {
-  background-color: #f5f5f5;
-}
 
 .overlay .close {
   background: none;
