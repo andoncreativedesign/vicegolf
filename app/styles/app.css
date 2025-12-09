@@ -469,14 +469,14 @@ button.reset:hover:not(:has(> *)) {
   height: auto;
   min-height: 200px;
   /* Default desktop style */
-  max-height: 85vh;
+  max-height: 65vh; /* Decreased height */
   border-radius: 0 0 16px 16px;
   overflow: hidden;
   
   /* Restored Base Styles */
   background: white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  transform: translateY(-100%);
+  transform: translateX(100%); /* Slide from right */
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -493,12 +493,28 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .overlay[aria-modal].expanded aside.search-aside {
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 /* Hide default aside header for search */
 .overlay[aria-modal] aside.search-aside > header {
   display: none !important;
+}
+
+/* Force search form to full width */
+.search-aside form,
+.search-aside .predictive-search-form {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+.search-aside input[type="search"] {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
 }
 
 
