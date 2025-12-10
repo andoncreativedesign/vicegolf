@@ -202,7 +202,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <div className="block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full relative group">
+    <div className="block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-full flex flex-col h-full relative group">
       <div className="block relative" >
 
         <div
@@ -236,9 +236,16 @@ export function VariantProductCard({ product }: ProductCardProps) {
                   src={currentImage || image.url}
                   alt={image.altText || product.title}
                   className="w-full h-full object-contain transition-transform duration-300"
-                  sizes="100%"
-                  width={320}
-                  height={320}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  width={300}
+                  height={300}
+                  style={{
+                    aspectRatio: '1/1',
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                    width: '100%',
+                    height: '100%'
+                  }}
                 />
               )}
             </div>

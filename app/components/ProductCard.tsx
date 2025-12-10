@@ -17,7 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="group block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
+      className="group block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-full flex flex-col h-full"
     >
       {/* Product Image */}
       <Link
@@ -29,17 +29,18 @@ export function ProductCard({ product }: ProductCardProps) {
             <Image
               data={image}
               alt={image.altText || product.title}
-              className="w-full h-full object-contain "
-              sizes="100%"
-              width={320}
-              height={320}
+              className="w-full h-full object-contain"
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              width={300}
+              height={300}
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'contain',
                 objectPosition: 'center',
                 padding: 0,
-                margin: 0
+                margin: 0,
+                aspectRatio: '1/1'
               }}
             />
           ) : (
