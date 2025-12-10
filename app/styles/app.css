@@ -888,7 +888,7 @@ button.reset:hover:not(:has(> *)) {
   grid-template-columns: repeat(3, 1fr);
   gap: 20px !important;
   margin: 0 !important;
-  padding: 0 15px !important;
+  padding: 0 !important;
   list-style: none;
   width: 100% !important;
   max-width: 100% !important;

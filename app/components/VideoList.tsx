@@ -52,11 +52,12 @@ export function VideoList({ videos, title = 'Videos', className = '' }: VideoLis
 
     return (
         <section
-            className={`relative w-full overflow-hidden mb-8 
-  h-[450px] min-h-[400px] max-h-[500px] 
-  w-screen max-w-[100vw] left-1/2 -ml-[50vw] listing-videos ${className}`}
+            className={`relative w-full overflow-hidden
+            h-[450px] min-h-[400px] max-h-[500px]
+            w-screen max-w-[100vw] left-1/2 -translate-x-1/2
+            listing-videos ${className}`}
         >
-            <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
                 <div className="w-full h-full">
                     <div className="w-full h-full flex items-center justify-center">
                         {videos.map((video, index) => (
