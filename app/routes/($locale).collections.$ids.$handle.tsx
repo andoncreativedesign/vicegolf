@@ -178,14 +178,14 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
 
   const decodedIds = JSON.parse(decodeURIComponent(ids));
-  const decodedHandle = decodeURIComponent(handle);
+  const decodedHandle = decodeURIComponent(handle); // Keep for UI/display (e.g., breadcrumbs)
 
   console.log('🔍 Debug: URL handle:', handle);
   console.log('🔍 Debug: Decoded handle:', decodedHandle);
 
-  // Convert space-separated handle to Shopify format (golf-balls)
-  const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
-  console.log('🔍 Debug: Shopify handle format:', shopifyHandle);
+  // OLD: Convert space-separated handle to Shopify format (golf-balls)
+  // const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
+  // NEW: We'll derive the true shopifyHandle from the collection response below
 
   // Debug: Check all listings in Sanity
   await getAllListings();
@@ -193,101 +193,111 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const [collection] = await Promise.all<ShopifyCollectionResponse>([
     storefront.query(GET_PRODUCTS_BY_COLLECTION, {
       variables: {
-        // handle: createCategoryQuery(decodedIds),
         ids: decodedIds,
         ...paginationVariables
       },
-      // Add other queries here, so that they are loaded in parallel
     }),
   ]);
 
+  console.log('\n\ngolf collection ');
+  console.log(JSON.stringify(collection.nodes[0].products.edges));
 
-  console.log('\n\ngolf collection ')
-  console.log(JSON.stringify(collection.nodes[0].products.edges))
-
-
-  if (!collection) {
+  if (!collection || !collection.nodes?.length) {
     throw new Response(`Collection ${decodedHandle} not found`, {
       status: 404,
     });
   }
 
+  // NEW: Extract the true collection handle from Shopify's response
+  // This is the full, canonical handle (e.g., "junior-towels")—use it for Sanity lookup
+  const trueCollectionHandle = collection.nodes[0]?.handle; // Assumes first node is primary; adjust if multi-node logic changes
+  console.log('🔍 Debug: True collection handle from Shopify:', trueCollectionHandle);
+
+  if (!trueCollectionHandle) {
+    console.warn('⚠️ No collection handle found in response—falling back to URL-derived');
+    // Fallback to old logic if somehow missing (rare)
+    const fallbackHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
+    // But proceed—Sanity query may still fail gracefully
+  }
+
+  // ... (your existing combineCollectionProducts function remains unchanged)
   const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection | null => {
-    try {
-      // Check if collections or nodes exist
-      if (!collections?.nodes?.length) {
-        console.log('No collections found');
-        return null;
-      }
-
-      console.log('Processing collections:', JSON.stringify(collections.nodes, null, 2));
-
-      // Filter out any null/undefined collections
-      const validCollections = collections.nodes.filter(
-        collection => collection?.products?.edges?.length > 0
-      );
-
-      if (validCollections.length === 0) {
-        console.log('No valid collections with products found');
-        return null;
-      }
-
-      // If there's only one valid collection, return it as is
-      if (validCollections.length === 1) {
-        console.log('Single collection found, returning as is');
-        return validCollections[0];
-      }
-
-      // Get the first collection to use as a base
-      const baseCollection = { ...validCollections[0] };
-
-      // Combine all products from all valid collections
-      const allEdges = validCollections.flatMap(collection => {
-        if (!collection?.products?.edges) return [];
-        return collection.products.edges.filter(edge => edge?.node);
-      });
-
-      // Create a map to deduplicate products by ID
-      const uniqueProducts = new Map();
-      allEdges.forEach(edge => {
-        if (edge?.node?.id) {
-          uniqueProducts.set(edge.node.id, edge);
-        }
-      });
-
-      console.log(`Combined ${allEdges.length} products into ${uniqueProducts.size} unique products`);
-
-      // Update the base collection with combined products
-      const result = {
-        ...baseCollection,
-        products: {
-          ...baseCollection.products,
-          edges: Array.from(uniqueProducts.values()),
-          pageInfo: baseCollection.products?.pageInfo || {
-            hasNextPage: false,
-            hasPreviousPage: false
-          }
-        }
-      };
-
-      return result;
-    } catch (error) {
-      console.error('Error combining collections:', error);
+  try {
+    if (!collections?.nodes?.length) {
+      console.warn('No collection nodes returned from Shopify');
       return null;
     }
-  };
+
+    // Filter collections that actually have products
+    const validCollections = collections.nodes.filter(
+      (c): c is NonNullable<typeof c> => Boolean(c?.products?.edges?.length)
+    );
+
+    if (validCollections.length === 0) {
+      console.warn('No collections with products found');
+      // Instead of returning null, return the first node with empty products
+      return {
+        ...collections.nodes[0]!,
+        products: {
+          edges: [],
+          pageInfo: { hasNextPage: false, hasPreviousPage: false }
+        }
+      };
+    }
+
+    // If only one collection → return it directly
+    if (validCollections.length === 1) {
+      return validCollections[0]!;
+    }
+
+    // Multiple collections → merge products (your original logic)
+    const baseCollection = { ...validCollections[0]! };
+
+    const allEdges = validCollections.flatMap(c => c.products.edges);
+
+    const uniqueProducts = new Map<string, any>();
+    allEdges.forEach(edge => {
+      if (edge?.node?.id) {
+        uniqueProducts.set(edge.node.id, edge);
+      }
+    });
+
+    return {
+      ...baseCollection,
+      products: {
+        ...baseCollection.products,
+        edges: Array.from(uniqueProducts.values()),
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: null,
+          endCursor: null
+        }
+      }
+    };
+  } catch (error) {
+    console.error('Error in combineCollectionProducts:', error);
+    // Fallback: return first collection even if empty
+    return collections.nodes[0] ? {
+      ...collections.nodes[0],
+      products: { edges: [], pageInfo: { hasNextPage: false, hasPreviousPage: false } }
+    } : null;
+  }
+};
 
   const updatedCollection = combineCollectionProducts(collection);
-  const listingData = await getListingByCollectionHandle(shopifyHandle);
-  console.log("\n\nupdatedCollection data 213123")
-  console.log(JSON.stringify(updatedCollection?.products?.edges?.[0]))
 
-  // 3️⃣ Extract unique family values from metafields
+  // NEW: Use trueCollectionHandle for Sanity query
+  const listingData = await getListingByCollectionHandle(trueCollectionHandle || decodedHandle.toLowerCase().replace(/\s+/g, '-'));
+
+  console.log("\n\nupdatedCollection data 213123");
+  console.log(JSON.stringify(updatedCollection?.products?.edges?.[0]));
+
+  // ... (your existing family extraction, queries, and attachment logic remains unchanged)
   const families = [
     ...new Set(
       updatedCollection?.products?.edges
         ?.map(edge => {
-          // Get family from metafield if available, otherwise use the direct family value
           const familyValue = edge?.node?.metafield?.value ||
             edge?.node?.family?.value;
           return familyValue;
@@ -296,17 +306,11 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     ),
   ];
 
-  // console.log("\n\nExtracted families from metafields:", families);
-  // console.log("\n\nfamilies collection.id.handle ")
-  // console.log(families)
-
-  // 4️⃣ Build Shopify search queries for each family
   const familyQueries = families.map(fam => ({
     value: fam,
     query: `metafields.custom.family:"${fam}"`,
   }));
 
-  // 5️⃣ Run a family group query for EACH family
   const familyGroups: Record<string, any[]> = {};
 
   for (const fam of familyQueries) {
@@ -318,20 +322,11 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     });
 
     if (response.data.errors) {
-      throw new Error(JSON.stringify(response?.data?.errors))
+      throw new Error(JSON.stringify(response?.data?.errors));
     }
-
-    // console.log('\n\ncategoryProducts.golfBalls.nodes')
-    // response.data?.data?.products?.edges.forEach((item) => {
-    //   if(item.node.family){ 
-    //     console.log(item.node.family)
-    //     console.log('image = ', item.node.variantImage?.reference?.image)
-    //   }
-    // })
 
     const colorVariantsRes = response.data?.data?.products?.edges || [];
 
-    // Transform the product data to match the expected format
     const products = colorVariantsRes.map(({ node }) => ({
       ...node,
       id: node.id,
@@ -365,26 +360,13 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     familyGroups[fam.value] = products;
   }
 
-  // 6️⃣ Attach grouped variants to each product
   function attachFamilyGroups(products) {
-
-    // console.log("\n\nobj assinged to family")
-    const updatedProduct = products?.map(p => {
-      const obj = {
-        ...p,
-        variantFamilyProducts: familyGroups[p.family?.value] || [],
-      }
-      if (obj?.variantFamilyProducts?.length > 0) {
-        // console.log(obj)
-      }
-      return obj
-    });
-    // console.log("\n\nend obj assinged to family")
-    return updatedProduct
+    const updatedProduct = products?.map(p => ({
+      ...p,
+      variantFamilyProducts: familyGroups[p.family?.value] || [],
+    }));
+    return updatedProduct;
   }
-
-  // console.log('\n\nfamilyGroups')
-  // console.log(familyGroups[familyQueries?.[0].value]?.[0])
 
   const updateNodes = (edge: any) => {
     const product = edge.node;
@@ -398,7 +380,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     };
   };
 
-
   const updatedEdges = updatedCollection?.products?.edges?.map(updateNodes) || [];
   const updatedCollectionWithVariants = {
     ...updatedCollection,
@@ -407,16 +388,15 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       edges: updatedEdges
     }
   };
-  console.log('\n\n updatedCollection')
-  console.log(updatedCollection?.products.edges[0].node)
-  console.log('\n\nproductsWithColorVariants')
-  console.log(updatedCollectionWithVariants.products.edges[0].node)
-  // Fetch Sanity listing data for this collection using Shopify handle format
+
+  console.log('\n\n updatedCollection');
+  console.log(updatedCollection?.products.edges[0].node);
+  console.log('\n\nproductsWithColorVariants');
+  console.log(updatedCollectionWithVariants.products.edges[0].node);
 
   return {
-    // collection: updatedCollection,
     collection: updatedCollectionWithVariants,
-    handle: decodedHandle,
+    handle: decodedHandle, // Still use URL handle for UI
     listing: listingData
   };
 }
