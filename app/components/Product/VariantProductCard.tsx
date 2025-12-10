@@ -202,11 +202,11 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <div className="block bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full relative group">
+    <div className="block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full relative group">
       <div className="block relative" >
 
         <div
-          className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden"
+          className="relative w-full h-80 bg-[#fcfcfc] overflow-hidden"
           onMouseEnter={() => {
             // Clear any pending timeouts when entering
             if (hoverDelayTimeout) {
@@ -334,7 +334,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
             </span>
           </div> */}
 
-          
+
           {/* ball variants */}
           {isGolfBall && allVariants.length > 1 && (
             <div className="pt-3">

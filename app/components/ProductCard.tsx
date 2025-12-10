@@ -17,37 +17,37 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="group block bg-white rounded-2xl overflow-hidden shadow-md  border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
+      className="group block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-[320px] min-w-[320px] flex flex-col h-full"
     >
       {/* Product Image */}
       <Link
         to={`/products/${product.handle}`}
         style={{ textDecoration: 'none' }}
       >
-      <div className="relative w-full h-80 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-        {image ? (
-          <Image
-            data={image}
-            alt={image.altText || product.title}
-            className="w-full h-full object-contain "
-            sizes="100%"
-            width={320}
-            height={320}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              objectPosition: 'center',
-              padding: 0,
-              margin: 0
-            }}
-          />
-        ) : (
-          <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        )}
-      </div>
+        <div className="relative w-full h-80 bg-[#fcfcfc] overflow-hidden">
+          {image ? (
+            <Image
+              data={image}
+              alt={image.altText || product.title}
+              className="w-full h-full object-contain "
+              sizes="100%"
+              width={320}
+              height={320}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'center',
+                padding: 0,
+                margin: 0
+              }}
+            />
+          ) : (
+            <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          )}
+        </div>
       </Link>
 
       {/* Product Info */}
