@@ -11,7 +11,7 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import type { Route } from './+types/root';
-import favicon from '~/assets/favicon.svg';
+import favicon from '~/assets/vicefav.svg';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { createCategoryQuery, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, type MenuData } from '~/lib/shopify/product-queries';
 import resetStyles from '~/styles/reset.css?url';
@@ -201,9 +201,9 @@ export default function App() {
     >
       <PageLayout {...data}>
         <Outlet />
-         <CustomToastContainer />
+        <CustomToastContainer />
       </PageLayout>
-     
+
     </Analytics.Provider>
   );
 }

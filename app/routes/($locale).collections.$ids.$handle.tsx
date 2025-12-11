@@ -16,7 +16,7 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 
 export const meta: Route.MetaFunction = ({ data }) => {
-    return [{ title: `Hydrogen | ${data?.collection?.title ?? ''} Collection` }];
+    return [{ title: `Vice Golf | ${data?.collection?.title ?? ''} Collection` }];
 };
 
 export async function loader(args: Route.LoaderArgs) {
