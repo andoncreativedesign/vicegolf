@@ -94,7 +94,7 @@ export default function TermsOfService() {
            </p>
             </section>
              <section>
-              <h3 className="text-[1.2rem]  font-bold text-gray-900 mb-4">10. Amendments</h3>
+              <h3 className="text-[1.2rem]  font-bold text-gray-900 mb-4"> 10. Amendments</h3>
               <p className="mb-4">
                The online version at the time of purchase applies. Gateway may update terms at any time.       
          </p>
