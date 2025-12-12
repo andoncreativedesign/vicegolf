@@ -7,7 +7,7 @@ export const meta: Route.MetaFunction = () => {
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <div className="max-w-[91rem] mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">PRIVACY POLICY</h1>
@@ -15,8 +15,9 @@ export default function PrivacyPolicy() {
 
         {/* Content */}
         <div className="prose prose-lg max-w-none">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Personal Details</h2>
-
+          <section >
+          <h6 className="text-4xl  font-bold text-gray-900 mb-4">Personal Details</h6>
+          </section>
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Privacy Policy</h3>
 
           <div className="mb-6">
@@ -24,7 +25,7 @@ export default function PrivacyPolicy() {
             <p className="font-semibold text-gray-900 mb-4">VICE SPORTING GOODS, INC. (08-28-2023)</p>
           </div>
 
-          <div className="space-y-8 text-gray-700 leading-relaxed">
+          <div className="space-y text-gray-700 leading-relaxed">
             <p>
               When recording, processing and making use of your personal details, we adhere strictly to statutory regulations. 
               We record, store and process your details for the overall processing of your purchase, including the provision of 

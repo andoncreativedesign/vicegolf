@@ -133,6 +133,7 @@ function FooterContent({
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Delivery & Shipping</NavLink></li>
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Refund Policy</NavLink></li>
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li>
+            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors">Return Policy</NavLink></li>
           </ul>
         </div>
 
@@ -142,6 +143,7 @@ function FooterContent({
           <ul className="space-y-2">
             <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors">Privacy Policy</NavLink></li>
             <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors">Terms of Service</NavLink></li>
+            <li><NavLink to="/duties-taxes" className="!text-white hover:!text-gray-300 transition-colors">Duties & Taxes</NavLink></li>
             <li><NavLink to="/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors">Cookie Settings</NavLink></li>
           </ul>
         </div>
