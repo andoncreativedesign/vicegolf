@@ -18,6 +18,7 @@ import type { AccordionItem } from '~/lib/sanity/products';
 import type { UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
 import ProductOptionDozen from './Product/ProductOptionDozen';
+import type { ShippingDetails } from '~/lib/sanity/home';
 
 export function ProductForm({
   productOptions,
@@ -27,6 +28,7 @@ export function ProductForm({
   productType,
   productAccordions,
   colorVariants,
+  shippingDetails,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -35,6 +37,7 @@ export function ProductForm({
   productType?: string;
   productAccordions: AccordionItem[];
   colorVariants?: UIColorVariant[];
+  shippingDetails?: ShippingDetails | null;
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -83,7 +86,7 @@ export function ProductForm({
         WebkitOverflowScrolling: 'touch',
         msOverflowStyle: 'none',
         scrollbarWidth: 'none'
-      }} 
+      }}
     >
       {/* Product Title */}
       <h1 className="text-2xl font-bold text-gray-900 mb-1">{title}</h1>
@@ -133,7 +136,7 @@ export function ProductForm({
           if (option.name?.includes('pack size')) return <ProductOptionDozen
             key={index}
             option={option}
-            
+
           />
           return (
             <div className="product-options mb-6" key={option.name}>
@@ -229,9 +232,11 @@ export function ProductForm({
       </div>
 
       {/* Shipping Info */}
-      <div className="mb-6">
-        <ShippingInfo />
-      </div>
+      {shippingDetails &&
+        <div className="mb-6">
+          <ShippingInfo shippingDetails={shippingDetails} />
+        </div>
+      }
 
       {/* Details Accordions */}
       <ProductDetailsAccordions accordions={productAccordions} />

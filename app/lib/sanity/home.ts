@@ -51,7 +51,21 @@ export const homePageQuery = `*[_type == "home"][0]{
           url
         }
       },
+    },
+
+    shippingDetails {
+      _id,
+      _type,
+      title,
+      contentType,
+      description,
+      points[] {
+        _key,
+        point
+      }
     }
+
+
 
   }`;
 
@@ -114,6 +128,19 @@ export interface HomeCategories {
   description?: string;
 }
 
+export interface ShippingPoint {
+  _key: string;
+  point: string;
+}
+export interface ShippingDetails {
+  _id: string;
+  _type: string;
+  title?: string;
+  contentType?: string;
+  description?: string;
+  points?: ShippingPoint[];
+}
+
 export interface HomePageData {
   heroes?: HeroContentImage[];
   secondaryHero?: HeroContentImage[];
@@ -138,9 +165,6 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
     }
 
     const result = response.data;
-
-    console.log("\n\nresponse.data.result")
-    console.log(response.data.result.homeCategories)
 
     // Transform the data to match our types
     const transformedData: HomePageDataTransformed = {
@@ -179,6 +203,41 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
     return transformedData;
   } catch (error) {
     console.error('Error fetching home page data:', error);
+    return null;
+  }
+}
+
+
+
+export const shippingDetailsQuery = `*[_type == "home"][0]{
+  shippingDetails {
+    _id,
+    _type,
+    title,
+    contentType,
+    description,
+    points[] {
+      _key,
+      point
+    }
+  }
+}`;
+
+export async function getShippingDetails(): Promise<ShippingDetails | null> {
+  try {
+    const query = encodeURIComponent(shippingDetailsQuery);
+    const response = await axiosSanity.get("/?query=" + query);
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = response.data;
+
+    // Return the shipping details directly since that's all we're querying for
+    return result.result?.shippingDetails || null;
+  } catch (error) {
+    console.error('Error fetching shipping details:', error);
     return null;
   }
 }
