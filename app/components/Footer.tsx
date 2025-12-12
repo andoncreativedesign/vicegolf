@@ -218,9 +218,9 @@ function FooterContent({
             <h4 className="font-semibold text-white mb-2">Safe & Fast Shipping</h4>
             <div className="flex items-center space-x-2">
               <img
-                src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/fedex.svg?v=1743711853&width=60&height=60&crop=center"
-                alt="FedEx"
-                className="h-5 w-auto"
+                src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/logo.svg?v=1765342145'
+                alt="Jeebly"
+                className="h-8 w-auto"
                 loading="lazy"
               />
             </div>

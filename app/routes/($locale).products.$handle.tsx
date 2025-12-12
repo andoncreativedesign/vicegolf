@@ -28,6 +28,7 @@ import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
+import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
 
 type ProductImageType = {
   id: string;
@@ -147,17 +148,23 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
       after: recommendedCursor || undefined,
     },
   }).catch(() => null);
+  const shippingDetails = await getShippingDetails();
 
-  return { recommendedProducts };
+  return { recommendedProducts, shippingDetails };
 }
 
 export default function Product() {
-  const { product, colorVariants, recommendedProducts } = useLoaderData<typeof loader>();
+  const { product, colorVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
+
+  // useEffect(() => {
+  //   if (!data) return 
+  //   console.log("data.homePageData ", data.homePageData)
+  // },[data])
 
   useEffect(() => {
-    console.log('product details from shopify', product)
-    console.log('product metafields:', product.metafields)
-    console.log('color variants from shopify', colorVariants)
+    // console.log('product details from shopify', product)
+    // console.log('product metafields:', product.metafields)
+    // console.log('color variants from shopify', colorVariants)
 
     // Debug metafields for Tracer product
     const isTracer = product.metafields?.some(
@@ -285,6 +292,7 @@ export default function Product() {
             productType={product.productType}
             productAccordions={productDetails?.accordionItems || []}
             colorVariants={colorVariants}
+            shippingDetails={shippingDetails}
           />
         </div>
       </div>
