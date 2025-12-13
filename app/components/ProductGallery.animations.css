@@ -1,0 +1,50 @@
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered delay for each thumbnail */
+.thumbnail-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.thumbnail-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  /* Horizontal layout for mobile */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .thumbnail-enter {
+    transform: translateX(-20px);
+  }
+  
+  .thumbnail-enter-active {
+    transform: translateX(0);
+  }
+}

@@ -81,141 +81,163 @@ export default function OrderRoute() {
     discountPercentage,
     fulfillmentStatus,
   } = useLoaderData<typeof loader>();
+  
   return (
-    <div className="account-order">
-      <h2>Order {order.name}</h2>
-      <p>Placed on {new Date(order.processedAt!).toDateString()}</p>
-      {order.confirmationNumber && (
-        <p>Confirmation: {order.confirmationNumber}</p>
-      )}
-      <br />
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Product</th>
-              <th scope="col">Price</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Total</th>
-            </tr>
-          </thead>
+    <div className="order-details">
+      <div className="order-header">
+        <h2>Order {order.name}</h2>
+        <p className="order-date">Placed on {new Date(order.processedAt!).toDateString()}</p>
+        {order.confirmationNumber && (
+          <p className="confirmation">Confirmation: {order.confirmationNumber}</p>
+        )}
+      </div>
+
+      <div className="order-items">
+        <div className="order-items-container">
+          <table className="order-items-table w-full border-collapse">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th scope="col" className="text-left py-3 px-4 w-1/2 font-medium">Product</th>
+                <th scope="col" className="text-right py-3 px-4 w-1/6 font-medium">Price</th>
+                <th scope="col" className="text-center py-3 px-4 w-1/6 font-medium">Quantity</th>
+                <th scope="col" className="text-right py-3 px-4 w-1/6 font-medium">Total</th>
+              </tr>
+            </thead>
           <tbody>
             {lineItems.map((lineItem, lineItemIndex) => (
-              // eslint-disable-next-line react/no-array-index-key
               <OrderLineRow key={lineItemIndex} lineItem={lineItem} />
             ))}
           </tbody>
-          <tfoot>
-            {((discountValue && discountValue.amount) ||
-              discountPercentage) && (
+          </table>
+        </div>
+        
+        <div className="order-summary mt-8">
+          <table className="w-full max-w-md ml-auto">
+            <tfoot className="text-right">
+            {((discountValue && discountValue.amount) || discountPercentage) && (
               <tr>
-                <th scope="row" colSpan={3}>
-                  <p>Discounts</p>
-                </th>
-                <th scope="row">
-                  <p>Discounts</p>
-                </th>
-                <td>
+                <td className="py-2 text-right">
+                  {discountPercentage ? 'Discount' : 'Discounts'}:
+                </td>
+                <td className="py-2 pl-4 text-right font-medium">
                   {discountPercentage ? (
-                    <span>-{discountPercentage}% OFF</span>
+                    <span className="text-red-600">-{discountPercentage}% OFF</span>
                   ) : (
-                    discountValue && <Money data={discountValue!} />
+                    discountValue && <Money data={discountValue!} className="text-red-600" />
                   )}
                 </td>
               </tr>
             )}
-            <tr>
-              <th scope="row" colSpan={3}>
-                <p>Subtotal</p>
+            <tr className="order-totals-row">
+              <th scope="row" colSpan={3} className="label">
+                Subtotal
               </th>
-              <th scope="row">
-                <p>Subtotal</p>
-              </th>
-              <td>
+              <td className="value">
                 <Money data={order.subtotal!} />
               </td>
             </tr>
-            <tr>
-              <th scope="row" colSpan={3}>
+            <tr className="order-totals-row">
+              <th scope="row" colSpan={3} className="label">
                 Tax
               </th>
-              <th scope="row">
-                <p>Tax</p>
-              </th>
-              <td>
+              <td className="value">
                 <Money data={order.totalTax!} />
               </td>
             </tr>
-            <tr>
-              <th scope="row" colSpan={3}>
+            <tr className="order-totals-row total">
+              <th scope="row" colSpan={3} className="label">
                 Total
               </th>
-              <th scope="row">
-                <p>Total</p>
-              </th>
-              <td>
+              <td className="value">
                 <Money data={order.totalPrice!} />
               </td>
             </tr>
           </tfoot>
         </table>
-        <div>
+        </div>
+      </div>
+
+      <div className="order-address-section">
+        <div className="shipping-address">
           <h3>Shipping Address</h3>
-          {order?.shippingAddress ? (
-            <address>
-              <p>{order.shippingAddress.name}</p>
-              {order.shippingAddress.formatted ? (
-                <p>{order.shippingAddress.formatted}</p>
-              ) : (
-                ''
-              )}
-              {order.shippingAddress.formattedArea ? (
-                <p>{order.shippingAddress.formattedArea}</p>
-              ) : (
-                ''
-              )}
-            </address>
-          ) : (
-            <p>No shipping address defined</p>
-          )}
+          <div className="address-details">
+            {order?.shippingAddress ? (
+              <address>
+                <p className="name">{order.shippingAddress.name}</p>
+                {order.shippingAddress.formatted && (
+                  <p className="address">{order.shippingAddress.formatted}</p>
+                )}
+                {order.shippingAddress.formattedArea && (
+                  <p className="area">{order.shippingAddress.formattedArea}</p>
+                )}
+              </address>
+            ) : (
+              <p>No shipping address defined</p>
+            )}
+          </div>
+        </div>
+
+        <div className="order-status-section">
           <h3>Status</h3>
-          <div>
-            <p>{fulfillmentStatus}</p>
+          <div className="status-badge">
+            {fulfillmentStatus}
           </div>
         </div>
       </div>
-      <br />
-      <p>
-        <a target="_blank" href={order.statusPageUrl} rel="noreferrer">
+
+      <div className="order-actions mt-8">
+        <a 
+          target="_blank" 
+          href={order.statusPageUrl} 
+          rel="noreferrer"
+          className="inline-block bg-gray-800 px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
+          style={{ color: 'white' }}
+        >
           View Order Status →
         </a>
-      </p>
+      </div>
     </div>
   );
 }
 
 function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
   return (
-    <tr key={lineItem.id}>
-      <td>
-        <div>
+    <tr className="order-line-item border-b border-gray-100 hover:bg-gray-50">
+      <td className="py-4 px-4">
+        <div className="flex items-center">
           {lineItem?.image && (
-            <div>
-              <Image data={lineItem.image} width={96} height={96} />
+            <div className="flex-shrink-0 mr-4">
+              <Image 
+                data={lineItem.image} 
+                width={64} 
+                height={64}
+                alt={lineItem.title || 'Product image'}
+                className="h-16 w-16 rounded-md object-cover object-center"
+              />
             </div>
           )}
           <div>
-            <p>{lineItem.title}</p>
-            <small>{lineItem.variantTitle}</small>
+            <p className="font-medium text-gray-900">{lineItem.title}</p>
+            {lineItem.variantTitle && (
+              <p className="text-sm text-gray-500">{lineItem.variantTitle}</p>
+            )}
           </div>
         </div>
       </td>
-      <td>
-        <Money data={lineItem.price!} />
+      <td className="py-4 px-4 text-right align-top">
+        <div className="text-gray-900">
+          <Money data={lineItem.price!} />
+        </div>
       </td>
-      <td>{lineItem.quantity}</td>
-      <td>
-        <Money data={lineItem.totalDiscount!} />
+      <td className="py-4 px-4 text-center align-top">
+        <div className="text-gray-900">
+          {lineItem.quantity}
+        </div>
+      </td>
+      <td className="py-4 px-4 text-right align-top">
+        <div className="font-medium text-gray-900">
+          <Money data={lineItem.totalDiscount!} />
+        </div>
       </td>
     </tr>
   );

@@ -1,4 +1,4 @@
-import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
+import { Analytics, getShopAnalytics, useNonce } from '@shopify/hydrogen';
 import {
   Outlet,
   useRouteError,
@@ -10,13 +10,16 @@ import {
   ScrollRestoration,
   useRouteLoaderData,
 } from 'react-router';
-import type {Route} from './+types/root';
-import favicon from '~/assets/favicon.svg';
-import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import type { Route } from './+types/root';
+import favicon from '~/assets/vicefav.svg';
+import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
+import { createCategoryQuery, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, type MenuData } from '~/lib/shopify/product-queries';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
-import {PageLayout} from './components/PageLayout';
+import { PageLayout } from './components/PageLayout';
+import { CustomToastContainer } from './components/basic/CustomToast';
+import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 
 export type RootLoader = typeof loader;
 
@@ -62,7 +65,8 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    { rel: 'icon', type: 'image/svg+xml', href: favicon },
+    { rel: "stylesheet", href: toastStyles }
   ];
 }
 
@@ -73,7 +77,7 @@ export async function loader(args: Route.LoaderArgs) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  const {storefront, env} = args.context;
+  const { storefront, env } = args.context;
 
   return {
     ...deferredData,
@@ -98,20 +102,35 @@ export async function loader(args: Route.LoaderArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context}: Route.LoaderArgs) {
-  const {storefront} = context;
+async function loadCriticalData({ context }: Route.LoaderArgs) {
+  const { storefront } = context;
+  const golfBallsHandle = createCategoryQuery('Golf Balls');
+  const golfClubsHandle = createCategoryQuery('Golf Club Set');
+  const apparelHandle = createCategoryQuery('Gloves Men');
+  const gearHandle = createCategoryQuery('Polo');
+  const limitedEditionsHandle = createCategoryQuery('Towels');
+  const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
+  const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  const [header] = await Promise.all([
+  const [header, productsForNav] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
+    storefront.query<MenuData>(MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, {
+      cache: storefront.CacheLong(),
+      variables: {
+        handle: "customer-account-main-menu",
+        country: "IN",
+        language: "EN",
+      }
+    }),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {header};
+  return { header, productsForNav };
 }
 
 /**
@@ -119,8 +138,8 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
-  const {storefront, customerAccount, cart} = context;
+function loadDeferredData({ context }: Route.LoaderArgs) {
+  const { storefront, customerAccount, cart } = context;
 
   // defer the footer query (below the fold)
   const footer = storefront
@@ -142,8 +161,10 @@ function loadDeferredData({context}: Route.LoaderArgs) {
   };
 }
 
-export function Layout({children}: {children?: React.ReactNode}) {
+export function Layout({ children }: { children?: React.ReactNode }) {
   const nonce = useNonce();
+  const data = useRouteLoaderData<typeof loader>('root');
+  const { header, footer } = data || {};
 
   return (
     <html lang="en">
@@ -156,7 +177,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className='font-sans'>
         {children}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -180,7 +201,9 @@ export default function App() {
     >
       <PageLayout {...data}>
         <Outlet />
+        <CustomToastContainer />
       </PageLayout>
+
     </Analytics.Provider>
   );
 }

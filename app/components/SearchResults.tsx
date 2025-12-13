@@ -102,7 +102,7 @@ function SearchResultsProducts({
   }
 
   return (
-    <div className="search-result">
+    <div className="search-results-container">
       <h2>Products</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
@@ -115,16 +115,44 @@ function SearchResultsProducts({
 
             const price = product?.selectedOrFirstAvailableVariant?.price;
             const image = product?.selectedOrFirstAvailableVariant?.image;
+            const compareAtPrice = product?.selectedOrFirstAvailableVariant?.compareAtPrice;
+            const isOnSale = compareAtPrice?.amount && 
+                            parseFloat(compareAtPrice.amount) > parseFloat(price?.amount || '0');
 
             return (
-              <div className="search-results-item" key={product.id}>
-                <Link prefetch="intent" to={productUrl}>
-                  {image && (
-                    <Image data={image} alt={product.title} width={50} />
-                  )}
-                  <div>
-                    <p>{product.title}</p>
-                    <small>{price && <Money data={price} />}</small>
+              <div className="product-card" key={product.id}>
+                <Link prefetch="intent" to={productUrl} className="product-card__link">
+                  <div className="product-card__image-container">
+                    {image && (
+                      <Image 
+                        data={image} 
+                        alt={product.title} 
+                        className="product-card__image"
+                        width={300}
+                        height={300}
+                        loading="lazy"
+                      />
+                    )}
+                    {isOnSale && (
+                      <div className="product-card__sale-badge">Sale</div>
+                    )}
+                  </div>
+                  <div className="product-card__info">
+                    <h3 className="product-card__title">{product.title}</h3>
+                    <div className="product-card__price">
+                      {isOnSale ? (
+                        <>
+                          <span className="product-card__price--sale">
+                            <Money data={price} />
+                          </span>
+                          <span className="product-card__price--compare">
+                            <Money data={compareAtPrice} />
+                          </span>
+                        </>
+                      ) : (
+                        <Money data={price} />
+                      )}
+                    </div>
                   </div>
                 </Link>
               </div>
@@ -132,26 +160,24 @@ function SearchResultsProducts({
           });
 
           return (
-            <div>
-              <div>
-                <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+            <div className="search-results">
+              <div className="pagination-controls">
+                <PreviousLink className="pagination-button">
+                  {isLoading ? 'Loading...' : <span>← Previous</span>}
                 </PreviousLink>
               </div>
-              <div>
+              <div className="products-grid">
                 {ItemsMarkup}
-                <br />
               </div>
-              <div>
-                <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+              <div className="pagination-controls">
+                <NextLink className="pagination-button">
+                  {isLoading ? 'Loading...' : <span>Next →</span>}
                 </NextLink>
               </div>
             </div>
           );
         }}
       </Pagination>
-      <br />
     </div>
   );
 }

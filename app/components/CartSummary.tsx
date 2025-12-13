@@ -1,48 +1,141 @@
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import type {CartLayout} from '~/components/CartMain';
-import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
-import {useEffect, useRef} from 'react';
-import {useFetcher} from 'react-router';
-import type {FetcherWithComponents} from 'react-router';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type { CartLayout } from '~/components/CartMain';
+import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
+import { useEffect, useRef, useState } from 'react';
+import { useFetcher } from 'react-router';
+import type { FetcherWithComponents } from 'react-router';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
   layout: CartLayout;
 };
 
-export function CartSummary({cart, layout}: CartSummaryProps) {
-  const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+export function CartSummary({ cart, layout }: CartSummaryProps) {
+  const isPageLayout = layout === 'page';
 
   return (
-    <div aria-labelledby="cart-summary" className={className}>
-      <h4>Totals</h4>
-      <dl className="cart-subtotal">
-        <dt>Subtotal</dt>
-        <dd>
-          {cart?.cost?.subtotalAmount?.amount ? (
-            <Money data={cart?.cost?.subtotalAmount} />
-          ) : (
-            '-'
+    <div aria-labelledby="cart-summary" className={`cart-summary ${isPageLayout ? 'cart-summary-page' : 'cart-summary-aside'}`}>
+      <div className="summary-card px-4 py-2">
+        <div className="space-y-2">
+          <CartDiscounts discountCodes={cart?.discountCodes} />
+          <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
+
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Subtotal</span>
+            <span className="font-medium text-gray-900">
+              {cart?.cost?.subtotalAmount?.amount ? (
+                <Money data={cart?.cost?.subtotalAmount} />
+              ) : (
+                '-'
+              )}
+            </span>
+          </div>
+
+          {cart?.cost?.totalAmount && (
+            <div className="border-t border-gray-200 pt-3 mt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-900 font-medium">Total <span className="text-gray-600 font-normal">(excl. taxes and shipping)</span></span>
+                <span className="font-medium text-gray-900">
+                  <Money data={cart.cost.totalAmount} />
+                </span>
+              </div>
+            </div>
           )}
-        </dd>
-      </dl>
-      <CartDiscounts discountCodes={cart?.discountCodes} />
-      <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+        </div>
+
+        <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+
+        {isPageLayout && (
+          <div className="mt-6 text-center">
+            <Link
+              to="/collections"
+              className="text-indigo-600 hover:text-indigo-500 text-sm font-medium transition-colors duration-200"
+            >
+              ← Continue Shopping
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
   if (!checkoutUrl) return null;
 
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
+    <div className="checkout-actions">
+      <a
+        href={checkoutUrl}
+        target="_self"
+        className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3"
+        style={{ textDecoration: 'none' }}
+      >
+        Checkout securely
       </a>
-      <br />
+      <div className="flex justify-center items-center gap-3 mt-2">
+        <img
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=50&crop=center"
+          srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard-card.svg?v=1715242245&width=150&crop=center 3x
+    "
+          alt="Mastercard"
+          className="h-6 w-auto"
+        />
+        <img
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=50&crop=center"
+          srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa-card.svg?v=1715242244&width=150&crop=center 3x
+    "
+          alt="Visa"
+          className="h-6 w-auto"
+        />
+        <img
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=50&crop=center"
+          srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=150&crop=center 3x
+    "
+          alt="PayPal"
+          className="h-6 w-auto"
+        />
+        <img
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=50&crop=center"
+          srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=150&crop=center 3x
+    "
+          alt="Apple Pay"
+          className="h-6 w-auto"
+        />
+        <img
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=50&crop=center"
+          srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=150&crop=center 3x
+    "
+          alt="Google Pay"
+          className="h-6 w-auto"
+        />
+        <img
+          src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center"
+          srcSet="
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center 1x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=100&crop=center 2x,
+      https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=150&crop=center 3x
+    "
+          alt="American Express"
+          className="h-6 w-auto"
+        />
+      </div>
+
     </div>
   );
 }
@@ -52,35 +145,65 @@ function CartDiscounts({
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
 }) {
-  const codes: string[] =
-    discountCodes
-      ?.filter((discount) => discount.applicable)
-      ?.map(({code}) => code) || [];
+  const [showInput, setShowInput] = useState(true);
+  const codes: string[] = discountCodes?.filter((discount) => discount.applicable)?.map(({ code }) => code) || [];
 
   return (
-    <div>
-      {/* Have existing discount, display it with a remove option */}
-      <dl hidden={!codes.length}>
-        <div>
-          <dt>Discount(s)</dt>
-          <UpdateDiscountForm>
-            <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
-              &nbsp;
-              <button>Remove</button>
+    <div className="discount-section">
+      {/* Display existing discounts */}
+      {codes.length > 0 && (
+        <div className="applied-discounts mb-3">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Volume discount</span>
+            <UpdateDiscountForm>
+              <button
+                type="submit"
+                className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+              >
+                Remove
+              </button>
+            </UpdateDiscountForm>
+          </div>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {codes.map((code) => (
+              <span key={code} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                {code}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Discount input form */}
+      <div className="discount-input mt-2 w-full">
+        {!showInput && !codes.length ? (
+          <button
+            onClick={() => setShowInput(true)}
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
+          >
+            + Add discount code
+          </button>
+        ) : (
+          <UpdateDiscountForm discountCodes={codes} onSuccess={() => setShowInput(false)}>
+            <div className="w-full">
+              <div className="flex w-full gap-2">
+                <input
+                  type="text"
+                  name="discountCode"
+                  placeholder="Discount code"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <button
+                  type="submit"
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           </UpdateDiscountForm>
-        </div>
-      </dl>
-
-      {/* Show an input to apply a discount */}
-      <UpdateDiscountForm discountCodes={codes}>
-        <div>
-          <input type="text" name="discountCode" placeholder="Discount code" />
-          &nbsp;
-          <button type="submit">Apply</button>
-        </div>
-      </UpdateDiscountForm>
+        )}
+      </div>
     </div>
   );
 }
@@ -88,9 +211,11 @@ function CartDiscounts({
 function UpdateDiscountForm({
   discountCodes,
   children,
+  onSuccess,
 }: {
   discountCodes?: string[];
   children: React.ReactNode;
+  onSuccess?: () => void;
 }) {
   return (
     <CartForm
@@ -99,6 +224,7 @@ function UpdateDiscountForm({
       inputs={{
         discountCodes: discountCodes || [],
       }}
+      onSuccess={onSuccess}
     >
       {children}
     </CartForm>
@@ -110,63 +236,92 @@ function CartGiftCard({
 }: {
   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
 }) {
+  const [showInput, setShowInput] = useState(true);
   const appliedGiftCardCodes = useRef<string[]>([]);
   const giftCardCodeInput = useRef<HTMLInputElement>(null);
-  const giftCardAddFetcher = useFetcher({key: 'gift-card-add'});
+  const giftCardAddFetcher = useFetcher({ key: 'gift-card-add' });
 
-  // Clear the gift card code input after the gift card is added
   useEffect(() => {
     if (giftCardAddFetcher.data) {
       giftCardCodeInput.current!.value = '';
+      setShowInput(false);
     }
   }, [giftCardAddFetcher.data]);
 
   function saveAppliedCode(code: string) {
-    const formattedCode = code.replace(/\s/g, ''); // Remove spaces
+    const formattedCode = code.replace(/\s/g, '');
     if (!appliedGiftCardCodes.current.includes(formattedCode)) {
       appliedGiftCardCodes.current.push(formattedCode);
     }
   }
 
   return (
-    <div>
-      {/* Display applied gift cards with individual remove buttons */}
+    <div className="gift-card-section">
+      {/* Display applied gift cards */}
       {giftCardCodes && giftCardCodes.length > 0 && (
-        <dl>
-          <dt>Applied Gift Card(s)</dt>
-          {giftCardCodes.map((giftCard) => (
-            <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
-              <div className="cart-discount">
-                <code>***{giftCard.lastCharacters}</code>
-                &nbsp;
-                <Money data={giftCard.amountUsed} />
-                &nbsp;
-                <button type="submit">Remove</button>
-              </div>
-            </RemoveGiftCardForm>
-          ))}
-        </dl>
+        <div className="applied-gift-cards mb-3">
+          <span className="text-gray-600 text-sm">Gift Card(s)</span>
+          <div className="space-y-2 mt-2">
+            {giftCardCodes.map((giftCard) => (
+              <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
+                <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900">
+                      ***{giftCard.lastCharacters}
+                    </span>
+                    <span className="text-sm text-green-600">
+                      <Money data={giftCard.amountUsed} />
+                    </span>
+                  </div>
+                  <button
+                    type="submit"
+                    className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </RemoveGiftCardForm>
+            ))}
+          </div>
+        </div>
       )}
 
-      {/* Show an input to apply a gift card */}
-      <UpdateGiftCardForm
-        giftCardCodes={appliedGiftCardCodes.current}
-        saveAppliedCode={saveAppliedCode}
-        fetcherKey="gift-card-add"
-      >
-        <div>
-          <input
-            type="text"
-            name="giftCardCode"
-            placeholder="Gift card code"
-            ref={giftCardCodeInput}
-          />
-          &nbsp;
-          <button type="submit" disabled={giftCardAddFetcher.state !== 'idle'}>
-            Apply
+      {/* Gift card input form */}
+      <div className="gift-card-input mt-2 w-full">
+        {!showInput ? (
+          <button
+            onClick={() => setShowInput(true)}
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
+          >
+            + Add gift card
           </button>
-        </div>
-      </UpdateGiftCardForm>
+        ) : (
+          <UpdateGiftCardForm
+            giftCardCodes={appliedGiftCardCodes.current}
+            saveAppliedCode={saveAppliedCode}
+            fetcherKey="gift-card-add"
+          >
+            <div className="w-full">
+              <div className="flex w-full gap-2">
+                <input
+                  type="text"
+                  name="giftCardCode"
+                  placeholder="Gift card"
+                  ref={giftCardCodeInput}
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <button
+                  type="submit"
+                  disabled={giftCardAddFetcher.state !== 'idle'}
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          </UpdateGiftCardForm>
+        )}
+      </div>
     </div>
   );
 }

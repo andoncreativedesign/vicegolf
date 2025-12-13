@@ -1,19 +1,11 @@
-// NOTE: https://shopify.dev/docs/api/customer/latest/mutations/customerUpdate
+// Customer Account API mutation for updating customer information
 export const CUSTOMER_UPDATE_MUTATION = `#graphql
-  mutation customerUpdate(
-    $customer: CustomerUpdateInput!
-    $language: LanguageCode
-  ) @inContext(language: $language) {
-    customerUpdate(input: $customer) {
+  mutation customerUpdate($input: CustomerUpdateInput!) {
+    customerUpdate(input: $input) {
       customer {
+        id
         firstName
         lastName
-        emailAddress {
-          emailAddress
-        }
-        phoneNumber {
-          phoneNumber
-        }
       }
       userErrors {
         code
@@ -22,4 +14,4 @@ export const CUSTOMER_UPDATE_MUTATION = `#graphql
       }
     }
   }
-` as const;
+`;

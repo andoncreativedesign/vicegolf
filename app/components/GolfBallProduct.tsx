@@ -1,0 +1,134 @@
+// app/components/GolfBallProduct.tsx
+import { useState, useEffect, useCallback } from 'react';
+import type { ProductFragment } from 'storefrontapi.generated';
+import { Youtube } from '~/components/Youtube';
+import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
+import ProductDetailsContent2 from '~/components/Product/ProductDetailsContent2';
+import { ProductGrid } from '~/components/ProductGrid';
+import ProductAccordion2 from '~/components/Product/ProductAccordion2';
+import type { ProductDetails } from '~/lib/sanity/products';
+import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
+import { useFetcher } from 'react-router';
+
+type GolfBallProductProps = {
+  productDetails: ProductDetails | null;
+  initialRecommended?: any; // from loader
+  showBestSellers?: boolean;
+  isGolfBallProduct?: boolean;
+};
+
+export function GolfBallProduct({
+  productDetails,
+  initialRecommended,
+  showBestSellers = true,
+  isGolfBallProduct = false,
+}: GolfBallProductProps) {
+  const fetcher = useFetcher();
+
+  const [recommendedProducts, setRecommendedProducts] = useState<ProductFragment[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Initialize from loader data
+  useEffect(() => {
+    if (initialRecommended?.products?.nodes) {
+      setRecommendedProducts(initialRecommended.products.nodes);
+      setCursor(initialRecommended.products.pageInfo.endCursor || null);
+      setHasMore(!!initialRecommended.products.pageInfo.hasNextPage);
+    }
+  }, [initialRecommended]);
+
+  // Handle fetcher updates (same pattern as homepage)
+  useEffect(() => {
+    if (fetcher.state === 'idle' && fetcher.data) {
+      const data = fetcher.data;
+      if (data.recommendedProducts?.products?.nodes?.length > 0) {
+        setRecommendedProducts(prev => [...prev, ...data.recommendedProducts.products.nodes]);
+        setCursor(data.recommendedProducts.products.pageInfo.endCursor || null);
+        setHasMore(!!data.recommendedProducts.products.pageInfo.hasNextPage);
+        setIsLoading(false);
+      }
+    }
+  }, [fetcher.state, fetcher.data]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!cursor || isLoading || !hasMore) return;
+    setIsLoading(true);
+    fetcher.submit(
+      { recommendedCursor: cursor },
+      { method: 'get', action: '.' }
+    );
+  }, [cursor, hasMore, isLoading, fetcher]);
+
+  return (
+    <div className={`${isGolfBallProduct ? 'px-10 sm:px-12 lg:px-20 xl:px-24' : 'px-6 sm:px-8 lg:px-12 xl:px-16'}`}>
+      <div className="max-w-8xl mx-auto">
+        {productDetails?.productContent1?.content?.map((item, index) => {
+          const isFirst = index === 0;
+          const isSecond = index === 1;
+          const isThird = index === 2;
+
+          // For golf ball products, show image on the left for the first section, right for the second
+          // For non-golf ball products, alternate the layout
+          const showImageLeft = isGolfBallProduct ? isFirst : (index % 2 === 0);
+
+          return (
+            <div key={index} className={isFirst ? 'w-full' : ''}>
+              <div className="w-full min-h-[30vh] flex items-center">
+                <div className="w-full py-8 mb-0">
+                  <ProductDetailsContent1
+                    content={item}
+                    showImageLeft={showImageLeft}
+                    isTextFull={false}
+                    isImageFull={false}
+                    isFirst={isFirst}
+                    isSecond={isSecond}
+                    isThird={isThird}
+                    isDescriptionFull={false}
+                    imageSize={isFirst ? "large" : "large"}
+                    titleClassName={isGolfBallProduct ? 'text-4xl lg:text-5xl font-bold' : ''}
+                    descriptionClassName={!isGolfBallProduct ? '!text-xl font-light text-gray-600 w-full max-w-full px-4' : 'text-base text-gray-600 w-[90%] max-w-[90%] ml-auto'}
+                    pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Product Content 2 Section */}
+        {productDetails?.productContent2?.sections?.map((section, index) => (
+          <div key={index}>
+            <ProductDetailsContent2 content={section} index={index} />
+          </div>
+        ))}
+
+        {productDetails?.accordion2 && (
+          <div className="my-20">
+            <ProductAccordion2 accordion2={productDetails.accordion2} />
+          </div>
+        )}
+
+        {productDetails?.youtubeVideos && (
+          <div className="mt-16 md:mt-20 lg:mt-24">
+            <Youtube youtubeVideo={productDetails.youtubeVideos} />
+          </div>
+        )}
+
+        {/* Best Sellers with Infinite Scroll */}
+        {showBestSellers && recommendedProducts.length > 0 && (
+          <div className="mt-16">
+            <ProductGrid
+              products={recommendedProducts}
+              title="OUR BEST SELLERS"
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loading={isLoading}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
