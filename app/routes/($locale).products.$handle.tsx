@@ -25,6 +25,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
+import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
@@ -312,6 +313,12 @@ export default function Product() {
             field?.key === 'category_variant' && field?.value === 'Towel Junior'
         );
 
+        // Check for Divot Junior product using metafield
+        const isDivotJuniorProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Divot Junior'
+        );
+
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -326,6 +333,15 @@ export default function Product() {
         if (isTowelJuniorProduct) {
           return (
             <TowelJuniorProduct
+              product={product}
+              productDetails={productDetails}
+            />
+          );
+        }
+
+        if (isDivotJuniorProduct) {
+          return (
+            <DivotJuniorProduct
               product={product}
               productDetails={productDetails}
             />
