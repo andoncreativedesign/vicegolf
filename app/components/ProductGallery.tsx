@@ -34,10 +34,10 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
 
   const handleNavigate = (dir: 'prev' | 'next') => {
     if (!images.length || isAnimating) return;
-    
+
     setIsAnimating(true);
     setDirection(dir === 'next' ? 'right' : 'left');
-    
+
     // Calculate new index based on direction
     let newIndex;
     if (dir === 'next') {
@@ -45,10 +45,10 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     } else {
       newIndex = (currentIndex - 1 + images.length) % images.length;
     }
-    
+
     // Start the slide out animation
     if (imageContainerRef.current) {
-      imageContainerRef.current.style.transform = 
+      imageContainerRef.current.style.transform =
         dir === 'next' ? 'translateX(-100%)' : 'translateX(100%)';
       imageContainerRef.current.style.opacity = '0';
     }
@@ -57,17 +57,17 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     setTimeout(() => {
       setCurrentIndex(newIndex);
       onImageSelect(images[newIndex]);
-      
+
       // Reset position and animate back in
       requestAnimationFrame(() => {
         if (imageContainerRef.current) {
           imageContainerRef.current.style.transition = 'none';
-          imageContainerRef.current.style.transform = 
+          imageContainerRef.current.style.transform =
             dir === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
-          
+
           // Force reflow
           imageContainerRef.current.offsetHeight;
-          
+
           // Start slide in animation
           requestAnimationFrame(() => {
             if (imageContainerRef.current) {
@@ -78,7 +78,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
           });
         }
       });
-      
+
       // Reset animation state
       setTimeout(() => {
         setIsAnimating(false);
@@ -118,11 +118,10 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
               <button
                 key={image.id}
                 onClick={() => handleThumbnailClick(image)}
-                className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 shadow-sm hover:shadow-md ${
-                  isActive
-                    ? 'ring-1 ring-white scale-[1.03] shadow-md'
-                    : 'hover:ring-0 hover:ring-white'
-                }`}
+                className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 shadow-sm hover:shadow-md ${isActive
+                  ? 'ring-1 ring-white scale-[1.03] shadow-md'
+                  : 'hover:ring-0 hover:ring-white'
+                  }`}
               >
                 <Image
                   data={image}
@@ -137,8 +136,8 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
       )}
 
       {/* Main Image */}
-      <div className="relative flex-1 max-h-[600px] max-w-[600px] group bg-white rounded-none shadow-lg overflow-hidden aspect-square">
-        <div 
+      <div className="relative flex-none w-[340px] h-[340px] md:w-[500px] md:h-[500px] xl:w-[600px] xl:h-[600px] group bg-white rounded-none shadow-lg overflow-hidden">
+        <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
         >
@@ -146,7 +145,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className="w-full h-full object-cover"
+              className="w-[340px] h-[340px] md:w-[500px] md:h-[500px] xl:w-[600px] xl:h-[600px] object-contain mix-blend-multiply"
               aspectRatio="1/1"
               sizes="(min-width: 45em) 50vw, 100vw"
             />
@@ -180,9 +179,9 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
           </div>
         )}
       </div>
-      
+
     </div>
   );
 }
 
-export default ProductGallery;
+export default ProductGallery

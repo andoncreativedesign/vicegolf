@@ -269,7 +269,7 @@ export default function Product() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-1 w-full p-10 justify-center items-center lg:items-start">
+      <div className="flex flex-col xl:flex-row gap-1 w-full p-10 justify-center items-center xl:items-start">
         <div className="">
           {images?.nodes?.length > 0 ? (
             <ProductGallery

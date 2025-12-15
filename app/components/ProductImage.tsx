@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+;import { useState } from 'react';
 import { Image } from '@shopify/hydrogen';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { ProductVariantFragment } from 'storefrontapi.generated';
@@ -30,11 +31,11 @@ export function ProductImage({ image, galleryImages = [], onImageChange }: Produ
   return (
     <div className="relative group overflow-hidden bg-white shadow-lg w-full max-w-[550px] mx-auto">
       <div className="relative pt-[100%] w-full">
-        <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="absolute inset-0 flex items-center justify-center">
           <Image
             alt={currentImage.altText || 'Product Image'}
             data={currentImage}
-            className="w-full h-full max-h-[600px] object-contain transition-transform duration-300 ease-in-out group-hover:scale-[1.02]"
+            className="w-full h-full max-h-[600px] object-cover transition-transform duration-300 ease-in-out group-hover:scale-[1.02] mix-blend-multiply"
             sizes="(min-width: 45em) 50vw, 100vw"
           />
         </div>
