@@ -46,12 +46,6 @@ export function ProductForm({
   const formRef = useRef<HTMLDivElement>(null);
   const [formHeight, setFormHeight] = useState('auto');
 
-  const pricingTiers = [
-    { key: '1', label: '1 dozen' },
-    { key: '3', label: '3 dozen' },
-    { key: '6', label: '6 dozen' },
-  ];
-
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
   const unitPriceAmount = parseFloat(selectedVariant?.price?.amount || '0');
   const unitCompareAmount = parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
@@ -59,6 +53,34 @@ export function ProductForm({
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
   const showCompare = unitCompareAmount > unitPriceAmount;
+
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+    }).format(amount);
+  };
+
+  const pricingTiers = [
+    {
+      key: '1',
+      label: '1 dozen',
+      price: formatPrice(unitPriceAmount),
+      oldPrice: showCompare ? formatPrice(unitCompareAmount) : undefined
+    },
+    {
+      key: '3',
+      label: '3 dozen',
+      price: formatPrice(unitPriceAmount * 3),
+      oldPrice: showCompare ? formatPrice(unitCompareAmount * 3) : undefined
+    },
+    {
+      key: '6',
+      label: '6 dozen',
+      price: formatPrice(unitPriceAmount * 6),
+      oldPrice: showCompare ? formatPrice(unitCompareAmount * 6) : undefined
+    },
+  ];
 
   const handleCustomQuantity = (q: number) => {
     setQuantity(Math.max(1, q));
@@ -133,11 +155,12 @@ export function ProductForm({
         {productOptions.map((option, index) => {
           if (option.optionValues.length === 1) return null;
           if (option.name === 'Color') return null;
-          if (option.name?.includes('pack size')) return <ProductOptionDozen
+          if (option.name?.includes('pack size')) return null;
+          /* if (option.name?.includes('pack size')) return <ProductOptionDozen
             key={index}
             option={option}
 
-          />
+          /> */
           return (
             <div className="product-options mb-6" key={option.name}>
               <h5 className="text-sm font-medium text-gray-700 mb-3">
@@ -200,15 +223,17 @@ export function ProductForm({
       </div>
 
       {/* Quantity Selector */}
-      {/* <div className="mb-6">
+      <div className="mb-6">
         <QuantitySelector
           selectedTier={selectedTier}
           setSelectedTier={setSelectedTier}
           quantity={quantity}
           setQuantity={handleCustomQuantity}
           pricingTiers={pricingTiers}
+          unitPrice={unitPriceAmount}
+          currencyCode={currencyCode}
         />
-      </div> */}
+      </div>
 
       {/* Add to Cart Button */}
       <div className="mb-6">
@@ -227,7 +252,9 @@ export function ProductForm({
               : []
           }
         >
-          {selectedVariant?.availableForSale ? 'Add to Cart' : 'Sold out'}
+          {selectedVariant?.availableForSale
+            ? `Add to Cart • ${formatPrice(totalPriceAmount)}`
+            : 'Sold out'}
         </AddToCartButton>
       </div>
 
