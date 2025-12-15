@@ -409,7 +409,8 @@ export interface ShopifyPageInfo {
   endCursor?: string;
 }
 
-
+// ! collection query without sorting 
+/* 
 export const GET_PRODUCTS_BY_COLLECTION = `#graphql
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
@@ -453,6 +454,60 @@ query GetProductsByCollectionIds(
   }
 }
 `;
+*/
+
+export const GET_PRODUCTS_BY_COLLECTION = `#graphql
+${MONEY_FRAGMENT}
+${PRODUCT_FRAGMENT_FOR_COLLECTION}
+
+query GetProductsByCollectionIds(
+  $ids: [ID!]!
+  $country: CountryCode
+  $language: LanguageCode
+  $first: Int
+  $startCursor: String
+  $endCursor: String
+) @inContext(country: $country, language: $language) {
+  nodes(ids: $ids) {
+    ... on Collection {
+      id
+      handle
+      title
+      description
+      image {
+        url
+        altText
+      }
+      products(
+        first: $first
+        before: $startCursor
+        after: $endCursor
+        sortKey: PRICE
+        reverse: false
+      ) {
+        edges {
+          node {
+            ...ProductItem
+            priceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
+        }
+      }
+    }
+  }
+}
+`;
+
 
 const PRODUCT_CARD_FRAGMENT = `
 fragment ProductCardFragment on Product {
@@ -666,57 +721,6 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
   }
 `;
 
-/* 
-//  ! working qury
-export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
-  query ProductsByFamily($searchQuery: String!) {
-    products(first: 20, query: $searchQuery) {
-      edges {
-        node {
-          id
-          title
-          handle
-          productType
-          vendor
-
-          featuredImage {
-            id
-            url
-            altText
-            width
-            height
-          }
-
-          family: metafield(namespace: "custom", key: "family") {
-            id
-            namespace
-            key
-            type
-            value
-          }
-
-          # Product-level: Variant Image metafield
-          variantImage: metafield(namespace: "custom", key: "variant_image") {
-            reference {
-              ... on MediaImage {
-                id
-                image {
-                  url
-                  altText
-                  width
-                  height
-                }
-              }
-            }
-          }
-
-        }
-      }
-    }
-  }
-`;
-*/
-
 
 export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
   query ProductsByFamily($searchQuery: String!) {
@@ -794,3 +798,124 @@ export const GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS = `#graphql
     }
   }
 `;
+
+
+
+const PRODUCT_VARIANT_FRAGMENT = `#graphql
+  fragment ProductVariant on ProductVariant {
+    availableForSale
+    compareAtPrice {
+      amount
+      currencyCode
+    }
+    id
+    image {
+      __typename
+      id
+      url
+      altText
+      width
+      height
+    }
+    price {
+      amount
+      currencyCode
+    }
+    product {
+      title
+      handle
+    }
+    selectedOptions {
+      name
+      value
+    }
+    sku
+    title
+    unitPrice {
+      amount
+      currencyCode
+    }
+  }
+` as const;
+
+const PRODUCT_FRAGMENT = `#graphql
+  fragment Product on Product {
+    id
+    title
+    vendor
+    handle
+    productType
+    descriptionHtml
+    description
+    encodedVariantExistence
+    encodedVariantAvailability
+    metafield(namespace: "custom", key: "family") {
+      id
+      namespace
+      key
+      type
+      value
+    }
+    metafields(identifiers: [
+      {namespace: "custom", key: "family"}
+      {namespace: "custom", key: "category_variant"}
+    ]) {
+      id
+      namespace
+      key
+      type
+      value
+    }
+    images(first: 10) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+    options {
+      name
+      optionValues {
+        name
+        firstSelectableVariant {
+          ...ProductVariant
+        }
+        swatch {
+          color
+          image {
+            previewImage {
+              url
+            }
+          }
+        }
+      }
+    }
+    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
+      ...ProductVariant
+    }
+    adjacentVariants (selectedOptions: $selectedOptions) {
+      ...ProductVariant
+    }
+    seo {
+      description
+      title
+    }
+  }
+  ${PRODUCT_VARIANT_FRAGMENT}
+` as const;
+
+export const PRODUCT_QUERY = `#graphql
+  query Product(
+    $country: CountryCode
+    $handle: String!
+    $language: LanguageCode
+    $selectedOptions: [SelectedOptionInput!]!
+  ) @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
+      ...Product
+    }
+  }
+  ${PRODUCT_FRAGMENT}
+` as const;
