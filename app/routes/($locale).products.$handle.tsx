@@ -238,54 +238,59 @@ export default function Product() {
   const productType = formatProductType(product.productType || '');
 
   return (
-    <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
+    <div className="w-full max-w-[1920px] mx-auto px-6 xl:px-12 2xl:px-24 py-6">
       {/* Breadcrumbs */}
-      <div className='flex justify-center'>
-        <div className="text-[18px] font-normal w-screen 2xl:w-[80%] px-4 sm:px-6 md:px-2 lg:px-20 pt-10 text-sm text-gray-900">
-          <div className="flex items-center flex-wrap gap-1">
-            <span className="mx-1"></span>
-            {productType.display ? (
-              <>
-                <Link
-                  to={`/collections/${productType}`}
-                  className="hover:text-gray-600 transition-colors"
-                >
-                  {productType.display}
-                </Link>
-                <span className="mx-1 text-gray-400">&gt;</span>
-              </>
-            ) : null}
-            <span className="font-semibold text-gray-900 font-medium line-clamp-1" title={title}>
-              {title}
-            </span>
-          </div>
+      <div className="w-full max-w-[1600px] mx-auto mb-8">
+        <div className="flex items-center text-sm text-gray-600">
+          <Link to="/" className="hover:text-gray-900 transition-colors">
+            Home
+          </Link>
+          <span className="mx-2 text-gray-400">/</span>
+          {productType.display && (
+            <>
+              <Link
+                to={`/collections/${productType.url}`}
+                className="hover:text-gray-900 transition-colors"
+              >
+                {productType.display}
+              </Link>
+              <span className="mx-2 text-gray-400">/</span>
+            </>
+          )}
+          <span className="text-gray-900 font-medium line-clamp-1" title={title}>
+            {title}
+          </span>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-1 w-full p-10 justify-center items-center lg:items-start">
-        <div className="">
-          {images?.nodes?.length > 0 ? (
-            <ProductGallery
-              images={images.nodes as ProductImageType[]}
-              selectedImage={selectedImage}
-              onImageSelect={handleImageSelect}
+      <div className="w-full max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
+          <div className="w-full">
+            {images?.nodes?.length > 0 ? (
+              <div className="sticky top-6">
+                <ProductGallery
+                  images={images.nodes as ProductImageType[]}
+                  selectedImage={selectedImage}
+                  onImageSelect={handleImageSelect}
+                />
+              </div>
+            ) : (
+              <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
+                <span className="text-gray-400">No image available</span>
+              </div>
+            )}
+          </div>
+          <div className="w-full">
+            <ProductForm
+              productOptions={productOptions}
+              selectedVariant={selectedVariant}
+              title={title}
+              description={descriptionHtml}
+              productType={product.productType}
+              productAccordions={productDetails?.accordionItems || []}
+              colorVariants={colorVariants}
             />
-          ) : (
-            <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
-              <span className="text-gray-400">No image available</span>
-            </div>
-          )}
-        </div>
-        <div className="">
-          <ProductForm
-            productOptions={productOptions}
-            selectedVariant={selectedVariant}
-            title={title}
-            description={descriptionHtml}
-            productType={product.productType}
-            productAccordions={productDetails?.accordionItems || []}
-            colorVariants={colorVariants}
-          />
+          </div>
         </div>
       </div>
       {/* Product-specific sections */}
