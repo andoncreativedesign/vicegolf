@@ -7,13 +7,14 @@ import { ProductItem } from '~/components/ProductItem';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
 import { VariantProductCard } from '~/components/Product/VariantProductCard';
-import { createCategoryQuery, GET_PRODUCTS_BY_COLLECTION, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
+import { createCategoryQuery, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
+import { GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
 import { useEffect } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
-import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD, PRODUCT_QUERY } from '~/lib/shopify/product-queries';
 
 export const meta: Route.MetaFunction = ({ data }) => {
     return [{ title: `Vice Golf | ${data?.collection?.title ?? ''} Collection` }];
