@@ -3,6 +3,7 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {CartPage} from '~/components/CartPage';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `Vice Golf | Cart`}];
@@ -107,11 +108,10 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function Cart() {
   const cart = useLoaderData<typeof loader>();
-
+  
   return (
-    <div className="cart">
-      <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
+    <div className="cart-page-container">
+      <CartPage cart={cart} />
     </div>
   );
 }
