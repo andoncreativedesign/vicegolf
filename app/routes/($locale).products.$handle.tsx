@@ -245,27 +245,28 @@ export default function Product() {
   const productType = formatProductType(product.productType || '');
 
   return (
-    <div className="product-page-container w-full max-w-full mx-auto px-0 py-3 md:py-4">
+    <div className="w-full max-w-[1920px] mx-auto px-6 xl:px-12 2xl:px-24 py-6">
       {/* Breadcrumbs */}
-      <div className='flex justify-center'>
-        <div className="text-[18px] font-normal w-screen 2xl:w-[80%] px-4 sm:px-6 md:px-2 lg:px-20 pt-10 text-sm text-gray-900">
-          <div className="flex items-center flex-wrap gap-1">
-            <span className="mx-1"></span>
-            {productType.display ? (
-              <>
-                <Link
-                  to={`/collections/${productType}`}
-                  className="hover:text-gray-600 transition-colors"
-                >
-                  {productType.display}
-                </Link>
-                <span className="mx-1 text-gray-400">&gt;</span>
-              </>
-            ) : null}
-            <span className="font-semibold text-gray-900 font-medium line-clamp-1" title={title}>
-              {title}
-            </span>
-          </div>
+      <div className="w-full max-w-[1600px] mx-auto mb-8">
+        <div className="flex items-center text-sm text-gray-600">
+          <Link to="/" className="hover:text-gray-900 transition-colors">
+            Home
+          </Link>
+          <span className="mx-2 text-gray-400">/</span>
+          {productType.display && (
+            <>
+              <Link
+                to={`/collections/${productType.url}`}
+                className="hover:text-gray-900 transition-colors"
+              >
+                {productType.display}
+              </Link>
+              <span className="mx-2 text-gray-400">/</span>
+            </>
+          )}
+          <span className="text-gray-900 font-medium line-clamp-1" title={title}>
+            {title}
+          </span>
         </div>
       </div>
 

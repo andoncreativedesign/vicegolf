@@ -101,7 +101,7 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
                   style={{ textDecoration: "none" }}
                 >
                   <div className="w-full bg-[#fcfcfc]">
-                    <h4 className="text-sm font-medium text-gray-800 text-start line-clamp-2 p-2">
+                    <h4 className="text-sm font-bold text-gray-700 text-start line-clamp-2 p-2">
                       {subItem.title}
                     </h4>
                   </div>

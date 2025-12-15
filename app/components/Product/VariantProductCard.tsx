@@ -270,13 +270,16 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 ?.map((variant, index) => (
                   <button
                     key={variant.id}
-                    className={`aspect-square rounded-lg overflow-hidden ring-1 transition-all cursor-pointer ${selectedVariant === index
-                      ? 'ring-2 ring-blue-500 scale-105'
-                      : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
+                    className={`aspect-square rounded-lg ring-1 ring-gray-200 transition-all cursor-pointer ${selectedVariant === index
+                      ? 'ring ' : ''
                       }`}
                     onClick={(e) => handleVariantSelect(e, variant, index)}
                     onMouseEnter={() => {
                       setIsOverVariants(true);
+                       // Change main image on hover
+                         if (variant.image?.url) {
+                       setCurrentImage(variant.image.url);
+                       }
                       // Clear any pending hide timeout
                       if (hoverDelayTimeout) {
                         clearTimeout(hoverDelayTimeout);
@@ -285,6 +288,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
                     }}
                     onMouseLeave={() => {
                       setIsOverVariants(false);
+                       // Revert to selected variant's image when leaving
+                        if (allVariants[selectedVariant]?.image?.url) {
+                        setCurrentImage(allVariants[selectedVariant].image.url);
+                        }
                       // Start the hide timeout when leaving the variants
                       const timeout = setTimeout(() => {
                         setIsHovering(false);
@@ -298,7 +305,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         alt={variant.title}
                         width={56}
                         height={56}
-                        className="w-full h-full object-contain hover:opacity-80 transition-opacity"
+                        className="w-full h-full  object-cover transition-transform duration-200 "
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -359,21 +366,15 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       <button
                         key={variant.id}
                         type="button"
-                        onClick={(e) => handleVariantSelect(e, variant, index)}
-                        onMouseEnter={() => {
+                        onClick={(e) => {
+                          handleVariantSelect(e, variant, index);
                           if (variant.image?.url) {
                             setCurrentImage(variant.image.url);
                           }
                         }}
-                        onMouseLeave={() => {
-                          if (allVariants[selectedVariant]?.image?.url) {
-                            setCurrentImage(allVariants[selectedVariant].image.url);
-                          }
-                        }}
-                        className={`w-6 h-6 rounded-full overflow-hidden ring-1 transition-all duration-200 ${selectedVariant === index
-                          ? 'ring-2 ring-blue-500 scale-110'
-                          : 'ring-gray-200 hover:ring-2 hover:ring-blue-400'
-                          }`}
+                        className={`w-6 h-6 rounded-full overflow-hidden ring-1 ring-gray-100 transition-all duration-200 ${
+                          selectedVariant === index ? 'ring-1 ring-gray-500 ' : ''
+                        }`}
                         title={variant.title}
                       >
                         {variant.variantImage?.url ? (
