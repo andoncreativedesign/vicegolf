@@ -1,11 +1,11 @@
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
-import type {CartLayout} from '~/components/CartMain';
-import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
-import {useVariantUrl} from '~/lib/variants';
-import {Link} from 'react-router';
-import {ProductPrice} from './ProductPrice';
-import {useAside} from './Aside';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
+import type { CartLayout } from '~/types/cart';
+import { CartForm, Image, type OptimisticCartLine } from '@shopify/hydrogen';
+import { useVariantUrl } from '~/lib/variants';
+import { Link } from 'react-router';
+import { ProductPrice } from './ProductPrice';
+import { useAside } from './Aside';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -16,18 +16,19 @@ export function CartLineItem({
   layout: CartLayout;
   line: CartLine;
 }) {
-  const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
+  const { id, merchandise } = line;
+  const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  const {close} = useAside();
+  const { close } = useAside();
 
   return (
-    <li key={id} className="cart-line group flex gap-4 py-6 transition-colors duration-200 hover:bg-gray-50 px-4 rounded-lg">
+    <li key={id} className="cart-line group flex gap-4 py-6 transition-colors duration-200 px-4 rounded-lg">
       {image && (
         <Link
           to={lineItemUrl}
           onClick={() => layout === 'aside' && close()}
-          className="flex-shrink-0 w-20 h-20 overflow-hidden rounded-lg border border-gray-200 transition-transform duration-200 hover:scale-105"
+          className="shrink-0 w-20 h-20  overflow-hidden rounded-sm border border-[#f0f0f0] transition-transform duration-200"
+          style={{ textDecoration: 'none' }}
         >
           <Image
             alt={title}
@@ -48,14 +49,15 @@ export function CartLineItem({
                 to={lineItemUrl}
                 className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors duration-200 line-clamp-2"
                 onClick={() => layout === 'aside' && close()}
+                style={{ textDecoration: 'none' }}
               >
                 {product.title}
               </Link>
-              
+
               {selectedOptions.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {selectedOptions.map((option) => (
-                    <span 
+                    <span
                       key={option.name}
                       className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                     >
@@ -65,16 +67,20 @@ export function CartLineItem({
                 </div>
               )}
             </div>
-            
+
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900">
                 <ProductPrice price={line?.cost?.totalAmount} />
               </div>
-              {line?.cost?.totalAmount?.amount !== line?.cost?.compareAtAmount?.amount && (
-                <div className="text-sm text-gray-500 line-through mt-1">
-                  <ProductPrice price={line?.cost?.compareAtAmount} />
-                </div>
-              )}
+              {line?.cost?.compareAtAmountPerQuantity?.amount &&
+                line.cost.totalAmount.amount !== line.cost.compareAtAmountPerQuantity.amount && (
+                  <div className="text-sm text-gray-500 line-through mt-1">
+                    <ProductPrice price={{
+                      amount: String(Number(line.cost.compareAtAmountPerQuantity.amount) * line.quantity),
+                      currencyCode: line.cost.compareAtAmountPerQuantity.currencyCode
+                    }} />
+                  </div>
+                )}
             </div>
           </div>
 
@@ -88,15 +94,15 @@ export function CartLineItem({
   );
 }
 
-function CartLineQuantity({line}: {line: CartLine}) {
+function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity, isOptimistic} = line;
+  const { id: lineId, quantity, isOptimistic } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
     <div className="flex items-center gap-2">
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
           className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           aria-label="Decrease quantity"
@@ -109,12 +115,12 @@ function CartLineQuantity({line}: {line: CartLine}) {
           </svg>
         </button>
       </CartLineUpdateButton>
-      
+
       <span className="w-6 text-center text-sm font-medium text-gray-900">
         {quantity}
       </span>
-      
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
           className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           aria-label="Increase quantity"
@@ -143,11 +149,11 @@ function CartLineRemoveButton({
       fetcherKey={getUpdateKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
+      inputs={{ lineIds }}
     >
-      <button 
+      <button
         className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
-        disabled={disabled} 
+        disabled={disabled}
         type="submit"
         aria-label="Remove item"
       >
@@ -173,7 +179,7 @@ function CartLineUpdateButton({
       fetcherKey={getUpdateKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {children}
     </CartForm>
