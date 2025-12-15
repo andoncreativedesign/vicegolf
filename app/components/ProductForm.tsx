@@ -19,6 +19,7 @@ import type { UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
 import ProductOptionDozen from './Product/ProductOptionDozen';
 import type { ShippingDetails } from '~/lib/sanity/home';
+import { AedIcon } from './ui/AedIcon';
 
 export function ProductForm({
   productOptions,
@@ -252,9 +253,17 @@ export function ProductForm({
               : []
           }
         >
-          {selectedVariant?.availableForSale
-            ? `Add to Cart • ${formatPrice(totalPriceAmount)}`
-            : 'Sold out'}
+          {selectedVariant?.availableForSale ? (
+            <span className="flex items-center justify-center gap-1">
+              Add to Cart • <AedIcon className="w-3 h-3 text-white" />
+              {new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(totalPriceAmount)}
+            </span>
+          ) : (
+            'Sold out'
+          )}
         </AddToCartButton>
       </div>
 
