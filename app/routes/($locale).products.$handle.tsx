@@ -28,6 +28,7 @@ import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
+import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
 
 type ProductImageType = {
   id: string;
@@ -147,17 +148,23 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
       after: recommendedCursor || undefined,
     },
   }).catch(() => null);
+  const shippingDetails = await getShippingDetails();
 
-  return { recommendedProducts };
+  return { recommendedProducts, shippingDetails };
 }
 
 export default function Product() {
-  const { product, colorVariants, recommendedProducts } = useLoaderData<typeof loader>();
+  const { product, colorVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
+
+  // useEffect(() => {
+  //   if (!data) return 
+  //   console.log("data.homePageData ", data.homePageData)
+  // },[data])
 
   useEffect(() => {
-    console.log('product details from shopify', product)
-    console.log('product metafields:', product.metafields)
-    console.log('color variants from shopify', colorVariants)
+    // console.log('product details from shopify', product)
+    // console.log('product metafields:', product.metafields)
+    // console.log('color variants from shopify', colorVariants)
 
     // Debug metafields for Tracer product
     const isTracer = product.metafields?.some(
@@ -263,34 +270,31 @@ export default function Product() {
         </div>
       </div>
 
-      <div className="w-full max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
-          <div className="w-full">
-            {images?.nodes?.length > 0 ? (
-              <div className="sticky top-6">
-                <ProductGallery
-                  images={images.nodes as ProductImageType[]}
-                  selectedImage={selectedImage}
-                  onImageSelect={handleImageSelect}
-                />
-              </div>
-            ) : (
-              <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
-                <span className="text-gray-400">No image available</span>
-              </div>
-            )}
-          </div>
-          <div className="w-full">
-            <ProductForm
-              productOptions={productOptions}
-              selectedVariant={selectedVariant}
-              title={title}
-              description={descriptionHtml}
-              productType={product.productType}
-              productAccordions={productDetails?.accordionItems || []}
-              colorVariants={colorVariants}
+      <div className="flex flex-col xl:flex-row gap-1 w-full p-10 justify-center items-center xl:items-start">
+        <div className="">
+          {images?.nodes?.length > 0 ? (
+            <ProductGallery
+              images={images.nodes as ProductImageType[]}
+              selectedImage={selectedImage}
+              onImageSelect={handleImageSelect}
             />
-          </div>
+          ) : (
+            <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
+              <span className="text-gray-400">No image available</span>
+            </div>
+          )}
+        </div>
+        <div className="">
+          <ProductForm
+            productOptions={productOptions}
+            selectedVariant={selectedVariant}
+            title={title}
+            description={descriptionHtml}
+            productType={product.productType}
+            productAccordions={productDetails?.accordionItems || []}
+            colorVariants={colorVariants}
+            shippingDetails={shippingDetails}
+          />
         </div>
       </div>
       {/* Product-specific sections */}

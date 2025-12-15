@@ -16,6 +16,8 @@ type Props = ComponentProps<'div'> & {
   quantity: number;
   setQuantity: (q: number) => void;
   pricingTiers: Tier[];
+  unitPrice: number;
+  currencyCode: string;
 };
 
 export function QuantitySelector({
@@ -24,13 +26,15 @@ export function QuantitySelector({
   quantity,
   setQuantity,
   pricingTiers,
+  unitPrice,
+  currencyCode,
   ...props
 }: Props) {
   return (
     <div className="w-full" {...props}>
       <div className="flex flex-col gap-4">
         {/* Pricing Tiers */}
-        <div className="space-y-3">
+        {/* <div className="space-y-3">
           {pricingTiers.map((tier) => {
             const isSelected = selectedTier === tier.key;
             return (
@@ -89,22 +93,22 @@ export function QuantitySelector({
               </label>
             );
           })}
-        </div>
+        </div> */}
 
         {/* Divider */}
-        <div className="relative flex items-center py-2">
+        {/* <div className="relative flex items-center py-2">
           <div className="flex-grow border-t border-gray-200"></div>
           <span className="flex-shrink mx-4 text-sm text-gray-500">or</span>
           <div className="flex-grow border-t border-gray-200"></div>
-        </div>
+        </div> */}
 
         {/* Custom Quantity Selector */}
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium text-gray-900 mb-3">
-             Pick a Custom Quantity
+              Pick a Custom Quantity
             </p>
-            
+
             <div className="flex items-center justify-between p-3 rounded-lg">
               <div className="flex items-center gap-3">
                 <button
@@ -114,11 +118,11 @@ export function QuantitySelector({
                 >
                   <Minus className="h-3 w-3" />
                 </button>
-                
+
                 <span className="w-8 text-center text-sm font-medium text-gray-900">
                   {quantity}
                 </span>
-                
+
                 <button
                   type="button"
                   onClick={() => setQuantity(quantity + 1)}
@@ -127,13 +131,13 @@ export function QuantitySelector({
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
-              
-              <div className="text-right">
+
+              {/* <div className="text-right">
                 <span className="text-xs text-gray-500 block">Total</span>
                 <span className="text-sm font-semibold text-gray-900">
-                  ${(quantity * 39.99).toFixed(2)}
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(quantity * unitPrice)}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

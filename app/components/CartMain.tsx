@@ -5,81 +5,52 @@ import { useAside } from '~/components/Aside';
 import { CartLineItem } from '~/components/CartLineItem';
 import { CartSummary } from './CartSummary';
 
-export type CartLayout = 'page' | 'aside';
-
-export type CartMainProps = {
+type CartMainProps = {
   cart: CartApiQueryFragment | null;
-  layout: CartLayout;
 };
 
 /**
- * The main cart component that displays the cart items and summary.
- * It is used by both the /cart route and the cart aside dialog.
+ * The cart component used specifically for the aside/mini-cart view
  */
-export function CartMain({ layout, cart: originalCart }: CartMainProps) {
+export function CartMain({ cart: originalCart }: CartMainProps) {
   const cart = useOptimisticCart(originalCart);
-  const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
-  const withDiscount = cart && Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
-  const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
+  const { close } = useAside();
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
 
   return (
-    <div className={className}>
-      <CartEmpty hidden={linesCount} layout={layout} />
-      {cartHasItems && (
-        <div className="cart-details">
-          <div className="cart-content">
-            <div className="cart-items" aria-labelledby="cart-lines">
-              <div className="cart-header"></div>
-              <ul className="cart-lines">
-                {(cart?.lines?.nodes ?? []).map((line) => (
-                  <CartLineItem key={line.id} line={line} layout={layout} />
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="cart-summary">
-            <CartSummary cart={cart} layout={layout} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CartEmpty({
-  hidden = false,
-  layout,
-}: {
-  hidden: boolean;
-  layout?: CartMainProps['layout'];
-}) {
-  const { close } = useAside();
-
-  return (
-    <div hidden={hidden} className="empty-cart text-center py-16">
-      <div className="max-w-md mx-auto">
-        <div className="empty-cart-icon mb-6">
-          <svg className="w-24 h-24 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5.5M7 13l2.5 5.5m5.5-5.5h5.5m-5.5 0V19a2 2 0 104 0v-1.5" />
-          </svg>
-        </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-3">Your cart is empty</h3>
-        <p className="text-gray-600 mb-8">
-          Looks like you haven't added anything yet, let's get you started!
-        </p>
-        <div className="w-full flex justify-center">
+    <div className="cart-aside h-full flex flex-col">
+      <div className="p-4 pb-2">
+        <h2 className="text-lg font-semibold mb-4">Your Cart</h2>
+      </div>
+      
+      {!cartHasItems ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-4">
+          <p className="text-gray-500 mb-4">Your cart is empty</p>
           <Link
             to="/collections"
             onClick={close}
-            prefetch="viewport"
-            className="flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline"
-            style={{ textDecoration: 'none', maxWidth: 'fit-content' }}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
           >
             Continue Shopping
           </Link>
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            <ul className="space-y-4">
+              {cart?.lines?.nodes.map((line) => (
+                <li key={line.id}>
+                  <CartLineItem line={line} layout="aside" />
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div className="border-t border-gray-200 p-4 bg-white">
+            <CartSummary cart={cart} layout="aside" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
-import type { CartLayout } from '~/components/CartMain';
+import type { CartLayout } from '~/types/cart';
 import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
-import { useFetcher } from 'react-router';
+import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 
 type CartSummaryProps = {
@@ -12,49 +12,57 @@ type CartSummaryProps = {
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
   const isPageLayout = layout === 'page';
+  const subtotal = cart?.cost?.subtotalAmount;
+  const total = cart?.cost?.totalAmount;
 
   return (
-    <div aria-labelledby="cart-summary" className={`cart-summary ${isPageLayout ? 'cart-summary-page' : 'cart-summary-aside'}`}>
+    <div
+      aria-labelledby="cart-summary"
+      className={`cart-summary ${isPageLayout ? 'cart-summary-page' : 'cart-summary-aside'}`}
+    >
       <div className="summary-card px-4 py-2">
-        <div className="space-y-2">
+        <div className="space-y-3">
           <CartDiscounts discountCodes={cart?.discountCodes} />
-          <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
+          {/* <CartGiftCard giftCardCodes={cart?.appliedGiftCards} /> */}
 
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
             <span className="font-medium text-gray-900">
-              {cart?.cost?.subtotalAmount?.amount ? (
-                <Money data={cart?.cost?.subtotalAmount} />
-              ) : (
-                '-'
-              )}
+              {subtotal?.amount ? <Money data={subtotal} /> : '-'}
             </span>
           </div>
 
-          {cart?.cost?.totalAmount && (
+          {total && (
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-900 font-medium">Total <span className="text-gray-600 font-normal">(excl. taxes and shipping)</span></span>
+                <span className="text-gray-900 font-medium">
+                  Total{' '}
+                  <span className="text-gray-600 font-normal">
+                    (excl. taxes and shipping)
+                  </span>
+                </span>
                 <span className="font-medium text-gray-900">
-                  <Money data={cart.cost.totalAmount} />
+                  <Money data={total} />
                 </span>
               </div>
             </div>
           )}
         </div>
 
-        <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+        <div className="mt-6">
+          <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+        </div>
 
-        {isPageLayout && (
-          <div className="mt-6 text-center">
+        {/* {isPageLayout && (
+          <div className="mt-4 text-center">
             <Link
-              to="/collections"
+              to="/"
               className="text-indigo-600 hover:text-indigo-500 text-sm font-medium transition-colors duration-200"
             >
               ← Continue Shopping
             </Link>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
@@ -175,7 +183,7 @@ function CartDiscounts({
       )}
 
       {/* Discount input form */}
-      <div className="discount-input mt-2 w-full">
+      <div className="discount-input mt-2 w-ful">
         {!showInput && !codes.length ? (
           <button
             onClick={() => setShowInput(true)}
@@ -186,12 +194,12 @@ function CartDiscounts({
         ) : (
           <UpdateDiscountForm discountCodes={codes} onSuccess={() => setShowInput(false)}>
             <div className="w-full">
-              <div className="flex w-full gap-2">
+              <div className="flex w-full gap-2 items-center">
                 <input
                   type="text"
                   name="discountCode"
-                  placeholder="Discount code"
-                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Insert Promo Code"
+                  className="flex-1 w-full px-3 py-2 border border-[#f0f0f0] bg-white rounded-none text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-150"
                 />
                 <button
                   type="submit"
