@@ -1,4 +1,4 @@
-import { redirect, useLoaderData, Link } from 'react-router';
+import { redirect, useLoaderData, Link, useNavigate, useFetcher } from 'react-router';
 import { useCallback, useEffect, useState } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
@@ -25,12 +25,13 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
+import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
-import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
+import { ChevronRight } from 'lucide-react';
 
 type ProductImageType = {
   id: string;
@@ -157,15 +158,16 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
 
 export default function Product() {
   const { product, colorVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
-
+  const navigate = useNavigate()
+  const fetcher = useFetcher()
   // useEffect(() => {
   //   if (!data) return 
   //   console.log("data.homePageData ", data.homePageData)
   // },[data])
 
   useEffect(() => {
-    // console.log('product details from shopify', product)
-    // console.log('product metafields:', product.metafields)
+    console.log('product details from shopify', product)
+    console.log('product metafields:', product.metafields)
     // console.log('color variants from shopify', colorVariants)
 
     // Debug metafields for Tracer product
@@ -246,27 +248,47 @@ export default function Product() {
 
   const productType = formatProductType(product.productType || '');
 
+  const handleBreadCrumbClick = () => {
+    const handle = product?.metafields?.find((item: any) => item?.key === 'primary_collection_handle')
+    if (!handle?.value) navigate(-1)
+    try {
+      fetcher.submit(
+        { handle: handle.value },
+        { method: "post", action: "/api/collection" }
+      );
+    } catch (error) {
+      navigate(-1)
+    }
+  }
+
+  useEffect(() => {
+    if (
+      fetcher.state === "idle"
+      && fetcher.data?.collection?.id
+      && fetcher.data?.collection?.title
+    ) {
+      const { id, title } = fetcher.data.collection
+      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    }
+  }, [fetcher.state, fetcher.data, navigate]);
+
   return (
     <div className="w-full max-w-[1920px] mx-auto px-6 xl:px-12 2xl:px-24 py-6">
       {/* Breadcrumbs */}
       <div className="w-full max-w-[1600px] mx-auto mb-8">
-        <div className="flex items-center text-sm text-gray-600">
-          <Link to="/" className="hover:text-gray-900 transition-colors">
-            Home
-          </Link>
-          <span className="mx-2 text-gray-400">/</span>
+        <div className="flex items-center text-gray-600">
           {productType.display && (
             <>
-              <Link
-                to={`/collections/${productType.url}`}
-                className="hover:text-gray-900 transition-colors"
+              <button
+                onClick={handleBreadCrumbClick}
+                className="cursor-pointer transition-colors text-gray-600"
               >
                 {productType.display}
-              </Link>
-              <span className="mx-2 text-gray-400">/</span>
+              </button>
+              <ChevronRight className="text-gray-600" size={20}/>
             </>
           )}
-          <span className="text-gray-900 font-medium line-clamp-1" title={title}>
+          <span className="text-gray-900 font-bold line-clamp-1" title={title}>
             {title}
           </span>
         </div>
@@ -508,122 +530,3 @@ export default function Product() {
     </div>
   );
 }
-
-const PRODUCT_VARIANT_FRAGMENT = `#graphql
-  fragment ProductVariant on ProductVariant {
-    availableForSale
-    compareAtPrice {
-      amount
-      currencyCode
-    }
-    id
-    image {
-      __typename
-      id
-      url
-      altText
-      width
-      height
-    }
-    price {
-      amount
-      currencyCode
-    }
-    product {
-      title
-      handle
-    }
-    selectedOptions {
-      name
-      value
-    }
-    sku
-    title
-    unitPrice {
-      amount
-      currencyCode
-    }
-  }
-` as const;
-
-const PRODUCT_FRAGMENT = `#graphql
-  fragment Product on Product {
-    id
-    title
-    vendor
-    handle
-    productType
-    descriptionHtml
-    description
-    encodedVariantExistence
-    encodedVariantAvailability
-    metafield(namespace: "custom", key: "family") {
-      id
-      namespace
-      key
-      type
-      value
-    }
-    metafields(identifiers: [
-      {namespace: "custom", key: "family"}
-      {namespace: "custom", key: "category_variant"}
-    ]) {
-      id
-      namespace
-      key
-      type
-      value
-    }
-    images(first: 10) {
-      nodes {
-        id
-        url
-        altText
-        width
-        height
-      }
-    }
-    options {
-      name
-      optionValues {
-        name
-        firstSelectableVariant {
-          ...ProductVariant
-        }
-        swatch {
-          color
-          image {
-            previewImage {
-              url
-            }
-          }
-        }
-      }
-    }
-    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
-      ...ProductVariant
-    }
-    adjacentVariants (selectedOptions: $selectedOptions) {
-      ...ProductVariant
-    }
-    seo {
-      description
-      title
-    }
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const PRODUCT_QUERY = `#graphql
-  query Product(
-    $country: CountryCode
-    $handle: String!
-    $language: LanguageCode
-    $selectedOptions: [SelectedOptionInput!]!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      ...Product
-    }
-  }
-  ${PRODUCT_FRAGMENT}
-` as const;
