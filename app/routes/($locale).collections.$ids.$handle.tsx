@@ -15,6 +15,7 @@ import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD, PRODUCT_QUERY } from '~/lib/shopify/product-queries';
+import { ChevronRight } from 'lucide-react';
 
 export const meta: Route.MetaFunction = ({ data }) => {
     return [{ title: `Vice Golf | ${data?.collection?.title ?? ''} Collection` }];
@@ -474,15 +475,12 @@ export default function Collection() {
                     {/* Breadcrumb navigation */}
                     <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
                         <ol className="flex items-center space-x-2">
-                            <li>
-                                <Link
-                                    to="/collections"
-                                    className="text-blue-600 hover:text-blue-800 transition-colors"
-                                >
+                            <li className='flex items-center'>
+                                <span className="transition-colors cursor-pointer">
                                     Collection
-                                </Link>
+                                </span>
+                                <ChevronRight className="text-gray-600" size={20} />
                             </li>
-                            <li className="text-gray-400">{'>'}</li>
                             <li>
                                 <span className="text-gray-900 font-semibold">
                                     {handle}
@@ -503,15 +501,12 @@ export default function Collection() {
                     {/* Breadcrumb navigation */}
                     <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
                         <ol className="flex items-center space-x-2">
-                            <li>
-                                <Link
-                                    to="/collections"
-                                    className="text-blue-600 hover:text-blue-800 transition-colors"
-                                >
+                            <li className='flex items-center'>
+                                <span className="transition-colors cursor-pointer">
                                     Collection
-                                </Link>
+                                </span>
+                                <ChevronRight className="text-gray-600" size={20} />
                             </li>
-                            <li className="text-gray-400">{'>'}</li>
                             <li>
                                 <span className="text-gray-900 font-semibold">
                                     {handle}
