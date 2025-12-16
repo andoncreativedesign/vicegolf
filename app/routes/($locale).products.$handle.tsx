@@ -21,6 +21,7 @@ import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
+import { CapProduct } from '~/components/CapProduct';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
@@ -417,11 +418,11 @@ export default function Product() {
           case "cap":
           case "caps":
             return (
-              <GolfBallProduct
+              <CapProduct
+                product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
                 showBestSellers={true}
-                isGolfBallProduct={false}
               />
             );
 
