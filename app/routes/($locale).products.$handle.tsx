@@ -26,6 +26,8 @@ import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
 import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
+import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
@@ -335,6 +337,18 @@ export default function Product() {
             field?.key === 'category_variant' && field?.value === 'Towel Junior'
         );
 
+        // Check for Divot Junior product using metafield
+        const isDivotJuniorProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Divot Junior'
+        );
+
+        // Check for Junior Golf Ball product using metafield
+        const isJuniorGolfBallProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Junior Ball'
+        );
+
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -351,6 +365,27 @@ export default function Product() {
             <TowelJuniorProduct
               product={product}
               productDetails={productDetails}
+            />
+          );
+        }
+
+        if (isDivotJuniorProduct) {
+          return (
+            <DivotJuniorProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
+            />
+          );
+        }
+
+        if (isJuniorGolfBallProduct) {
+          return (
+            <JuniorGolfBallProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
             />
           );
         }
