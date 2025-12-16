@@ -52,8 +52,8 @@ export function TracerProduct({ product, productDetails, initialRecommended, sho
                                 showImageLeft={false}
                                 isTextFull={true}
                                 isImageFull={true}
-                                isFirst={false}
-                                isSecond={true}
+                                isFirst={true}
+                                isSecond={false}
                                 isThird={false}
                                 isDescriptionFull={true}
                                 imageSize="xlarge"
