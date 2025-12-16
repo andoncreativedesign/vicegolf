@@ -15,6 +15,7 @@ import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import { GolfBallProduct } from '~/components/GolfBallProduct';
 import { GolfClubSetProduct } from '~/components/GolfClubSetProduct';
 import { ShoesProduct } from '~/components/ShoesProduct';
+import { JuniorCapProduct } from '~/components/JuniorCapProduct';
 import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
@@ -328,6 +329,10 @@ export default function Product() {
             field?.key === 'category_variant' && field?.value === 'Junior Ball'
         );
 
+        const isJuniorCapProduct = product.metafields?.some(
+    (field: { key?: string; value?: string }) =>
+      field?.key === 'category_variant' && field?.value === 'Junior Cap'
+  );
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -368,6 +373,17 @@ export default function Product() {
             />
           );
         }
+
+        if (isJuniorCapProduct) {
+    return (
+      <JuniorCapProduct
+        product={product}
+        productDetails={productDetails}
+        initialRecommended={recommendedProducts}
+        showBestSellers={true} // or false, depending on your design
+      />
+    );
+  }
 
         switch (productType) {
           /** 👇 Clothing category */
