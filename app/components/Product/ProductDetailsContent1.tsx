@@ -39,17 +39,22 @@ const ProductDetailsContent1 = ({
 
   const imageSection = (
     <div className={`flex items-center justify-center ${isImageFull || isFirst ? 'w-full' : ''} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
-      <div className={`relative group ${isFirst ? 'w-full' : ''} ${isFirst ? 'max-h-[80vh] overflow-hidden' : ''}`}>
+      <div className={`relative group ${isImageFull ? 'w-full' : (isFirst ? 'w-full' : '')} ${isFirst ? 'max-h-[80vh] overflow-hidden' : ''}`}>
         {content?.images?.[0]?.asset?.url && (
           <img
             src={content.images[0].asset.url}
             alt={content.title || 'Product image'}
-            className={`${isImageFull || isFirst ? 'w-full' : 'w-full'} ${isFirst ? 'max-w-none' : ''} ${!isImageFull && !isFirst && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
-              !isImageFull && !isFirst && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
-                !isImageFull && !isFirst && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
-                  !isImageFull && !isFirst && imageSize === 'xlarge' ? 'max-w-2xl lg:max-w-4xl' :
-                    ''
-              } ${isFirst ? 'h-auto max-h-[80vh] object-cover object-center' : 'object-contain'} ${imageClassName}`}
+            className={`${isImageFull ? 'w-full max-w-full' : (isFirst ? 'w-full' : 'w-full')} 
+              ${isImageFull ? 'h-auto' : (isFirst ? 'h-auto max-h-[80vh]' : '')} 
+              ${isImageFull ? 'object-cover' : (isFirst ? 'object-cover object-center' : 'object-contain')}
+              ${!isImageFull && !isFirst && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
+                !isImageFull && !isFirst && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
+                  !isImageFull && !isFirst && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
+                    !isImageFull && !isFirst && imageSize === 'xlarge' ? 'max-w-2xl lg:max-w-4xl' :
+                      ''
+              } 
+              ${imageClassName}`}
+            style={isImageFull ? { width: '100%', height: 'auto', display: 'block' } : undefined}
           />
         )}
       </div>

@@ -29,46 +29,48 @@ export function CapProduct({
 
                 {/* Only the Product Details Content Sections */}
                 {productDetails?.productContent1?.content?.map((item, index) => {
-                    const isEven = (index + 1) % 2 === 0;
                     const isFirst = index === 0;
                     const isSecond = index === 1;
 
-                    return (
-                        <div key={index} className={isFirst ? 'w-full' : ''}>
-                            {isFirst ? (
-                                <div className="w-full">
-                                    <div className="flex items-center">
-                                        <div className="w-full py-8 mb-0">
-                                            <ProductDetailsContent1
-                                                content={item}
-                                                showImageLeft={!isEven}
-                                                isTextFull={isEven}
-                                                isImageFull={isEven}
-                                                isFirst={isFirst}
-                                                isDescriptionFull={false}
-                                                imageSize={isEven ? 'xlarge' : 'large'}
-                                            />
+                    if (isFirst || isSecond) {
+                        return (
+                            <div key={index} className={isFirst ? 'w-full' : 'w-full'}>
+                                {isFirst ? (
+                                    <div className="w-full">
+                                        <div className="flex items-center">
+                                            <div className="w-full py-8 mb-0">
+                                                <ProductDetailsContent1
+                                                    content={item}
+                                                    showImageLeft={true}
+                                                    isTextFull={false}
+                                                    isImageFull={false}
+                                                    isFirst={true}
+                                                    isDescriptionFull={false}
+                                                    imageSize="large"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="max-w-8xl mx-auto">
-                                    <div className={isSecond ? 'min-h-[40vh]' : 'min-h-[35vh]'}>
-                                        <div className={isSecond ? 'flex flex-col space-y-8 h-full py-8' : 'h-full'}>
-                                            <ProductDetailsContent1
-                                                content={item}
-                                                showImageLeft={isSecond ? true : !isEven}
-                                                isTextFull={isEven}
-                                                isImageFull={isSecond ? true : isEven}
-                                                isDescriptionFull={isSecond ? true : false}
-                                                imageSize={isEven ? 'xlarge' : 'large'}
-                                            />
+                                ) : (
+                                    <div className="max-w-8xl mx-auto">
+                                        <div className="min-h-[40vh]">
+                                            <div className="flex flex-col space-y-8 h-full py-8">
+                                                <ProductDetailsContent1
+                                                    content={item}
+                                                    showImageLeft={true}
+                                                    isTextFull={true}
+                                                    isImageFull={true}
+                                                    isDescriptionFull={true}
+                                                    imageSize="xlarge"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    );
+                                )}
+                            </div>
+                        );
+                    }
+                    return null; // Skip all other items
                 })}
             </div>
         </div>
