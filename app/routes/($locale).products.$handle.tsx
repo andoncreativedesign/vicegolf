@@ -351,6 +351,8 @@ export default function Product() {
             <DivotJuniorProduct
               product={product}
               productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
             />
           );
         }
