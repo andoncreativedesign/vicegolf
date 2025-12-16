@@ -1,4 +1,4 @@
-import { Await, Link, useLoaderData } from 'react-router';
+import { Await, Link, useFetcher, useLoaderData, useNavigate } from 'react-router';
 import { Suspense, useId, useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Image, Money } from '@shopify/hydrogen';
@@ -18,6 +18,7 @@ import {
 } from '~/components/SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 import type { MenuData } from '~/lib/shopify/product-queries';
+import type { Collection } from '@shopify/hydrogen/storefront-api-types';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -83,15 +84,78 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
 function SearchAside() {
   const queriesDatalistId = useId();
   const { close } = useAside();
+  const fetcher = useFetcher()
+  const navigate = useNavigate()
 
   // Trending search terms
-  const trendingSearches = [
-    'Vice Pro Plus',
-    'Vice Pro',
-    'Vice Golf Pure 2024',
-    'Vice Drive',
-    'Vice Tour'
+  // const trendingSearches = [
+  //   'Vice Pro Plus',
+  //   'Vice Pro',
+  //   'Vice Golf Pure 2024',
+  //   'Vice Drive',
+  //   'Vice Tour'
+  // ];
+
+  const trendingSearches: Pick<Collection, "handle" | "id" | "title" | "trackingParameters">[] = [
+    {
+      id: 'gid://shopify/Collection/1',
+      handle: 'golf-balls',
+      title: 'Vice Pro Plus',
+      trackingParameters: null
+    },
+    {
+      id: 'gid://shopify/Collection/2',
+      handle: 'golf-balls',
+      title: 'Vice Pro',
+      trackingParameters: null
+    },
+    {
+      id: 'gid://shopify/Collection/3',
+      handle: 'golf-balls',
+      title: 'Vice Golf Pure 2024',
+      trackingParameters: null
+    },
+    {
+      id: 'gid://shopify/Collection/4',
+      handle: 'golf-balls',
+      title: 'Vice Drive',
+      trackingParameters: null
+    },
+    {
+      id: 'gid://shopify/Collection/5',
+      handle: 'golf-balls',
+      title: 'Vice Tour',
+      trackingParameters: null
+    }
   ];
+
+  const handleCollectionNavigate = (
+    e: React.UIEvent<HTMLButtonElement, UIEvent>,
+    item: Pick<Collection, "handle" | "id" | "title" | "trackingParameters">
+  ) => {
+    e.preventDefault()
+    if (!item?.handle) navigate(-1)
+    try {
+      fetcher.submit(
+        { handle: item.handle },
+        { method: "post", action: "/api/collection" }
+      );
+    } catch (error) {
+      navigate(-1)
+    }
+  }
+
+  useEffect(() => {
+    if (
+      fetcher.state === "idle"
+      && fetcher.data?.collection?.id
+      && fetcher.data?.collection?.title
+    ) {
+      const { id, title } = fetcher.data.collection
+      close()
+      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    }
+  }, [fetcher.state, fetcher.data, navigate]);
 
   return (
     <Aside type="search" heading="">
@@ -148,9 +212,11 @@ function SearchAside() {
       <div className="search-body flex-1 overflow-y-auto w-full bg-white">
         <SearchResultsPredictive>
           {({ items, total, term, state, closeSearch }) => {
-            const { products, queries } = items;
+            const { products, queries, collections } = items;
             const isLoading = state === 'loading' && term.current;
             const hasTerm = !!term.current;
+
+            console.log('search collections - ', collections)
 
             if (isLoading) {
               return (
@@ -171,7 +237,8 @@ function SearchAside() {
                           Suggestions
                         </h3>
                         <div className="flex flex-col gap-2">
-                          {queries.map((item, i) => {
+                          {/* ! quires map  */}
+                          {/* {queries.map((item, i) => {
                             const text = typeof item === 'string' ? item : item.text;
                             if (!text) return null;
                             return (
@@ -183,6 +250,26 @@ function SearchAside() {
                               >
                                 {text}
                               </Link>
+                            );
+                          })} */}
+
+                          {collections.map((item, i) => {
+                            return (
+                              // <Link
+                              //   key={i}
+                              //   to={`collections/${encodeURIComponent(item.handle)}`}
+                              //   onClick={close}
+                              //   className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
+                              // >
+                              //   {item.title}
+                              // </Link>
+                              <button
+                                key={i}
+                                onClick={(e) => handleCollectionNavigate(e, item)}
+                                className="text-gray-900 hover:text-gray-600 cursor-pointer py-1 font-medium transition-colors text-left"
+                              >
+                                {item.title}
+                              </button>
                             );
                           })}
                         </div>
@@ -236,15 +323,22 @@ function SearchAside() {
                           Trending Searches
                         </h3>
                         <div className="flex flex-col gap-2">
-                          {trendingSearches.map((text, i) => (
-                            <Link
-                              key={i}
-                              to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(text)}`}
-                              onClick={close}
-                              className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
+                          {trendingSearches.map((item) => (
+                            // <Link
+                            //   key={i}
+                            //   to={`${SEARCH_ENDPOINT}?q=${encodeURIComponent(text)}`}
+                            //   onClick={close}
+                            //   className="text-gray-900 hover:text-gray-600 py-1 font-medium transition-colors text-left"
+                            // >
+                            //   {text}
+                            // </Link>
+                            <button
+                              key={item.id}
+                              onClick={(e) => handleCollectionNavigate(e, item)}
+                              className="text-gray-900 cursor-pointer hover:text-gray-600 py-1 font-medium transition-colors text-left"
                             >
-                              {text}
-                            </Link>
+                              {item.title}
+                            </button>
                           ))}
                         </div>
                       </>

@@ -42,7 +42,7 @@ export default function SearchPage() {
 
   return (
     <div className="search lg:mx-16 sm:mx-8">
-      <div className="search-container">
+      <div className="search-container flex justify-center">
         <SearchForm>
           {({inputRef}) => (
             <div className="search-input-container">
