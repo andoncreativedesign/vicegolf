@@ -15,12 +15,14 @@ import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import { GolfBallProduct } from '~/components/GolfBallProduct';
 import { GolfClubSetProduct } from '~/components/GolfClubSetProduct';
 import { ShoesProduct } from '~/components/ShoesProduct';
+import { JuniorCapProduct } from '~/components/JuniorCapProduct';
 import { PoloProduct } from '~/components/PoloProduct';
 import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
+import { CapProduct } from '~/components/CapProduct';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
@@ -273,7 +275,7 @@ export default function Product() {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="w-full max-w-[1920px] mx-auto px-6 xl:px-12 2xl:px-24 py-6">
+    <div className="w-full max-w-[2560px] mx-auto px-6 xl:px-12 2xl:px-25 py-6">
       {/* Breadcrumbs */}
       <div className="w-full max-w-[1600px] mx-auto mb-8">
         <div className="flex items-center text-gray-600">
@@ -349,6 +351,10 @@ export default function Product() {
             field?.key === 'category_variant' && field?.value === 'Junior Ball'
         );
 
+        const isJuniorCapProduct = product.metafields?.some(
+    (field: { key?: string; value?: string }) =>
+      field?.key === 'category_variant' && field?.value === 'Junior Cap'
+  );
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -389,6 +395,17 @@ export default function Product() {
             />
           );
         }
+
+        if (isJuniorCapProduct) {
+    return (
+      <JuniorCapProduct
+        product={product}
+        productDetails={productDetails}
+        initialRecommended={recommendedProducts}
+        showBestSellers={true} // or false, depending on your design
+      />
+    );
+  }
 
         switch (productType) {
           /** 👇 Clothing category */
@@ -439,11 +456,11 @@ export default function Product() {
           case "cap":
           case "caps":
             return (
-              <GolfBallProduct
+              <CapProduct
+                product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
                 showBestSellers={true}
-                isGolfBallProduct={false}
               />
             );
 

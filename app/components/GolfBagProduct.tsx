@@ -84,6 +84,7 @@ export function GolfBagProduct({ product, productDetails, initialRecommended, sh
                   isImageFull={false}
                   isFirst={true}
                   isDescriptionFull={false}
+                  isSquareAspect={true}       // Enable square aspect ratio
                   imageSize="xlarge"
                 />
               </div>
@@ -100,6 +101,7 @@ export function GolfBagProduct({ product, productDetails, initialRecommended, sh
                 isImageFull={false}
                 isFirst={false}
                 isDescriptionFull={false}
+                isSquareAspect={true}         // Enable square aspect ratio
                 imageSize="xlarge"
               />
             </div>

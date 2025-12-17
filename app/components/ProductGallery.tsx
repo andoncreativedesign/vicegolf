@@ -109,7 +109,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && (
-        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(6*5.5rem)] 
+        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(100vh-200px)] 
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
@@ -126,8 +126,9 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
                 <Image
                   data={image}
                   alt={image.altText || 'Thumbnail'}
-                  className="w-20 h-20 object-cover bg-gray-50"
+                  className="w-20 h-16 md:w-20 md:h-20 object-cover bg-gray-50"
                   loading="lazy"
+                  sizes="(min-width: 768px) 6rem, 5rem"
                 />
               </button>
             );
@@ -136,18 +137,18 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
       )}
 
       {/* Main Image */}
-      <div className="relative flex-none w-[340px] h-[340px] md:w-[500px] md:h-[500px] xl:w-[600px] xl:h-[600px] group bg-white rounded-none shadow-lg overflow-hidden">
+      <div className="relative w-full max-w-3xl mx-auto aspect-square group bg-white rounded-none shadow-lg overflow-hidden">
         <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
         >
-          <div className="w-full h-full">
+          <div className="w-full h-full flex items-center justify-center p-4">
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className="w-[340px] h-[340px] md:w-[500px] md:h-[500px] xl:w-[600px] xl:h-[600px] object-contain mix-blend-multiply"
+              className="w-full h-full max-h-[80vh] object-contain mix-blend-multiply"
               aspectRatio="1/1"
-              sizes="(min-width: 45em) 50vw, 100vw"
+              sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
         </div>

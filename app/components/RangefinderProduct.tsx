@@ -37,6 +37,7 @@ export function RangefinderProduct({ productDetails }: RangefinderProductProps) 
                       isImageFull={false}
                       isFirst={isFirst}
                       isDescriptionFull={false}
+                      isSquareAspect={isFirst}  // Apply square aspect ratio to first item
                       imageSize="large"
                     />
                   </div>
