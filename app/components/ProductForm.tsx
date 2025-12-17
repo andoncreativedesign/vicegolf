@@ -97,6 +97,7 @@ export function ProductForm({
 
   useEffect(() => {
     setFormHeight('600px');
+    console.log('product type from details',productType)
   }, []);
 
   return (
@@ -154,9 +155,16 @@ export function ProductForm({
       )}
 
       {/* cards and dropdowns for customization */}
-      <ProductCustomization
-        productOptions={productOptions}
-      />
+      {
+        productType === 'Golf Clubs'
+        ? <ProductCustomization
+          productOptions={productOptions}
+          styling='club'
+        />
+        : <ProductCustomization
+          productOptions={productOptions}
+        />
+      }
 
       {/* Quantity Selector */}
       <div className="mb-6">
