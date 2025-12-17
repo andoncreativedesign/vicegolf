@@ -40,12 +40,12 @@ export function JuniorCapProduct({ product, productDetails }: JuniorCapProductPr
                             <div key={index} className="w-full py-8">
                                 <ProductDetailsContent1
                                     content={item}
-                                    showImageLeft={true}        // First section: Image Left → Text Right
+                                    showImageLeft={true}
                                     isTextFull={false}
                                     isImageFull={false}
                                     isFirst={true}
                                     isDescriptionFull={false}
-                                    isSquareAspect={true}      // Enable square aspect ratio for junior cap
+                                    isSquareAspect={true}      // Square aspect ratio is enabled
                                     imageSize="xlarge"
                                 />
                             </div>
@@ -56,13 +56,12 @@ export function JuniorCapProduct({ product, productDetails }: JuniorCapProductPr
                         <div key={index} className="py-12">
                             <ProductDetailsContent1
                                 content={item}
-                                showImageLeft={isEvenIndex}   // Even index (0,2,4) → Image Left → showImageLeft = true
-                                // Odd index (1,3,5) → Text Left → showImageLeft = false
+                                showImageLeft={isEvenIndex}
                                 isTextFull={false}
                                 isImageFull={false}
                                 isFirst={false}
                                 isDescriptionFull={false}
-                                isSquareAspect={true}        // Enable square aspect ratio for junior cap
+                                isSquareAspect={true}      // Square aspect ratio is enabled
                                 imageSize="xlarge"
                             />
                         </div>
