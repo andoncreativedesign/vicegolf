@@ -247,7 +247,7 @@ export default function Product() {
   const productType = formatProductType(product.productType || '');
 
   return (
-    <div className="w-full max-w-[1920px] mx-auto px-6 xl:px-12 2xl:px-24 py-6">
+    <div className="w-full max-w-[2560px] mx-auto px-6 xl:px-12 2xl:px-25 py-6">
       {/* Breadcrumbs */}
       <div className="w-full max-w-[1600px] mx-auto mb-8">
         <div className="flex items-center text-sm text-gray-600">
