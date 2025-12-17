@@ -10,6 +10,7 @@ interface ProductContent1Props {
   isFirst?: boolean;
   isSecond?: boolean;
   isThird?: boolean;
+  isSquareAspect?: boolean;
   imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
   titleClassName?: string;
   descriptionClassName?: string;
@@ -27,6 +28,7 @@ const ProductDetailsContent1 = ({
   isDescriptionFull = false,
   isFirst = false,
   isThird = false,
+  isSquareAspect = false,
   imageSize = 'medium',
   titleClassName = '',
   descriptionClassName = '',
@@ -38,24 +40,24 @@ const ProductDetailsContent1 = ({
   const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
 
   const imageSection = (
-    <div className={`flex items-center justify-center ${isImageFull || isFirst ? 'w-full' : ''} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
-      <div className={`relative group ${isImageFull ? 'w-full' : (isFirst ? 'w-full' : '')} ${isFirst ? 'max-h-[80vh] overflow-hidden' : ''}`}>
+    <div className={`flex items-center justify-center ${isImageFull ? 'w-full' : 'w-full'} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
+      <div className={`relative group w-full ${isSquareAspect ? 'aspect-square' : ''} ${isImageFull ? 'max-w-full' : ''}`}>
         {content?.images?.[0]?.asset?.url && (
-          <img
-            src={content.images[0].asset.url}
-            alt={content.title || 'Product image'}
-            className={`${isImageFull ? 'w-full max-w-full' : (isFirst ? 'w-full' : 'w-full')} 
-              ${isImageFull ? 'h-auto' : (isFirst ? 'h-auto max-h-[80vh]' : '')} 
-              ${isImageFull ? 'object-cover' : (isFirst ? 'object-cover object-center' : 'object-contain')}
-              ${!isImageFull && !isFirst && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
-                !isImageFull && !isFirst && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
-                  !isImageFull && !isFirst && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
-                    !isImageFull && !isFirst && imageSize === 'xlarge' ? 'max-w-2xl lg:max-w-4xl' :
-                      ''
-              } 
-              ${imageClassName}`}
-            style={isImageFull ? { width: '100%', height: 'auto', display: 'block' } : undefined}
-          />
+          <div className="w-full h-full">
+            <img
+              src={content.images[0].asset.url}
+              alt={content.title || 'Product image'}
+              className={`w-full h-full object-cover ${isImageFull ? 'max-w-full' : ''} 
+                ${!isImageFull && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
+                  !isImageFull && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
+                    !isImageFull && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
+                      !isImageFull && imageSize === 'xlarge' ? 'max-w-2xl lg:max-w-4xl' :
+                        ''
+                } 
+                ${imageClassName}`}
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
         )}
       </div>
     </div>

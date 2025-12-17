@@ -45,6 +45,7 @@ export function JuniorCapProduct({ product, productDetails }: JuniorCapProductPr
                                     isImageFull={false}
                                     isFirst={true}
                                     isDescriptionFull={false}
+                                    isSquareAspect={true}      // Enable square aspect ratio for junior cap
                                     imageSize="xlarge"
                                 />
                             </div>
@@ -61,6 +62,7 @@ export function JuniorCapProduct({ product, productDetails }: JuniorCapProductPr
                                 isImageFull={false}
                                 isFirst={false}
                                 isDescriptionFull={false}
+                                isSquareAspect={true}        // Enable square aspect ratio for junior cap
                                 imageSize="xlarge"
                             />
                         </div>
