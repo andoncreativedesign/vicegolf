@@ -90,6 +90,12 @@ export const productDetailsQuery = (gid: string) => `
       content[]{
         title,
         description,
+        descriptionType,
+        subDescriptions[]{
+          _key,
+          mainPoint,
+          description
+        },
         points[],
         images[]{
           alt,
@@ -217,12 +223,23 @@ export interface Accordion2 {
   sectionImage?: {
     asset: SanityImageAsset;
   };
-  items: Accordion2Item[];
+  items?: Array<{
+    title: string;
+    description: string;
+  }>;
+}
+
+export interface SubDescriptionItem {
+  _key: string;
+  mainPoint: string;
+  description: string;
 }
 
 export interface ProductContent1Item {
   title?: string;
   description?: string;
+  descriptionType?: 'normal' | 'subDescriptions';
+  subDescriptions?: SubDescriptionItem[];
   points?: string[];
   images?: Array<{
     alt?: string;

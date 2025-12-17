@@ -1,8 +1,19 @@
 import { Image } from "@shopify/hydrogen";
 import type { ProductContent1Item } from "~/lib/sanity/products";
 
+interface SubDescriptionItem {
+  mainPoint: string;
+  description: string;
+  _key: string;
+}
+
+interface ProductContent1ItemWithDescriptionType extends ProductContent1Item {
+  descriptionType?: 'normal' | 'subDescriptions';
+  subDescriptions?: SubDescriptionItem[];
+}
+
 interface ProductContent1Props {
-  content: ProductContent1Item;
+  content: ProductContent1ItemWithDescriptionType;
   showImageLeft?: boolean;
   isTextFull?: boolean;
   isImageFull?: boolean;
@@ -74,13 +85,24 @@ const ProductDetailsContent1 = ({
           </div>
         )}
       </div>
-      {content.description && (
+      {content.descriptionType === 'subDescriptions' ? (
+        <div className="w-full space-y-4 mt-4">
+          {content.subDescriptions?.map((item) => (
+            <div key={item._key} className="mb-4">
+              <p className={`text-gray-600 leading-relaxed ${descriptionClassName || ''}`}>
+                <span className="font-semibold text-gray-900">{item.mainPoint}: </span>
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : content.description ? (
         <div className={`${isThird ? 'w-full flex justify-center' : ''}`}>
           <p className={`${isDescriptionFull || isThird ? 'w-full text-center' : (isTextFull ? 'max-w-4xl text-center' : 'text-center lg:text-left w-full')} ${descriptionClassName || '!text-xl font-light'} ${descriptionClassName ? '' : 'text-gray-600'} leading-relaxed mx-0 mb-3 mt-1`}>
             {content.description}
           </p>
         </div>
-      )}
+      ) : null}
       {content.points && content.points.length > 0 && (
         <div className={`w-[95%] max-w-[95%] mx-auto ${pointsClassName}`}>
           <ul className={`space-y-3 w-full ${isTextFull ? 'text-start' : 'text-center lg:text-left'}`}>
