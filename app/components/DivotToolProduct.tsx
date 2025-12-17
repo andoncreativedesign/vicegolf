@@ -95,6 +95,7 @@ export function DivotToolProduct({
                                                 isTextFull={false}
                                                 isImageFull={false}
                                                 isDescriptionFull={false}
+                                                isSquareAspect={isSecond}  // Apply square aspect ratio to second item
                                                 imageSize="large"
                                             />
                                         </div>

@@ -85,6 +85,7 @@ export function PoloProduct({
                         isImageFull={isEven}
                         isFirst={isFirst}
                         isDescriptionFull={false}
+                        isSquareAspect={isFirst}
                         imageSize={isEven ? 'xlarge' : 'large'}
                       />
                     </div>

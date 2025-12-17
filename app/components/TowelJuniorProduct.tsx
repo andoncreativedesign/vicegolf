@@ -42,6 +42,7 @@ export function TowelJuniorProduct({ product, productDetails }: TowelJuniorProdu
                                     isImageFull={false}
                                     isFirst={true}
                                     isDescriptionFull={false}
+                                    isSquareAspect={true}       // Apply square aspect ratio
                                     imageSize="xlarge"
                                 />
                             </div>
@@ -58,6 +59,7 @@ export function TowelJuniorProduct({ product, productDetails }: TowelJuniorProdu
                                 isImageFull={false}
                                 isFirst={false}
                                 isDescriptionFull={false}
+                                isSquareAspect={true}          // Apply square aspect ratio
                                 imageSize="xlarge"
                             />
                         </div>
