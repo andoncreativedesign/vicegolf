@@ -74,22 +74,21 @@ export function GolfBallProduct({
           const showImageLeft = isGolfBallProduct ? isFirst : (index % 2 === 0);
 
           return (
-            <div key={index} className={isFirst ? 'w-full' : ''}>
-              <div className={`w-full min-h-[30vh] flex items-center ${isFirst ? 'py-4 md:py-8' : 'py-8 md:py-16'}`}>
-                <div className={`w-full ${isFirst ? 'max-w-full' : 'max-w-7xl'} mx-auto px-4 sm:px-6 lg:px-8`}>
+              <div key={index} className={isFirst ? 'w-full' : ''}>
+              <div className="w-full min-h-[30vh] flex items-center">
+                <div className="w-full py-8 mb-0">
                   <ProductDetailsContent1
                     content={item}
                     showImageLeft={showImageLeft}
-                    isTextFull={isFirst}
-                    isImageFull={isFirst}
+                    isTextFull={false}
+                    isImageFull={false}
                     isFirst={isFirst}
                     isSecond={isSecond}
                     isThird={isThird}
-                    isDescriptionFull={isFirst}
-                    imageSize={isFirst ? "xlarge" : "large"}
-                    titleClassName={`${isGolfBallProduct ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl lg:text-4xl'} font-bold text-center sm:text-left`}
-                    descriptionClassName={`${!isGolfBallProduct ? '!text-base sm:!text-lg lg:!text-xl' : 'text-sm sm:text-base'} font-light text-gray-600 w-full max-w-4xl mx-auto text-center sm:text-left`}
-                    pointsClassName="w-full max-w-4xl mx-auto"
+                    isDescriptionFull={false}
+                    imageSize={isFirst ? "large" : "large"}
+titleClassName={`${isGolfBallProduct ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl lg:text-4xl'} font-bold text-center sm:text-left`}
+descriptionClassName={`${!isGolfBallProduct ? '!text-base sm:!text-lg lg:!text-xl' : 'text-sm sm:text-base'} font-light text-gray-600 w-full max-w-4xl mx-auto text-center sm:text-left`}                    pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
                   />
                 </div>
               </div>
