@@ -14,6 +14,9 @@ interface ProductContent1Props {
   titleClassName?: string;
   descriptionClassName?: string;
   pointsClassName?: string;
+  imageContainerClassName?: string;
+  imageClassName?: string;
+  imageCentered?: boolean;
 }
 
 const ProductDetailsContent1 = ({
@@ -27,12 +30,15 @@ const ProductDetailsContent1 = ({
   imageSize = 'medium',
   titleClassName = '',
   descriptionClassName = '',
-  pointsClassName = ''
+  pointsClassName = '',
+  imageContainerClassName = '',
+  imageClassName = '',
+  imageCentered = false
 }: ProductContent1Props) => {
   const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
 
   const imageSection = (
-    <div className={`flex items-center justify-center ${isImageFull || isFirst ? 'w-full' : ''} ${showImageLeft ? 'lg:justify-end' : 'lg:justify-start'} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'}`}>
+    <div className={`flex items-center justify-center ${isImageFull || isFirst ? 'w-full' : ''} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
       <div className={`relative group ${isFirst ? 'w-full' : ''} ${isFirst ? 'max-h-[80vh] overflow-hidden' : ''}`}>
         {content?.images?.[0]?.asset?.url && (
           <img
@@ -43,7 +49,7 @@ const ProductDetailsContent1 = ({
                 !isImageFull && !isFirst && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
                   !isImageFull && !isFirst && imageSize === 'xlarge' ? 'max-w-2xl lg:max-w-4xl' :
                     ''
-              } ${isFirst ? 'h-auto max-h-[80vh] object-cover object-center' : 'object-contain'}`}
+              } ${isFirst ? 'h-auto max-h-[80vh] object-cover object-center' : 'object-contain'} ${imageClassName}`}
           />
         )}
       </div>
