@@ -20,6 +20,7 @@ import ColorVariant from './Product/ColorVariant';
 import ProductOptionDozen from './Product/ProductOptionDozen';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
+import ProductCustomization from './basic/ProductCustomization';
 
 export function ProductForm({
   productOptions,
@@ -152,76 +153,10 @@ export function ProductForm({
         />
       )}
 
-      <div className="space-y-3">
-        {productOptions.map((option, index) => {
-          if (option.optionValues.length === 1) return null;
-          if (option.name === 'Color') return null;
-          if (option.name?.includes('pack size')) return null;
-          /* if (option.name?.includes('pack size')) return <ProductOptionDozen
-            key={index}
-            option={option}
-
-          /> */
-          return (
-            <div className="product-options mb-6" key={option.name}>
-              <h5 className="text-sm font-medium text-gray-700 mb-3">
-                {option.name}:
-              </h5>
-              <div className="grid grid-cols-6 gap-2">
-                {option.optionValues.map((value) => {
-                  const {
-                    name,
-                    handle,
-                    variantUriQuery,
-                    selected,
-                    available,
-                    exists,
-                    isDifferentProduct,
-                    swatch,
-                  } = value;
-
-                  if (isDifferentProduct) {
-                    return (
-                      <Link
-                        className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
-                          } ${!available ? 'opacity-40 grayscale' : ''}`}
-                        key={option.name + name}
-                        prefetch="intent"
-                        preventScrollReset
-                        replace
-                        to={`/products/${handle}?${variantUriQuery}`}
-                      >
-                        <ProductOptionSwatch swatch={swatch} name={name} />
-                      </Link>
-                    );
-                  } else {
-                    return (
-                      <button
-                        type="button"
-                        className={`product-options-item relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
-                          } ${!exists ? 'opacity-40 cursor-not-allowed' : ''} ${!available ? 'grayscale' : ''
-                          }`}
-                        key={option.name + name}
-                        disabled={!exists}
-                        onClick={() => {
-                          if (!selected) {
-                            void navigate(`?${variantUriQuery}`, {
-                              replace: true,
-                              preventScrollReset: true,
-                            });
-                          }
-                        }}
-                      >
-                        <ProductOptionSwatch swatch={swatch} name={name} />
-                      </button>
-                    );
-                  }
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* cards and dropdowns for customization */}
+      <ProductCustomization
+        productOptions={productOptions}
+      />
 
       {/* Quantity Selector */}
       <div className="mb-6">
