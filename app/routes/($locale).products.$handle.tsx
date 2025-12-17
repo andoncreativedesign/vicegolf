@@ -23,6 +23,7 @@ import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { BeaniesProduct } from '~/components/BeaniesProduct';
+import { PuttersProduct } from '~/components/PuttersProduct';
 import { CapProduct } from '~/components/CapProduct';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
@@ -510,6 +511,17 @@ export default function Product() {
 case "beanies":
   return (
     <BeaniesProduct
+      product={product}
+      productDetails={productDetails}
+      initialRecommended={recommendedProducts}
+      showBestSellers={true}
+    />
+  );
+
+  case "putter":
+case "putters":
+  return (
+    <PuttersProduct
       product={product}
       productDetails={productDetails}
       initialRecommended={recommendedProducts}
