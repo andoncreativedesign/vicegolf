@@ -62,7 +62,7 @@ export function GolfBallProduct({
   }, [cursor, hasMore, isLoading, fetcher]);
 
   return (
-    <div className={`w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 ${isGolfBallProduct ? '' : 'py-8'}`}>
+    <div className={`w-full ${isGolfBallProduct ? '' : 'py-8'}`}>
       <div className="w-full max-w-[1536px] mx-auto">
         {productDetails?.productContent1?.content?.map((item, index) => {
           const isFirst = index === 0;
@@ -74,7 +74,7 @@ export function GolfBallProduct({
           const showImageLeft = isGolfBallProduct ? isFirst : (index % 2 === 0);
 
           return (
-              <div key={index} className={isFirst ? 'w-full' : ''}>
+            <div key={index} className={isFirst ? 'w-full' : ''}>
               <div className="w-full min-h-[30vh] flex items-center">
                 <div className="w-full py-8 mb-0">
                   <ProductDetailsContent1
@@ -87,8 +87,8 @@ export function GolfBallProduct({
                     isThird={isThird}
                     isDescriptionFull={false}
                     imageSize={isFirst ? "large" : "large"}
-titleClassName={`${isGolfBallProduct ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl lg:text-4xl'} font-bold text-center sm:text-left`}
-descriptionClassName={`${!isGolfBallProduct ? '!text-base sm:!text-lg lg:!text-xl' : 'text-sm sm:text-base'} font-light text-gray-600 w-full max-w-4xl mx-auto text-center sm:text-left`}                    pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
+                    titleClassName={`${isGolfBallProduct ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl lg:text-4xl'} font-bold text-center sm:text-left`}
+                    descriptionClassName={`${!isGolfBallProduct ? '!text-base sm:!text-lg lg:!text-xl' : 'text-sm sm:text-base'} font-light text-gray-600 w-full max-w-4xl mx-auto text-center sm:text-left`} pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
                   />
                 </div>
               </div>

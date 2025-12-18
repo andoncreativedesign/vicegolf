@@ -27,7 +27,7 @@ export function JuniorCapProduct({ product, productDetails }: JuniorCapProductPr
     }, [product.id, productDetails]);
 
     return (
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+        <div>
             <div className="max-w-8xl mx-auto">
                 {/* Dynamic Content Sections – Alternating: Image first → Text first → Image first... */}
                 {productDetailsState?.productContent1?.content?.map((item, index) => {

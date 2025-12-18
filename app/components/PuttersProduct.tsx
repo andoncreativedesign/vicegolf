@@ -8,7 +8,7 @@ type PuttersProductProps = {
 
 export function PuttersProduct({ productDetails }: PuttersProductProps) {
   return (
-    <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+    <div>
       <div className="max-w-8xl mx-auto">
         {productDetails?.productContent1?.content?.slice(0, 1).map((item, index) => (
           <div key={index} className="w-full">

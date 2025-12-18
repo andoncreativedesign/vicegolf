@@ -10,7 +10,7 @@ type RangefinderProductProps = {
 
 export function RangefinderProduct({ productDetails }: RangefinderProductProps) {
   return (
-    <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+    <div>
       <div className="max-w-8xl mx-auto">
         {productDetails?.videoContent && (
           <VideoSection videoContent={productDetails.videoContent} />

@@ -14,7 +14,7 @@ export function JuniorGolfBallProduct({
 }: JuniorGolfBallProductProps) {
 
     return (
-        <div className="px-10 sm:px-12 lg:px-20 xl:px-24">
+        <div>
             <div className="max-w-8xl mx-auto">
                 {productDetails?.productContent1?.content?.map((item, index) => {
                     const isFirst = index === 0 || index === 1;

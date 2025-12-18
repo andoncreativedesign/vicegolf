@@ -64,7 +64,7 @@ export function BeaniesProduct({ product, productDetails, initialRecommended, sh
     }, [product.id, productDetails]);
 
     return (
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+        <div>
             <div className="max-w-8xl mx-auto">
                 {/* Only show the first content section */}
                 {productDetailsState?.productContent1?.content?.[0] && (
