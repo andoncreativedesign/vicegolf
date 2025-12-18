@@ -59,7 +59,7 @@ export function Aside({
     >
       <button className="close-outside" onClick={close} />
       <aside
-        style={{ zIndex: 9999 }}
+        style={{ zIndex: 9999, backgroundColor: "#fafafa" }}
         className={[
           type === 'search' ? 'search-aside' : '',
           type === 'mobile' ? 'mobile-menu' : '',

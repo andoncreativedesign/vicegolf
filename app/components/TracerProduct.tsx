@@ -21,7 +21,7 @@ export function TracerProduct({ product, productDetails, initialRecommended, sho
     if (!firstContent) return null;
 
     return (
-        <div className="px-10 sm:px-12 lg:px-20 xl:px-24">
+        <div>
             <div className="max-w-8xl mx-auto space-y-8">
                 {/* First Product Content */}
                 <div className="w-full">

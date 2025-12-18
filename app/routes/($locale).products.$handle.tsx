@@ -22,6 +22,8 @@ import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { TracerProduct } from '~/components/TracerProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
+import { BeaniesProduct } from '~/components/BeaniesProduct';
+import { PuttersProduct } from '~/components/PuttersProduct';
 import { CapProduct } from '~/components/CapProduct';
 import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
@@ -275,9 +277,9 @@ export default function Product() {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="w-full max-w-[2560px] mx-auto px-6 xl:px-12 2xl:px-25 py-6">
+    <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 py-6">
       {/* Breadcrumbs */}
-      <div className="w-full max-w-[1600px] mx-auto mb-8">
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
         <div className="flex items-center text-gray-600">
           {productType.display && (
             <>
@@ -287,7 +289,7 @@ export default function Product() {
               >
                 {productType.display}
               </button>
-              <ChevronRight className="text-gray-600" size={20}/>
+              <ChevronRight className="text-gray-600" size={20} />
             </>
           )}
           <span className="text-gray-900 font-bold line-clamp-1" title={title}>
@@ -296,8 +298,13 @@ export default function Product() {
         </div>
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-1 w-full p-10 justify-center items-center xl:items-start">
-        <div className="">
+      <div
+        // className="flex flex-col xl:flex-row w-full"
+        className="flex flex-col xl:flex-row gap-1 w-full p-10 justify-center items-center xl:items-start"
+      >
+        <div
+          // className="w-full xl:w-1/2"        
+        >
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
@@ -310,7 +317,7 @@ export default function Product() {
             </div>
           )}
         </div>
-        <div className="">
+        <div className="w-full xl:w-1/2">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
@@ -323,6 +330,10 @@ export default function Product() {
           />
         </div>
       </div>
+
+      {/* Spacer */}
+      <div className="h-8"></div>
+
       {/* Product-specific sections */}
       {(() => {
         const productType = product.productType?.toLowerCase();
@@ -352,9 +363,9 @@ export default function Product() {
         );
 
         const isJuniorCapProduct = product.metafields?.some(
-    (field: { key?: string; value?: string }) =>
-      field?.key === 'category_variant' && field?.value === 'Junior Cap'
-  );
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Junior Cap'
+        );
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -397,15 +408,15 @@ export default function Product() {
         }
 
         if (isJuniorCapProduct) {
-    return (
-      <JuniorCapProduct
-        product={product}
-        productDetails={productDetails}
-        initialRecommended={recommendedProducts}
-        showBestSellers={true} // or false, depending on your design
-      />
-    );
-  }
+          return (
+            <JuniorCapProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true} // or false, depending on your design
+            />
+          );
+        }
 
         switch (productType) {
           /** 👇 Clothing category */
@@ -502,6 +513,28 @@ export default function Product() {
                 initialRecommended={recommendedProducts}
                 showBestSellers={false}
                 isGolfBallProduct={true}
+              />
+            );
+
+          case "beanie":
+          case "beanies":
+            return (
+              <BeaniesProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
+
+          case "putter":
+          case "putters":
+            return (
+              <PuttersProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
               />
             );
 
