@@ -22,7 +22,7 @@ export function CapProduct({
     // No more recommended products or best sellers logic needed
 
     return (
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+        <div>
             <div className="max-w-8xl mx-auto">
                 {/* Removed summary section */}
                 <ProductSummaryCap />

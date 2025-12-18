@@ -58,7 +58,7 @@ export function DivotToolProduct({
     }, [cursor, hasMore, isLoading, fetcher]);
 
     return (
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16">
+        <div>
             <div className="max-w-8xl mx-auto">
                 {/* Reusable What's New Section */}
                 {productDetails?.productContent1?.content?.map((item, index) => {
