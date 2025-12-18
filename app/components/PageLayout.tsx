@@ -50,7 +50,7 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
-<main className="bg-white pt-[120px] md:pt-[140px]">
+      <main className="bg-[#fafafa] pt-[120px] md:pt-[140px]">
   <div className="w-full max-w-[2560px] mx-auto">
     <div className="w-full max-w-[1920px] mx-auto ">
       {children}

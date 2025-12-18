@@ -15,14 +15,21 @@ type ProductGalleryProps = {
   images: ProductImageType[];
   selectedImage: ProductImageType | null;
   onImageSelect: (image: ProductImageType) => void;
+  mainImageClassNames?: string
 };
 
-export function ProductGallery({ images = [], selectedImage, onImageSelect }: ProductGalleryProps) {
+export function ProductGallery({
+  images = [],
+  selectedImage,
+  onImageSelect,
+  mainImageClassNames = '',
+}: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
     if (!selectedImage) return;
@@ -105,11 +112,27 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
     }
   };
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobileView(window.innerWidth <= 1024);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+
   return (
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
-      {hasMultiple && (
-        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:max-h-[calc(100vh-200px)] 
+      {hasMultiple && !isMobileView && (
+        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[580.547px] 
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
@@ -118,15 +141,13 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
               <button
                 key={image.id}
                 onClick={() => handleThumbnailClick(image)}
-                className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 shadow-sm hover:shadow-md ${isActive
-                  ? 'ring-1 ring-white scale-[1.03] shadow-md'
-                  : 'hover:ring-0 hover:ring-white'
-                  }`}
+                className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 ${isActive
+                  ? '' : ''}`}
               >
                 <Image
                   data={image}
                   alt={image.altText || 'Thumbnail'}
-                  className="w-20 h-16 md:w-20 md:h-20 object-cover bg-gray-50"
+                  className="w-20 h-20 md:w-20 md:h-20 object-cover bg-gray-50"
                   loading="lazy"
                   sizes="(min-width: 768px) 6rem, 5rem"
                 />
@@ -137,18 +158,18 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
       )}
 
       {/* Main Image */}
-      <div className="relative w-full max-w-3xl mx-auto aspect-square group bg-white rounded-none shadow-lg overflow-hidden">
+      <div className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-none overflow-hidden">
         <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
         >
-          <div className="w-full h-full flex items-center justify-center p-4">
+          <div className="">
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className="w-full h-full max-h-[80vh] object-contain mix-blend-multiply"
+              className={`sm:min-h-[580.547px] min-h-[285px] max-w-[690.547px] max-h-[580.547px]`}
               aspectRatio="1/1"
-              sizes="(min-width: 1024px) 50vw, 100vw"
+              // sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
         </div>
@@ -160,7 +181,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
                 e.stopPropagation();
                 handleNavigate('prev');
               }}
-              className="bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-90 hover:opacity-100"
+              className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90"
               aria-label="Previous image"
               disabled={isAnimating}
             >
@@ -171,7 +192,7 @@ export function ProductGallery({ images = [], selectedImage, onImageSelect }: Pr
                 e.stopPropagation();
                 handleNavigate('next');
               }}
-              className="bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-opacity duration-300 opacity-90 hover:opacity-100"
+              className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90"
               aria-label="Next image"
               disabled={isAnimating}
             >
