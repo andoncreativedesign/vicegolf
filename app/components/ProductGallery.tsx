@@ -132,7 +132,7 @@ export function ProductGallery({
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
-        <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[580.547px] 
+        <div className="flex md:flex-col gap-2 md:overflow-y-auto max-h-[580.547px] w-[113px]
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
@@ -141,15 +141,14 @@ export function ProductGallery({
               <button
                 key={image.id}
                 onClick={() => handleThumbnailClick(image)}
-                className={`relative flex-shrink-0 rounded-none overflow-hidden transition-all duration-200 ${isActive
+                className={`w-[92px] h-[92px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200 ${isActive
                   ? '' : ''}`}
               >
                 <Image
                   data={image}
                   alt={image.altText || 'Thumbnail'}
-                  className="w-20 h-20 md:w-20 md:h-20 object-cover bg-gray-50"
+                  className="w-[92px] h-[92px] bg-[#f6f6f6] object-cover"
                   loading="lazy"
-                  sizes="(min-width: 768px) 6rem, 5rem"
                 />
               </button>
             );
@@ -158,7 +157,7 @@ export function ProductGallery({
       )}
 
       {/* Main Image */}
-      <div className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-none overflow-hidden">
+      <div className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden">
         <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
