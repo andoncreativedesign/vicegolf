@@ -15,7 +15,13 @@ export function PuttersProduct({ productDetails }: PuttersProductProps) {
       {productDetails?.youtubeVideos && <Youtube youtubeVideo={productDetails.youtubeVideos} />}
 
       {/* Video Section */}
-      {productDetails?.videoContent && <VideoSection videoContent={productDetails.videoContent} />}
+      {productDetails?.videoContent && (
+        <VideoSection
+          videoContent={productDetails.videoContent}
+          titleSize="text-4xl lg:text-5xl"
+          descriptionSize="!text-xl font-light"
+        />
+      )}
 
       <div className="max-w-8xl mx-auto">
         {productDetails?.productContent1?.content?.slice(0, 1).map((item, index) => (
