@@ -277,9 +277,9 @@ export default function Product() {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-6 py-6">
+    <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 py-6">
       {/* Breadcrumbs */}
-      <div className="w-full max-w-[1600px] mx-auto mb-8">
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
         <div className="flex items-center text-gray-600">
           {productType.display && (
             <>
