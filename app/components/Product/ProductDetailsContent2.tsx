@@ -9,31 +9,52 @@ const ProductDetailsContent2 = ({ content, index }: ProductContent2Props) => {
   const isTextOnRight = index % 2 === 0; // Even indices (0, 2, 4...) will have text on right, odd on left
 
   return (
-    <div className="text-center mb-12 py-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-center max-w-6xl mx-auto mt-8 px-4">
-        {/* Text Section - Left or Right based on index */}
-        <div className={`lg:text-base xl:text-lg space-y-2 p-6 ${isTextOnRight ? 'order-3 text-left' : 'order-1 text-right'}`}>
-          <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-main-900 leading-tight mb-2">
-            {content?.contentItems?.[0]?.title}
-          </h2>
-          <p className="text-gray-600 leading-relaxed max-w-xs">
-            {content?.contentItems?.[0]?.description}
-          </p>
-        </div>
+    <div className="w-full py-12 md:py-16 lg:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center">
+          {/* Left Text Section - Only shown on even indices */}
+          {isTextOnRight && (
+            <div className="lg:px-4 order-2 lg:order-1">
+              <div className="space-y-4 text-center lg:text-right">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                  {content?.contentItems?.[0]?.title}
+                </h2>
+                <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-md mx-auto lg:mx-0 lg:ml-auto">
+                  {content?.contentItems?.[0]?.description}
+                </p>
+              </div>
+            </div>
+          )}
 
-        {/* Image Section - Always in the middle */}
-        <div className="relative group flex justify-center order-2 w-3/4 mx-auto">
-          <img
-            src={content?.images?.[0]?.asset?.url}
-            alt={content?.images?.[0]?.alt}
-            className="w-full max-w-xs object-contain"
-          />
-        </div>
+          {/* Image Section - Always in the center */}
+          <div className="order-1 lg:order-2">
+            <div className="relative w-full aspect-square max-w-lg mx-auto">
+              <img
+                src={content?.images?.[0]?.asset?.url}
+                alt={content?.images?.[0]?.alt || 'Product image'}
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            </div>
+          </div>
 
-        {/* Empty div to maintain grid structure */}
-        <div className={isTextOnRight ? 'order-1' : 'order-3'}></div>
+          {/* Right Text Section - Only shown on odd indices */}
+          {!isTextOnRight && (
+            <div className="lg:px-4 order-3">
+              <div className="space-y-4 text-center lg:text-left">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                  {content?.contentItems?.[0]?.title}
+                </h2>
+                <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-md mx-auto lg:mx-0">
+                  {content?.contentItems?.[0]?.description}
+                </p>
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
-    </div >
+    </div>
   )
 }
 
