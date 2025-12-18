@@ -298,8 +298,13 @@ export default function Product() {
         </div>
       </div>
 
-      <div className="flex flex-col xl:flex-row w-full">
-        <div className="w-full xl:w-1/2">
+      <div
+        // className="flex flex-col xl:flex-row w-full"
+        className="flex flex-col xl:flex-row gap-1 w-full p-10 justify-center items-center xl:items-start"
+      >
+        <div
+          // className="w-full xl:w-1/2"        
+        >
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
