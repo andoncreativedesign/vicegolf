@@ -277,34 +277,31 @@ export default function Product() {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 py-6">
-      {/* Breadcrumbs */}
-      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
-        <div className="flex items-center text-gray-600">
-          {productType.display && (
-            <>
-              <button
-                onClick={handleBreadCrumbClick}
-                className="cursor-pointer transition-colors text-gray-600"
-              >
-                {productType.display}
-              </button>
-              <ChevronRight className="text-gray-600" size={20} />
-            </>
-          )}
-          <span className="text-gray-900 font-bold line-clamp-1" title={title}>
-            {title}
-          </span>
-        </div>
-      </div>
+    <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
 
-      <div
-        // className="flex flex-col xl:flex-row w-full"
-        className="flex flex-col xl:flex-row gap-1 w-full p-10 justify-center items-center xl:items-start"
-      >
-        <div
-          // className="w-full xl:w-1/2"        
-        >
+      <div  className="flex flex-col xl:flex-row gap-1 w-full pb-10 px-10 pt-6 justify-center items-center xl:items-start">
+        <div>
+
+          {/* Breadcrumbs */}
+          <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
+            <div className="flex items-center text-gray-600">
+              {productType.display && (
+                <>
+                  <button
+                    onClick={handleBreadCrumbClick}
+                    className="cursor-pointer transition-colors text-gray-600"
+                  >
+                    {productType.display}
+                  </button>
+                  <ChevronRight className="text-gray-600" size={20} />
+                </>
+              )}
+              <span className="text-gray-900 font-semibold line-clamp-1" title={title}>
+                {title}
+              </span>
+            </div>
+          </div>
+
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
