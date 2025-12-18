@@ -74,7 +74,7 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <div className="fixed left-0 right-0 mt-6 bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 w-screen">
+    <div className="bg-[#fafafa] fixed left-0 right-0 mt-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 w-screen">
       <div className="relative w-full px-16 sm:px-20 lg:px-24 py-4">
 
         <div
@@ -97,10 +97,10 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
                   prefetch="intent"
                   to={subItem.url}
                   onClick={() => onClose && onClose()}
-                  className="flex flex-col items-start bg-[#fcfcfc] hover:bg-gray-50 rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
+                  className="flex flex-col items-start rounded-sm p-0 transition-colors group w-[180px] h-[220px] overflow-hidden"
                   style={{ textDecoration: "none" }}
                 >
-                  <div className="w-full bg-[#fcfcfc]">
+                  <div className="w-full">
                     <h4 className="text-sm font-bold text-gray-700 text-start line-clamp-2 p-2">
                       {subItem.title}
                     </h4>

@@ -110,7 +110,7 @@ export default function Cart() {
   const cart = useLoaderData<typeof loader>();
   
   return (
-    <div className="cart-page-container">
+    <div className="cart-page-container]">
       <CartPage cart={cart} />
     </div>
   );
