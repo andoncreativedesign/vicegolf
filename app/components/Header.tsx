@@ -64,12 +64,13 @@ const transformCollectionsToDropdown = (collections: any[]): ProductDropdownItem
 
 // Country flag URLs
 const flagUrls: Record<string, string> = {
-  US: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/united_states.svg?v=1708075042&width=40&height=40&crop=center',
-  CA: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/canada.svg?v=1708075041&width=40&height=40&crop=center',
-  DE: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/germany.svg?v=1708075042&width=40&height=40&crop=center',
-  CH: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/switzerland.svg?v=1708075042&width=40&height=40&crop=center',
-  GB: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/united_kingdom.svg?v=1708075042&width=40&height=40&crop=center',
-  SE: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/sweden.svg?v=1712925748&width=40&height=40&crop=center'
+    UAE: 'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/WhatsApp_Image_2025-12-19_at_12.17.59_PM.jpg?v=1766127036&width=30&height=30&crop=center',
+  // US: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/united_states.svg?v=1708075042&width=40&height=40&crop=center',
+  // CA: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/canada.svg?v=1708075041&width=40&height=40&crop=center',
+  // DE: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/germany.svg?v=1708075042&width=40&height=40&crop=center',
+  // CH: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/switzerland.svg?v=1708075042&width=40&height=40&crop=center',
+  // GB: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/united_kingdom.svg?v=1708075042&width=40&height=40&crop=center',
+  // SE: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/sweden.svg?v=1712925748&width=40&height=40&crop=center'
 };
 
 // Then update the Header component
@@ -231,12 +232,13 @@ function CartBanner() {
 
 // Country/Currency data - Specified countries
 const countries = [
-  { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
-  { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
-  { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
-  { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.', url: 'https://www.vicegolf.ch' },
-  { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£', url: 'https://www.vicegolf.co.uk' },
-  { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr', url: 'https://www.vicegolf.se' },
+  { code: 'UAE', name: ' United Arab Emirates', currency: 'AED', symbol: '', url: 'https://www.vicegolf.com' },
+  // { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
+  // { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
+  // { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
+  // { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.', url: 'https://www.vicegolf.ch' },
+  // { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£', url: 'https://www.vicegolf.co.uk' },
+  // { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr', url: 'https://www.vicegolf.se' },
 ] as const;
 
 function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
@@ -310,7 +312,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
         <img
           src={flagUrls[selectedCountry.code]}
           alt={selectedCountry.name}
-          className="w-5 h-4 object-cover flex-shrink-0"
+          className="w-5 h-5 object-cover flex-shrink-0"
         />
         <span className="hidden sm:inline">
           {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
@@ -318,24 +320,24 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
         <span className="sm:hidden">
           {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
         </span>
-        <svg
+        {/* <svg
           className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        </svg> */}
       </button>
 
       {/* Dropdown Menu */}
-      {isOpen && (
-        <>
+      {/* {isOpen && (
+        <> */}
           {/* Backdrop */}
-          <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
+          {/* <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} /> */}
 
           {/* Dropdown Content */}
-          <div className={`fixed ${isMobile ? 'bottom-16 left-4 right-4' : 'top-[var(--header-height, 80px)] left-4 w-64'} bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[50vh] overflow-y-auto px-4`}>
+          {/* <div className={`fixed ${isMobile ? 'bottom-16 left-4 right-4' : 'top-[var(--header-height, 80px)] left-4 w-64'} bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[50vh] overflow-y-auto px-4`}>
             <div className={`py-2 ${isMobile ? 'flex flex-col-reverse' : ''}`}>
               {filteredCountries.map((country) => (
                 <button
@@ -359,7 +361,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
             </div>
           </div>
         </>
-      )}
+      )} */}
     </div>
   );
 }
