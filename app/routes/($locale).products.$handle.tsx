@@ -21,6 +21,7 @@ import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { TracerProduct } from '~/components/TracerProduct';
+import { BagProProduct } from '~/components/BagProProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { BeaniesProduct } from '~/components/BeaniesProduct';
 import { PuttersProduct } from '~/components/PuttersProduct';
@@ -364,6 +365,10 @@ export default function Product() {
           (field: { key?: string; value?: string }) =>
             field?.key === 'category_variant' && field?.value === 'Junior Cap'
         );
+        const isBagProProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Bag Pro'
+        );
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -412,6 +417,16 @@ export default function Product() {
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
               showBestSellers={true} // or false, depending on your design
+            />
+          );
+        }
+        if (isBagProProduct) {
+          return (
+            <BagProProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true} // adjust as needed
             />
           );
         }
