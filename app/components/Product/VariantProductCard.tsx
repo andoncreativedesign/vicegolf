@@ -202,8 +202,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <div className="block bg-white rounded-lg overflow-hidden border border-gray-100/30 w-full flex flex-col h-full relative group">
-      <div className="block relative" >
+    <div className="group relative flex flex-col h-full bg-red-50 rounded-lg overflow-hidden border border-red-100">
+      <div className="relative w-full overflow-hidden">
 
         <div
           className="relative w-full h-96 bg-[#fcfcfc] overflow-hidden"
@@ -232,21 +232,23 @@ export function VariantProductCard({ product }: ProductCardProps) {
           >
             <div className="w-full h-full">
               {image && (
-                <Image
-                  src={currentImage || image.url}
-                  alt={image.altText || product.title}
-                  className="w-full h-full object-contain transition-transform duration-300"
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  width={300}
-                  height={300}
-                  style={{
-                    aspectRatio: '1/1',
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                    width: '100%',
-                    height: '100%'
-                  }}
-                />
+                <div className="w-full h-full flex items-center justify-center p-4">
+                  <Image
+                    src={currentImage || image.url}
+                    alt={image.altText || product.title}
+                    className="w-full h-full object-cover transition-transform duration-300"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    width={300}
+                    height={300}
+                    style={{
+                      aspectRatio: '1/1',
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                      maxWidth: '100%',
+                      maxHeight: '100%'
+                    }}
+                  />
+                </div>
               )}
             </div>
           </Link>
