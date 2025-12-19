@@ -9,7 +9,7 @@ interface YoutubeProps {
   youtubeVideo: YoutubeVideo
 }
 
-export function Youtube({youtubeVideo}: YoutubeProps) {
+export function Youtube({ youtubeVideo }: YoutubeProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
@@ -44,16 +44,21 @@ export function Youtube({youtubeVideo}: YoutubeProps) {
   };
 
   useEffect(() => {
-    console.log("youtubeVideo ",youtubeVideo)
-  },[youtubeVideo])
+    console.log("youtubeVideo ", youtubeVideo)
+  }, [youtubeVideo])
 
   return (
     <section className="w-full py-16 md:py-24">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
-        <div className="text-center mb-12">
-          <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
+      <div className="w-full">
+        <div className="text-center mb-12 max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
+          <h3 className="text-4xl lg:text-5xl font-semibold mb-3 text-gray-900">
             {youtubeVideo?.title}
           </h3>
+          {youtubeVideo?.description && (
+            <p className="!text-xl font-light text-gray-600">
+              {youtubeVideo.description}
+            </p>
+          )}
         </div>
 
         <div className="relative">
@@ -96,9 +101,8 @@ export function Youtube({youtubeVideo}: YoutubeProps) {
               <button
                 key={index}
                 onClick={() => emblaApi?.scrollTo(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === selectedIndex ? 'bg-gray-900 w-8' : 'bg-gray-300'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all ${index === selectedIndex ? 'bg-gray-900 w-8' : 'bg-gray-300'
+                  }`}
                 aria-label={`Go to video ${index + 1}`}
               />
             ))}
