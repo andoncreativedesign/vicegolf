@@ -206,7 +206,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
       <div className="relative w-full overflow-hidden">
 
         <div
-          className="relative w-full h-96 bg-[#fcfcfc] overflow-hidden"
+          className="relative w-full bg-[#f6f6f6] overflow-hidden aspect-square"
           onMouseEnter={() => {
             // Clear any pending timeouts when entering
             if (hoverDelayTimeout) {
@@ -232,20 +232,19 @@ export function VariantProductCard({ product }: ProductCardProps) {
           >
             <div className="w-full h-full">
               {image && (
-                <div className="relative w-full h-96 bg-white overflow-hidden">
+                <div className="relative w-full h-full bg-[#f6f6f6] overflow-hidden">
                   <Image
                     src={currentImage || image.url}
                     alt={image.altText || product.title}
                     className="w-full h-full object-cover object-center transition-transform duration-300"
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    width={300}
-                    height={300}
+                    width={400}
+                    height={400}
                     style={{
-                      aspectRatio: '1/1',
+                      width: '100%',
+                      height: '100%',
                       objectFit: 'cover',
                       objectPosition: 'center',
-                      maxWidth: '100%',
-                      maxHeight: '100%'
                     }}
                   />
                 </div>

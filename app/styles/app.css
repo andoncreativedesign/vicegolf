@@ -2190,3 +2190,15 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
   z-index: 20;
 }
+
+/* Product Description Bullet Points */
+.product-description ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.product-description li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
