@@ -206,7 +206,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
       <div className="block relative" >
 
         <div
-          className="relative w-full h-80 bg-[#fcfcfc] overflow-hidden"
+          className="relative w-full h-96 bg-[#fcfcfc] overflow-hidden"
           onMouseEnter={() => {
             // Clear any pending timeouts when entering
             if (hoverDelayTimeout) {
@@ -276,10 +276,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
                     onClick={(e) => handleVariantSelect(e, variant, index)}
                     onMouseEnter={() => {
                       setIsOverVariants(true);
-                       // Change main image on hover
-                         if (variant.image?.url) {
-                       setCurrentImage(variant.image.url);
-                       }
+                      // Change main image on hover
+                      if (variant.image?.url) {
+                        setCurrentImage(variant.image.url);
+                      }
                       // Clear any pending hide timeout
                       if (hoverDelayTimeout) {
                         clearTimeout(hoverDelayTimeout);
@@ -288,10 +288,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
                     }}
                     onMouseLeave={() => {
                       setIsOverVariants(false);
-                       // Revert to selected variant's image when leaving
-                        if (allVariants[selectedVariant]?.image?.url) {
+                      // Revert to selected variant's image when leaving
+                      if (allVariants[selectedVariant]?.image?.url) {
                         setCurrentImage(allVariants[selectedVariant].image.url);
-                        }
+                      }
                       // Start the hide timeout when leaving the variants
                       const timeout = setTimeout(() => {
                         setIsHovering(false);
@@ -372,9 +372,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
                             setCurrentImage(variant.image.url);
                           }
                         }}
-                        className={`w-6 h-6 rounded-full overflow-hidden ring-1 ring-gray-100 transition-all duration-200 ${
-                          selectedVariant === index ? 'ring-1 ring-gray-500 ' : ''
-                        }`}
+                        className={`w-6 h-6 rounded-full overflow-hidden ring-1 ring-gray-100 transition-all duration-200 ${selectedVariant === index ? 'ring-1 ring-gray-500 ' : ''
+                          }`}
                         title={variant.title}
                       >
                         {variant.variantImage?.url ? (

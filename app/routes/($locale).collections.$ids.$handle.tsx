@@ -489,6 +489,15 @@ export default function Collection() {
                         </ol>
                     </nav>
 
+                    {/* Product Grid */}
+                    {collection?.products?.edges?.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+                            {collection.products.edges.map(({ node }) => (
+                                <VariantProductCard key={node.id} product={node} />
+                            ))}
+                        </div>
+                    )}
+
                     {/* Fallback to original collection header if no listing data */}
                 </div>
             )}
@@ -514,47 +523,16 @@ export default function Collection() {
                             </li>
                         </ol>
                     </nav>
+
+                    {/* Product Grid */}
+                    {collection?.products?.edges?.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+                            {collection.products.edges.map(({ node }) => (
+                                <VariantProductCard key={node.id} product={node} />
+                            ))}
+                        </div>
+                    )}
                 </>
-            )}
-
-            {/* Products section */}
-            {collection?.products && hasProducts && (
-                <div>
-                    <PaginatedResourceSection<ProductItemFragment>
-                        connection={collection.products}
-                        resourcesClassName="products-grid"
-                    >
-                        {({ node: product, index }) => (
-                            // product ? (
-                            //   <ProductCard
-                            //     key={product.id}
-                            //     product={product}
-                            //     loading={index < 8 ? 'eager' : undefined}
-                            //   />
-                            // ) : null
-
-                            product?.metafield?.value
-                                ? <VariantProductCard
-                                    key={product.id}
-                                    product={product}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                                : <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-
-                            // <div>{JSON.stringify(product?.metafield?.value)}</div>
-                        )}
-                    </PaginatedResourceSection>
-                </div>
-            )}
-
-            {!hasProducts && (
-                <p className="mt-6 text-center text-gray-500 text-sm">
-                    No products found in this collection.
-                </p>
             )}
 
             {collection?.id && collection?.handle &&
