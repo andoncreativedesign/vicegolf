@@ -23,7 +23,7 @@ export function VideoSection({
     <section className="w-full py-16 md:py-24">
       <div className="w-full">
         <div className="text-center mb-12 max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
-          <h3 className={`${titleSize} font-semibold mb-3 ${titleColor}`}>
+          <h3 className={`font-semibold mb-3 ${titleColor} ${titleSize}`}>
             {videoContent?.title}
           </h3>
           <p className={`${descriptionSize} font-light ${descriptionColor}`}>
