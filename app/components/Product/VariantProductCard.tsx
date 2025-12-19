@@ -202,7 +202,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <div className="group relative flex flex-col h-full bg-red-50 rounded-lg overflow-hidden border border-red-100">
+    <div className="group relative flex flex-col h-full bg-white rounded-lg overflow-hidden border border-gray-100">
       <div className="relative w-full overflow-hidden">
 
         <div

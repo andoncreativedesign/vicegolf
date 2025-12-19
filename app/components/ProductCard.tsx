@@ -17,7 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="group block bg-blue-50 rounded-lg overflow-hidden border border-blue-100 w-full flex flex-col h-full"
+      className="group block bg-white rounded-lg overflow-hidden border border-gray-100 w-full flex flex-col h-full"
     >
       {/* Product Image */}
       <Link
