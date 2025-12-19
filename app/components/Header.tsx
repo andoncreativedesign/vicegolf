@@ -232,7 +232,7 @@ function CartBanner() {
 
 // Country/Currency data - Specified countries
 const countries = [
-  { code: 'UAE', name: ' United Arab Emirates', currency: 'AED', symbol: '', url: 'https://www.vicegolf.com' },
+  { code: 'UAE', name: 'United Arab Emirates', currency: 'AED', symbol:'', url: 'https://www.vicegolf.com' },
   // { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
   // { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
   // { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
@@ -315,7 +315,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
           className="w-5 h-5 object-cover flex-shrink-0"
         />
         <span className="hidden sm:inline">
-          {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
+          {selectedCountry.name} ({selectedCountry.currency}{selectedCountry.symbol})
         </span>
         <span className="sm:hidden">
           {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
