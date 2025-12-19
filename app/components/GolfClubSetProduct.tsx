@@ -12,14 +12,17 @@ type GolfClubSetProductProps = {
 
 export function GolfClubSetProduct({ productDetails }: GolfClubSetProductProps) {
   return (
-    <div>
+    <div className='w-full max-w-[1536px] mx-auto'>
       {productDetails && productDetails?.youtubeVideos &&
         <Youtube youtubeVideo={productDetails?.youtubeVideos} />
       }
 
-      <div className='bg-black text-white px-8 py-4'>
+      <div className='px-8 py-4'>
         {productDetails && productDetails?.videoContent &&
-          <VideoSection videoContent={productDetails?.videoContent} />
+          <VideoSection
+            titleSize='lg:text-[48px] text-[32px] font-semibold'
+            videoContent={productDetails?.videoContent}
+          />
         }
 
         {/* Reusable What's New Section */}
@@ -29,6 +32,7 @@ export function GolfClubSetProduct({ productDetails }: GolfClubSetProductProps) 
               key={index}
               content={item}
               showImageLeft={index % 2 === 0}
+              titleClassName='lg:text-[48px] text-[32px] font-semibold w-full'
             />
           ))
         }

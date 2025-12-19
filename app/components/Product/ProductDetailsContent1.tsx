@@ -23,12 +23,15 @@ interface ProductContent1Props {
   isThird?: boolean;
   isSquareAspect?: boolean;
   imageSize?: 'small' | 'medium' | 'large' | 'xlarge';
+  titleContainerClassName?: string,
   titleClassName?: string;
   descriptionClassName?: string;
   pointsClassName?: string;
   imageContainerClassName?: string;
+  imageInnerContainerClassName?: string
   imageClassName?: string;
   imageCentered?: boolean;
+  imageObjectFit?: 'cover' | 'contain' | 'cover' | 'none' | 'scale-down'
 }
 
 const ProductDetailsContent1 = ({
@@ -41,12 +44,15 @@ const ProductDetailsContent1 = ({
   isThird = false,
   isSquareAspect = false,
   imageSize = 'medium',
+  titleContainerClassName = '',
   titleClassName = '',
   descriptionClassName = '',
   pointsClassName = '',
   imageContainerClassName = '',
+  imageInnerContainerClassName = '',
   imageClassName = '',
-  imageCentered = false
+  imageCentered = false,
+  imageObjectFit = 'cover'
 }: ProductContent1Props) => {
   const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
 
@@ -54,7 +60,7 @@ const ProductDetailsContent1 = ({
     <div className={`flex items-center justify-center ${isImageFull ? 'w-full' : 'w-full'} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
       <div className={`relative group w-full ${isSquareAspect ? 'aspect-square' : ''} ${isImageFull ? 'max-w-full' : ''}`}>
         {content?.images?.[0]?.asset?.url && (
-          <div className="w-full h-full">
+          <div className={"w-full h-full " + imageInnerContainerClassName}>
             <img
               src={content.images[0].asset.url}
               alt={content.title || 'Product image'}
@@ -66,7 +72,7 @@ const ProductDetailsContent1 = ({
                         ''
                 } 
                 ${imageClassName}`}
-              style={{ objectFit: 'cover' }}
+              style={{ objectFit: imageObjectFit }}
             />
           </div>
         )}
@@ -78,7 +84,7 @@ const ProductDetailsContent1 = ({
     <div className={`space-y-4 ${isTextFull || isThird ? 'w-full flex flex-col items-center' : 'flex flex-col justify-center h-full w-full pr-0'} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'} ${isFirst ? 'mt-6' : ''}`}>
       <div className={`${isTextFull || isThird ? 'w-full max-w-4xl' : 'w-full'}`}>
         {content.title && (
-          <div className={`${isThird ? 'w-full flex justify-center' : ''}`}>
+          <div className={`${isThird ? 'w-full flex justify-center' : ''} ${titleContainerClassName}`}>
             <h3 className={`${titleClassName || (isThird ? 'text-4xl lg:text-5xl font-bold' : 'text-2xl lg:text-3xl font-semibold')} ${isTextFull || isThird ? 'text-center' : 'text-center lg:text-left'}`}>
               {content.title}
             </h3>
