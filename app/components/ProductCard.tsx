@@ -24,7 +24,7 @@ export function ProductCard({ product }: ProductCardProps) {
         to={`/products/${product.handle}`}
         style={{ textDecoration: 'none' }}
       >
-        <div className="relative w-full h-96 bg-white overflow-hidden">
+        <div className="relative w-full bg-[#f6f6f6] overflow-hidden aspect-square">
           {image ? (
             <div className="w-full h-full">
               <Image
