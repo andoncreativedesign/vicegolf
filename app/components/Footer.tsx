@@ -112,76 +112,78 @@ function FooterContent({
   publicStoreDomain: string;
 }) {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="max-w-7xl mx-auto px-4 py-12" >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
         {/* About Column */}
-        <div>
+        {/* <div>
           <h3 className="font-semibold text-white mb-4">About</h3>
-          <ul className="space-y-2">
-            <li><NavLink to="/careers" className="!text-white hover:!text-gray-300 transition-colors">Career</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Blog</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Press Center</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">The Story of Vice Golf</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Vice x HIO Labs</NavLink></li>
+          <ul className="space-y-2 textDecoration-none">
+            <li><NavLink to="/careers" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Career</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Blog</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Press Center</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>The Story of Vice Golf</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Vice x HIO Labs</NavLink></li>
           </ul>
-        </div>
+        </div> */}
 
         {/* Help & Info Column */}
         <div>
           <h3 className="font-semibold text-white mb-4">Help & Info</h3>
           <ul className="space-y-2">
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Delivery & Shipping</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Refund Policy</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li>
-            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors">Return Policy</NavLink></li>
+            {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Delivery & Shipping</NavLink></li> */}
+            {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Refund Policy</NavLink></li> */}
+            {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li> */}
+            <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
           </ul>
         </div>
 
         {/* Legal Column */}
         <div>
           <h3 className="font-semibold text-white mb-4">Legal</h3>
-          <ul className="space-y-2">
-            <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors">Privacy Policy</NavLink></li>
-            <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors">Terms of Service</NavLink></li>
-            <li><NavLink to="/duties-taxes" className="!text-white hover:!text-gray-300 transition-colors">Duties & Taxes</NavLink></li>
-            <li><NavLink to="/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors">Cookie Settings</NavLink></li>
+          <ul className="space-y-2"> 
+            <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
+            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Return Policy</NavLink></li>
+            {/* <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Privacy Policy</NavLink></li> */}
+            {/* <li><NavLink to="/duties-taxes" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Duties & Taxes</NavLink></li> */}
+            {/* <li><NavLink to="/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Cookie Settings</NavLink></li> */}
           </ul>
         </div>
 
 
 
         {/* Your Vice Golf Column */}
-        <div>
+        {/* <div>
           <h3 className="font-semibold text-white mb-4">Your Vice Golf</h3>
           <ul className="space-y-2">
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">eGift Cards</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">New Product Releases 2025</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Limited Editions</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Promo Codes</NavLink></li>
-            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Service & First Responder Discount</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>eGift Cards</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>New Product Releases 2025</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Limited Editions</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Promo Codes</NavLink></li>
+            <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Service & First Responder Discount</NavLink></li>
           </ul>
-        </div>
+        </div> */}
+       
 
         {/* Follow Us & Payment Info Column */}
         <div>
           <h3 className="font-semibold text-white mb-4">Follow Us</h3>
           <div className="flex space-x-3 mb-6">
-            <a href="/" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.instagram.com/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
               <FaInstagram className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="/" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.facebook.com/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
               <FaFacebookF className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="/" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.tiktok.com/@vicegolfofficial" className="!text-white hover:!text-gray-300 transition-colors">
               <FaTiktok className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="/" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.youtube.com/user/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
               <FaYoutube className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="/" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.linkedin.com/company/vice-sporting-goods-gmbh" className="!text-white hover:!text-gray-300 transition-colors">
               <FaLinkedinIn className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="/" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.pinterest.de/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
               <FaPinterestP className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
           </div>
@@ -204,12 +206,6 @@ function FooterContent({
               <img
                 src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/american_express.svg?v=1743711767&width=60&height=60&crop=center"
                 alt="American Express"
-                className="h-6 w-auto"
-                loading="lazy"
-              />
-              <img
-                src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal_1.svg?v=1743711766&width=60&height=60&crop=center"
-                alt="PayPal"
                 className="h-6 w-auto"
                 loading="lazy"
               />

@@ -21,6 +21,7 @@ import { GolfBagProduct } from '~/components/GolfBagProduct';
 import { RangefinderProduct } from '~/components/RangefinderProduct';
 import { DivotToolProduct } from '~/components/DivotToolProduct';
 import { TracerProduct } from '~/components/TracerProduct';
+import { BagProProduct } from '~/components/BagProProduct';
 import { CustomerReviews } from '~/components/CustomerReviews';
 import { BeaniesProduct } from '~/components/BeaniesProduct';
 import { PuttersProduct } from '~/components/PuttersProduct';
@@ -36,6 +37,7 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
+import { DriversProduct } from '~/components/Product/DriversProduct';
 
 type ProductImageType = {
   id: string;
@@ -279,7 +281,7 @@ export default function Product() {
   return (
     <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
 
-      <div  className="flex flex-col xl:flex-row gap-1 w-full pb-10 px-10 pt-6 justify-center items-center xl:items-start">
+      <div className="flex flex-col xl:flex-row gap-1 w-full pb-10 px-10 pt-6 justify-center items-center xl:items-start">
         <div>
 
           {/* Breadcrumbs */}
@@ -363,6 +365,10 @@ export default function Product() {
           (field: { key?: string; value?: string }) =>
             field?.key === 'category_variant' && field?.value === 'Junior Cap'
         );
+        const isBagProProduct = product.metafields?.some(
+          (field: { key?: string; value?: string }) =>
+            field?.key === 'category_variant' && field?.value === 'Bag Pro'
+        );
         if (isTracerProduct) {
           return (
             <TracerProduct
@@ -411,6 +417,16 @@ export default function Product() {
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
               showBestSellers={true} // or false, depending on your design
+            />
+          );
+        }
+        if (isBagProProduct) {
+          return (
+            <BagProProduct
+              product={product}
+              productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true} // adjust as needed
             />
           );
         }
@@ -534,6 +550,13 @@ export default function Product() {
                 showBestSellers={true}
               />
             );
+
+          case "golf clubs":
+            return (
+              <DriversProduct
+                productDetails={productDetails}
+              />
+            )
 
           /** 👇 Default — fallback to golf balls layout */
           default:
