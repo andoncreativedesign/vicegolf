@@ -232,11 +232,11 @@ export function VariantProductCard({ product }: ProductCardProps) {
           >
             <div className="w-full h-full">
               {image && (
-                <div className="w-full h-full flex items-center justify-center p-4">
+                <div className="relative w-full h-96 bg-white overflow-hidden">
                   <Image
                     src={currentImage || image.url}
                     alt={image.altText || product.title}
-                    className="w-full h-full object-cover transition-transform duration-300"
+                    className="w-full h-full object-cover object-center transition-transform duration-300"
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                     width={300}
                     height={300}
