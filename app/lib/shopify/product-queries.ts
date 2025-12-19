@@ -409,8 +409,7 @@ export interface ShopifyPageInfo {
   endCursor?: string;
 }
 
-// ! collection query without sorting 
-/* 
+// ! collection query without sorting
 export const GET_PRODUCTS_BY_COLLECTION = `#graphql
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
@@ -454,8 +453,9 @@ query GetProductsByCollectionIds(
   }
 }
 `;
-*/
 
+// ! collection with sorting
+/* 
 export const GET_PRODUCTS_BY_COLLECTION = `#graphql
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
@@ -507,7 +507,7 @@ query GetProductsByCollectionIds(
   }
 }
 `;
-
+*/
 
 const PRODUCT_CARD_FRAGMENT = `
 fragment ProductCardFragment on Product {
