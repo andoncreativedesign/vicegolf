@@ -31,6 +31,8 @@ interface ProductContent1Props {
   imageInnerContainerClassName?: string
   imageClassName?: string;
   imageCentered?: boolean;
+  containerClassName?: string;
+  contentContainerClassName?: string;
   imageObjectFit?: 'cover' | 'contain' | 'cover' | 'none' | 'scale-down'
 }
 
@@ -52,6 +54,8 @@ const ProductDetailsContent1 = ({
   imageInnerContainerClassName = '',
   imageClassName = '',
   imageCentered = false,
+  containerClassName = '',
+  contentContainerClassName = '',
   imageObjectFit = 'cover'
 }: ProductContent1Props) => {
   const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
@@ -82,7 +86,7 @@ const ProductDetailsContent1 = ({
 
   const textSection = (
     <div className={`space-y-4 ${isTextFull || isThird ? 'w-full flex flex-col items-center' : 'flex flex-col justify-center h-full w-full pr-0'} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'} ${isFirst ? 'mt-6' : ''}`}>
-      <div className={`${isTextFull || isThird ? 'w-full max-w-4xl' : 'w-full'}`}>
+      <div className={`${isTextFull || isThird ? 'w-full' : 'w-full'} ${contentContainerClassName}`}>
         {content.title && (
           <div className={`${isThird ? 'w-full flex justify-center' : ''} ${titleContainerClassName}`}>
             <h3 className={`${titleClassName || (isThird ? 'text-4xl lg:text-5xl font-bold' : 'text-2xl lg:text-3xl font-semibold')} ${isTextFull || isThird ? 'text-center' : 'text-center lg:text-left'}`}>
@@ -135,7 +139,7 @@ const ProductDetailsContent1 = ({
 
   // Show layout with images and text
   return (
-    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${isFirst ? 'gap-8 lg:gap-10' : 'gap-6 lg:gap-8'} items-center justify-center`}>
+    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${isFirst ? 'gap-8 lg:gap-10' : 'gap-6 lg:gap-8'} items-center justify-center ${containerClassName}`}>
       {showImageLeft ? (
         <>
           {imageSection}
