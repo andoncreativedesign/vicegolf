@@ -31,8 +31,6 @@ interface ProductContent1Props {
   imageInnerContainerClassName?: string
   imageClassName?: string;
   imageCentered?: boolean;
-  containerClassName?: string;
-  contentContainerClassName?: string;
   imageObjectFit?: 'cover' | 'contain' | 'cover' | 'none' | 'scale-down'
 }
 
@@ -54,21 +52,19 @@ const ProductDetailsContent1 = ({
   imageInnerContainerClassName = '',
   imageClassName = '',
   imageCentered = false,
-  containerClassName = '',
-  contentContainerClassName = '',
   imageObjectFit = 'cover'
 }: ProductContent1Props) => {
   const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
 
   const imageSection = (
-    <div className={`flex items-center justify-center w-full ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
-      <div className={`relative group w-full ${isSquareAspect ? 'aspect-square' : ''} ${isImageFull ? 'max-w-full' : ''} overflow-hidden`}>
+    <div className={`flex items-center justify-center ${isImageFull ? 'w-full' : 'w-full'} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
+      <div className={`relative group w-full ${isSquareAspect ? 'aspect-square' : ''} ${isImageFull ? 'max-w-full' : ''}`}>
         {content?.images?.[0]?.asset?.url && (
-          <div className={`w-full h-full ${imageInnerContainerClassName}`}>
+          <div className={"w-full h-full " + imageInnerContainerClassName}>
             <img
               src={content.images[0].asset.url}
               alt={content.title || 'Product image'}
-              className={`w-full h-full ${isImageFull ? 'max-w-full' : ''} 
+              className={`w-full h-full object-cover ${isImageFull ? 'max-w-full' : ''} 
                 ${!isImageFull && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
                   !isImageFull && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
                     !isImageFull && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
@@ -76,17 +72,7 @@ const ProductDetailsContent1 = ({
                         ''
                 } 
                 ${imageClassName}`}
-              style={{
-                objectFit: imageObjectFit,
-                objectPosition: 'center',
-                width: '100%',
-                height: '100%',
-                display: 'block',
-                maxWidth: '100%',
-                maxHeight: '100%'
-              }}
-              loading="lazy"
-              decoding="async"
+              style={{ objectFit: imageObjectFit }}
             />
           </div>
         )}
@@ -96,7 +82,7 @@ const ProductDetailsContent1 = ({
 
   const textSection = (
     <div className={`space-y-4 ${isTextFull || isThird ? 'w-full flex flex-col items-center' : 'flex flex-col justify-center h-full w-full pr-0'} text-center lg:text-left order-2 ${showImageLeft ? 'lg:order-2' : 'lg:order-1'} ${isFirst ? 'mt-6' : ''}`}>
-      <div className={`${isTextFull || isThird ? 'w-full' : 'w-full'} ${contentContainerClassName}`}>
+      <div className={`${isTextFull || isThird ? 'w-full max-w-4xl' : 'w-full'}`}>
         {content.title && (
           <div className={`${isThird ? 'w-full flex justify-center' : ''} ${titleContainerClassName}`}>
             <h3 className={`lg:text-[48px] text-[32px] font-semibold w-full ${titleClassName || (isThird ? 'text-4xl lg:text-5xl font-bold' : 'text-2xl lg:text-3xl font-semibold')} ${isTextFull || isThird ? 'text-center' : 'text-center lg:text-left'}`}>
@@ -149,7 +135,7 @@ const ProductDetailsContent1 = ({
 
   // Show layout with images and text
   return (
-    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${isFirst ? 'gap-8 lg:gap-10' : 'gap-6 lg:gap-8'} items-center justify-center ${containerClassName}`}>
+    <div className={`grid ${isTextFull || isImageFull ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${isFirst ? 'gap-8 lg:gap-10' : 'gap-6 lg:gap-8'} items-center justify-center`}>
       {showImageLeft ? (
         <>
           {imageSection}
