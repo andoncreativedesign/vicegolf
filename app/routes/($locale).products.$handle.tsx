@@ -551,7 +551,8 @@ export default function Product() {
               />
             );
 
-          case "golf clubs":
+          // case "golf clubs":
+          case "drivers":
             return (
               <DriversProduct
                 productDetails={productDetails}
