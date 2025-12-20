@@ -1,16 +1,16 @@
 import type { Route } from './+types/return-policy';
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: 'Return Policy | Vice Golf' }];
+  return [{ title: 'Returns Policy | Vice Golf' }];
 };
 
 export default function ReturnPolicy() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <div className="max-w-[91rem] mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">RETURN POLICY</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">RETURNS POLICY</h1>
         </div>
 
         {/* Content */}

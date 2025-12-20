@@ -322,7 +322,7 @@ export default function Product() {
             selectedVariant={selectedVariant}
             title={title}
             description={descriptionHtml}
-            productType={product.productType}
+            productType={product.productType?.toLowerCase()}
             productAccordions={productDetails?.accordionItems || []}
             colorVariants={colorVariants}
             shippingDetails={shippingDetails}
@@ -462,6 +462,7 @@ export default function Product() {
 
           /** 👇 Golf club sets */
           case "golf club set":
+          case "golf clubs":
             return <GolfClubSetProduct productDetails={productDetails} />;
 
           /** 👇 Golf bags */
@@ -551,7 +552,7 @@ export default function Product() {
               />
             );
 
-          case "golf clubs":
+          case "drivers":
             return (
               <DriversProduct
                 productDetails={productDetails}

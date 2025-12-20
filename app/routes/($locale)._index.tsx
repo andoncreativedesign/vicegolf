@@ -52,11 +52,11 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       variables: {
         golfBallsHandle: createCategoryQuery('golf-balls'),
         golfBallsCursor,
-        golfClubsHandle: createCategoryQuery(''),
+        golfClubsHandle: createCategoryQuery('golf-clubs'),
         golfClubsCursor,
         apparelHandle: createCategoryQuery('apparel'),
         apparelCursor,
-        gearHandle: createCategoryQuery('gear'),
+        gearHandle: createCategoryQuery(''),
         gearCursor,
         limitedEditionsHandle: createCategoryQuery(''),
         fittingCustomisationHandle: createCategoryQuery(''),
@@ -474,17 +474,6 @@ export default function Homepage() {
             loading={isLoadingGolfClubs}
           />
         )}
-        {/* VICE APPAREL - Infinite Scroll */}
-        {apparelProducts.length > 0 && (
-          <ProductGrid
-            products={apparelProducts}
-            title="VICE APPAREL"
-            categoryHandle="apparel"
-            onLoadMore={handleLoadMoreApparel}
-            hasMore={hasMoreApparel}
-            loading={isLoadingApparel}
-          />
-        )}
         {/* VICE GEAR - Now with Infinite Scroll */}
         {gearProducts.length > 0 && (
           <ProductGrid
@@ -502,6 +491,17 @@ export default function Homepage() {
         <ShopByCategories
           menuItems={menu.slice(0, 4)}
           sanityHomeCategories={data?.homePageData?.homeCategories}
+        />
+      )}
+      {/* VICE APPAREL - Infinite Scroll */}
+      {apparelProducts.length > 0 && (
+        <ProductGrid
+          products={apparelProducts}
+          title="VICE APPAREL"
+          categoryHandle="apparel"
+          onLoadMore={handleLoadMoreApparel}
+          hasMore={hasMoreApparel}
+          loading={isLoadingApparel}
         />
       )}
       <HeroSection
