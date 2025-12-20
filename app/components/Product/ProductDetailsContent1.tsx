@@ -61,14 +61,14 @@ const ProductDetailsContent1 = ({
   const isGolfBallSecondSection = (descriptionClassName?.includes('bg-blue-100') || false);
 
   const imageSection = (
-    <div className={`flex items-center justify-center ${isImageFull ? 'w-full' : 'w-full'} ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
-      <div className={`relative group w-full ${isSquareAspect ? 'aspect-square' : ''} ${isImageFull ? 'max-w-full' : ''}`}>
+    <div className={`flex items-center justify-center w-full ${imageCentered ? 'lg:justify-center' : (showImageLeft ? 'lg:justify-end' : 'lg:justify-start')} order-1 ${showImageLeft ? 'lg:order-1' : 'lg:order-2'} ${imageContainerClassName}`}>
+      <div className={`relative group w-full ${isSquareAspect ? 'aspect-square' : ''} ${isImageFull ? 'max-w-full' : ''} overflow-hidden`}>
         {content?.images?.[0]?.asset?.url && (
-          <div className={"w-full h-full " + imageInnerContainerClassName}>
+          <div className={`w-full h-full ${imageInnerContainerClassName}`}>
             <img
               src={content.images[0].asset.url}
               alt={content.title || 'Product image'}
-              className={`w-full h-full object-cover ${isImageFull ? 'max-w-full' : ''} 
+              className={`w-full h-full ${isImageFull ? 'max-w-full' : ''} 
                 ${!isImageFull && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
                   !isImageFull && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
                     !isImageFull && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
@@ -76,7 +76,17 @@ const ProductDetailsContent1 = ({
                         ''
                 } 
                 ${imageClassName}`}
-              style={{ objectFit: imageObjectFit }}
+              style={{
+                objectFit: imageObjectFit,
+                objectPosition: 'center',
+                width: '100%',
+                height: '100%',
+                display: 'block',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         )}
