@@ -70,37 +70,12 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const [hoverDelayTimeout, setHoverDelayTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isOverVariants, setIsOverVariants] = useState(false);
 
-  // Get all available variants including the main product
-  // const allVariants = useMemo(() => {
-  //   const variants = [{
-  //     ...product,
-  //     isMain: true,
-  //     id: product.handle,
-  //     image: product.featuredImage || product.images?.nodes?.[0],
-  //     variantImage: product.variantImage || product.featuredImage,
-  //   }];
-
-  //   if (product.variantFamilyProducts?.length > 0) {
-  //     product.variantFamilyProducts.forEach(variant => {
-  //       variants.push({
-  //         ...variant,
-  //         isMain: false,
-  //         id: variant.handle,
-  //         image: variant.featuredImage || variant.images?.nodes?.[0],
-  //         variantImage: variant.variantImage || variant.featuredImage,
-  //       });
-  //     });
-  //   }
-
-  //   // console.log('variant length - ', product.handle, product.variantFamilyProducts.length)
-  //   console.log('variant 123123123- ', product.handle, variants)
-
-  //   return variants;
-  // }, [product]);
-
 
   const allVariants = useMemo(() => {
     // Create a Set to track unique variant handles
+    if (product.title === "Vice Pro Plus")
+      console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
+
     const seenHandles = new Set();
     const variants = [];
 
@@ -112,7 +87,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
         isMain: true,
         id: product.handle,
         image: product.featuredImage || product.images?.nodes?.[0],
-        variantImage: product.variantImage || product.featuredImage,
+        variantImage: product.productType === "Golf Balls"
+          ? product.variantImage || ""
+          : product.variantImage || product.featuredImage,
       });
     }
 
