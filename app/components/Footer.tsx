@@ -142,9 +142,8 @@ function FooterContent({
           <h3 className="font-semibold text-white mb-4">Legal</h3>
           <ul className="space-y-2"> 
             <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
-            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Return Policy</NavLink></li>
+            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
             {/* <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Privacy Policy</NavLink></li> */}
-            {/* <li><NavLink to="/duties-taxes" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Duties & Taxes</NavLink></li> */}
             {/* <li><NavLink to="/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Cookie Settings</NavLink></li> */}
           </ul>
         </div>
