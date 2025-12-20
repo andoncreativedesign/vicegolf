@@ -85,7 +85,7 @@ const ProductDetailsContent1 = ({
       <div className={`${isTextFull || isThird ? 'w-full max-w-4xl' : 'w-full'}`}>
         {content.title && (
           <div className={`${isThird ? 'w-full flex justify-center' : ''} ${titleContainerClassName}`}>
-            <h3 className={`${titleClassName || (isThird ? 'text-4xl lg:text-5xl font-bold' : 'text-2xl lg:text-3xl font-semibold')} ${isTextFull || isThird ? 'text-center' : 'text-center lg:text-left'}`}>
+            <h3 className={`lg:text-[48px] text-[32px] font-semibold w-full ${titleClassName || (isThird ? 'text-4xl lg:text-5xl font-bold' : 'text-2xl lg:text-3xl font-semibold')} ${isTextFull || isThird ? 'text-center' : 'text-center lg:text-left'}`}>
               {content.title}
             </h3>
           </div>
