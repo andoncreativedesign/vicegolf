@@ -156,7 +156,9 @@ export function ProductForm({
 
       {/* cards and dropdowns for customization */}
       {
-        productType === 'Golf Clubs'
+        productType === 'drivers' ||
+        productType === 'golf club set' ||
+        productType === 'golf clubs' 
           ? <ProductCustomization
             productOptions={productOptions}
             styling='club'
