@@ -12,9 +12,9 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
   const renderBulletLine = (bullet: { customBullet?: string; text: string }) => {
     const hasCustom = bullet.customBullet?.trim();
     return (
-      <div className="flex items-start gap-3 py-1.5">
+      <div className="flex items-center gap-3">
         <span
-          className={`font-medium text-gray-900 flex-shrink-0 mt-[3px] ${hasCustom ? 'text-sm' : 'text-base'}`}
+          className={`font-medium text-gray-900 flex-shrink-0 ${hasCustom ? 'text-sm' : 'text-base'}`}
           style={{ width: hasCustom ? 'auto' : '0.75em' }}
         >
           {hasCustom ? bullet.customBullet : '•'}
@@ -222,15 +222,13 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
                 {item.title}
               </span>
               <ChevronDown
-                className={`h-4 w-4 text-gray-400 transition-all duration-300 flex-shrink-0 group-hover:text-gray-600 ${
-                  isOpen ? 'rotate-180 text-gray-900' : ''
-                }`}
+                className={`h-4 w-4 text-gray-400 transition-all duration-300 flex-shrink-0 group-hover:text-gray-600 ${isOpen ? 'rotate-180 text-gray-900' : ''
+                  }`}
               />
             </button>
             <div
-              className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                isOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'
-              }`}
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
             >
               <div className="px-4 md:px-0 pb-6 pt-1">
                 {renderContent(item)}
