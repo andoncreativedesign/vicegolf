@@ -16,7 +16,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   return (
-    <div className="group flex flex-col h-full bg-white rounded-lg overflow-hidden border border-gray-100">
+    <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       {/* Product Image */}
       <Link
         to={`/products/${product.handle}`}

@@ -202,7 +202,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <div className="group relative flex flex-col h-full bg-white rounded-lg overflow-hidden border border-gray-100">
+    <div className="group relative flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       <div className="relative w-full overflow-hidden">
 
         <div
@@ -257,10 +257,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
         {/* all other variants */}
         {!isGolfBall && isHovering && allVariants.length > 1 && (
           <div
-            className="absolute bottom-17 left-0 right-0 z-30 p-3 bg-white/90 backdrop-blur-sm shadow-lg"
+            className="absolute bottom-18 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
             onClick={(e) => e.preventDefault()}
           >
-            <div className="grid grid-cols-5 gap-2 w-full">
+            <div className="grid grid-cols-6 w-full">
               {allVariants
                 .sort((a, b) => {
                   // Move current variant to the start
@@ -271,8 +271,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 ?.map((variant, index) => (
                   <button
                     key={variant.id}
-                    className={`aspect-square rounded-lg ring-1 ring-gray-200 transition-all cursor-pointer ${selectedVariant === index
-                      ? 'ring ' : ''
+                    className={`aspect-square rounded-lg  ${selectedVariant === index
+                      ? '' : ''
                       }`}
                     onClick={(e) => handleVariantSelect(e, variant, index)}
                     onMouseEnter={() => {
@@ -306,7 +306,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         alt={variant.title}
                         width={56}
                         height={56}
-                        className="w-full h-full  object-cover transition-transform duration-200 "
+                        sizes="(max-width: 48em) 55px, 100px"
+                       className="w-full h-full max-w-[48px] max-h-[48px] sm:max-w-[52px] sm:max-h-[52px] md:max-w-[55px] md:max-h-[55px] object-cover transition-transform duration-200"
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
