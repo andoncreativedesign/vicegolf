@@ -67,8 +67,9 @@ const ProductDetailsContent1 = ({
           <div className={"w-full h-full " + imageInnerContainerClassName}>
             <img
               src={content.images[0].asset.url}
+              srcSet={`${content.images[0].asset.url} 1x, ${content.images[0].asset.url}?w=2000 2x`}
               alt={content.title || 'Product image'}
-              className={`w-full h-full object-cover ${isImageFull ? 'max-w-full' : ''} 
+              className={`w-full h-full ${isImageFull ? 'max-w-full' : ''} 
                 ${!isImageFull && imageSize === 'small' ? 'max-w-xs lg:max-w-sm' :
                   !isImageFull && imageSize === 'medium' ? 'max-w-md lg:max-w-lg' :
                     !isImageFull && imageSize === 'large' ? 'max-w-xl lg:max-w-2xl' :
@@ -76,7 +77,17 @@ const ProductDetailsContent1 = ({
                         ''
                 } 
                 ${imageClassName}`}
-              style={{ objectFit: imageObjectFit }}
+              style={{
+                objectFit: imageObjectFit,
+                imageRendering: '-webkit-optimize-contrast',
+                backfaceVisibility: 'hidden',
+                transform: 'translateZ(0)',
+                maxWidth: '100%',
+                height: 'auto',
+                display: 'block'
+              }}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         )}
