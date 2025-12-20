@@ -31,18 +31,18 @@ export function ViceLookSection() {
             id: '1',
             title: 'VICE GOLF BALLS',
             image: {
-                url: 'https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-homepage-get-the-look-1.jpg?v=1718636826',
+                url: 'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/Vice_Golf_Next_Up_Big_OG_Polo_White-59_1.jpg?v=1766224447',
                 altText: 'VICE Golf Balls',
             },
             url: '/',
             tooltips: [
                 {
                     id: '1-1',
-                    title: 'Vice Camo Polo',
+                    title: 'vice-solid-polo-white',
                     category: 'Polo',
                     price: '$49.99',
                     position: { top: '33%', left: '50%' },
-                    handle: 'vice-camo-polo-white-2025'
+                    handle: 'vice-solid-polo-white-2025'
                 },
                 // {
                 //     id: '1-2',
@@ -54,11 +54,11 @@ export function ViceLookSection() {
                 // },
                 {
                     id: '1-3',
-                    title: 'Vice Verve Offwhite/ Blue',
+                    title: 'vice-verve-white',
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'verve-offwhite-saphire'
+                    handle: 'vice-verve-white'
                 }
             ]
         },
@@ -76,7 +76,7 @@ export function ViceLookSection() {
                     title: 'Vice Long Sleeve',
                     category: 'Long Sleeve',
                     price: '$59.99',
-                    position: { top: '32%', left: '40%' },
+                    position: { top: '30%', left: '50%' },
                     handle: 'vice-longsleeve-navy-2025'
                 },
                 // {
@@ -124,8 +124,8 @@ export function ViceLookSection() {
                 // },
                 {
                     id: '3-3',
-                    title: 'Vice Verve',
-                    category: 'Vice Verve Black',
+                    title: 'Vice Verve Black',
+                    category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
                     handle: 'verve-black'
@@ -185,7 +185,7 @@ export function ViceLookSection() {
                                         width: 1200,
                                         height: 1600,
                                     }}
-                                    className="w-full h-[500px] lg:h-[700px] object-cover"
+                                    className="w-full h-auto object-cover"
                                     loading="lazy"
                                 />
 
@@ -222,7 +222,7 @@ export function ViceLookSection() {
 
                                             {activeTooltip === tooltip.id && (
                                                 <button
-                                                    className="absolute cursor-pointer left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-64 z-20"
+                                                    className="absolute cursor-pointer left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-61 z-20"
                                                     onMouseEnter={(e) => {
                                                         e.stopPropagation();
                                                         setActiveTooltip(tooltip.id);
@@ -232,13 +232,13 @@ export function ViceLookSection() {
                                                 >
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-gray-900">{tooltip.title}</span>
-                                                        <span className="text-sm text-gray-600">{tooltip.category}</span>
                                                         <div className="flex justify-between items-center mt-2">
+                                                           <span className="text-sm text-gray-600">{tooltip.category}</span>
                                                             {/* <span className="text-gray-900 font-medium">{tooltip.price}</span> */}
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
-                                                        </div>
+                                                          </div>
                                                     </div>
                                                 </button>
                                             )}
