@@ -148,7 +148,7 @@ export function ProductForm({
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <ColorVariant
-          productType={productType}
+          productType={productType?.toLowerCase()}
           colorVariants={colorVariants}
           selectedVariant={selectedVariant}
         />
@@ -156,9 +156,9 @@ export function ProductForm({
 
       {/* cards and dropdowns for customization */}
       {
-        productType === 'drivers' ||
-        productType === 'golf club set' ||
-        productType === 'golf clubs' 
+        productType?.toLowerCase() === 'drivers' ||
+        productType?.toLowerCase() === 'golf club set' ||
+        productType?.toLowerCase() === 'golf clubs' 
           ? <ProductCustomization
             productOptions={productOptions}
             styling='club'

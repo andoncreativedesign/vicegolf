@@ -16,7 +16,7 @@ const ColorVariant = ({ productType, colorVariants, selectedVariant }: ColorVari
 
 
   useEffect(() => {
-    if (productType === 'Golf Balls') {
+    if (productType === 'golf balls') {
       setVariantStyle('w-8 h-8 rounded-full')
     }
   }, [productType])
