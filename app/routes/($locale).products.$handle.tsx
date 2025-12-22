@@ -281,7 +281,7 @@ export default function Product() {
   return (
     <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
 
-      <div className="flex flex-col xl:flex-row gap-1 w-full pb-10 px-10 pt-6 justify-center items-center xl:items-start">
+      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-6 justify-center items-center xl:items-start">
         <div>
 
           {/* Breadcrumbs */}
@@ -316,7 +316,7 @@ export default function Product() {
             </div>
           )}
         </div>
-        <div className="w-full xl:w-1/2">
+        <div className="flex flex-col items-start">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
