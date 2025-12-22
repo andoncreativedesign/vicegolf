@@ -129,7 +129,7 @@ export function HeroSection({
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <section className="relative w-full overflow-hidden mb-8 h-[80vh] min-h-[500px] max-h-[90vh] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
+    <section className="relative w-full overflow-hidden mb-8 h-[74vh] min-h-[490px] max-h-[740px] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
       {/* Background slides */}
       <div className="absolute inset-0">
         {validSlides.map((slide, index) => (
