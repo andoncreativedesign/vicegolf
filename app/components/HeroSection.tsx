@@ -154,7 +154,7 @@ export function HeroSection({
       </div>
 
       {/* Text and CTA */}
-      <div className={`absolute inset-0 z-20 flex ${center ? 'items-center' : 'items-start'} justify-start px-4 sm:pl-6 md:pl-16 ${textColor} ${center ? '' : 'pt-56 sm:pt-72 md:pt-80'}`}>
+      <div className={`absolute inset-0 z-20 flex items-center justify-start px-4 sm:pl-6 md:pl-16 ${textColor}`}>
         <div className={`max-w-xl p-8 rounded-lg ${bgColor} bg-opacity-90 drop-shadow-2xl`}>
           <h1
             className={`font-extrabold uppercase tracking-tight ${textColor}`}
