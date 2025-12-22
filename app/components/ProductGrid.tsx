@@ -122,9 +122,14 @@ export function ProductGrid({
       <div className="relative">
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto scrollbar-hide pb-5 -mx-4 px-4"
+          className="flex overflow-x-auto scrollbar-hide pb-5"
           onScroll={checkScrollButtons}
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            marginInline: 'calc(-1 * var(--home-padding, 1rem))',
+            paddingInline: 'var(--home-padding, 1rem)'
+          }}
         >
           <div className="flex space-x-8">
             {products.map((product) => (
