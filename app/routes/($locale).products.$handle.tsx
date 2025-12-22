@@ -30,7 +30,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
-import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
@@ -80,6 +80,9 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   redirectIfHandleIsLocalized(request, { handle, data: product });
 
   // Fetch color variants if product has family metafield
+  const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
+  const family = product?.metafields?.find((item: any) => item?.key === "family")
+
   let colorVariants: UIColorVariant[] = [];
   if (product.metafield?.value) {
     try {
@@ -144,7 +147,33 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     }
   }
 
-  return { product, colorVariants };
+  console.log("clubFamily", clubFamily)
+  let clubVariants = []
+  if (clubFamily?.value) {
+    try {
+      const CLUB_FAMILY  = clubFamily.value.trim()
+      const response = await axiosShopifyAdmin.post("", {
+        query: ADMIN_PRODUCTS_BY_CLUB_FAMILY,
+        variables: {
+          searchQuery: `metafields.custom.club_family:"${CLUB_FAMILY}"`,
+        },
+      });
+
+      clubVariants = response?.data?.data?.products?.edges || []
+      console.log('\n\clubVariantsRes start')
+      console.log(JSON.stringify(clubVariants))
+      console.log('\n\clubVariantsRes end')
+
+      if (response.data.errors) {
+        throw new Error(JSON.stringify(response?.data?.errors))
+      }
+
+    } catch (error) {
+      console.error('Error fetching club variants:', error);
+    }
+  }
+
+  return { product, colorVariants, clubVariants };
 }
 
 async function loadDeferredData({ context, request }: Route.LoaderArgs) {
@@ -163,7 +192,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const { product, colorVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   // useEffect(() => {
@@ -174,6 +203,7 @@ export default function Product() {
   useEffect(() => {
     console.log('product details from shopify', product)
     console.log('product metafields:', product.metafields)
+    console.log('product clubVariantsRes:', clubVariants)
     // console.log('color variants from shopify', colorVariants)
 
     // Debug metafields for Tracer product

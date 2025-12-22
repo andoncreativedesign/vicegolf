@@ -673,6 +673,54 @@ export interface UIColorVariant {
   } | null;
 }
 
+export const ADMIN_PRODUCTS_BY_CLUB_FAMILY = `#graphql
+  query ProductsByFamily($searchQuery: String!) {
+    products(first: 20, query: $searchQuery) {
+      edges {
+        node {
+          id
+          title
+          handle
+          productType
+          vendor
+
+          # Product-level: Product Family metafield
+          club_hand_orientation: metafield(namespace: "custom", key: "club_hand_orientation") {
+            id
+            namespace
+            key
+            type
+            value
+          }
+
+          # Product-level: Variant Image metafield 
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
+
+          featuredImage {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
   query ProductsByFamily($searchQuery: String!) {
     products(first: 20, query: $searchQuery) {
@@ -860,6 +908,8 @@ const PRODUCT_FRAGMENT = `#graphql
       {namespace: "custom", key: "family"}
       {namespace: "custom", key: "category_variant"}
       {namespace: "custom", key: "primary_collection_handle"}
+      {namespace: "custom", key: "club_family"}
+      {namespace: "custom", key: "club_hand_orientation"}
     ]) {
       id
       namespace
