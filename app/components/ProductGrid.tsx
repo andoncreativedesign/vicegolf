@@ -84,8 +84,8 @@ export function ProductGrid({
   return (
     <section className={`py-4 sm:py-6 ${className}`}>
       {title && (
-        <div className="flex items-center justify-between mb-6 lg:mb-10">
-          <h2 className="text-base sm:text-lg font-extrabold tracking-tight" style={{ fontSize: '1.375rem', fontWeight: '800' }}>
+        <div className="flex items-center justify-between mb-1 sm:mb-2 text-black">
+          <h2 className="uppercase tracking-normal" style={{ fontSize: 'clamp(1.125rem, 2vw, 1.5rem)', fontWeight: '700', lineHeight: '1.2' }}>
             {title}
           </h2>
           <div className="flex items-center space-x-2 sm:space-x-4">
