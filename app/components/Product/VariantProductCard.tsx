@@ -26,15 +26,9 @@ type ProductCardProps = {
       url: string;
       altText?: string;
     };
-    variantImage?: {
-      url: string;
-      altText?: string;
-    };
+    variantImage?: any;
     images?: {
-      nodes: Array<{
-        url: string;
-        altText?: string;
-      }>;
+      nodes: Array<any>;
     };
     variants?: {
       nodes: Array<{
@@ -277,14 +271,23 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       setHoverDelayTimeout(timeout);
                     }}
                   >
-                    {variant.variantImage?.url ? (
+                    {typeof variant.variantImage === 'object' && variant.variantImage?.url ? (
                       <Image
                         src={variant.variantImage.url}
                         alt={variant.title}
                         width={56}
                         height={56}
                         sizes="(max-width: 48em) 55px, 100px"
-                       className="w-full h-full max-w-[48px] max-h-[48px] sm:max-w-[52px] sm:max-h-[52px] md:max-w-[55px] md:max-h-[55px] object-cover transition-transform duration-200"
+                        className="w-full h-full max-w-[48px] max-h-[48px] sm:max-w-[52px] sm:max-h-[52px] md:max-w-[55px] md:max-h-[55px] object-cover transition-transform duration-200"
+                      />
+                    ) : typeof variant.variantImage === 'string' && variant.variantImage ? (
+                      <Image
+                        src={variant.variantImage}
+                        alt={variant.title}
+                        width={56}
+                        height={56}
+                        sizes="(max-width: 48em) 55px, 100px"
+                        className="w-full h-full max-w-[48px] max-h-[48px] sm:max-w-[52px] sm:max-h-[52px] md:max-w-[55px] md:max-h-[55px] object-cover transition-transform duration-200"
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -308,26 +311,6 @@ export function VariantProductCard({ product }: ProductCardProps) {
             {product.productType || 'Golf Equipment'}
           </p>
 
-          {/* rating section */}
-          {/* <div className="flex items-center space-x-1.5 pt-1">
-            <div className="flex items-center space-x-0.5">
-              {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className={`w-3.5 h-3.5 flex-shrink-0 ${i < Math.floor(rating) ? 'text-amber-400 fill-current' : 'text-gray-200'
-                    }`}
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="text-xs text-gray-500">
-              {rating.toFixed(1)} ({reviewCount})
-            </span>
-          </div> */}
-
-
           {/* ball variants */}
           {isGolfBall && allVariants.length > 1 && (
             <div className="pt-3">
@@ -336,7 +319,6 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 <div className="flex flex-wrap gap-2">
                   {allVariants
                     .sort((a, b) => {
-                      // Move current variant to the start
                       if (a.handle === product.handle) return -1;
                       if (b.handle === product.handle) return 1;
                       return 0;
@@ -351,13 +333,19 @@ export function VariantProductCard({ product }: ProductCardProps) {
                             setCurrentImage(variant.image.url);
                           }
                         }}
-                        className={`w-6 h-6 rounded-full overflow-hidden ring-1 ring-gray-100 transition-all duration-200 ${selectedVariant === index ? 'ring-1 ring-gray-500 ' : ''
+                        className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
                           }`}
                         title={variant.title}
                       >
-                        {variant.variantImage?.url ? (
+                        {typeof variant.variantImage === 'object' && variant.variantImage?.url ? (
                           <img
                             src={variant.variantImage.url}
+                            alt={variant.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : typeof variant.variantImage === 'string' && variant.variantImage ? (
+                          <img
+                            src={variant.variantImage}
                             alt={variant.title}
                             className="w-full h-full object-cover"
                           />
@@ -366,6 +354,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         )}
                       </button>
                     ))}
+                  {allVariants.length > 5 && (
+                    <span className="text-xs text-gray-400 self-center">+{allVariants.length - 5}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -375,14 +366,14 @@ export function VariantProductCard({ product }: ProductCardProps) {
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
                 {firstVariant.compareAtPrice && (
-                  <div className="flex items-center text-sm text-gray-400 line-through">
+                  <div className="flex items-center text-sm text-gray-400 line-through font-medium">
                     <AedIcon className="mr-0.5" />
                     {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)}
                   </div>
                 )}
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold text-red-600">
+                  <span className="text-xl font-bold text-red-600 tracking-tight">
                     {parseFloat(firstVariant.price.amount).toFixed(2)}
                   </span>
                 </div>

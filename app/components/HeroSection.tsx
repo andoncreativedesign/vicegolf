@@ -129,7 +129,7 @@ export function HeroSection({
   }, [fetcher.state, fetcher.data, navigate]);
 
   return (
-    <section className="relative w-full overflow-hidden mb-8 h-[80vh] min-h-[500px] max-h-[90vh] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
+    <section className="relative w-full overflow-hidden mb-8 h-[74vh] min-h-[490px] max-h-[740px] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
       {/* Background slides */}
       <div className="absolute inset-0">
         {validSlides.map((slide, index) => (
@@ -154,8 +154,8 @@ export function HeroSection({
       </div>
 
       {/* Text and CTA */}
-      <div className={`absolute inset-0 z-20 flex ${center ? 'items-center' : 'items-start'} justify-start px-4 sm:pl-6 md:pl-16 ${textColor} ${center ? '' : 'pt-56 sm:pt-72 md:pt-80'}`}>
-        <div className={`max-w-xl p-8 rounded-lg ${bgColor} bg-opacity-90 drop-shadow-2xl`}>
+      <div className={`absolute inset-0 z-20 flex ${center ? 'items-center justify-start' : 'items-end justify-center md:justify-start pb-12 md:pb-6'} px-[clamp(1rem,4vw,3rem)] ${textColor}`}>
+        <div className={`max-w-xl py-10 md:py-14 ${bgColor} ${center ? '' : 'text-center md:text-left'}`}>
           <h1
             className={`font-extrabold uppercase tracking-tight ${textColor}`}
             style={{ fontSize: '3rem', lineHeight: '1.1', marginBottom: '0.5rem' }}
