@@ -82,36 +82,36 @@ export function ProductGrid({
 
 
   return (
-    <section className={`py-6 ${className}`}>
+    <section className={`py-4 sm:py-6 ${className}`}>
       {title && (
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-base sm:text-lg font-extrabold tracking-tight mb-6 lg:mb-10" style={{ fontSize: '1.375rem', fontWeight: '800' }}>
+        <div className="flex items-center justify-between mb-6 lg:mb-10">
+          <h2 className="text-base sm:text-lg font-extrabold tracking-tight" style={{ fontSize: '1.375rem', fontWeight: '800' }}>
             {title}
           </h2>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={scrollLeft}
               disabled={!canScrollLeft}
-              className={`p-2 rounded-full border transition-colors duration-200 ${canScrollLeft
-                ? 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-800'
-                : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200 ${canScrollLeft
+                ? 'border-gray-200 hover:border-black text-gray-800'
+                : 'border-gray-100 text-gray-300 cursor-not-allowed opacity-50'
                 }`}
               aria-label="Scroll left"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button
               onClick={scrollRight}
               disabled={!canScrollRight}
-              className={`p-2 rounded-full border transition-colors duration-200 ${canScrollRight
-                ? 'border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-800'
-                : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200 ${canScrollRight
+                ? 'border-gray-200 hover:border-black text-gray-800'
+                : 'border-gray-100 text-gray-300 cursor-not-allowed opacity-50'
                 }`}
               aria-label="Scroll right"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -122,18 +122,19 @@ export function ProductGrid({
       <div className="relative">
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto scrollbar-hide pb-5"
+          className="flex overflow-x-auto scrollbar-hide select-none"
           onScroll={checkScrollButtons}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             marginInline: 'calc(-1 * var(--home-padding, 1rem))',
-            paddingInline: 'var(--home-padding, 1rem)'
+            paddingInline: 'var(--home-padding, 1rem)',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
-          <div className="flex space-x-8">
+          <div className="flex space-x-4 sm:space-x-8 pb-6">
             {products.map((product) => (
-              <div key={product.id} className="w-96 flex-shrink-0">
+              <div key={product.id} className="w-[85vw] sm:w-[320px] md:w-[384px] flex-shrink-0 transition-transform duration-300">
                 <div className="h-full">
                   {product?.family
                     ? <VariantProductCard product={product} />
@@ -144,10 +145,10 @@ export function ProductGrid({
             ))}
 
             {(hasMore || loading) && (
-              <div className="w-96 flex-shrink-0 flex items-center justify-center">
-                <div className="relative w-12 h-12">
-                  <div className="w-full h-full bg-white rounded-full shadow-lg">
-                    <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-24 sm:w-48 flex-shrink-0 flex items-center justify-center">
+                <div className="relative w-10 h-10">
+                  <div className="w-full h-full bg-white rounded-full shadow-md border border-gray-100">
+                    <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-200 border-t-black rounded-full animate-spin"></div>
                   </div>
                 </div>
               </div>
