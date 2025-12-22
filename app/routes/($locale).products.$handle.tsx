@@ -322,7 +322,7 @@ export default function Product() {
             selectedVariant={selectedVariant}
             title={title}
             description={descriptionHtml}
-            productType={product.productType?.toLowerCase()}
+            productType={product.productType}
             productAccordions={productDetails?.accordionItems || []}
             colorVariants={colorVariants}
             shippingDetails={shippingDetails}

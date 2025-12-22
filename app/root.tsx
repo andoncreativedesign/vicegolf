@@ -20,6 +20,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
+import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
 
 export type RootLoader = typeof loader;
 
@@ -178,7 +179,9 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <Links />
       </head>
       <body className='font-sans'>
+        <CookieConsentWrapper>
         {children}
+        </CookieConsentWrapper>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>
