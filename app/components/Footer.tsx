@@ -4,6 +4,7 @@ import { Await, NavLink } from 'react-router';
 import { FaInstagram, FaFacebookF, FaTiktok, FaYoutube, FaLinkedinIn, FaPinterestP } from "react-icons/fa";
 
 import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated';
+import { useCookieConsent } from '~/contexts/CookieConsentContext';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -16,7 +17,8 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
- 
+
+
   // const [email, setEmail] = useState('');
   // const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -110,7 +112,10 @@ function FooterContent({
   footer: FooterQuery | null;
   header: HeaderQuery;
   publicStoreDomain: string;
-}) {
+  }) {
+  const { setShowPreferences } = useCookieConsent();
+
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12" >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
@@ -140,11 +145,18 @@ function FooterContent({
         {/* Legal Column */}
         <div>
           <h3 className="font-semibold text-white mb-4">Legal</h3>
-          <ul className="space-y-2"> 
+          <ul className="space-y-2">
             <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
-            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
+            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
             {/* <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Privacy Policy</NavLink></li> */}
-            {/* <li><NavLink to="/cookie-settings" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Cookie Settings</NavLink></li> */}
+            <li>
+              <button
+                onClick={() => setShowPreferences(true)}
+                className="!text-white hover:!text-gray-300 transition-colors"
+                style={{ textDecoration: 'none' }}>
+                Cookie Settings
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -161,7 +173,7 @@ function FooterContent({
             <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Service & First Responder Discount</NavLink></li>
           </ul>
         </div> */}
-       
+
 
         {/* Follow Us & Payment Info Column */}
         <div>

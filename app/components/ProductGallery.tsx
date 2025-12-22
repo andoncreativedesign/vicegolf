@@ -93,6 +93,80 @@ export function ProductGallery({
     }, 300);
   };
 
+  const handleDotClick = (index: number) => {
+    if (index === currentIndex || isAnimating) return;
+
+    setIsAnimating(true);
+    const dir = index > currentIndex ? 'next' : 'prev';
+    setDirection(dir === 'next' ? 'right' : 'left');
+
+    // Start the slide out animation
+    if (imageContainerRef.current) {
+      imageContainerRef.current.style.transform =
+        dir === 'next' ? 'translateX(-100%)' : 'translateX(100%)';
+      imageContainerRef.current.style.opacity = '0';
+    }
+
+    // After slide out, update the image and slide back in
+    setTimeout(() => {
+      setCurrentIndex(index);
+      onImageSelect(images[index]);
+
+      // Reset position and animate back in
+      requestAnimationFrame(() => {
+        if (imageContainerRef.current) {
+          imageContainerRef.current.style.transition = 'none';
+          imageContainerRef.current.style.transform =
+            dir === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
+
+          // Force reflow
+          imageContainerRef.current.offsetHeight;
+
+          // Start slide in animation
+          requestAnimationFrame(() => {
+            if (imageContainerRef.current) {
+              imageContainerRef.current.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+              imageContainerRef.current.style.transform = 'translateX(0)';
+              imageContainerRef.current.style.opacity = '1';
+            }
+          });
+        }
+      });
+
+      // Reset animation state
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 300);
+    }, 300);
+  };
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      handleNavigate('next');
+    }
+    if (isRightSwipe) {
+      handleNavigate('prev');
+    }
+  };
+
   if (!images.length) {
     return (
       <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-xl">
@@ -157,7 +231,12 @@ export function ProductGallery({
       )}
 
       {/* Main Image */}
-      <div className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden">
+      <div
+        className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
@@ -168,36 +247,59 @@ export function ProductGallery({
               alt={mainImage.altText || 'Product Image'}
               className={`sm:min-h-[580.547px] min-h-[285px] max-w-[690.547px] max-h-[580.547px]`}
               aspectRatio="1/1"
-              // sizes="(min-width: 1024px) 50vw, 100vw"
+            // sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
         </div>
 
         {hasMultiple && (
-          <div className="absolute bottom-6 right-6 flex gap-4">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNavigate('prev');
-              }}
-              className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90"
-              aria-label="Previous image"
-              disabled={isAnimating}
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNavigate('next');
-              }}
-              className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90"
-              aria-label="Next image"
-              disabled={isAnimating}
-            >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
-            </button>
-          </div>
+          <>
+            {isMobileView ? (
+              /* Mobile Dots Pagination */
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDotClick(index);
+                    }}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
+                      ? 'bg-black w-3'
+                      : 'bg-black/20 hover:bg-black/40'
+                      }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              /* Desktop Arrows */
+              <div className="absolute bottom-6 right-6 flex gap-4">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNavigate('prev');
+                  }}
+                  className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90 hover:opacity-100"
+                  aria-label="Previous image"
+                  disabled={isAnimating}
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNavigate('next');
+                  }}
+                  className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90 hover:opacity-100"
+                  aria-label="Next image"
+                  disabled={isAnimating}
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
