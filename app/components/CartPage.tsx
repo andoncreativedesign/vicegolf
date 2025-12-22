@@ -21,8 +21,9 @@ export function CartPage({ cart: originalCart }: CartPageProps) {
       {!cartHasItems ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">Your cart is empty</p>
-          <a href="/collections" className="text-indigo-600 hover:text-indigo-500">
-            Continue Shopping →
+         <a href="/" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 transition-colors"
+         style={{color: 'white' , textDecoration: 'none' }}>
+          Continue Shopping
           </a>
         </div>
       ) : (
