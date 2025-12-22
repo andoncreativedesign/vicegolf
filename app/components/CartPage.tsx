@@ -17,7 +17,7 @@ export function CartPage({ cart: originalCart }: CartPageProps) {
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
 
   return (
-    <div className="cart-page mx-4 md:mx-10">
+    <div className="cart-page mx-4 md:mx-10 min-h-[calc(66vh-200px)]">
       {!cartHasItems ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">Your cart is empty</p>
@@ -43,8 +43,8 @@ export function CartPage({ cart: originalCart }: CartPageProps) {
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="cart-summary-container">
-              <div className="sticky top-12 bg-[#f0f0f0]">
+          <div className="cart-summary-container h-full">
+              <div className="sticky top-24 bg-[#f0f0f0] p-6 rounded-lg">
               <CartSummary cart={cart} layout="page" />
             </div>
           </div>
