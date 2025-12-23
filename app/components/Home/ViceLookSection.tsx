@@ -1,6 +1,7 @@
 import { Image } from '@shopify/hydrogen';
 import { Link, useFetcher, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
+import Collection from '~/routes/($locale).collections.$ids.$handle';
 
 interface ProductTooltip {
     id: string;
@@ -12,6 +13,7 @@ interface ProductTooltip {
         left: string;
     };
     handle: string
+    type: 'product' | 'collection';
 }
 
 interface ViceLookItem {
@@ -42,7 +44,9 @@ export function ViceLookSection() {
                     category: 'Polo',
                     price: '$49.99',
                     position: { top: '33%', left: '50%' },
-                    handle: 'vice-solid-polo-white-2025'
+                    handle: 'vice-solid-polo-white-2025',
+                    type: 'product'
+
                 },
                 // {
                 //     id: '1-2',
@@ -58,7 +62,9 @@ export function ViceLookSection() {
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'vice-verve-white'
+                    handle: 'vice-verve-white',
+                    type: 'product'
+
                 }
             ]
         },
@@ -77,7 +83,8 @@ export function ViceLookSection() {
                     category: 'Long Sleeve',
                     price: '$59.99',
                     position: { top: '30%', left: '50%' },
-                    handle: 'vice-longsleeve-navy-2025'
+                    handle: 'polos',
+                    type: 'collection'
                 },
                 // {
                 //     id: '2-2',
@@ -93,7 +100,9 @@ export function ViceLookSection() {
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'verve-black'
+                    handle: 'shoes',
+                    type: 'collection'
+
                 }
             ]
         },
@@ -112,7 +121,9 @@ export function ViceLookSection() {
                     category: 'Polos',
                     price: '$59.99',
                     position: { top: '30%', left: '50%' },
-                    handle: 'vice-logo-polo-black-2025'
+                    handle: 'vice-solid-polo-navy-2025',
+                    type: 'product'
+
                 },
                 // {
                 //     id: '3-2',
@@ -128,7 +139,9 @@ export function ViceLookSection() {
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'verve-black'
+                    handle: 'shoes',
+                    type: 'collection'
+
                 }
             ]
         },
@@ -142,16 +155,27 @@ export function ViceLookSection() {
     const title = "GET THE VICE LOOK";
     if (!items || items.length === 0) return null;
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>, item: ProductTooltip) => {
-        e.preventDefault()
-        if (!item.handle) return
-        navigate(`/products/${encodeURIComponent(item.handle)}/`)
-        // fetcher.submit(
-        //     { handle: item.handle },
-        //     { method: "post", action: "/api/collection" }
-        // );
-    }
+    const handleClick = async (e: React.MouseEvent<HTMLButtonElement>, item: ProductTooltip) => {
+        e.preventDefault();
+        if (!item.handle) return;
 
+        const itemType = item.type.trim();
+        console.log("vice look itemType", itemType)
+        try {
+            if (itemType === 'collection') {
+                fetcher.submit(
+                    { handle: item.handle },
+                    { method: "post", action: "/api/collection" }
+                );
+            } else {
+                navigate(`/products/${encodeURIComponent(item.handle)}/`);
+            }
+        } catch (error) {
+            console.log("vice look eror", error)
+            console.error(' Error in handleClick:', error);
+
+        }
+    }
     useEffect(() => {
         if (
             fetcher.state === "idle"
@@ -159,9 +183,10 @@ export function ViceLookSection() {
             && fetcher.data?.collection?.title
         ) {
             const { id, title } = fetcher.data.collection
-            console.log("fetcher.data hero section", id, title)
             navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
         }
+        console.log("vice look data", fetcher.data)
+        console.log("vice look state", fetcher.data)
     }, [fetcher.state, fetcher.data, navigate]);
 
     return (
@@ -233,12 +258,12 @@ export function ViceLookSection() {
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-gray-900">{tooltip.title}</span>
                                                         <div className="flex justify-between items-center mt-2">
-                                                           <span className="text-sm text-gray-600">{tooltip.category}</span>
+                                                            <span className="text-sm text-gray-600">{tooltip.category}</span>
                                                             {/* <span className="text-gray-900 font-medium">{tooltip.price}</span> */}
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
-                                                          </div>
+                                                        </div>
                                                     </div>
                                                 </button>
                                             )}

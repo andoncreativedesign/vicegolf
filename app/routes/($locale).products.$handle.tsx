@@ -1,5 +1,5 @@
 import { redirect, useLoaderData, Link, useNavigate, useFetcher } from 'react-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -30,7 +30,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
-import { ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type ClubVariant, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
@@ -80,6 +80,9 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   redirectIfHandleIsLocalized(request, { handle, data: product });
 
   // Fetch color variants if product has family metafield
+  const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
+  const family = product?.metafields?.find((item: any) => item?.key === "family")
+
   let colorVariants: UIColorVariant[] = [];
   if (product.metafield?.value) {
     try {
@@ -144,7 +147,33 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     }
   }
 
-  return { product, colorVariants };
+  console.log("clubFamily", clubFamily)
+  let clubVariants = [] as ClubVariant[]
+  if (clubFamily?.value) {
+    try {
+      const CLUB_FAMILY  = clubFamily.value.trim()
+      const response = await axiosShopifyAdmin.post("", {
+        query: ADMIN_PRODUCTS_BY_CLUB_FAMILY,
+        variables: {
+          searchQuery: `metafields.custom.club_family:"${CLUB_FAMILY}"`,
+        },
+      });
+
+      clubVariants = response?.data?.data?.products?.edges || []
+      console.log('\n\clubVariantsRes start')
+      console.log(JSON.stringify(clubVariants))
+      console.log('\n\clubVariantsRes end')
+
+      if (response.data.errors) {
+        throw new Error(JSON.stringify(response?.data?.errors))
+      }
+
+    } catch (error) {
+      console.error('Error fetching club variants:', error);
+    }
+  }
+
+  return { product, colorVariants, clubVariants };
 }
 
 async function loadDeferredData({ context, request }: Route.LoaderArgs) {
@@ -163,7 +192,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const { product, colorVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   // useEffect(() => {
@@ -174,6 +203,7 @@ export default function Product() {
   useEffect(() => {
     console.log('product details from shopify', product)
     console.log('product metafields:', product.metafields)
+    console.log('product clubVariantsRes:', clubVariants)
     // console.log('color variants from shopify', colorVariants)
 
     // Debug metafields for Tracer product
@@ -278,31 +308,103 @@ export default function Product() {
     }
   }, [fetcher.state, fetcher.data, navigate]);
 
+  const formRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+
+    let isScrolling = false;
+    let scrollAnimationFrame: number | null = null;
+    let lastScrollTime = 0;
+    const SCROLL_THROTTLE = 8; // ~120fps for smoother scrolling
+    const SCROLL_FACTOR = 0.5; // Reduce scroll speed for better control
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only for desktop view
+      if (window.innerWidth < 1280) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = form;
+      const canScrollDown = e.deltaY > 0 && scrollTop < scrollHeight - clientHeight - 1;
+      const canScrollUp = e.deltaY < 0 && scrollTop > 1;
+
+      // If we can't scroll further in this direction, allow default behavior
+      if ((!canScrollDown && e.deltaY > 0) || (!canScrollUp && e.deltaY < 0)) {
+        return;
+      }
+
+      // If we can scroll, prevent default and handle it ourselves
+      e.preventDefault();
+
+      const now = Date.now();
+      const timeSinceLastScroll = now - lastScrollTime;
+
+      // Skip if we're already handling a scroll or it's too soon
+      if (isScrolling || timeSinceLastScroll < SCROLL_THROTTLE) {
+        return;
+      }
+
+      isScrolling = true;
+      lastScrollTime = now;
+
+      // Cancel any pending animation frame to prevent jank
+      if (scrollAnimationFrame) {
+        cancelAnimationFrame(scrollAnimationFrame);
+      }
+
+      // Use requestAnimationFrame for smooth scrolling
+      scrollAnimationFrame = requestAnimationFrame(() => {
+        const scrollAmount = e.deltaY * SCROLL_FACTOR;
+
+        // Use smooth scrolling for better visual feedback
+        form.scrollBy({
+          top: scrollAmount,
+          behavior: 'smooth'
+        });
+
+        // Reset after the scroll is complete
+        setTimeout(() => {
+          isScrolling = false;
+        }, 100); // Slight delay to prevent rapid successive scrolls
+      });
+    };
+
+    // Attach to document for global scroll handling
+    document.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+      if (scrollAnimationFrame) {
+        cancelAnimationFrame(scrollAnimationFrame);
+      }
+    };
+  }, []);
+
   return (
     <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
+      {/* Breadcrumbs - Moved outside the main container */}
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-4 px-4 md:px-10">
+        <div className="flex items-center text-gray-600">
+          {productType.display && (
+            <>
+              <button
+                onClick={handleBreadCrumbClick}
+                className="cursor-pointer transition-colors text-gray-600"
+              >
+                {productType.display}
+              </button>
+              <ChevronRight className="text-gray-600" size={20} />
+            </>
+          )}
+          <span className="text-gray-900 font-semibold line-clamp-1" title={title}>
+            {title}
+          </span>
+        </div>
+      </div>
 
-      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-6 justify-center items-center xl:items-start">
-        <div>
-
-          {/* Breadcrumbs */}
-          <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
-            <div className="flex items-center text-gray-600">
-              {productType.display && (
-                <>
-                  <button
-                    onClick={handleBreadCrumbClick}
-                    className="cursor-pointer transition-colors text-gray-600"
-                  >
-                    {productType.display}
-                  </button>
-                  <ChevronRight className="text-gray-600" size={20} />
-                </>
-              )}
-              <span className="text-gray-900 font-semibold line-clamp-1" title={title}>
-                {title}
-              </span>
-            </div>
-          </div>
+      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-2 justify-center items-center xl:items-start relative">
+        <div ref={galleryRef} className="xl:sticky xl:top-24">
 
           {images?.nodes?.length > 0 ? (
             <ProductGallery
@@ -318,6 +420,7 @@ export default function Product() {
         </div>
         <div className="flex flex-col items-start">
           <ProductForm
+            ref={formRef}
             productOptions={productOptions}
             selectedVariant={selectedVariant}
             title={title}
@@ -326,6 +429,8 @@ export default function Product() {
             productAccordions={productDetails?.accordionItems || []}
             colorVariants={colorVariants}
             shippingDetails={shippingDetails}
+            currentProductId={product.id}
+            clubVariants={clubVariants}
           />
         </div>
       </div>
@@ -463,6 +568,8 @@ export default function Product() {
           /** 👇 Golf club sets */
           case "golf club set":
           case "golf clubs":
+             case "wedge":
+          case "wedges":
             return <GolfClubSetProduct productDetails={productDetails} />;
 
           /** 👇 Golf bags */
@@ -541,8 +648,10 @@ export default function Product() {
               />
             );
 
-          case "putter":
-          case "putters":
+     
+          case "blade putter":
+             case "mallet putter":
+          case "center mallet putter":
             return (
               <PuttersProduct
                 product={product}

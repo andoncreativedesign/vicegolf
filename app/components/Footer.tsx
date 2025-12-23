@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { useState } from 'react';
 import { Await, NavLink } from 'react-router';
 // import { ArrowRight } from 'lucide-react';
 import { FaInstagram, FaFacebookF, FaTiktok, FaYoutube, FaLinkedinIn, FaPinterestP } from "react-icons/fa";
@@ -112,13 +113,25 @@ function FooterContent({
   footer: FooterQuery | null;
   header: HeaderQuery;
   publicStoreDomain: string;
-  }) {
+})  {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    help: false,
+    legal: false,
+    follow: false
+  });
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,  
+      [section]: !prev[section]
+    }));
+  };  
+  
   const { setShowPreferences } = useCookieConsent();
 
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12" >
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+<div className="max-w-7xl mx-auto px-6 md:px-8 py-8 md:py-12">
+  <div className="flex flex-col md:flex-row flex-wrap justify-center md:justify-between gap-6 md:text-left">
         {/* About Column */}
         {/* <div>
           <h3 className="font-semibold text-white mb-4">About</h3>
@@ -132,22 +145,37 @@ function FooterContent({
         </div> */}
 
         {/* Help & Info Column */}
-        <div>
-          <h3 className="font-semibold text-white mb-4">Help & Info</h3>
+         <div className="border-b md:border-none border-gray-700 mb-4 md:mb-0">
+         <button  onClick={() => toggleSection('help')}
+          className="flex justify-between items-center w-full py-3 md:py-0">
+          <h3 className="font-semibold text-white ">Help & Info</h3>
+          <svg className="w-4 h-4 md:hidden text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+         </button>
+          <div className={`${openSections.help ? 'block' : 'hidden'} md:block md:mt-4`}>
           <ul className="space-y-2">
             {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Delivery & Shipping</NavLink></li> */}
             {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Refund Policy</NavLink></li> */}
             {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li> */}
-            <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
+            <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
           </ul>
+          </div>
         </div>
 
         {/* Legal Column */}
-        <div>
-          <h3 className="font-semibold text-white mb-4">Legal</h3>
-          <ul className="space-y-2">
-            <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
-            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
+        <div className="border-b md:border-none border-gray-700 mb-4 md:mb-0">
+          <button onClick={() => toggleSection('legal')}
+           className="flex justify-between items-center w-full py-3 md:py-0">
+           <h3 className="font-semibold text-white ">Legal</h3>
+          <svg className="w-4 h-4 md:hidden text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+        </button>
+          <div className={`${openSections.legal ? 'block' : 'hidden'} md:block md:mt-4`}>
+        <ul className="space-y-2"> 
+            <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
+            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-100 transition-colors"style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
             {/* <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Privacy Policy</NavLink></li> */}
             <li>
               <button
@@ -158,11 +186,9 @@ function FooterContent({
               </button>
             </li>
           </ul>
+          </div>
         </div>
-
-
-
-        {/* Your Vice Golf Column */}
+         {/* Your Vice Golf Column */}
         {/* <div>
           <h3 className="font-semibold text-white mb-4">Your Vice Golf</h3>
           <ul className="space-y-2">
@@ -174,8 +200,7 @@ function FooterContent({
           </ul>
         </div> */}
 
-
-        {/* Follow Us & Payment Info Column */}
+         {/* Follow Us  */}
         <div>
           <h3 className="font-semibold text-white mb-4">Follow Us</h3>
           <div className="flex space-x-3 mb-6">
@@ -198,7 +223,10 @@ function FooterContent({
               <FaPinterestP className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
             </a>
           </div>
+        </div>
 
+        {/* Payment Info Column */}
+        <div>
           <div className="mb-4">
             <h4 className="font-semibold text-white mb-2">100% Safe Payment</h4>
             <div className="flex items-center space-x-3">

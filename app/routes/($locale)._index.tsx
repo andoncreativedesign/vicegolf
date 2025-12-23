@@ -512,7 +512,7 @@ export default function Homepage() {
         bgColor="bg-transparent"
         center={true}
       />
-      {recommendedProducts.length > 0 && (
+      {/* {recommendedProducts.length > 0 && (
         <ProductGrid
           products={recommendedProducts}
           title="RECOMMENDED PRODUCTS"
@@ -521,7 +521,7 @@ export default function Homepage() {
           hasMore={hasMoreRecommended}
           loading={isLoadingRecommended}
         />
-      )}
+      )} */}
       <ViceLookSection />
     </div>
   );
@@ -554,7 +554,7 @@ function RecommendedProducts({
 }) {
   return (
     <div className="recommended-products">
-      <h2>Recommended Products</h2>
+      {/* <h2>Recommended Products</h2>
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
           {(response) => (
@@ -568,7 +568,7 @@ function RecommendedProducts({
           )}
         </Await>
       </Suspense>
-      <br />
+      <br /> */}
     </div>
   );
 }
