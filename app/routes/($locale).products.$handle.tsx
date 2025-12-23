@@ -1,5 +1,5 @@
 import { redirect, useLoaderData, Link, useNavigate, useFetcher } from 'react-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -278,11 +278,41 @@ export default function Product() {
     }
   }, [fetcher.state, fetcher.data, navigate]);
 
+  const formRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    if (!gallery) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only for desktop view
+      if (window.innerWidth < 1280) return;
+
+      const form = formRef.current;
+      if (form) {
+        const { scrollTop, scrollHeight, clientHeight } = form;
+        const canScrollDown = e.deltaY > 0 && scrollTop < scrollHeight - clientHeight - 1;
+        const canScrollUp = e.deltaY < 0 && scrollTop > 1;
+
+        // If form can still scroll in the desired direction, scroll it and stop page scroll
+        if (canScrollDown || canScrollUp) {
+          e.preventDefault();
+          form.scrollTop += e.deltaY * 0.5;
+        }
+        // Otherwise, allow the wheel event to bubble up and scroll the page (scroll chaining)
+      }
+    };
+
+    gallery.addEventListener('wheel', handleWheel, { passive: false });
+    return () => gallery.removeEventListener('wheel', handleWheel);
+  }, []);
+
   return (
     <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
 
-      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-6 justify-center items-center xl:items-start">
-        <div>
+      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-6 justify-center items-center xl:items-start relative">
+        <div ref={galleryRef} className="xl:sticky xl:top-24">
 
           {/* Breadcrumbs */}
           <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
@@ -318,6 +348,7 @@ export default function Product() {
         </div>
         <div className="flex flex-col items-start">
           <ProductForm
+            ref={formRef}
             productOptions={productOptions}
             selectedVariant={selectedVariant}
             title={title}

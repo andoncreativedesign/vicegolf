@@ -1,5 +1,4 @@
-// app/components/ProductForm.tsx (updated with imports)
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -8,30 +7,19 @@ import type {
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 import { ProductPrice } from './ProductPrice';
-import { ProductRating } from './ProductRating';
 import { QuantitySelector } from './QuantitySelector';
 import { ShippingInfo } from './ShippingInfo';
 import { ProductDetailsAccordions } from './ProductDetailsAccordions';
 import type { ProductFragment } from 'storefrontapi.generated';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
-import ProductOptionDozen from './Product/ProductOptionDozen';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
 
-export function ProductForm({
-  productOptions,
-  selectedVariant,
-  title,
-  description,
-  productType,
-  productAccordions,
-  colorVariants,
-  shippingDetails,
-}: {
+export const ProductForm = forwardRef<HTMLDivElement, {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
@@ -40,13 +28,20 @@ export function ProductForm({
   productAccordions: AccordionItem[];
   colorVariants?: UIColorVariant[];
   shippingDetails?: ShippingDetails | null;
-}) {
+}>(({
+  productOptions,
+  selectedVariant,
+  title,
+  description,
+  productType,
+  productAccordions,
+  colorVariants,
+  shippingDetails,
+}, ref) => {
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
-  const formRef = useRef<HTMLDivElement>(null);
-  const [formHeight, setFormHeight] = useState('auto');
 
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
   const unitPriceAmount = parseFloat(selectedVariant?.price?.amount || '0');
@@ -96,16 +91,15 @@ export function ProductForm({
   };
 
   useEffect(() => {
-    setFormHeight('600px');
     console.log('product type from details', productType)
-  }, []);
+  }, [productType]);
 
   return (
     <div
-      ref={formRef}
+      ref={ref}
       className="product-form p-4 md:p-5 scrollbar-hide w-full max-w-[600px]"
       style={{
-        height: formHeight,
+        height: '580px',
         overflowY: 'auto',
         scrollBehavior: 'smooth',
         WebkitOverflowScrolling: 'touch',
@@ -140,11 +134,6 @@ export function ProductForm({
         />
       )}
 
-      {/* Ratings
-      <div className="mb-8">
-        <ProductRating rating={4.8} reviewCount={1145} />
-      </div> */}
-
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <ColorVariant
@@ -157,8 +146,8 @@ export function ProductForm({
       {/* cards and dropdowns for customization */}
       {
         productType?.toLowerCase() === 'drivers' ||
-        productType?.toLowerCase() === 'golf club set' ||
-        productType?.toLowerCase() === 'golf clubs' 
+          productType?.toLowerCase() === 'golf club set' ||
+          productType?.toLowerCase() === 'golf clubs'
           ? <ProductCustomization
             productOptions={productOptions}
             styling='club'
@@ -223,7 +212,7 @@ export function ProductForm({
       <ProductDetailsAccordions accordions={productAccordions} />
     </div>
   );
-}
+});
 
 function ProductOptionSwatch({
   swatch,
