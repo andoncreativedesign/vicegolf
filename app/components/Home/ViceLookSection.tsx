@@ -1,6 +1,7 @@
 import { Image } from '@shopify/hydrogen';
 import { Link, useFetcher, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
+import Collection from '~/routes/($locale).collections.$ids.$handle';
 
 interface ProductTooltip {
     id: string;
@@ -12,6 +13,7 @@ interface ProductTooltip {
         left: string;
     };
     handle: string
+    type:'product'|'collection';
 }
 
 interface ViceLookItem {
@@ -42,7 +44,9 @@ export function ViceLookSection() {
                     category: 'Polo',
                     price: '$49.99',
                     position: { top: '33%', left: '50%' },
-                    handle: 'vice-solid-polo-white-2025'
+                    handle: 'vice-solid-polo-white-2025',
+                     type:'product'
+
                 },
                 // {
                 //     id: '1-2',
@@ -58,7 +62,9 @@ export function ViceLookSection() {
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'vice-verve-white'
+                    handle: 'vice-verve-white',
+                   type:'product'
+
                 }
             ]
         },
@@ -77,7 +83,8 @@ export function ViceLookSection() {
                     category: 'Long Sleeve',
                     price: '$59.99',
                     position: { top: '30%', left: '50%' },
-                    handle: 'vice-longsleeve-navy-2025'
+                    handle: 'vice-longsleeve-navy-2025',
+                   type:'collection'
                 },
                 // {
                 //     id: '2-2',
@@ -93,7 +100,9 @@ export function ViceLookSection() {
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'verve-black'
+                    handle: 'verve-black',
+                    type:'collection'
+
                 }
             ]
         },
@@ -112,7 +121,9 @@ export function ViceLookSection() {
                     category: 'Polos',
                     price: '$59.99',
                     position: { top: '30%', left: '50%' },
-                    handle: 'vice-solid-polo-navy-2025'
+                    handle: 'vice-solid-polo-navy-2025',
+                    type:'product'
+
                 },
                 // {
                 //     id: '3-2',
@@ -128,7 +139,9 @@ export function ViceLookSection() {
                     category: 'Shoes',
                     price: '$59.99',
                     position: { top: '92%', left: '40%' },
-                    handle: 'verve-black'
+                    handle: 'verve-black',
+                    type:'collection'
+
                 }
             ]
         },
@@ -142,16 +155,26 @@ export function ViceLookSection() {
     const title = "GET THE VICE LOOK";
     if (!items || items.length === 0) return null;
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>, item: ProductTooltip) => {
-        e.preventDefault()
-        if (!item.handle) return
-        navigate(`/products/${encodeURIComponent(item.handle)}/`)
-        // fetcher.submit(
-        //     { handle: item.handle },
-        //     { method: "post", action: "/api/collection" }
-        // );
-    }
+   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>, item: ProductTooltip) => {
+        e.preventDefault();
+        if (!item.handle) return;
+        
+        const itemType = item.type.trim();
+        console.log("itemType",itemType)
+        try {
+            if (itemType === 'collection') {
+                     fetcher.submit(
+                    { handle: item.handle },
+                    { method: "post", action: "/api/collection" }
+                );
+            } else {
+                navigate(`/products/${encodeURIComponent(item.handle)}/`);
+            }
+        } catch (error) {
+            console.error('Error in handleClick:', error);
 
+        }
+}
     useEffect(() => {
         if (
             fetcher.state === "idle"
@@ -162,6 +185,7 @@ export function ViceLookSection() {
             console.log("fetcher.data hero section", id, title)
             navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
         }
+        console.log("fetcherdata",fetcher.data)
     }, [fetcher.state, fetcher.data, navigate]);
 
     return (
