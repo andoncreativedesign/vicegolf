@@ -536,6 +536,8 @@ export default function Product() {
           /** 👇 Golf club sets */
           case "golf club set":
           case "golf clubs":
+             case "wedge":
+          case "wedges":
             return <GolfClubSetProduct productDetails={productDetails} />;
 
           /** 👇 Golf bags */
