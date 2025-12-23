@@ -80,15 +80,15 @@ export function GolfBallProduct({
                   <ProductDetailsContent1
                     content={item}
                     showImageLeft={showImageLeft}
-                    isTextFull={false}
-                    isImageFull={false}
+                    isTextFull={isThird}
+                    isImageFull={isThird}
                     isFirst={isFirst}
                     isSecond={isSecond}
                     isThird={isThird}
-                    isDescriptionFull={false}
-                    imageSize={isFirst ? "large" : "large"}
-                    titleClassName={`${isGolfBallProduct ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl lg:text-4xl'} font-bold text-center sm:text-left`}
-                    descriptionClassName={`${!isGolfBallProduct ? '!text-base sm:!text-lg lg:!text-xl' : 'text-sm sm:text-base'} font-light text-gray-600 w-full max-w-4xl mx-auto text-center sm:text-left`} pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
+                    isDescriptionFull={isThird}
+                    imageSize={isThird ? "xlarge" : "large"}
+                    titleClassName={`${isGolfBallProduct ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl lg:text-4xl'} font-bold text-center ${isThird ? '' : 'sm:text-left'}`}
+                    descriptionClassName={`${!isGolfBallProduct ? '!text-base sm:!text-lg lg:!text-xl' : 'text-sm sm:text-base'} font-light text-gray-600 w-full max-w-4xl mx-auto text-center ${isThird ? '' : 'sm:text-left'}`} pointsClassName={isGolfBallProduct ? 'w-[90%] max-w-[90%]' : ''}
                   />
                 </div>
               </div>

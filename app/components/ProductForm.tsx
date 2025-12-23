@@ -1,5 +1,4 @@
-// app/components/ProductForm.tsx (updated with imports)
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -8,33 +7,19 @@ import type {
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 import { ProductPrice } from './ProductPrice';
-import { ProductRating } from './ProductRating';
 import { QuantitySelector } from './QuantitySelector';
 import { ShippingInfo } from './ShippingInfo';
 import { ProductDetailsAccordions } from './ProductDetailsAccordions';
 import type { ProductFragment } from 'storefrontapi.generated';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { ClubVariant, UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
-import ProductOptionDozen from './Product/ProductOptionDozen';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
-import HandOrientation from '~/components/Product/HandOrientation';
 
-export function ProductForm({
-  productOptions,
-  selectedVariant,
-  title,
-  description,
-  productType,
-  productAccordions,
-  colorVariants,
-  shippingDetails,
-  clubVariants,
-  currentProductId
-}: {
+export const ProductForm = forwardRef<HTMLDivElement, {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
@@ -45,13 +30,23 @@ export function ProductForm({
   shippingDetails?: ShippingDetails | null;
   clubVariants?: ClubVariant[];
   currentProductId: string;
-}) {
+}>(({
+  productOptions,
+  selectedVariant,
+  title,
+  description,
+  productType,
+  productAccordions,
+  colorVariants,
+  shippingDetails,
+  clubVariants,
+  currentProductId
+}, ref) => {
+
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
-  const formRef = useRef<HTMLDivElement>(null);
-  const [formHeight, setFormHeight] = useState('auto');
 
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
   const unitPriceAmount = parseFloat(selectedVariant?.price?.amount || '0');
@@ -101,9 +96,8 @@ export function ProductForm({
   };
 
   useEffect(() => {
-    setFormHeight('600px');
     console.log('product type from details', productType)
-  }, []);
+  }, [productType]);
 
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
     const type = productType?.toLowerCase();
@@ -116,19 +110,18 @@ export function ProductForm({
 
   return (
     <div
-      ref={formRef}
-      className="product-form p-4 md:p-5 md:mx-24 scrollbar-hide w-full max-w-[500px] mx-auto"
+      ref={ref}
+      className="product-form p-4 md:p-5 scrollbar-hide w-full max-w-[600px] overflow-y-auto"
       style={{
-        height: formHeight,
-        overflowY: 'auto',
-        scrollBehavior: 'smooth',
-        WebkitOverflowScrolling: 'touch',
+        height: '580px',
         msOverflowStyle: 'none',
-        scrollbarWidth: 'none'
+        scrollbarWidth: 'none',
+        WebkitOverflowScrolling: 'touch',
+        willChange: 'transform'
       }}
     >
       {/* Product Title */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">{title}</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
       {productType && (
         <div className="text-sm text-gray-500 mb-2">{productType}</div>
       )}
@@ -154,11 +147,6 @@ export function ProductForm({
         />
       )}
 
-      {/* Ratings
-      <div className="mb-8">
-        <ProductRating rating={4.8} reviewCount={1145} />
-      </div> */}
-
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <ColorVariant
@@ -169,11 +157,11 @@ export function ProductForm({
       )}
 
       {<ProductCustomization
-          productOptions={productOptions}
-          styling={getProductCustomizationStyleType(productType)}
-          clubVariants={clubVariants}
-          currentProductId={currentProductId}
-        />
+        productOptions={productOptions}
+        styling={getProductCustomizationStyleType(productType)}
+        clubVariants={clubVariants}
+        currentProductId={currentProductId}
+      />
       }
 
       {/* Quantity Selector */}
@@ -231,7 +219,7 @@ export function ProductForm({
       <ProductDetailsAccordions accordions={productAccordions} />
     </div>
   );
-}
+});
 
 function ProductOptionSwatch({
   swatch,

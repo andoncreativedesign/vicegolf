@@ -50,9 +50,13 @@ header {
 * pages/Home
 * --------------------------------------------------
 */
+:root {
+  --home-padding: clamp(1rem, 4vw, 3rem);
+}
+
 .home {
   width: 100%;
-  padding-inline: clamp(1rem, 4vw, 3rem);
+  padding-inline: var(--home-padding);
   background-color: var(--main-bg-color);
 }
 

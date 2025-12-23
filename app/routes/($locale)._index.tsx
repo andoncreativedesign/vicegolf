@@ -101,8 +101,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         searchQuery: `metafields.custom.family:"${fam.value}"`,
       },
     });
- 
-    
+
+
     if (response.data.errors) {
       throw new Error(JSON.stringify(response?.data?.errors))
     }
@@ -116,7 +116,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     // })
 
     const colorVariantsRes = response.data?.data?.products?.edges || [];
-    
+
     // Transform the product data to match the expected format
     const products = colorVariantsRes.map(({ node }) => ({
       ...node,
@@ -155,8 +155,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   function attachFamilyGroups(products) {
 
     // console.log("\n\nobj assinged to family")
-    const updatedProduct =  products?.map(p => {
-      const obj =  {
+    const updatedProduct = products?.map(p => {
+      const obj = {
         ...p,
         variantFamilyProducts: familyGroups[p.family?.value] || [],
       }
@@ -172,9 +172,9 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   // console.log('\n\nfamilyGroups')
   // console.log(familyGroups[familyQueries?.[0].value]?.[0])
 
-  const updateNodes = (category:any) => {
+  const updateNodes = (category: any) => {
     const products = category?.products?.nodes || [];
-    const pageInfo = category?.products?.pageInfo ;
+    const pageInfo = category?.products?.pageInfo;
     return {
       ...category,
       nodes: attachFamilyGroups(products) || [],
@@ -449,7 +449,7 @@ export default function Homepage() {
     <div className="home">
       <HeroSection
         heroData={data.homePageData?.heroes}
-        // bgColor="bg-red-500/30"
+        bgColor="bg-transparent"
       />
       <div className="py-8 space-y-12">
         {/* VICE GOLF BALLS - Infinite Scroll */}
@@ -509,7 +509,7 @@ export default function Homepage() {
         textColor="text-black"
         buttonBgColor="bg-black"
         buttonTextColor="text-white"
-        // bgColor="bg-blue-500/30"
+        bgColor="bg-transparent"
         center={true}
       />
       {recommendedProducts.length > 0 && (

@@ -1,6 +1,6 @@
 // app/components/ProductPrice.tsx
-import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
-import {AedIcon} from './ui/AedIcon';
+import type { MoneyV2 } from '@shopify/hydrogen/storefront-api-types';
+import { AedIcon } from './ui/AedIcon';
 
 const currencyOptions = {
   style: 'decimal',
@@ -20,8 +20,8 @@ export function ProductPrice({
       {compareAtPrice ? (
         <div className="product-price-on-sale flex items-baseline gap-3">
           {price ? (
-            <span className="text-base font-medium text-gray-900 flex items-center">
-              <AedIcon />
+            <span className="text-xl font-bold text-gray-900 flex items-center">
+              <AedIcon className="w-4 h-4 mr-0.5" />
               {new Intl.NumberFormat('en-US', currencyOptions).format(parseFloat(price.amount))}
             </span>
           ) : null}
@@ -30,8 +30,8 @@ export function ProductPrice({
           </s>
         </div>
       ) : price ? (
-        <span className="text-base font-medium text-gray-900 flex items-center">
-          <AedIcon />
+        <span className="text-xl font-bold text-gray-900 flex items-center">
+          <AedIcon className="w-4 h-4 mr-0.5" />
           {new Intl.NumberFormat('en-US', currencyOptions).format(parseFloat(price.amount))}
         </span>
       ) : (
