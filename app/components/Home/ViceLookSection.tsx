@@ -112,7 +112,7 @@ export function ViceLookSection() {
                     category: 'Polos',
                     price: '$59.99',
                     position: { top: '30%', left: '50%' },
-                    handle: 'vice-logo-polo-black-2025'
+                    handle: 'vice-solid-polo-navy-2025'
                 },
                 // {
                 //     id: '3-2',
