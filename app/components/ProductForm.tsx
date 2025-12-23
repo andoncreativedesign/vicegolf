@@ -15,12 +15,13 @@ import { ProductDetailsAccordions } from './ProductDetailsAccordions';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useEffect, useRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
-import type { UIColorVariant } from '~/lib/shopify/product-queries';
+import type { ClubVariant, UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
 import ProductOptionDozen from './Product/ProductOptionDozen';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
+import HandOrientation from '~/components/Product/HandOrientation';
 
 export function ProductForm({
   productOptions,
@@ -31,6 +32,8 @@ export function ProductForm({
   productAccordions,
   colorVariants,
   shippingDetails,
+  clubVariants,
+  currentProductId
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -40,6 +43,8 @@ export function ProductForm({
   productAccordions: AccordionItem[];
   colorVariants?: UIColorVariant[];
   shippingDetails?: ShippingDetails | null;
+  clubVariants?: ClubVariant[];
+  currentProductId: string;
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -154,11 +159,19 @@ export function ProductForm({
         />
       )}
 
+      { clubVariants && clubVariants.length > 0 &&
+        <HandOrientation
+          clubVariants={clubVariants}
+          currentProductId={currentProductId}
+        />
+
+      }
+
       {/* cards and dropdowns for customization */}
       {
         productType?.toLowerCase() === 'drivers' ||
-        productType?.toLowerCase() === 'golf club set' ||
-        productType?.toLowerCase() === 'golf clubs' 
+          productType?.toLowerCase() === 'golf club set' ||
+          productType?.toLowerCase() === 'golf clubs'
           ? <ProductCustomization
             productOptions={productOptions}
             styling='club'

@@ -673,6 +673,41 @@ export interface UIColorVariant {
   } | null;
 }
 
+export interface ClubVariant {
+  node: {
+    id: string;
+    title: string;
+    handle: string;
+    productType: string;
+    vendor: string;
+    club_hand_orientation: {
+      id: string;
+      namespace: string;
+      key: string;
+      type: string;
+      value: string;
+    } | null;
+    variantImage: {
+      reference: {
+        id: string;
+        image: {
+          url: string;
+          altText: string | null;
+          width: number | null;
+          height: number | null;
+        };
+      };
+    } | null;
+    featuredImage: {
+      id: string;
+      url: string;
+      altText: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+  };
+}
+
 export const ADMIN_PRODUCTS_BY_CLUB_FAMILY = `#graphql
   query ProductsByFamily($searchQuery: String!) {
     products(first: 20, query: $searchQuery) {

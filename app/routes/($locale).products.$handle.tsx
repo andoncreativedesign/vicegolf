@@ -30,7 +30,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
-import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type ClubVariant, type UIColorVariant } from '~/lib/shopify/product-queries';
 import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
@@ -148,7 +148,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
 
   console.log("clubFamily", clubFamily)
-  let clubVariants = []
+  let clubVariants = [] as ClubVariant[]
   if (clubFamily?.value) {
     try {
       const CLUB_FAMILY  = clubFamily.value.trim()
@@ -356,6 +356,8 @@ export default function Product() {
             productAccordions={productDetails?.accordionItems || []}
             colorVariants={colorVariants}
             shippingDetails={shippingDetails}
+            currentProductId={product.id}
+            clubVariants={clubVariants}
           />
         </div>
       </div>
