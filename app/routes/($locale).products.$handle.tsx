@@ -282,8 +282,8 @@ export default function Product() {
   const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const gallery = galleryRef.current;
-    if (!gallery) return;
+    const form = formRef.current;
+    if (!form) return;
 
     let isScrolling = false;
     let scrollAnimationFrame: number | null = null;
@@ -294,9 +294,6 @@ export default function Product() {
     const handleWheel = (e: WheelEvent) => {
       // Only for desktop view
       if (window.innerWidth < 1280) return;
-
-      const form = formRef.current;
-      if (!form) return;
 
       const { scrollTop, scrollHeight, clientHeight } = form;
       const canScrollDown = e.deltaY > 0 && scrollTop < scrollHeight - clientHeight - 1;
@@ -343,11 +340,11 @@ export default function Product() {
       });
     };
 
-    // Use passive: false to allow preventDefault() to work
-    gallery.addEventListener('wheel', handleWheel, { passive: false });
+    // Attach to document for global scroll handling
+    document.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => {
-      gallery.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('wheel', handleWheel);
       if (scrollAnimationFrame) {
         cancelAnimationFrame(scrollAnimationFrame);
       }
