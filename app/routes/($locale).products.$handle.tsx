@@ -286,74 +286,98 @@ export default function Product() {
     if (!gallery) return;
 
     let isScrolling = false;
+    let scrollAnimationFrame: number | null = null;
     let lastScrollTime = 0;
-    const SCROLL_THROTTLE = 16; // ~60fps
+    const SCROLL_THROTTLE = 8; // ~120fps for smoother scrolling
+    const SCROLL_FACTOR = 0.5; // Reduce scroll speed for better control
 
     const handleWheel = (e: WheelEvent) => {
       // Only for desktop view
-      if (window.innerWidth < 1280 || isScrolling) return;
+      if (window.innerWidth < 1280) return;
 
-      const now = Date.now();
-      if (now - lastScrollTime < SCROLL_THROTTLE) {
-        e.preventDefault();
+      const form = formRef.current;
+      if (!form) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = form;
+      const canScrollDown = e.deltaY > 0 && scrollTop < scrollHeight - clientHeight - 1;
+      const canScrollUp = e.deltaY < 0 && scrollTop > 1;
+
+      // If we can't scroll further in this direction, allow default behavior
+      if ((!canScrollDown && e.deltaY > 0) || (!canScrollUp && e.deltaY < 0)) {
         return;
       }
 
-      const form = formRef.current;
-      if (form) {
-        const { scrollTop, scrollHeight, clientHeight } = form;
-        const canScrollDown = e.deltaY > 0 && scrollTop < scrollHeight - clientHeight - 1;
-        const canScrollUp = e.deltaY < 0 && scrollTop > 1;
+      // If we can scroll, prevent default and handle it ourselves
+      e.preventDefault();
 
-        // If form can still scroll in the desired direction, scroll it and stop page scroll
-        if (canScrollDown || canScrollUp) {
-          e.preventDefault();
-          isScrolling = true;
-          lastScrollTime = now;
+      const now = Date.now();
+      const timeSinceLastScroll = now - lastScrollTime;
 
-          // Use requestAnimationFrame for smoother scrolling
-          requestAnimationFrame(() => {
-            form.scrollBy({
-              top: e.deltaY * 1.2, // Slightly increase scroll speed
-              behavior: 'instant' as any // Force instant scroll
-            });
-            isScrolling = false;
-          });
-          form.scrollTop += e.deltaY * 0.5;
-        }
-        // Otherwise, allow the wheel event to bubble up and scroll the page (scroll chaining)
+      // Skip if we're already handling a scroll or it's too soon
+      if (isScrolling || timeSinceLastScroll < SCROLL_THROTTLE) {
+        return;
       }
+
+      isScrolling = true;
+      lastScrollTime = now;
+
+      // Cancel any pending animation frame to prevent jank
+      if (scrollAnimationFrame) {
+        cancelAnimationFrame(scrollAnimationFrame);
+      }
+
+      // Use requestAnimationFrame for smooth scrolling
+      scrollAnimationFrame = requestAnimationFrame(() => {
+        const scrollAmount = e.deltaY * SCROLL_FACTOR;
+
+        // Use smooth scrolling for better visual feedback
+        form.scrollBy({
+          top: scrollAmount,
+          behavior: 'smooth'
+        });
+
+        // Reset after the scroll is complete
+        setTimeout(() => {
+          isScrolling = false;
+        }, 100); // Slight delay to prevent rapid successive scrolls
+      });
     };
 
+    // Use passive: false to allow preventDefault() to work
     gallery.addEventListener('wheel', handleWheel, { passive: false });
-    return () => gallery.removeEventListener('wheel', handleWheel);
+
+    return () => {
+      gallery.removeEventListener('wheel', handleWheel);
+      if (scrollAnimationFrame) {
+        cancelAnimationFrame(scrollAnimationFrame);
+      }
+    };
   }, []);
 
   return (
     <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
+      {/* Breadcrumbs - Moved outside the main container */}
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-4 px-4 md:px-10">
+        <div className="flex items-center text-gray-600">
+          {productType.display && (
+            <>
+              <button
+                onClick={handleBreadCrumbClick}
+                className="cursor-pointer transition-colors text-gray-600"
+              >
+                {productType.display}
+              </button>
+              <ChevronRight className="text-gray-600" size={20} />
+            </>
+          )}
+          <span className="text-gray-900 font-semibold line-clamp-1" title={title}>
+            {title}
+          </span>
+        </div>
+      </div>
 
-      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-6 justify-center items-center xl:items-start relative">
+      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-2 justify-center items-center xl:items-start relative">
         <div ref={galleryRef} className="xl:sticky xl:top-24">
-
-          {/* Breadcrumbs */}
-          <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-8">
-            <div className="flex items-center text-gray-600">
-              {productType.display && (
-                <>
-                  <button
-                    onClick={handleBreadCrumbClick}
-                    className="cursor-pointer transition-colors text-gray-600"
-                  >
-                    {productType.display}
-                  </button>
-                  <ChevronRight className="text-gray-600" size={20} />
-                </>
-              )}
-              <span className="text-gray-900 font-semibold line-clamp-1" title={title}>
-                {title}
-              </span>
-            </div>
-          </div>
 
           {images?.nodes?.length > 0 ? (
             <ProductGallery
