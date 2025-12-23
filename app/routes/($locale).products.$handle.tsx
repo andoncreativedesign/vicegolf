@@ -285,9 +285,19 @@ export default function Product() {
     const gallery = galleryRef.current;
     if (!gallery) return;
 
+    let isScrolling = false;
+    let lastScrollTime = 0;
+    const SCROLL_THROTTLE = 16; // ~60fps
+
     const handleWheel = (e: WheelEvent) => {
       // Only for desktop view
-      if (window.innerWidth < 1280) return;
+      if (window.innerWidth < 1280 || isScrolling) return;
+
+      const now = Date.now();
+      if (now - lastScrollTime < SCROLL_THROTTLE) {
+        e.preventDefault();
+        return;
+      }
 
       const form = formRef.current;
       if (form) {
@@ -298,6 +308,17 @@ export default function Product() {
         // If form can still scroll in the desired direction, scroll it and stop page scroll
         if (canScrollDown || canScrollUp) {
           e.preventDefault();
+          isScrolling = true;
+          lastScrollTime = now;
+
+          // Use requestAnimationFrame for smoother scrolling
+          requestAnimationFrame(() => {
+            form.scrollBy({
+              top: e.deltaY * 1.2, // Slightly increase scroll speed
+              behavior: 'instant' as any // Force instant scroll
+            });
+            isScrolling = false;
+          });
           form.scrollTop += e.deltaY * 0.5;
         }
         // Otherwise, allow the wheel event to bubble up and scroll the page (scroll chaining)
