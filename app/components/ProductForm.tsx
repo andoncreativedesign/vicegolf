@@ -105,6 +105,15 @@ export function ProductForm({
     console.log('product type from details', productType)
   }, []);
 
+  const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
+    const type = productType?.toLowerCase();
+
+    if (type === 'drivers') return 'drivers';
+    if (['golf club set', 'golf clubs', 'wedges'].includes(type)) return 'club';
+    return 'default';
+  };
+
+
   return (
     <div
       ref={formRef}
@@ -159,26 +168,12 @@ export function ProductForm({
         />
       )}
 
-      { clubVariants && clubVariants.length > 0 &&
-        <HandOrientation
+      {<ProductCustomization
+          productOptions={productOptions}
+          styling={getProductCustomizationStyleType(productType)}
           clubVariants={clubVariants}
           currentProductId={currentProductId}
         />
-      }
-
-      {/* cards and dropdowns for customization */}
-      {
-        productType?.toLowerCase() === 'drivers' ||
-          productType?.toLowerCase() === 'golf club set' ||
-          productType?.toLowerCase() === 'golf clubs' ||
-          productType?.toLowerCase() === 'wedges'
-          ? <ProductCustomization
-            productOptions={productOptions}
-            styling='club'
-          />
-          : <ProductCustomization
-            productOptions={productOptions}
-          />
       }
 
       {/* Quantity Selector */}

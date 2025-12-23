@@ -73,7 +73,7 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
 
 
   return (
-    <div className="mt-6 mb-6">
+    <div className="">
       <h3 className="font-medium mb-4">Hand Orientation</h3>
       <div className="flex flex-wrap gap-3">
         {variantsByOrientation.map(({ orientation, variants }) => {
@@ -83,7 +83,6 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
           const isCurrent = variantForOrientation?.node.id === currentProductId;
           const variantHandle = variantForOrientation?.node.handle;
           if (!variantHandle) return null;
-
           return (
             <Link
               key={orientation}
