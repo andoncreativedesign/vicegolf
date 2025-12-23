@@ -616,8 +616,10 @@ export default function Product() {
               />
             );
 
-          case "putter":
-          case "putters":
+     
+          case "blade putter":
+             case "mallet putter":
+          case "center mallet putter":
             return (
               <PuttersProduct
                 product={product}
