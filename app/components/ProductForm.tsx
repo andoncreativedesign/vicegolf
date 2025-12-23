@@ -164,14 +164,14 @@ export function ProductForm({
           clubVariants={clubVariants}
           currentProductId={currentProductId}
         />
-
       }
 
       {/* cards and dropdowns for customization */}
       {
         productType?.toLowerCase() === 'drivers' ||
           productType?.toLowerCase() === 'golf club set' ||
-          productType?.toLowerCase() === 'golf clubs'
+          productType?.toLowerCase() === 'golf clubs' ||
+          productType?.toLowerCase() === 'wedges'
           ? <ProductCustomization
             productOptions={productOptions}
             styling='club'

@@ -257,8 +257,8 @@ const ProductCustomization = ({
 
     return (
       <div key={option.name} className={`relative ${containerClass}`}>
-        <h5 className="text-sm font-semibold text-gray-700 mb-2">
-          {option.name}:
+        <h5 className="font-medium mb-2">
+          {option.name}
         </h5>
         <div className="relative">
           <button
@@ -308,9 +308,9 @@ const ProductCustomization = ({
 
     return (
       <div className={`product-options ${!isLoft ? containerClass : ''}`} key={option.name}>
-        <h5 className={`text-sm mb-3 ${hasSelected ? 'font-bold' : 'font-semibold'
-          } text-gray-700`}>
-          {option.name}:
+        <h5 className={`mb-3 ${hasSelected ? 'font-bold' : 'font-medium'
+          } `}>
+          {option.name}
         </h5>
         <div className="grid grid-cols-6 gap-2">
           {option.optionValues.map((value: any) => {
