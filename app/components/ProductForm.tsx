@@ -103,7 +103,7 @@ export function ProductForm({
   return (
     <div
       ref={formRef}
-      className="product-form p-4 md:p-5 md:mx-24 scrollbar-hide w-full max-w-[500px] mx-auto"
+      className="product-form p-4 md:p-5 scrollbar-hide w-full max-w-[600px]"
       style={{
         height: formHeight,
         overflowY: 'auto',
@@ -114,7 +114,7 @@ export function ProductForm({
       }}
     >
       {/* Product Title */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">{title}</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
       {productType && (
         <div className="text-sm text-gray-500 mb-2">{productType}</div>
       )}
@@ -148,7 +148,7 @@ export function ProductForm({
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <ColorVariant
-          productType={productType}
+          productType={productType?.toLowerCase()}
           colorVariants={colorVariants}
           selectedVariant={selectedVariant}
         />
@@ -156,9 +156,9 @@ export function ProductForm({
 
       {/* cards and dropdowns for customization */}
       {
-        productType === 'drivers' ||
-        productType === 'golf club set' ||
-        productType === 'golf clubs' 
+        productType?.toLowerCase() === 'drivers' ||
+        productType?.toLowerCase() === 'golf club set' ||
+        productType?.toLowerCase() === 'golf clubs' 
           ? <ProductCustomization
             productOptions={productOptions}
             styling='club'
