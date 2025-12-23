@@ -13,7 +13,7 @@ import { ProductDetailsAccordions } from './ProductDetailsAccordions';
 import type { ProductFragment } from 'storefrontapi.generated';
 import { useState, useEffect, forwardRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
-import type { UIColorVariant } from '~/lib/shopify/product-queries';
+import type { ClubVariant, UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
@@ -28,6 +28,8 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   productAccordions: AccordionItem[];
   colorVariants?: UIColorVariant[];
   shippingDetails?: ShippingDetails | null;
+  clubVariants?: ClubVariant[];
+  currentProductId: string;
 }>(({
   productOptions,
   selectedVariant,
@@ -37,7 +39,10 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   productAccordions,
   colorVariants,
   shippingDetails,
+  clubVariants,
+  currentProductId
 }, ref) => {
+
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
@@ -94,6 +99,15 @@ export const ProductForm = forwardRef<HTMLDivElement, {
     console.log('product type from details', productType)
   }, [productType]);
 
+  const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
+    const type = productType?.toLowerCase();
+
+    if (type === 'drivers') return 'drivers';
+    if (['golf club set', 'golf clubs', 'wedges'].includes(type)) return 'club';
+    return 'default';
+  };
+
+
   return (
     <div
       ref={ref}
@@ -142,18 +156,12 @@ export const ProductForm = forwardRef<HTMLDivElement, {
         />
       )}
 
-      {/* cards and dropdowns for customization */}
-      {
-        productType?.toLowerCase() === 'drivers' ||
-          productType?.toLowerCase() === 'golf club set' ||
-          productType?.toLowerCase() === 'golf clubs'
-          ? <ProductCustomization
-            productOptions={productOptions}
-            styling='club'
-          />
-          : <ProductCustomization
-            productOptions={productOptions}
-          />
+      {<ProductCustomization
+        productOptions={productOptions}
+        styling={getProductCustomizationStyleType(productType)}
+        clubVariants={clubVariants}
+        currentProductId={currentProductId}
+      />
       }
 
       {/* Quantity Selector */}
