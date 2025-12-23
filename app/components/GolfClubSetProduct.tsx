@@ -33,6 +33,7 @@ export function GolfClubSetProduct({ productDetails }: GolfClubSetProductProps) 
               content={item}
               showImageLeft={index % 2 === 0}
               titleClassName='lg:text-[48px] text-[32px] font-semibold w-full'
+              imageSize='xlarge'
             />
           ))
         }
