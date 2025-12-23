@@ -17,12 +17,13 @@ export function CartPage({ cart: originalCart }: CartPageProps) {
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
 
   return (
-    <div className="cart-page mx-4 md:mx-10">
+    <div className="cart-page mx-4 md:mx-10 min-h-[calc(66vh-200px)]">
       {!cartHasItems ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">Your cart is empty</p>
-          <a href="/collections" className="text-indigo-600 hover:text-indigo-500">
-            Continue Shopping →
+         <a href="/" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 transition-colors"
+         style={{color: 'white' , textDecoration: 'none' }}>
+          Continue Shopping
           </a>
         </div>
       ) : (
@@ -42,8 +43,8 @@ export function CartPage({ cart: originalCart }: CartPageProps) {
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="cart-summary-container">
-              <div className="sticky top-12 bg-[#f0f0f0]">
+          <div className="cart-summary-container h-full">
+              <div className="sticky top-24 bg-[#f0f0f0] p-6 rounded-lg">
               <CartSummary cart={cart} layout="page" />
             </div>
           </div>
