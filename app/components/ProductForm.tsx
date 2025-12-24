@@ -18,7 +18,6 @@ import ColorVariant from './Product/ColorVariant';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
-
 export const ProductForm = forwardRef<HTMLDivElement, {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -42,12 +41,10 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   clubVariants,
   currentProductId
 }, ref) => {
-
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
-
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
   const unitPriceAmount = parseFloat(selectedVariant?.price?.amount || '0');
   const unitCompareAmount = parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
@@ -55,14 +52,12 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
   const showCompare = unitCompareAmount > unitPriceAmount;
-
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currencyCode,
     }).format(amount);
   };
-
   const pricingTiers = [
     {
       key: '1',
@@ -83,31 +78,24 @@ export const ProductForm = forwardRef<HTMLDivElement, {
       oldPrice: showCompare ? formatPrice(unitCompareAmount * 6) : undefined
     },
   ];
-
   const handleCustomQuantity = (q: number) => {
     setQuantity(Math.max(1, q));
     if (selectedTier !== 'custom') {
       setSelectedTier('custom');
     }
   };
-
   const handleAddToCart = () => {
     open('cart');
   };
-
   useEffect(() => {
     console.log('product type from details', productType)
   }, [productType]);
-
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
     const type = productType?.toLowerCase();
-
     if (type === 'drivers') return 'drivers';
     if (['golf club set', 'golf clubs', 'wedges'].includes(type)) return 'club';
     return 'default';
   };
-
-
   return (
     <div
       ref={ref}
@@ -117,7 +105,8 @@ export const ProductForm = forwardRef<HTMLDivElement, {
         msOverflowStyle: 'none',
         scrollbarWidth: 'none',
         WebkitOverflowScrolling: 'touch',
-        willChange: 'transform'
+        willChange: 'transform',
+        overscrollBehaviorY: 'contain', // ← ONLY THIS LINE ADDED
       }}
     >
       {/* Product Title */}
@@ -125,7 +114,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
       {productType && (
         <div className="text-sm text-gray-500 mb-2">{productType}</div>
       )}
-
       {/* Product Price */}
       <div className="mb-6">
         <ProductPrice
@@ -138,7 +126,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           </span>
         )}
       </div>
-
       {/* Product Description */}
       {description && (
         <div
@@ -146,7 +133,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           dangerouslySetInnerHTML={{ __html: description }}
         />
       )}
-
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <ColorVariant
@@ -155,7 +141,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           selectedVariant={selectedVariant}
         />
       )}
-
       {<ProductCustomization
         productOptions={productOptions}
         styling={getProductCustomizationStyleType(productType)}
@@ -163,7 +148,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
         currentProductId={currentProductId}
       />
       }
-
       {/* Quantity Selector */}
       <div className="mb-6">
         <QuantitySelector
@@ -176,7 +160,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           currencyCode={currencyCode}
         />
       </div>
-
       {/* Add to Cart Button */}
       <div className="mb-6">
         <AddToCartButton
@@ -207,20 +190,17 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           )}
         </AddToCartButton>
       </div>
-
       {/* Shipping Info */}
       {shippingDetails &&
         <div className="mb-6">
           <ShippingInfo shippingDetails={shippingDetails} />
         </div>
       }
-
       {/* Details Accordions */}
       <ProductDetailsAccordions accordions={productAccordions} />
     </div>
   );
 });
-
 function ProductOptionSwatch({
   swatch,
   name,
