@@ -274,40 +274,85 @@ export default function Product() {
   const formRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
-  // === FIXED SCROLL BEHAVIOR ===
-  useEffect(() => {
-    // Only for desktop view
-    if (window.innerWidth < 1280) return;
+useEffect(() => {
+  if (window.innerWidth < 1280) return;
 
-    const form = formRef.current;
-    if (!form) return;
+  const form = formRef.current;
+  if (!form) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      // Ignore mainly horizontal scrolling
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  let targetScroll = form.scrollTop;
+  let currentScroll = form.scrollTop;
+  let rafId: number | null = null;
+  let lastDelta = 0;
 
-      const { scrollTop, scrollHeight, clientHeight } = form;
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 2;
-      const atTop = scrollTop <= 2;
+  const MAX_DELTA = 120;
+  const BASE_SPEED = 1.15;
 
-      const scrollingDown = e.deltaY > 0;
-      const scrollingUp = e.deltaY < 0;
+  const animate = () => {
+    // 🔑 dynamic easing
+    const easing =
+      Math.abs(lastDelta) > 40 ? 0.35 : 0.22;
 
-      if ((scrollingDown && !atBottom) || (scrollingUp && !atTop)) {
-        e.preventDefault();
-        // Small immediate nudge for instant response
-        form.scrollBy({ top: e.deltaY * 0.8, behavior: 'auto' });
+    currentScroll += (targetScroll - currentScroll) * easing;
+    form.scrollTop = currentScroll;
+
+    if (Math.abs(targetScroll - currentScroll) > 0.5) {
+      rafId = requestAnimationFrame(animate);
+    } else {
+      rafId = null;
+    }
+  };
+
+  const handleWheel = (e: WheelEvent) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = form;
+    const atTop = scrollTop <= 1;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+    const scrollingDown = e.deltaY > 0;
+    const scrollingUp = e.deltaY < 0;
+
+    if ((scrollingDown && !atBottom) || (scrollingUp && !atTop)) {
+      e.preventDefault();
+
+      const delta = Math.max(
+        -MAX_DELTA,
+        Math.min(MAX_DELTA, e.deltaY)
+      );
+
+      // 🔑 slight mouse boost
+      const boost =
+        Math.abs(delta) > 40 ? 1.35 : 1.0;
+
+      lastDelta = delta;
+      targetScroll += delta * BASE_SPEED * boost;
+
+      targetScroll = Math.max(
+        0,
+        Math.min(targetScroll, scrollHeight - clientHeight)
+      );
+
+      if (!rafId) {
+        rafId = requestAnimationFrame(animate);
       }
-      // Else: allow page to scroll when form is at limit
-    };
+    }
+  };
 
-    document.addEventListener('wheel', handleWheel, { capture: true, passive: false });
+  document.addEventListener('wheel', handleWheel, {
+    passive: false,
+    capture: true,
+  });
 
-    return () => {
-      document.removeEventListener('wheel', handleWheel, { capture: true, passive: false });
-    };
-  }, []);
-  // === END FIXED SCROLL ===
+  return () => {
+    document.removeEventListener('wheel', handleWheel, {
+      capture: true,
+    });
+    if (rafId) cancelAnimationFrame(rafId);
+  };
+}, []);
+
+
 
   return (
     <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
