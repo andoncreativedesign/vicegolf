@@ -38,7 +38,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
                 <span className="text-gray-900 font-medium">
                   Total{' '}
                   <span className="text-gray-600 font-normal">
-                    (excl. taxes and shipping)
+                    (Incl. taxes and shipping)
                   </span>
                 </span>
                 <span className="font-medium text-gray-900">
