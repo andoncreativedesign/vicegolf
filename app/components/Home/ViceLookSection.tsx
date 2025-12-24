@@ -193,88 +193,90 @@ export function ViceLookSection() {
         <section className="w-full">
             <div className="w-full">
                 <h2 className="text-base sm:text-lg font-extrabold tracking-tight mb-6 lg:mb-10 uppercase" style={{ fontSize: '1.375rem', fontWeight: '800' }}>{title}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {items.map((item) => (
-                        <div
-                            key={item.id}
-                            className="group block overflow-visible"
-                        >
+                <div className="w-full overflow-x-auto scrollbar-hide md:overflow-visible">
+                    <div className="flex md:grid md:grid-cols-3 gap-6 w-max md:w-auto">
+                        {items.map((item) => (
                             <div
-                                className="relative overflow-visible lg:w-auto group"
-                                onMouseLeave={() => setActiveTooltip(null)}
+                                key={item.id}
+                                className="group block overflow-visible w-80 flex-shrink-0 md:w-full"
                             >
-                                <Image
-                                    data={{
-                                        url: item.image.url,
-                                        altText: item.image.altText || item.title,
-                                        width: 1200,
-                                        height: 1600,
-                                    }}
-                                    className="w-full h-auto object-cover"
-                                    loading="lazy"
-                                />
-
-                                {item.tooltips.map((tooltip) => (
-                                    <div
-                                        key={tooltip.id}
-                                        className="absolute"
-                                        style={{
-                                            top: tooltip.position.top,
-                                            left: tooltip.position.left,
-                                            transform: 'translate(-50%, -50%)',
-                                            zIndex: 10
+                                <div
+                                    className="relative overflow-visible lg:w-auto group"
+                                    onMouseLeave={() => setActiveTooltip(null)}
+                                >
+                                    <Image
+                                        data={{
+                                            url: item.image.url,
+                                            altText: item.image.altText || item.title,
+                                            width: 1200,
+                                            height: 1600,
                                         }}
-                                    >
+                                        className="w-full h-auto object-cover"
+                                        loading="lazy"
+                                    />
+
+                                    {item.tooltips.map((tooltip) => (
                                         <div
-                                            className="relative group"
-                                            onMouseEnter={() => {
-                                                if (hideTimeout) {
-                                                    clearTimeout(hideTimeout);
-                                                    setHideTimeout(null);
-                                                }
-                                                setActiveTooltip(tooltip.id);
-                                            }}
-                                            onMouseLeave={() => {
-                                                const timeout = setTimeout(() => {
-                                                    setActiveTooltip(null);
-                                                }, 300); // 300ms delay before hiding
-                                                setHideTimeout(timeout);
+                                            key={tooltip.id}
+                                            className="absolute"
+                                            style={{
+                                                top: tooltip.position.top,
+                                                left: tooltip.position.left,
+                                                transform: 'translate(-50%, -50%)',
+                                                zIndex: 10
                                             }}
                                         >
-                                            <div className="bg-black rounded-full w-8 h-8 flex items-center justify-center shadow-lg cursor-pointer">
-                                                <span className="text-white font-bold">+</span>
-                                            </div>
+                                            <div
+                                                className="relative group"
+                                                onMouseEnter={() => {
+                                                    if (hideTimeout) {
+                                                        clearTimeout(hideTimeout);
+                                                        setHideTimeout(null);
+                                                    }
+                                                    setActiveTooltip(tooltip.id);
+                                                }}
+                                                onMouseLeave={() => {
+                                                    const timeout = setTimeout(() => {
+                                                        setActiveTooltip(null);
+                                                    }, 300); // 300ms delay before hiding
+                                                    setHideTimeout(timeout);
+                                                }}
+                                            >
+                                                <div className="bg-black rounded-full w-8 h-8 flex items-center justify-center shadow-lg cursor-pointer">
+                                                    <span className="text-white font-bold">+</span>
+                                                </div>
 
-                                            {activeTooltip === tooltip.id && (
-                                                <button
-                                                    className="absolute cursor-pointer left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-61 z-20"
-                                                    onMouseEnter={(e) => {
-                                                        e.stopPropagation();
-                                                        setActiveTooltip(tooltip.id);
-                                                    }}
-                                                    onMouseLeave={() => setActiveTooltip(null)}
-                                                    onClick={(e) => handleClick(e, tooltip)}
-                                                >
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-gray-900">{tooltip.title}</span>
-                                                        <div className="flex justify-between items-center mt-2">
-                                                            <span className="text-sm text-gray-600">{tooltip.category}</span>
-                                                            {/* <span className="text-gray-900 font-medium">{tooltip.price}</span> */}
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                            </svg>
+                                                {activeTooltip === tooltip.id && (
+                                                    <button
+                                                        className="absolute cursor-pointer left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-61 z-20"
+                                                        onMouseEnter={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveTooltip(tooltip.id);
+                                                        }}
+                                                        onMouseLeave={() => setActiveTooltip(null)}
+                                                        onClick={(e) => handleClick(e, tooltip)}
+                                                    >
+                                                        <div className="flex flex-col">
+                                                            <span className="font-bold text-gray-900">{tooltip.title}</span>
+                                                            <div className="flex justify-between items-center mt-2">
+                                                                <span className="text-sm text-gray-600">{tooltip.category}</span>
+                                                                {/* <span className="text-gray-900 font-medium">{tooltip.price}</span> */}
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                                </svg>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </button>
-                                            )}
+                                                    </button>
+                                                )}
 
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
 
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>

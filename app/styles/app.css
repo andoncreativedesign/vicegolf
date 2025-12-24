@@ -17,17 +17,14 @@ img {
   border-radius: 4px;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none;
+/* Show default scrollbar for the page */
+html {
+  overflow-y: scroll;
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-html,
 body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
   font-family: var(--font-sans);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;

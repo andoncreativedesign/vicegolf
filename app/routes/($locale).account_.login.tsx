@@ -78,11 +78,11 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
               By signing in, you agree to our{' '}
-              <Link to="/pages/terms" className="underline hover:text-gray-700">
+              <Link to="/terms-of-service" className="underline hover:text-gray-700">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link to="/pages/privacy" className="underline hover:text-gray-700">
+              <Link to="/return-policy" className="underline hover:text-gray-700">
                 Privacy Policy
               </Link>
             </p>
