@@ -525,6 +525,8 @@ useEffect(() => {
           case "golf clubs":
              case "wedge":
           case "wedges":
+            case "iron":
+            case "irons":
             return <GolfClubSetProduct productDetails={productDetails} />;
           /** 👇 Golf bags */
           case "golf bag":
