@@ -11,22 +11,24 @@ const ClientLogos: React.FC<{ brands: BrandItemTransformed[] }> = ({ brands }) =
           As Seen In
         </h2>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 lg:gap-8 items-center justify-items-center">
-          {brands.map((brand, index) => (
-            <div key={index} className="flex items-center justify-center">
-              <Image
-                data={{
-                  url: brand.logo,
-                  altText: `${brand.name} logo`,
-                  width: 160,
-                  height: 80
-                }}
-                sizes="160px"
-                loading="lazy"
-                className="w-40 h-20 object-contain"
-              />
-            </div>
-          ))}
+        <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+          <div className="flex items-center justify-between w-full min-w-max">
+            {brands.map((brand, index) => (
+              <div key={index} className="flex-shrink-0 px-4">
+                <Image
+                  data={{
+                    url: brand.logo,
+                    altText: `${brand.name} logo`,
+                    width: 160,
+                    height: 80
+                  }}
+                  sizes="160px"
+                  loading="lazy"
+                  className="w-40 h-20 object-contain"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
