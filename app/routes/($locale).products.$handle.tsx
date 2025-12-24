@@ -289,10 +289,7 @@ useEffect(() => {
   const BASE_SPEED = 1.15;
 
   const animate = () => {
-    // 🔑 dynamic easing
-    const easing =
-      Math.abs(lastDelta) > 40 ? 0.35 : 0.22;
-
+    const easing = Math.abs(lastDelta) > 40 ? 0.35 : 0.22;
     currentScroll += (targetScroll - currentScroll) * easing;
     form.scrollTop = currentScroll;
 
@@ -313,29 +310,30 @@ useEffect(() => {
     const scrollingDown = e.deltaY > 0;
     const scrollingUp = e.deltaY < 0;
 
-    if ((scrollingDown && !atBottom) || (scrollingUp && !atTop)) {
-      e.preventDefault();
+    // ✅ Only run smooth scroll if form can scroll in that direction
+    const canScroll =
+      (scrollingUp && !atTop) || (scrollingDown && !atBottom);
 
-      const delta = Math.max(
-        -MAX_DELTA,
-        Math.min(MAX_DELTA, e.deltaY)
-      );
+    if (!canScroll) {
+      // reset scroll targets to prevent stuck animation
+      targetScroll = form.scrollTop;
+      currentScroll = form.scrollTop;
+      return; // let event bubble → page scroll
+    }
 
-      // 🔑 slight mouse boost
-      const boost =
-        Math.abs(delta) > 40 ? 1.35 : 1.0;
+    e.preventDefault(); // only prevent default if form can scroll
 
-      lastDelta = delta;
-      targetScroll += delta * BASE_SPEED * boost;
+    const delta = Math.max(-MAX_DELTA, Math.min(MAX_DELTA, e.deltaY));
+    const boost = Math.abs(delta) > 40 ? 1.35 : 1.0;
 
-      targetScroll = Math.max(
-        0,
-        Math.min(targetScroll, scrollHeight - clientHeight)
-      );
+    lastDelta = delta;
+    targetScroll += delta * BASE_SPEED * boost;
 
-      if (!rafId) {
-        rafId = requestAnimationFrame(animate);
-      }
+    // clamp targetScroll inside form
+    targetScroll = Math.max(0, Math.min(targetScroll, scrollHeight - clientHeight));
+
+    if (!rafId) {
+      rafId = requestAnimationFrame(animate);
     }
   };
 
