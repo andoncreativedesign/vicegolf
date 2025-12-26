@@ -7,8 +7,17 @@ export const homePageQuery = `*[_type == "home"][0]{
     heroes[] {
       title,
       description,
+      buttonText,
       handle,
       content[0]{
+        image{
+          asset->{
+            _id,
+            url
+          }
+        }
+      },
+      mobileContent[0]{
         image{
           asset->{
             _id,
@@ -22,8 +31,15 @@ export const homePageQuery = `*[_type == "home"][0]{
       title,
       description,
       handle,
+      buttonText,
       buttonLink,
       backgroundImage{
+        asset->{
+          _id,
+          url
+        }
+      },
+      mobileBackgroundImage{
         asset->{
           _id,
           url
@@ -108,13 +124,24 @@ export interface BrandItem {
 }
 
 export interface HeroItemTransformed {
-  title?: string;
-  description?: string;
-  buttonText?: string;
-  image?: string
-  handle: string
+  title?: {
+    text?: string;
+    color?: string;
+  };
+  description?: {
+    text?: string;
+    color?: string;
+  };
+  buttonText?: {
+    text?: string;
+    textColor?: string;
+    backgroundColor?: string;
+  };
+  image?: string;
+  mobileImage?: string;
+  handle: string;
+  _key?: string; // Added for array items
 }
-
 
 export interface BrandItemTransformed {
   name: string;
@@ -171,15 +198,18 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
       heroes: result.result.heroes?.map((hero: any) => ({
         title: hero.title,
         description: hero.description,
+        buttonText: hero.buttonText,
         handle: hero.handle,
-        image: hero.content?.image?.asset?.url
+        image: hero.content?.image?.asset?.url,
+        mobileImage: hero.mobileContent?.image?.asset?.url
       })),
       secondaryHero: result.result.secondaryHero?.map((hero: any) => ({
         title: hero.title,
         description: hero.description,
         buttonText: hero.buttonText,
-        handle: hero.handle,
+        handle: hero.buttonLink || hero.handle,
         image: hero.backgroundImage?.asset?.url,
+        mobileImage: hero.mobileBackgroundImage?.asset?.url
       })),
       brand: result.result.brand?.map((brand: any) => ({
         name: brand.name as string,

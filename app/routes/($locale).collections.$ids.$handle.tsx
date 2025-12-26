@@ -9,12 +9,12 @@ import { ProductCard } from '~/components/ProductCard';
 import { VariantProductCard } from '~/components/Product/VariantProductCard';
 import { createCategoryQuery, type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
-import { getListingByCollectionHandle, getAllListings, type SanityListing } from '~/lib/sanity/products';
-import { useEffect } from 'react';
+import { getListingByCollectionHandle, getAllListings } from '~/lib/sanity/products';
+import { isValidElement, useEffect } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
-import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD, PRODUCT_QUERY } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 import { ChevronRight } from 'lucide-react';
 
 export const meta: Route.MetaFunction = ({ data }) => {
@@ -491,12 +491,20 @@ export default function Collection() {
 
                     {/* Product Grid */}
                     {collection?.products?.edges?.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                            {collection.products.edges.map(({ node }) => (
-                                <VariantProductCard key={node.id} product={node} />
-                            ))}
-                        </div>
+                        <PaginatedResourceSection
+                            connection={collection?.products}
+                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                        >
+                            {({ node, index }) => (
+                                <VariantProductCard
+                                    key={node.id}
+                                    product={node}
+                                    loading={index < 8 ? 'eager' : undefined}
+                                />
+                            )}
+                        </PaginatedResourceSection>
                     )}
+
 
                     {/* Fallback to original collection header if no listing data */}
                 </div>
@@ -526,11 +534,18 @@ export default function Collection() {
 
                     {/* Product Grid */}
                     {collection?.products?.edges?.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                            {collection.products.edges.map(({ node }) => (
-                                <VariantProductCard key={node.id} product={node} />
-                            ))}
-                        </div>
+                        <PaginatedResourceSection
+                            connection={collection?.products}
+                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                        >
+                            {({ node, index }) => (
+                                <VariantProductCard
+                                    key={node.id}
+                                    product={node}
+                                    loading={index < 8 ? 'eager' : undefined}
+                                />
+                            )}
+                        </PaginatedResourceSection>
                     )}
                 </>
             )}
@@ -549,66 +564,4 @@ export default function Collection() {
     );
 }
 
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
-    id
-    handle
-    title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-      maxVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-  }
-` as const;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
-const COLLECTION_QUERY = `#graphql
-  ${PRODUCT_ITEM_FRAGMENT}
-  query Collection(
-    $handle: String!
-    $country: CountryCode
-    $language: LanguageCode
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor
-      ) {
-        nodes {
-          ...ProductItem
-        }
-        pageInfo {
-          hasPreviousPage
-          hasNextPage
-          endCursor
-          startCursor
-        }
-      }
-    }
-  }
-` as const;

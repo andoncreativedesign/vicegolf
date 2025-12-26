@@ -133,7 +133,7 @@ const ProductCustomization = ({
           } `}>
           {option.name}
         </h5>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 min-w-[300px]">
           {option.optionValues.map((value: any) => {
             const {
               name,
