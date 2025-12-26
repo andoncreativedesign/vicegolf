@@ -9,6 +9,8 @@ interface HeroSlide {
   bgImage: {
     url: string;
     altText: string;
+    mobileUrl?: string;
+    mobileAltText?: string;
   };
   title: string;
   subtitle?: string;
@@ -77,6 +79,8 @@ export function HeroSection({
       bgImage: {
         url: item.image || fallbackSlides[0].bgImage.url,
         altText: item.title || `Hero slide ${index + 1}`,
+        mobileUrl: item.mobileImage,
+        mobileAltText: item.title ? `${item.title} (Mobile)` : `Hero slide ${index + 1} (Mobile)`,
       },
       title: item.title || 'Welcome',
       subtitle: item.description,
@@ -138,15 +142,46 @@ export function HeroSection({
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
               }`}
           >
-            <Image
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              data={slide.bgImage}
-              alt={slide.bgImage.altText}
-              sizes="100vw"
-              loading={index === 0 ? 'eager' : 'lazy'}
-              width={1920}
-              height={1080}
-            />
+            {/* Desktop Image */}
+            <div className="hidden md:block absolute inset-0 w-full h-full">
+              <Image
+                className="w-full h-full object-cover object-center"
+                src={slide.bgImage.url}
+                alt={slide.bgImage.altText}
+                sizes="100vw"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                width={1920}
+                height={1080}
+              />
+            </div>
+
+            {/* Mobile Image - only shown if mobileUrl exists */}
+            {slide.bgImage.mobileUrl ? (
+              <div className="md:hidden absolute inset-0 w-full h-full">
+                <Image
+                  className="w-full h-full object-cover object-center"
+                  src={slide.bgImage.mobileUrl}
+                  alt={slide.bgImage.mobileAltText || slide.bgImage.altText}
+                  sizes="100vw"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  width={768}
+                  height={1024}
+                />
+              </div>
+            ) : (
+              // Fallback to desktop image on mobile if no mobile image is provided
+              <div className="md:hidden absolute inset-0 w-full h-full">
+                <Image
+                  className="w-full h-full object-cover object-center"
+                  src={slide.bgImage.url}
+                  alt={slide.bgImage.altText}
+                  sizes="100vw"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  width={768}
+                  height={1024}
+                />
+              </div>
+            )}
 
             <div className="absolute inset-0 bg-black/25" />
           </div>
