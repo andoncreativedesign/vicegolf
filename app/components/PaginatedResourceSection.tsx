@@ -30,10 +30,11 @@ export function PaginatedResourceSection<NodesType>({
             ) : (
               resourcesMarkup
             )}
-            <NextLink>
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+            <NextLink className="w-full block text-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors mt-4"
+            style={{textDecoration: 'none'}}>
+              {isLoading ? 'Loading...' : <span>Load more products</span>}
             </NextLink>
-          </div>
+          </div>  
         );
       }}
     </Pagination>

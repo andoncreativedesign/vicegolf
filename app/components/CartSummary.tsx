@@ -38,7 +38,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
                 <span className="text-gray-900 font-medium">
                   Total{' '}
                   <span className="text-gray-600 font-normal">
-                    (Incl. taxes and shipping)
+                    {subtotal?.amount === total.amount 
+                      ? '(Incl. taxes and excl. shipping)' 
+                      : '(Incl. taxes and shipping)'}
                   </span>
                 </span>
                 <span className="font-medium text-gray-900">
