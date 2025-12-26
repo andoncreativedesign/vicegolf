@@ -2,6 +2,7 @@ import { Await, Link, useFetcher, useLoaderData, useNavigate } from 'react-route
 import { Suspense, useId, useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Image, Money } from '@shopify/hydrogen';
+import { AedIcon } from './ui/AedIcon';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -51,13 +52,13 @@ export function PageLayout({
         />
       )}
       <main className="bg-[#fafafa] pt-[120px] md:pt-[140px]">
-  <div className="w-full max-w-[2560px] mx-auto">
-    <div className="w-full max-w-[1920px] mx-auto ">
-      {children}
-    </div>
-  </div>
-</main>    
-  <Footer
+        <div className="w-full max-w-[2560px] mx-auto">
+          <div className="w-full max-w-[1920px] mx-auto ">
+            {children}
+          </div>
+        </div>
+      </main>
+      <Footer
         footer={footer}
         header={header}
         publicStoreDomain={publicStoreDomain}
@@ -311,8 +312,14 @@ function SearchAside() {
                               <p className="text-gray-500 text-sm mb-1">
                                 {product.productType}
                               </p>
-                              <p className="font-normal text-black text-sm">
-                                <Money data={product.selectedOrFirstAvailableVariant?.price!} />
+                              <p className="font-normal text-black text-sm flex items-center gap-1">
+                                <AedIcon />
+                                <span>
+                                  {parseFloat(product.selectedOrFirstAvailableVariant?.price?.amount || '0').toLocaleString('en-US', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                  })}
+                                </span>
                               </p>
                             </Link>
                           ))}
