@@ -120,15 +120,77 @@ export function HeroSection({
   const fetcher = useFetcher()
   const navigate = useNavigate()
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationRef, setAnimationRef] = useState<number>();
+  const slideDuration = 5000; // 5 seconds per slide
+
+  const animateProgress = (startTimestamp: number, duration: number) => {
+    const startTime = performance.now();
+
+    const frame = (currentTime: number) => {
+      if (isPaused) return;
+
+      const elapsed = currentTime - startTime;
+      const newProgress = Math.min((elapsed / duration) * 100, 100);
+
+      // Update progress state with the new value
+      setProgress(newProgress);
+
+      // Continue the animation if not complete
+      if (newProgress < 100) {
+        const id = requestAnimationFrame(frame);
+        setAnimationRef(id);
+      } else {
+        // Move to next slide when progress completes
+        setCurrentSlide(prev => (prev + 1) % validSlides.length);
+      }
+    };
+
+    // Start the animation
+    const id = requestAnimationFrame(frame);
+    setAnimationRef(id);
+    return id;
+  };
 
   useEffect(() => {
-    if (validSlides.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % validSlides.length);
-      }, 5000);
-      return () => clearInterval(interval);
+    if (validSlides.length <= 1) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    // Cleanup any existing animations
+    if (animationRef) {
+      cancelAnimationFrame(animationRef);
     }
-  }, [validSlides.length]);
+
+    if (!isPaused) {
+      // Reset progress and start new animation
+      setProgress(0);
+      setIsAnimating(true);
+
+      // Start smooth progress animation
+      const id = animateProgress(performance.now(), slideDuration);
+
+      // Fallback timeout in case animation frame doesn't complete
+      timeoutId = setTimeout(() => {
+        setCurrentSlide(prev => (prev + 1) % validSlides.length);
+      }, slideDuration + 50);
+
+      return () => {
+        cancelAnimationFrame(id);
+        clearTimeout(timeoutId);
+      };
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [validSlides.length, isPaused, currentSlide]);
+
+  const togglePause = () => {
+    setIsPaused(!isPaused);
+  };
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % validSlides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + validSlides.length) % validSlides.length);
@@ -255,37 +317,86 @@ export function HeroSection({
         </div>
       </div>
 
-
-      {/* Arrows + Dots */}
+      {/* Navigation arrows */}
       {validSlides.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-30"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
             aria-label="Previous slide"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
             </svg>
           </button>
-
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full z-30"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
             aria-label="Next slide"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </button>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
+          {/* Pause/Play Button with Progress Ring */}
+          <div className="absolute bottom-4 right-4 md:right-8 lg:right-16 z-20">
+            <button
+              onClick={togglePause}
+              className="relative bg-black/50 hover:bg-black/70 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              aria-label={isPaused ? 'Play slideshow' : 'Pause slideshow'}
+            >
+              {/* Progress Ring */}
+              <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90" viewBox="0 0 40 40">
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="18"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.3)"
+                  strokeWidth="2"
+                />
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray="113.1"
+                  strokeDashoffset={113.1 - (progress / 100) * 113.1}
+                  strokeLinecap="round"
+                  style={{
+                    transition: 'none',
+                    willChange: 'stroke-dashoffset',
+                    transform: 'rotate(-90deg)',
+                    transformOrigin: '50% 50%'
+                  }}
+                />
+              </svg>
+
+              {/* Play/Pause Icon */}
+              <div className="relative z-10">
+                {isPaused ? (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
+                  </svg>
+                )}
+              </div>
+            </button>
+          </div>
+
+          {/* Pagination Dots */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
             {validSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-colors duration-300 ${index === currentSlide ? 'bg-white' : 'bg-white/50'
-                  }`}
+                className={`w-2 h-2 rounded-full transition-colors ${index === currentSlide ? 'bg-white' : 'bg-white/50'}`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
