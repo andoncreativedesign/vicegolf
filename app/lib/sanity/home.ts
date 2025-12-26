@@ -124,14 +124,24 @@ export interface BrandItem {
 }
 
 export interface HeroItemTransformed {
-  title?: string;
-  description?: string;
-  buttonText?: string;
+  title?: {
+    text?: string;
+    color?: string;
+  };
+  description?: {
+    text?: string;
+    color?: string;
+  };
+  buttonText?: {
+    text?: string;
+    textColor?: string;
+    backgroundColor?: string;
+  };
   image?: string;
   mobileImage?: string;
   handle: string;
+  _key?: string; // Added for array items
 }
-
 
 export interface BrandItemTransformed {
   name: string;

@@ -13,10 +13,14 @@ interface HeroSlide {
     mobileAltText?: string;
   };
   title: string;
-  subtitle?: string;
+  titleColor?: string;
   description: string;
+  descriptionColor?: string;
   buttonText: string;
+  buttonTextColor?: string;
+  buttonBgColor?: string;
   handle: string;
+  _key?: string;
 }
 
 const fallbackSlides: HeroSlide[] = [
@@ -27,9 +31,12 @@ const fallbackSlides: HeroSlide[] = [
       altText: 'Black Friday Early Access',
     },
     title: 'BLACK FRIDAY',
-    subtitle: 'EARLY ACCESS',
+    titleColor: '#FFFFFF',
     description: 'Sign up now and be first in line for exclusive Black Friday drops and deals!',
+    descriptionColor: '#FFFFFF',
     buttonText: 'Sign Me Up',
+    buttonTextColor: '#000000',
+    buttonBgColor: '#FFFFFF',
     handle: '/account/register',
   },
   {
@@ -39,8 +46,12 @@ const fallbackSlides: HeroSlide[] = [
       altText: 'Hero slide 2',
     },
     title: 'Summer Essentials Await',
+    titleColor: '#FFFFFF',
     description: 'Beat the heat with lightweight fabrics and vibrant colors. Limited time offer.',
+    descriptionColor: '#FFFFFF',
     buttonText: 'Explore More',
+    buttonTextColor: '#000000',
+    buttonBgColor: '#FFFFFF',
     handle: '/collections/summer',
   },
   {
@@ -50,8 +61,12 @@ const fallbackSlides: HeroSlide[] = [
       altText: 'Hero slide 3',
     },
     title: 'Exclusive Deals Inside',
+    titleColor: '#FFFFFF',
     description: 'Unlock member perks and get early access to sales. Join today!',
+    descriptionColor: '#FFFFFF',
     buttonText: 'Join Now',
+    buttonTextColor: '#000000',
+    buttonBgColor: '#FFFFFF',
     handle: '/account/register',
   },
 ];
@@ -74,20 +89,30 @@ export function HeroSection({
   center = false
 }: HeroSectionProps) {
   const heroSlides: HeroSlide[] =
-    heroData?.map((item, index) => ({
-      id: `hero-${index}-${item.title?.replace(/\s+/g, '-').toLowerCase() || index}`,
-      bgImage: {
-        url: item.image || fallbackSlides[0].bgImage.url,
-        altText: item.title || `Hero slide ${index + 1}`,
-        mobileUrl: item.mobileImage,
-        mobileAltText: item.title ? `${item.title} (Mobile)` : `Hero slide ${index + 1} (Mobile)`,
-      },
-      title: item.title || 'Welcome',
-      subtitle: item.description,
-      description: item.description || 'Discover amazing products',
-      buttonText: item.buttonText || 'Shop Now',
-      handle: item.handle,
-    })) || [];
+    heroData?.map((item, index) => {
+      const titleText = item.title?.text || 'Welcome';
+      const descriptionText = item.description?.text || 'Discover amazing products';
+      const buttonText = item.buttonText?.text || 'Shop Now';
+
+      return {
+        id: `hero-${index}-${titleText.replace(/\s+/g, '-').toLowerCase() || index}`,
+        _key: item._key || `hero-${index}`,
+        bgImage: {
+          url: item.image || fallbackSlides[0].bgImage.url,
+          altText: titleText,
+          mobileUrl: item.mobileImage,
+          mobileAltText: `${titleText} (Mobile)`,
+        },
+        title: titleText,
+        titleColor: item.title?.color || '#FFFFFF',
+        description: descriptionText,
+        descriptionColor: item.description?.color || '#FFFFFF',
+        buttonText: buttonText,
+        buttonTextColor: item.buttonText?.textColor || '#000000',
+        buttonBgColor: item.buttonText?.backgroundColor || '#FFFFFF',
+        handle: item.handle,
+      };
+    }) || [];
 
   const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
   const validSlides = slides.length > 0 ? slides : fallbackSlides;
@@ -192,24 +217,37 @@ export function HeroSection({
       <div className={`absolute inset-0 z-20 flex ${center ? 'items-center justify-start' : 'items-end justify-center md:justify-start pb-12 md:pb-6'} px-[clamp(1rem,4vw,3rem)] ${textColor}`}>
         <div className={`max-w-xl py-10 md:py-14 ${bgColor} ${center ? '' : 'text-center md:text-left'}`}>
           <h1
-            className={`font-extrabold uppercase tracking-tight ${textColor}`}
-            style={{ fontSize: '3rem', lineHeight: '1.1', marginBottom: '0.5rem' }}
+            className="font-extrabold uppercase tracking-tight"
+            style={{
+              fontSize: '3rem',
+              lineHeight: '1.1',
+              marginBottom: '0.5rem',
+              color: currentSlideData.titleColor || textColor
+            }}
           >
             {currentSlideData.title}
           </h1>
 
-          {currentSlideData.subtitle && (
+          {currentSlideData.description && (
             <h2
-              className={`text-2xl md:text-4xl lg:text-5xl font-thin mb-6 ${textColor}`}
-              style={{ lineHeight: '1.1', fontWeight: '200' }}
+              className="text-2xl md:text-4xl lg:text-5xl font-thin mb-6"
+              style={{
+                lineHeight: '1.1',
+                fontWeight: '200',
+                color: currentSlideData.descriptionColor || textColor
+              }}
             >
-              {currentSlideData.subtitle}
+              {currentSlideData.description}
             </h2>
           )}
 
           <button
             onClick={(e) => handleClick(e, currentSlideData)}
-            className={`px-8 py-3 ${buttonBgColor} ${buttonTextColor} font-medium rounded-full hover:opacity-90 transition-opacity`}
+            className="px-8 py-3 font-medium rounded-full hover:opacity-90 transition-opacity"
+            style={{
+              color: currentSlideData.buttonTextColor || buttonTextColor,
+              backgroundColor: currentSlideData.buttonBgColor || buttonBgColor
+            }}
           >
             {currentSlideData.buttonText}
           </button>
