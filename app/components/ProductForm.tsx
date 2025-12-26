@@ -97,18 +97,18 @@ export const ProductForm = forwardRef<HTMLDivElement, {
     return 'default';
   };
   return (
-  <div
-  ref={ref}
-  className="product-form p-4 md:p-5 scrollbar-hide w-full max-w-[600px] overflow-y-auto"
-  style={{
-    height: '580px',
-    msOverflowStyle: 'none',
-    scrollbarWidth: 'none',
-    WebkitOverflowScrolling: 'touch',
-    willChange: 'transform',
-    // overscrollBehaviorY: 'contain',  <-- REMOVE THIS
-  }}
->
+    <div
+      ref={ref}
+      className="product-form p-4 md:p-5 scrollbar-hide w-full max-w-[600px] overflow-y-auto"
+      style={{
+        maxHeight: 'calc(100vh - 200px)',
+        minHeight: '400px',
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none',
+        WebkitOverflowScrolling: 'touch',
+        willChange: 'transform',
+      }}
+    >
 
       {/* Product Title */}
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
