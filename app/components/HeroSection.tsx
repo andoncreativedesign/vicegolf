@@ -343,15 +343,15 @@ export function HeroSection({
           <div className="absolute bottom-4 right-4 md:right-8 lg:right-16 z-20">
             <button
               onClick={togglePause}
-              className="relative bg-black/50 hover:bg-black/70 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              className="relative bg-transparent hover:bg-white/20 text-white p-1.5 rounded-full w-9 h-9 flex items-center justify-center transition-all duration-200"
               aria-label={isPaused ? 'Play slideshow' : 'Pause slideshow'}
             >
               {/* Progress Ring */}
-              <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90" viewBox="0 0 40 40">
+              <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90" viewBox="0 0 40 40" style={{ overflow: 'visible' }}>
                 <circle
                   cx="20"
                   cy="20"
-                  r="18"
+                  r="16"
                   fill="none"
                   stroke="rgba(255, 255, 255, 0.3)"
                   strokeWidth="2"
@@ -359,7 +359,7 @@ export function HeroSection({
                 <circle
                   cx="20"
                   cy="20"
-                  r="18"
+                  r="16"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -378,11 +378,11 @@ export function HeroSection({
               {/* Play/Pause Icon */}
               <div className="relative z-10">
                 {isPaused ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                   </svg>
                 ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
                   </svg>
                 )}
