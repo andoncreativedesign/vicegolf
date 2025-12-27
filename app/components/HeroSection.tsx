@@ -14,6 +14,10 @@ interface HeroSlide {
   };
   title: string;
   titleColor?: string;
+  text2?: {
+    text?: string;
+    color?: string;
+  };
   description: string;
   descriptionColor?: string;
   buttonText: string;
@@ -88,6 +92,7 @@ export function HeroSection({
   bgColor = 'bg-transparent',
   center = false
 }: HeroSectionProps) {
+  console.log('Hero Data:', JSON.stringify(heroData, null, 2));
   const heroSlides: HeroSlide[] =
     heroData?.map((item, index) => {
       const titleText = item.title?.text || 'Welcome';
@@ -105,6 +110,10 @@ export function HeroSection({
         },
         title: titleText,
         titleColor: item.title?.color || '#FFFFFF',
+        text2: item.text2 ? {
+          text: item.text2.text || '',
+          color: item.text2.color || '#FFFFFF'
+        } : undefined,
         description: descriptionText,
         descriptionColor: item.description?.color || '#FFFFFF',
         buttonText: buttonText,
@@ -289,6 +298,20 @@ export function HeroSection({
           >
             {currentSlideData.title}
           </h1>
+
+          {currentSlideData.text2?.text && (
+            <h2
+              className="font-extrabold uppercase tracking-tight"
+              style={{
+                fontSize: '3rem',
+                lineHeight: '1.1',
+                marginBottom: '0.5rem',
+                color: currentSlideData.text2.color || textColor
+              }}
+            >
+              {currentSlideData.text2.text}
+            </h2>
+          )}
 
           {currentSlideData.description && (
             <h2
