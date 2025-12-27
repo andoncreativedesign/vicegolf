@@ -205,22 +205,22 @@ function FooterContent({
           <h3 className="font-semibold text-white mb-4">Follow Us</h3>
           <div className="flex space-x-3 mb-6">
             <a href="https://www.instagram.com/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
-              <FaInstagram className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
+              <FaInstagram className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.facebook.com/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
-              <FaFacebookF className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
+              <FaFacebookF className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.tiktok.com/@vicegolfofficial" className="!text-white hover:!text-gray-300 transition-colors">
-              <FaTiktok className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
+              <FaTiktok className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.youtube.com/user/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
-              <FaYoutube className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
+              <FaYoutube className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.linkedin.com/company/vice-sporting-goods-gmbh" className="!text-white hover:!text-gray-300 transition-colors">
-              <FaLinkedinIn className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
+              <FaLinkedinIn className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.pinterest.de/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
-              <FaPinterestP className="w-5 h-5 !text-white" style={{ color: 'white !important' }} />
+              <FaPinterestP className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
           </div>
         </div>
@@ -233,19 +233,20 @@ function FooterContent({
               <img
                 src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/visa.svg?v=1743711766&width=60&height=60&crop=center"
                 alt="Visa"
-                className="h-6 w-auto"
+                className="h-8 w-auto "
                 loading="lazy"
               />
               <img
                 src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/mastercard.svg?v=1743711766&width=60&height=60&crop=center"
                 alt="Mastercard"
-                className="h-6 w-auto"
+                className="h-8 w-auto"
                 loading="lazy"
               />
               <img
-                src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/american_express.svg?v=1743711767&width=60&height=60&crop=center"
+                // src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/american_express.svg?v=1743711767&width=60&height=60&crop=center"
+                src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center"
                 alt="American Express"
-                className="h-6 w-auto"
+                className="h-8 w-10 object-cover"
                 loading="lazy"
               />
             </div>
