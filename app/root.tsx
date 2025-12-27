@@ -21,7 +21,6 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
-
 export type RootLoader = typeof loader;
 
 /**
@@ -211,27 +210,4 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary() {
-  const error = useRouteError();
-  let errorMessage = 'Unknown error';
-  let errorStatus = 500;
-
-  if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
-    errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
-  }
-
-  return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
-    </div>
-  );
-}
+export { ErrorBoundary } from './components/ErrorBoundary';
