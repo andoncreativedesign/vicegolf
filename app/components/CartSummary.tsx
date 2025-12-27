@@ -104,7 +104,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
           alt="Visa"
           className="h-6 w-auto"
         />
-        <img
+        {/* <img
           src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=50&crop=center"
           srcSet="
       https://cdn.shopify.com/s/files/1/0835/8445/0850/files/paypal-card_1.svg?v=1715242244&width=50&crop=center 1x,
@@ -113,7 +113,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
     "
           alt="PayPal"
           className="h-6 w-auto"
-        />
+        /> */}
         <img
           src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/applepay-card_1.svg?v=1715242244&width=50&crop=center"
           srcSet="
