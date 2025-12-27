@@ -91,10 +91,20 @@ export const ProductForm = forwardRef<HTMLDivElement, {
     console.log('product type from details', productType)
   }, [productType]);
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
-    const type = productType?.toLowerCase();
-    if (type === 'drivers') return 'drivers';
-    if (['golf club set', 'golf clubs', 'wedges'].includes(type)) return 'club';
-    return 'default';
+  const DRIVER_TYPES = ['drivers', 'hybrids', 'fairway woods'];
+const CLUB_TYPES = ['golf club set', 'golf clubs', 'wedges'];
+
+const type = productType?.toLowerCase();
+
+if (DRIVER_TYPES.includes(type)) {
+  return 'drivers';
+}
+
+if (CLUB_TYPES.includes(type)) {
+  return 'club';
+}
+
+return 'default';
   };
   return (
     <div

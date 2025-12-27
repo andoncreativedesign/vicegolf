@@ -609,6 +609,8 @@ useEffect(() => {
               />
             );
           case "drivers":
+            case "hybrids":
+              case "fairway woods":
             return (
               <DriversProduct
                 productDetails={productDetails}

@@ -61,6 +61,11 @@ export const productDetailsQuery = (gid: string) => `
         text,
         url
       },
+      titledPoints[]{
+        bullet,
+        name,
+        text
+      },
       secondaryDescription
     },
 
@@ -198,7 +203,7 @@ export interface SanityImageAsset {
 export interface AccordionItem {
   _key: string;
   title: string;
-  type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich' | 'stackedPoints';
+  type: 'basic' | 'bulletPoints' | 'inlinePoints' | 'linkPoints' | 'descriptionSandwich' | 'stackedPoints' | 'titledPoints';
   description?: string;
   descriptionTitle?: string;
   bulletPoints?: Array<{
@@ -208,6 +213,11 @@ export interface AccordionItem {
   inlinePoints?: Array<{ title: string; description: string }>;
   stackedPoints?: Array<{ title?: string; description: string }>;
   linkPoints?: Array<{ text: string; url: string }>;
+  titledPoints?: Array<{
+    bullet?: string;
+    name: string;
+    text: string;
+  }>;
   secondaryDescription?: string;
 }
 

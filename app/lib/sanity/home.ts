@@ -6,6 +6,7 @@ import { axiosSanity } from "~/utils/axiosInsatances";
 export const homePageQuery = `*[_type == "home"][0]{
     heroes[] {
       title,
+      text2,
       description,
       buttonText,
       handle,
@@ -29,6 +30,7 @@ export const homePageQuery = `*[_type == "home"][0]{
 
     secondaryHero[] {
       title,
+      text2,
       description,
       handle,
       buttonText,
@@ -100,6 +102,7 @@ export interface HeroContentImage {
 
 export interface HeroItem {
   title?: string;
+  text2?: string;
   description?: string;
   buttonText?: string;
   content?: HeroContentImage[];
@@ -125,6 +128,10 @@ export interface BrandItem {
 
 export interface HeroItemTransformed {
   title?: {
+    text?: string;
+    color?: string;
+  };
+  text2?: {
     text?: string;
     color?: string;
   };
@@ -197,6 +204,7 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
     const transformedData: HomePageDataTransformed = {
       heroes: result.result.heroes?.map((hero: any) => ({
         title: hero.title,
+        text2: hero.text2,
         description: hero.description,
         buttonText: hero.buttonText,
         handle: hero.handle,
@@ -205,6 +213,7 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
       })),
       secondaryHero: result.result.secondaryHero?.map((hero: any) => ({
         title: hero.title,
+        text2: hero.text2,
         description: hero.description,
         buttonText: hero.buttonText,
         handle: hero.buttonLink || hero.handle,

@@ -31,6 +31,7 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
     const inlinePoints = item.inlinePoints ?? [];
     const linkPoints = item.linkPoints ?? [];
     const stackedPoints = item.stackedPoints ?? [];
+    const titledPoints = item.titledPoints ?? [];
 
     switch (item.type) {
       case 'basic':
@@ -171,6 +172,42 @@ export function ProductDetailsAccordions({ accordions }: ProductDetailsAccordion
             ))}
           </div>
         ) : null;
+
+      case 'titledPoints':
+        if (titledPoints.length === 0) return null;
+        return (
+          <div className="space-y-4">
+            {item.descriptionTitle && (
+              <h4 className="font-semibold text-gray-900 text-[17px] tracking-tight mb-3">
+                {item.descriptionTitle}
+              </h4>
+            )}
+            {item.description && (
+              <div className="pb-3">
+                <p className="text-gray-700 text-[15px] leading-relaxed tracking-wide font-light">
+                  {item.description}
+                </p>
+              </div>
+            )}
+            <div className="space-y-4">
+              {titledPoints.map((point, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="font-medium text-gray-900 flex-shrink-0 text-[15px] w-4 text-center">
+                    {point.bullet || '•'}
+                  </span>
+                  <div className="flex-1">
+                    <span className="font-semibold text-gray-900 text-[15px] leading-relaxed tracking-wide">
+                      {point.name}:
+                    </span>
+                    <span className="text-gray-700 text-[15px] leading-relaxed tracking-wide font-light ml-1">
+                      {point.text}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
 
       case 'descriptionSandwich':
         return (
