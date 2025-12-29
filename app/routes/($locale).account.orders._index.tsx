@@ -4,8 +4,8 @@ import {
   useNavigation,
   useSearchParams,
 } from 'react-router';
-import type {Route} from './+types/account.orders._index';
-import {useRef} from 'react';
+import type { Route } from './+types/account.orders._index';
+import { useRef } from 'react';
 import {
   Money,
   getPaginationVariables,
@@ -17,12 +17,12 @@ import {
   ORDER_FILTER_FIELDS,
   type OrderFilterParams,
 } from '~/lib/orderFilters';
-import {CUSTOMER_ORDERS_QUERY} from '~/graphql/customer-account/CustomerOrdersQuery';
+import { CUSTOMER_ORDERS_QUERY } from '~/graphql/customer-account/CustomerOrdersQuery';
 import type {
   CustomerOrdersFragment,
   OrderItemFragment,
 } from 'customer-accountapi.generated';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -30,11 +30,11 @@ type OrdersLoaderData = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Orders'}];
+  return [{ title: 'Orders' }];
 };
 
-export async function loader({request, context}: Route.LoaderArgs) {
-  const {customerAccount} = context;
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const { customerAccount } = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 20,
   });
@@ -43,7 +43,7 @@ export async function loader({request, context}: Route.LoaderArgs) {
   const filters = parseOrderFilters(url.searchParams);
   const query = buildOrderSearchQuery(filters);
 
-  const {data, errors} = await customerAccount.query(CUSTOMER_ORDERS_QUERY, {
+  const { data, errors } = await customerAccount.query(CUSTOMER_ORDERS_QUERY, {
     variables: {
       ...paginationVariables,
       query,
@@ -55,17 +55,25 @@ export async function loader({request, context}: Route.LoaderArgs) {
     throw Error('Customer orders not found');
   }
 
-  return {customer: data.customer, filters};
+  return { customer: data.customer, filters };
 }
 
 export default function Orders() {
-  const {customer, filters} = useLoaderData<OrdersLoaderData>();
-  const {orders} = customer;
+  const { customer, filters } = useLoaderData<OrdersLoaderData>();
+  const { orders } = customer;
 
   return (
-    <div className="orders">
-      <OrderSearchForm currentFilters={filters} />
-      <OrdersTable orders={orders} filters={filters} />
+    <div className="orders w-full">
+      {orders.nodes.length > 0 ? (
+        <div className="bg-[#F5F5F5] p-8 min-h-[400px]">
+          <OrderSearchForm currentFilters={filters} />
+          <OrdersTable orders={orders} filters={filters} />
+        </div>
+      ) : (
+        <div className="bg-[#F5F5F5] p-8 w-full min-h-[400px]">
+          <EmptyOrders hasFilters={!!(filters.name || filters.confirmationNumber)} />
+        </div>
+      )}
     </div>
   );
 }
@@ -77,22 +85,20 @@ function OrdersTable({
   orders: CustomerOrdersFragment['orders'];
   filters: OrderFilterParams;
 }) {
-  const hasFilters = !!(filters.name || filters.confirmationNumber);
-
   return (
     <div className="acccount-orders" aria-live="polite">
       {orders?.nodes.length ? (
         <PaginatedResourceSection connection={orders}>
-          {({node: order}) => <OrderItem key={order.id} order={order} />}
+          {({ node: order }) => <OrderItem key={order.id} order={order} />}
         </PaginatedResourceSection>
       ) : (
-        <EmptyOrders hasFilters={hasFilters} />
+        <EmptyOrders hasFilters={true} />
       )}
     </div>
   );
 }
 
-function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
+function EmptyOrders({ hasFilters = false }: { hasFilters?: boolean }) {
   return (
     <div>
       {hasFilters ? (
@@ -104,19 +110,7 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
           </p>
         </>
       ) : (
-        <>
-          <p>You haven&apos;t placed any orders yet.</p>
-          <br />
-          <p>
-              <Link
-                to="/collections"
-                className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
-                style={{textDecoration: 'none', color: 'white'}}
-              >
-                Start Shopping →
-              </Link>
-          </p>
-        </>
+        <p className="text-gray-900 font-medium">No orders yet</p>
       )}
     </div>
   );
@@ -184,8 +178,8 @@ function OrderSearchForm({
         </div>
 
         <div className="order-search-buttons flex gap-4 mt-4">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSearching}
             className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
           >
@@ -210,23 +204,49 @@ function OrderSearchForm({
   );
 }
 
-function OrderItem({order}: {order: OrderItemFragment}) {
+function OrderItem({ order }: { order: OrderItemFragment }) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
+  const statusColor = order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-800' :
+    order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
+      'bg-gray-100 text-gray-800';
+
   return (
-    <div className="order-item">
-      <Link to={`/account/orders/${btoa(order.id)}`} className="order-item-link">
-        <div className="order-item-content">
-          <div className="order-item-details">
-            <p className="order-number">Order {order.name}</p>
-            <p className="order-date">Placed on {new Date(order.processedAt!).toDateString()}</p>
-            <p className="order-total">
-              <span>Total: </span>
-              <Money data={order.totalPrice!} />
-            </p>
-            <p className="order-status">
-              <span>Status: </span>
+    <div className="mb-4 last:mb-0">
+      <Link
+        to={`/account/orders/${btoa(order.id)}`}
+        className="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+      >
+        <div className="flex flex-col space-y-3">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Order {order.name}</h3>
+              <p className="text-sm text-gray-500">
+                Placed on {new Date(order.processedAt!).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
               {order.fulfillmentStatus}
-            </p>
+            </span>
+          </div>
+
+          <div className="pt-3 border-t border-gray-100">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-700">Total Amount</span>
+              <span className="text-base font-semibold text-gray-900">
+                <Money data={order.totalPrice!} />
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <span className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+              View Order Details →
+            </span>
           </div>
         </div>
       </Link>

@@ -25,7 +25,7 @@ interface AddressCardProps {
 };
 
 const baseCardClasses =
-  'relative rounded-md bg-gray-50 px-6 py-5 text-gray-900';
+  'relative px-0 py-0 text-gray-900';
 
 export function AddressCard({
   address,
