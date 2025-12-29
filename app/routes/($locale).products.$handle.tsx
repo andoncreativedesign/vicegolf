@@ -274,81 +274,127 @@ export default function Product() {
   const formRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
-useEffect(() => {
-  if (window.innerWidth < 1280) return;
+  useEffect(() => {
+    if (window.innerWidth < 1280) return;
 
-  const form = formRef.current;
-  if (!form) return;
+    const form = formRef.current;
+    if (!form) return;
 
-  let targetScroll = form.scrollTop;
-  let currentScroll = form.scrollTop;
-  let rafId: number | null = null;
-  let lastDelta = 0;
+    let targetScroll = form.scrollTop;
+    let currentScroll = form.scrollTop;
+    let rafId: number | null = null;
+    let lastDelta = 0;
 
-  const MAX_DELTA = 120;
-  const BASE_SPEED = 1.15;
+    // Track window scroll so we can "redirect" it into the form
+    let lastWindowScrollY = window.scrollY;
+    let isSyncingWindow = false;
 
-  const animate = () => {
-    const easing = Math.abs(lastDelta) > 40 ? 0.35 : 0.22;
-    currentScroll += (targetScroll - currentScroll) * easing;
-    form.scrollTop = currentScroll;
+    // Scale factor to match native page scroll speed
+    const SCROLL_SCALE = 0.2;
 
-    if (Math.abs(targetScroll - currentScroll) > 0.5) {
-      rafId = requestAnimationFrame(animate);
-    } else {
-      rafId = null;
-    }
-  };
+    const animate = () => {
+      // Smooth easing that matches native scroll feel
+      const easing = 0.25;
+      currentScroll += (targetScroll - currentScroll) * easing;
+      form.scrollTop = currentScroll;
 
-  const handleWheel = (e: WheelEvent) => {
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (Math.abs(targetScroll - currentScroll) > 0.5) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        rafId = null;
+        form.scrollTop = targetScroll; // Snap to final position
+      }
+    };
 
-    const { scrollTop, scrollHeight, clientHeight } = form;
-    const atTop = scrollTop <= 1;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+    const maybeScrollForm = (deltaY: number, options?: { immediate?: boolean }) => {
+      const { scrollTop, scrollHeight, clientHeight } = form;
+      const atTop = scrollTop <= 1;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
 
-    const scrollingDown = e.deltaY > 0;
-    const scrollingUp = e.deltaY < 0;
+      const scrollingDown = deltaY > 0;
+      const scrollingUp = deltaY < 0;
 
-    // ✅ Only run smooth scroll if form can scroll in that direction
-    const canScroll =
-      (scrollingUp && !atTop) || (scrollingDown && !atBottom);
+      const canScroll =
+        (scrollingUp && !atTop) || (scrollingDown && !atBottom);
 
-    if (!canScroll) {
-      // reset scroll targets to prevent stuck animation
-      targetScroll = form.scrollTop;
-      currentScroll = form.scrollTop;
-      return; // let event bubble → page scroll
-    }
+      if (!canScroll) {
+        // reset scroll targets to prevent stuck animation
+        targetScroll = form.scrollTop;
+        currentScroll = form.scrollTop;
+        return false;
+      }
 
-    e.preventDefault(); // only prevent default if form can scroll
+      // Apply scale factor to match native scroll speed
+      const scaledDelta = deltaY * SCROLL_SCALE;
 
-    const delta = Math.max(-MAX_DELTA, Math.min(MAX_DELTA, e.deltaY));
-    const boost = Math.abs(delta) > 40 ? 1.35 : 1.0;
+      if (options?.immediate) {
+        // For scroll-bar drags, apply scaled delta
+        currentScroll = Math.max(
+          0,
+          Math.min(scrollTop + scaledDelta, scrollHeight - clientHeight),
+        );
+        targetScroll = currentScroll;
+        form.scrollTop = currentScroll;
+      } else {
+        // For wheel events, use scaled delta
+        lastDelta = scaledDelta;
+        targetScroll += scaledDelta;
 
-    lastDelta = delta;
-    targetScroll += delta * BASE_SPEED * boost;
+        // clamp targetScroll inside form
+        targetScroll = Math.max(0, Math.min(targetScroll, scrollHeight - clientHeight));
 
-    // clamp targetScroll inside form
-    targetScroll = Math.max(0, Math.min(targetScroll, scrollHeight - clientHeight));
+        if (!rafId) {
+          rafId = requestAnimationFrame(animate);
+        }
+      }
 
-    if (!rafId) {
-      rafId = requestAnimationFrame(animate);
-    }
-  };
+      return true;
+    };
 
-  document.addEventListener('wheel', handleWheel, {
-    passive: false,
-    capture: true,
-  });
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
 
-  return () => {
-    document.removeEventListener('wheel', handleWheel, {
+      // Only prevent default and handle when form can scroll
+      const handled = maybeScrollForm(e.deltaY);
+      if (handled) {
+        e.preventDefault();
+      }
+    };
+
+    const handleWindowScroll = () => {
+      if (isSyncingWindow) return;
+
+      const currentY = window.scrollY;
+      const deltaY = currentY - lastWindowScrollY;
+      lastWindowScrollY = currentY;
+
+      if (deltaY === 0) return;
+
+      const handled = maybeScrollForm(deltaY, { immediate: true });
+      if (!handled) return;
+
+      // If the form handled the scroll, keep the page fixed by
+      // restoring the previous scroll position.
+      isSyncingWindow = true;
+      window.scrollTo({ top: currentY - deltaY });
+      lastWindowScrollY = currentY - deltaY;
+      isSyncingWindow = false;
+    };
+
+    document.addEventListener('wheel', handleWheel, {
+      passive: false,
       capture: true,
     });
-    if (rafId) cancelAnimationFrame(rafId);
-  };
-}, []);
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener('wheel', handleWheel, {
+        capture: true,
+      });
+      window.removeEventListener('scroll', handleWindowScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
 
 
 
@@ -523,10 +569,10 @@ useEffect(() => {
           /** 👇 Golf club sets */
           case "golf club set":
           case "golf clubs":
-             case "wedge":
+          case "wedge":
           case "wedges":
-            case "iron":
-            case "irons":
+          case "iron":
+          case "irons":
             return <GolfClubSetProduct productDetails={productDetails} />;
           /** 👇 Golf bags */
           case "golf bag":
@@ -596,9 +642,9 @@ useEffect(() => {
                 showBestSellers={true}
               />
             );
-    
+
           case "blade putter":
-             case "mallet putter":
+          case "mallet putter":
           case "center mallet putter":
             return (
               <PuttersProduct
@@ -609,8 +655,8 @@ useEffect(() => {
               />
             );
           case "drivers":
-            case "hybrids":
-              case "fairway woods":
+          case "hybrids":
+          case "fairway woods":
             return (
               <DriversProduct
                 productDetails={productDetails}
