@@ -250,6 +250,8 @@ export default function AccountProfile() {
     phone: customer?.phoneNumber?.phoneNumber ? customer.phoneNumber.phoneNumber.replace('+', '') : '',
     firstName: customer?.firstName || '',
     lastName: customer?.lastName || '',
+    newPassword: '',
+    confirmNewPassword: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,104 +262,126 @@ export default function AccountProfile() {
     }));
   };
 
+  const isDirty = React.useMemo(() => {
+    const originalEmail = customer?.emailAddress?.emailAddress || customer?.email || '';
+    const originalPhone = customer?.phoneNumber?.phoneNumber ? customer.phoneNumber.phoneNumber.replace('+', '') : '';
+    const originalFirstName = customer?.firstName || '';
+    const originalLastName = customer?.lastName || '';
+
+    return (
+      formData.firstName !== originalFirstName ||
+      formData.lastName !== originalLastName ||
+      formData.email !== originalEmail ||
+      formData.phone !== originalPhone ||
+      formData.newPassword !== '' ||
+      formData.confirmNewPassword !== ''
+    );
+  }, [formData, customer]);
+
   return (
-    <div className="account-profile w-full flex justify-center">
-      <Form method="PUT" className="space-y-6 w-full lg:mx-8" style={{ maxWidth: '40rem' }}>
-        <h2>My details</h2>
-        <fieldset className="space-y-4 w-full">
-          <CustomInputFiled
-            label="First name"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleInputChange}
-            autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
-            minLength={2}
-            required
-          />
+    <div className="account-profile w-full">
+      <div className="bg-[#F5F5F5] p-10 w-full">
+        <h2 className="text-xl font-bold text-gray-900 mb-8">My details</h2>
+        <Form method="PUT" className="space-y-6 w-full" style={{ maxWidth: '100%' }}>
+          <fieldset className="space-y-4 w-full">
+            <CustomInputFiled
+              label="First name"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              autoComplete="given-name"
+              placeholder="First name"
+              aria-label="First name"
+              minLength={2}
+              required
+            />
 
-          <CustomInputFiled
-            label="Last name"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleInputChange}
-            autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
-            minLength={2}
-            required
-          />
+            <CustomInputFiled
+              label="Last name"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              autoComplete="family-name"
+              placeholder="Last name"
+              aria-label="Last name"
+              minLength={2}
+              required
+            />
 
-          <CustomInputFiled
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            autoComplete="email"
-            placeholder="Email address"
-            aria-label="Email address"
-            pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
-            required
-          />
+            <CustomInputFiled
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              autoComplete="email"
+              placeholder="Email address"
+              aria-label="Email address"
+              pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
+              required
+            />
 
-          <CustomInputFiled
-            label="Phone Number"
-            name="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={handleInputChange}
-            autoComplete="tel"
-            placeholder="Phone number"
-            aria-label="Phone number"
-            pattern="[0-9]{10,15}"
-            title="Please enter a valid phone number (10-15 digits)"
-            required
-          />
+            <CustomInputFiled
+              label="Phone Number"
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={handleInputChange}
+              autoComplete="tel"
+              placeholder="Phone number"
+              aria-label="Phone number"
+              pattern="[0-9]{10,15}"
+              title="Please enter a valid phone number (10-15 digits)"
+              required
+            />
 
-          <CustomInputFiled
-            label="New Password"
-            name="newPassword"
-            type="password"
-            autoComplete="new-password"
-            placeholder="New password"
-            aria-label="New password"
-            minLength={8}
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-            title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character"
-          />
+            <CustomInputFiled
+              label="New Password"
+              name="newPassword"
+              type="password"
+              value={formData.newPassword}
+              onChange={handleInputChange}
+              autoComplete="new-password"
+              placeholder="New password"
+              aria-label="New password"
+              minLength={8}
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+              title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character"
+            />
 
-          <CustomInputFiled
-            label="Confirm New Password"
-            name="confirmNewPassword"
-            type="password"
-            autoComplete="new-password"
-            placeholder="Confirm new password"
-            aria-label="Confirm new password"
-            minLength={8}
-          />
+            <CustomInputFiled
+              label="Confirm New Password"
+              name="confirmNewPassword"
+              type="password"
+              value={formData.confirmNewPassword}
+              onChange={handleInputChange}
+              autoComplete="new-password"
+              placeholder="Confirm new password"
+              aria-label="Confirm new password"
+              minLength={8}
+            />
 
-          <input type="hidden" name="customerId" value={customer?.id} />
-        </fieldset>
-        {action?.error && (
-          <div className="mt-4 mb-6 w-full p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-            <p className="text-sm">{action.error}</p>
-          </div>
-        )}
-        {action && !action.error && action.customer && (
-          <div className="mt-4 mb-6 w-full p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
-            <p className="text-sm">Profile updated successfully!</p>
-          </div>
-        )}
-        <button
-          type="submit"
-          disabled={state !== 'idle'}
-          className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {state !== 'idle' ? 'Updating' : 'Update'}
-        </button>
-      </Form>
+            <input type="hidden" name="customerId" value={customer?.id} />
+          </fieldset>
+          {action?.error && (
+            <div className="mt-4 mb-6 w-full p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+              <p className="text-sm">{action.error}</p>
+            </div>
+          )}
+          {action && !action.error && action.customer && (
+            <div className="mt-4 mb-6 w-full p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+              <p className="text-sm">Profile updated successfully!</p>
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={!isDirty || state !== 'idle'}
+            className="w-full bg-gray-900 text-white px-4 py-3 rounded-full font-bold hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200 text-sm tracking-wide"
+          >
+            {state !== 'idle' ? 'Saving' : 'Save changes'}
+          </button>
+        </Form>
+      </div>
     </div>
   );
 }
