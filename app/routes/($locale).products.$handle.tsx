@@ -285,11 +285,16 @@ useEffect(() => {
   let rafId: number | null = null;
   let lastDelta = 0;
 
-  const MAX_DELTA = 120;
-  const BASE_SPEED = 1.15;
+  // Track window scroll so we can "redirect" it into the form
+  let lastWindowScrollY = window.scrollY;
+  let isSyncingWindow = false;
+
+  // Scale factor to match native page scroll speed
+  const SCROLL_SCALE = 0.6;
 
   const animate = () => {
-    const easing = Math.abs(lastDelta) > 40 ? 0.35 : 0.22;
+    // Smooth easing that matches native scroll feel
+    const easing = 0.25;
     currentScroll += (targetScroll - currentScroll) * easing;
     form.scrollTop = currentScroll;
 
@@ -297,20 +302,18 @@ useEffect(() => {
       rafId = requestAnimationFrame(animate);
     } else {
       rafId = null;
+      form.scrollTop = targetScroll; // Snap to final position
     }
   };
 
-  const handleWheel = (e: WheelEvent) => {
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-
+  const maybeScrollForm = (deltaY: number, options?: { immediate?: boolean }) => {
     const { scrollTop, scrollHeight, clientHeight } = form;
     const atTop = scrollTop <= 1;
     const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
 
-    const scrollingDown = e.deltaY > 0;
-    const scrollingUp = e.deltaY < 0;
+    const scrollingDown = deltaY > 0;
+    const scrollingUp = deltaY < 0;
 
-    // ✅ Only run smooth scroll if form can scroll in that direction
     const canScroll =
       (scrollingUp && !atTop) || (scrollingDown && !atBottom);
 
@@ -318,34 +321,77 @@ useEffect(() => {
       // reset scroll targets to prevent stuck animation
       targetScroll = form.scrollTop;
       currentScroll = form.scrollTop;
-      return; // let event bubble → page scroll
+      return false;
     }
 
-    e.preventDefault(); // only prevent default if form can scroll
+    // Apply scale factor to match native scroll speed
+    const scaledDelta = deltaY * SCROLL_SCALE;
 
-    const delta = Math.max(-MAX_DELTA, Math.min(MAX_DELTA, e.deltaY));
-    const boost = Math.abs(delta) > 40 ? 1.35 : 1.0;
+    if (options?.immediate) {
+      // For scroll-bar drags, apply scaled delta
+      currentScroll = Math.max(
+        0,
+        Math.min(scrollTop + scaledDelta, scrollHeight - clientHeight),
+      );
+      targetScroll = currentScroll;
+      form.scrollTop = currentScroll;
+    } else {
+      // For wheel events, use scaled delta
+      lastDelta = scaledDelta;
+      targetScroll += scaledDelta;
 
-    lastDelta = delta;
-    targetScroll += delta * BASE_SPEED * boost;
+      // clamp targetScroll inside form
+      targetScroll = Math.max(0, Math.min(targetScroll, scrollHeight - clientHeight));
 
-    // clamp targetScroll inside form
-    targetScroll = Math.max(0, Math.min(targetScroll, scrollHeight - clientHeight));
-
-    if (!rafId) {
-      rafId = requestAnimationFrame(animate);
+      if (!rafId) {
+        rafId = requestAnimationFrame(animate);
+      }
     }
+
+    return true;
+  };
+
+  const handleWheel = (e: WheelEvent) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+    // Only prevent default and handle when form can scroll
+    const handled = maybeScrollForm(e.deltaY);
+    if (handled) {
+      e.preventDefault();
+    }
+  };
+
+  const handleWindowScroll = () => {
+    if (isSyncingWindow) return;
+
+    const currentY = window.scrollY;
+    const deltaY = currentY - lastWindowScrollY;
+    lastWindowScrollY = currentY;
+
+    if (deltaY === 0) return;
+
+    const handled = maybeScrollForm(deltaY, { immediate: true });
+    if (!handled) return;
+
+    // If the form handled the scroll, keep the page fixed by
+    // restoring the previous scroll position.
+    isSyncingWindow = true;
+    window.scrollTo({ top: currentY - deltaY });
+    lastWindowScrollY = currentY - deltaY;
+    isSyncingWindow = false;
   };
 
   document.addEventListener('wheel', handleWheel, {
     passive: false,
     capture: true,
   });
+  window.addEventListener('scroll', handleWindowScroll, { passive: true });
 
   return () => {
     document.removeEventListener('wheel', handleWheel, {
       capture: true,
     });
+    window.removeEventListener('scroll', handleWindowScroll);
     if (rafId) cancelAnimationFrame(rafId);
   };
 }, []);
