@@ -20,10 +20,10 @@ interface HeroSlide {
   };
   description: string;
   descriptionColor?: string;
-  buttonText: string;
+  buttonText?: string;
   buttonTextColor?: string;
   buttonBgColor?: string;
-  handle: string;
+  handle?: string;
   _key?: string;
 }
 
@@ -38,9 +38,6 @@ const fallbackSlides: HeroSlide[] = [
     titleColor: '#FFFFFF',
     description: 'Sign up now and be first in line for exclusive Black Friday drops and deals!',
     descriptionColor: '#FFFFFF',
-    buttonText: 'Sign Me Up',
-    buttonTextColor: '#000000',
-    buttonBgColor: '#FFFFFF',
     handle: '/account/register',
   },
   {
@@ -53,9 +50,6 @@ const fallbackSlides: HeroSlide[] = [
     titleColor: '#FFFFFF',
     description: 'Beat the heat with lightweight fabrics and vibrant colors. Limited time offer.',
     descriptionColor: '#FFFFFF',
-    buttonText: 'Explore More',
-    buttonTextColor: '#000000',
-    buttonBgColor: '#FFFFFF',
     handle: '/collections/summer',
   },
   {
@@ -68,9 +62,6 @@ const fallbackSlides: HeroSlide[] = [
     titleColor: '#FFFFFF',
     description: 'Unlock member perks and get early access to sales. Join today!',
     descriptionColor: '#FFFFFF',
-    buttonText: 'Join Now',
-    buttonTextColor: '#000000',
-    buttonBgColor: '#FFFFFF',
     handle: '/account/register',
   },
 ];
@@ -97,7 +88,7 @@ export function HeroSection({
     heroData?.map((item, index) => {
       const titleText = item.title?.text || 'Welcome';
       const descriptionText = item.description?.text || 'Discover amazing products';
-      const buttonText = item.buttonText?.text || 'Shop Now';
+      const buttonText = item.buttonText?.text
 
       return {
         id: `hero-${index}-${titleText.replace(/\s+/g, '-').toLowerCase() || index}`,
@@ -288,17 +279,17 @@ export function HeroSection({
       <div className={`absolute inset-0 z-20 flex ${center ? 'items-center justify-start' : 'items-end justify-center md:justify-start pb-12 md:pb-6'} px-[clamp(1rem,4vw,3rem)] ${textColor}`}>
         <div className={`max-w-xl py-10 md:py-14 ${bgColor} ${center ? '' : 'text-center md:text-left'}`}>
           <h1
-          className="uppercase tracking-tight leading-[1.1] mb-2"
-          style={{
-          fontSize: '3rem',
-          fontWeight: 400,
-           lineHeight: '1.1',
-          color: currentSlideData.titleColor || textColor
-         }}
-       >
-  {currentSlideData.title}
-</h1>
-           
+            className="uppercase tracking-tight leading-[1.1] mb-2"
+            style={{
+              fontSize: '3rem',
+              fontWeight: 400,
+              lineHeight: '1.1',
+              color: currentSlideData.titleColor || textColor
+            }}
+          >
+            {currentSlideData.title}
+          </h1>
+
           {currentSlideData.text2?.text && (
             <h2
               className="font-extrabold uppercase tracking-tight"
@@ -326,16 +317,17 @@ export function HeroSection({
             </h2>
           )}
 
-          <button
-            onClick={(e) => handleClick(e, currentSlideData)}
-            className="px-8 py-3 font-medium rounded-full hover:opacity-90 transition-opacity"
-            style={{
-              color: currentSlideData.buttonTextColor || buttonTextColor,
-              backgroundColor: currentSlideData.buttonBgColor || buttonBgColor
-            }}
-          >
-            {currentSlideData.buttonText}
-          </button>
+          {currentSlideData?.buttonText &&
+            <button
+              onClick={(e) => handleClick(e, currentSlideData)}
+              className="px-8 py-3 font-medium rounded-full hover:opacity-90 transition-opacity"
+              style={{
+                color: currentSlideData.buttonTextColor || buttonTextColor,
+                backgroundColor: currentSlideData.buttonBgColor || buttonBgColor
+              }}
+            >
+              {currentSlideData.buttonText}
+            </button>}
 
         </div>
       </div>
