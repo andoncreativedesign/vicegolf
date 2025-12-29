@@ -1,11 +1,17 @@
 import { useRouteError, isRouteErrorResponse, Link, useRouteLoaderData, useLocation } from 'react-router';
 import { PageLayout } from './PageLayout';
 import type { Route } from '~/+types/root';
-
+// import { useRef, useEffect } from 'react';
+// import { ProductCard } from './ProductCard';
+// import type { ProductFragment } from 'storefrontapi.generated';
+// interface ErrorBoundaryProps {
+//   products?: ProductFragment[];
+// }
 export function ErrorBoundary() {
   const error = useRouteError();
   const location = useLocation();
   const data = useRouteLoaderData('root') as Route.LoaderData;
+    // const scrollContainerRef = useRef<HTMLDivElement>(null);
   let errorMessage = 'Unknown error';
   let errorStatus = 404;
   let pageTitle = "Something Went Wrong";
@@ -57,7 +63,23 @@ export function ErrorBoundary() {
             Take me to the home page
           </Link>
           </div>
-          
+ {/* {products.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold mb-6">You might also like</h2>
+              <div className="relative">
+                <div
+                  ref={scrollContainerRef}
+                  className="flex overflow-x-auto pb-6 -mx-4 px-4 gap-8 scrollbar-hide"
+                >
+                  {products.map((product) => (
+                    <div key={product.id} className="flex-shrink-0 w-[280px] sm:w-[300px] lg:w-[320px]">
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )} */}
         </div>
       </div>
     </PageLayout>
