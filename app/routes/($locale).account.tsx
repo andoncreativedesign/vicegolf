@@ -47,7 +47,7 @@ export default function AccountLayout() {
     (firstName?.[0] || '') + (lastName?.[0] || '')
   ).toUpperCase();
   const fullName = `${firstName} ${lastName}`.trim() || 'Guest';
-  const email = customer?.email || '';
+  const email = customer?.emailAddress?.emailAddress || '';
 
   return (
     <div className="account w-full px-4 sm:px-6 lg:px-8 py-12 max-w-[1440px] mx-auto">
@@ -61,9 +61,9 @@ export default function AccountLayout() {
               {initials}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm text-gray-900 font-medium mb-1">Hello</p>
-              <p className="font-bold text-gray-900 text-lg leading-tight truncate mb-1">{fullName}</p>
-              <p className="text-sm text-gray-500 truncate">{email}</p>
+              <p className="font-semibold text-gray-900 leading-tight mb-1" style={{ fontSize: '1.5rem' }}>Hello</p>
+              <p className="font-semibold text-gray-900 leading-tight truncate mb-1" style={{ fontSize: '1.5rem' }}>{fullName}</p>
+              <p className="text-gray-500 truncate" style={{ fontSize: '0.9375rem' }}>{email}</p>
             </div>
           </div>
 
