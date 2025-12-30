@@ -83,7 +83,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
               {product.variants?.nodes[0]?.price && (
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold text-red-600 tracking-tight">
+                  <span className="text-xl font-bold tracking-tight">
                     {parseFloat(product.variants.nodes[0].price.amount).toFixed(2)}
                   </span>
                 </div>
