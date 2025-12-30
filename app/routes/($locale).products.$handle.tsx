@@ -290,15 +290,15 @@ export default function Product() {
     let isSyncingWindow = false;
 
     // Scale factor to match native page scroll speed
-    const SCROLL_SCALE = 0.2;
+    const SCROLL_SCALE = 1.0;
 
     const animate = () => {
-      // Smooth easing that matches native scroll feel
-      const easing = 0.25;
+      // Smoother easing for more natural scroll feel
+      const easing = 0.5; // Increased for more responsive feel
       currentScroll += (targetScroll - currentScroll) * easing;
       form.scrollTop = currentScroll;
 
-      if (Math.abs(targetScroll - currentScroll) > 0.5) {
+      if (Math.abs(targetScroll - currentScroll) > 0.05) {
         rafId = requestAnimationFrame(animate);
       } else {
         rafId = null;
@@ -324,8 +324,9 @@ export default function Product() {
         return false;
       }
 
-      // Apply scale factor to match native scroll speed
-      const scaledDelta = deltaY * SCROLL_SCALE;
+      // Apply scale factor with deltaY normalization for consistent behavior
+      const delta = Math.sign(deltaY) * Math.min(Math.abs(deltaY), 50); // Cap delta for large wheel events
+      const scaledDelta = delta * SCROLL_SCALE;
 
       if (options?.immediate) {
         // For scroll-bar drags, apply scaled delta
