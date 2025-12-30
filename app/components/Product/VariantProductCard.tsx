@@ -373,7 +373,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 )}
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold text-red-600 tracking-tight">
+                  <span className="text-xl font-bold tracking-tight">
                     {parseFloat(firstVariant.price.amount).toFixed(2)}
                   </span>
                 </div>
