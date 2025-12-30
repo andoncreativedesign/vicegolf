@@ -1,6 +1,8 @@
 // Create a new file: app/components/Order/CancelOrderModal.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFetcher } from 'react-router';
+import showToast from '~/components/basic/CustomToast';
+
 
 interface CancelOrderModalProps {
   orderId: string;
@@ -14,27 +16,76 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fetcher = useFetcher();
 
+
+  const getErrorMessage = (data: any): string | null => {
+    if (Array.isArray(data?.errors) && data.errors.length > 0) {
+      return data.errors[0].message;
+    }
+
+    if (typeof data?.error === 'string') {
+      return data.error;
+    }
+
+    if (data?.error?.message) {
+      return data.error.message;
+    }
+
+    return null;
+  };
+
+  useEffect(() => {
+    if (fetcher.state !== 'idle') return;
+
+    setIsSubmitting(false);
+
+    const data = fetcher.data;
+    console.log('[CancelOrder] fetcher.data:', data);
+
+    if (!data) return;
+
+    // ✅ Success
+    if (data.job) {
+      showToast.success('Your order cancellation request has been submitted.');
+      onClose();
+      return;
+    }
+
+    // ❌ Error
+    const errorMessage = getErrorMessage(data);
+
+    if (errorMessage) {
+      console.error('[CancelOrder] Error:', errorMessage);
+      showToast.error(errorMessage);
+      onClose();
+      return;
+    }
+
+    // Default success case (if no job but also no error)
+    showToast.success('Your order cancellation request has been submitted.');
+    onClose();
+
+    // ⚠️ Unexpected (this will only be reached if getErrorMessage returns falsy but there's no job)
+    console.warn('[CancelOrder] Unexpected response:', data);
+  }, [fetcher.state, fetcher.data]);
+
   const handleSubmit = (e: React.FormEvent) => {
+    if (!staffNote) return
     e.preventDefault();
     setIsSubmitting(true);
 
     fetcher.submit(
       {
-        orderId,
-        notifyCustomer: 'true',
-        refundMethod: JSON.stringify({ [refundMethod]: true }),
-        restock: 'true',
-        reason: 'CUSTOMER',
-        staffNote,
+        orderId, // already full GID
+        staffNote: staffNote,
       },
-      { method: 'post', action: '/api/order/cancel' }
+      { method: "post", action: "/api/order" }
     );
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Cancel Order</h2>
 
@@ -54,17 +105,6 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
                   className="mr-2"
                 />
                 Original Payment Method
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="refundMethod"
-                  value="giftCardRefund"
-                  checked={refundMethod === 'giftCardRefund'}
-                  onChange={() => setRefundMethod('giftCardRefund')}
-                  className="mr-2"
-                />
-                Gift Card
               </label>
             </div>
           </div>

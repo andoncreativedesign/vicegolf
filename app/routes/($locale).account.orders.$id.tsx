@@ -186,7 +186,7 @@ export default function OrderRoute() {
       </div>
 
       <div className="order-actions mt-8">
-        <a 
+        {/* <a 
           target="_blank" 
           href={order.statusPageUrl} 
           rel="noreferrer"
@@ -194,7 +194,7 @@ export default function OrderRoute() {
           style={{ color: 'white' }}
         >
           View Order Status →
-        </a>
+        </a> */}
       </div>
     </div>
   );
