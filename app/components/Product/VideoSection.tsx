@@ -26,9 +26,9 @@ export function VideoSection({
           <h3 className={`mb-3 sm:text-[32px] text-[24px] font-semibold w-full ${titleColor} ${titleSize}`}>
             {videoContent?.title}
           </h3>
-          <p className={`${descriptionSize} font-light ${descriptionColor}`}>
+          <p className={`${descriptionSize} font-light ${descriptionColor}`} style={{fontSize:'1.2rem'}} >
             {videoContent?.description}
-          </p>
+          </p> 
         </div>
 
         <div className="w-full">
