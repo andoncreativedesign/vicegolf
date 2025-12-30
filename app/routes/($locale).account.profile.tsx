@@ -335,7 +335,7 @@ export default function AccountProfile() {
               required
             />
 
-            <CustomInputFiled
+            {/* <CustomInputFiled
               label="New Password"
               name="newPassword"
               type="password"
@@ -359,7 +359,7 @@ export default function AccountProfile() {
               placeholder="Confirm new password"
               aria-label="Confirm new password"
               minLength={8}
-            />
+            /> */}
 
             <input type="hidden" name="customerId" value={customer?.id} />
           </fieldset>

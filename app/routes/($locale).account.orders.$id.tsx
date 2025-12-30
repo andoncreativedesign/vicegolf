@@ -186,7 +186,7 @@ export default function OrderRoute() {
       </div>
 
       <div className="order-actions mt-8">
-        <a 
+        {/* <a 
           target="_blank" 
           href={order.statusPageUrl} 
           rel="noreferrer"
@@ -194,13 +194,18 @@ export default function OrderRoute() {
           style={{ color: 'white' }}
         >
           View Order Status →
-        </a>
+        </a> */}
       </div>
     </div>
   );
 }
 
-function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
+function OrderLineRow({ lineItem }: { lineItem: OrderLineItemFullFragment }) {
+  
+  const hadnleOrderCancel = () => {
+    console.log('Order Cancelled');
+  }  
+
   return (
     <tr className="order-line-item border-b border-gray-100 hover:bg-gray-50">
       <td className="py-4 px-4">

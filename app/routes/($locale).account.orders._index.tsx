@@ -5,7 +5,7 @@ import {
   useSearchParams,
 } from 'react-router';
 import type { Route } from './+types/account.orders._index';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Money,
   getPaginationVariables,
@@ -23,6 +23,7 @@ import type {
   OrderItemFragment,
 } from 'customer-accountapi.generated';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import { CancelOrderModal } from '~/components/Profile/CancelOrderModal';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -205,17 +206,30 @@ function OrderSearchForm({
 }
 
 function OrderItem({ order }: { order: OrderItemFragment }) {
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   const statusColor = order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-800' :
     order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
       'bg-gray-100 text-gray-800';
 
+    useEffect(() => {
+      console.log("order isCancelModalOpen", fulfillmentStatus);
+  }, [order]);
+
+  const canCancelOrder = (status?: string) => {
+    if(!status) return true;
+    if (status === 'CANCELLED') return false;
+    // if (status === 'PENDING') return false;
+    // if (status === 'IN_PROGRESS') return false;
+    // if (status === 'FULFILLED') return false;
+    return true;
+  };
+
+
+
   return (
     <div className="mb-4 last:mb-0">
-      <Link
-        to={`/account/orders/${btoa(order.id)}`}
-        className="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
-      >
+      <div className="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200" >
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-start">
             <div>
@@ -229,9 +243,9 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
                 })}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
+            {/* <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
               {order.fulfillmentStatus}
-            </span>
+            </span> */}
           </div>
 
           <div className="pt-3 border-t border-gray-100">
@@ -243,13 +257,38 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
             </div>
           </div>
 
-          <div className="pt-2 flex justify-end">
-            <span className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
-              View Order Details →
-            </span>
+          <div className='flex justify-end'>
+            <div className="pt-2">
+              {canCancelOrder(fulfillmentStatus) &&
+                <button
+                  className='inline-block px-4 py-2 rounded-lg bg-white disabled:cursor-not-allowed cursor-pointer'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCancelModalOpen(true);
+                  }}
+                >
+                  Cancel Order
+                </button>
+              }
+              <Link
+                to={`/account/orders/${btoa(order.id)}`}
+                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                style={{ textDecoration: 'none' }}
+              >
+                View Order Details →
+              </Link>
+            </div>
           </div>
+
         </div>
-      </Link>
+      </div>
+
+      <CancelOrderModal
+        orderId={order.id}
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+      />
+
     </div>
   );
 }

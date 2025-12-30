@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { LuUser } from 'react-icons/lu';
-import { Await, NavLink, useAsyncValue, useLoaderData, type LoaderFunctionArgs } from 'react-router';
+import { Await, NavLink, useAsyncValue, useLoaderData, useNavigate, type LoaderFunctionArgs } from 'react-router';
 import {
   type CartViewPayload,
   Image,
@@ -99,6 +99,23 @@ export function Header({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const [isNavigating, setIsNavigating] = useState(false);
+  const navigate = useNavigate();
+  const handleMenuNavigation = async () => {
+    const isHomePage = window.location.pathname === '/';
+    if (isHomePage) return; // Already on home page, do nothing
+
+    try {
+      setIsNavigating(true);
+      await navigate('/');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    } finally {
+      // This will run after navigation completes or fails
+      setIsNavigating(false);
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 shadow-xs" style={{ width: '100%', margin: 0 }}>
       {/* Marquee Banner - Always Visible */}
@@ -117,13 +134,30 @@ export function Header({
 
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center pl-12 md:pl-0">
-          <NavLink prefetch="intent" to="/" className="flex items-center">
+          {/* <NavLink prefetch="intent" to="/" className="flex items-center">
             <img
               src="/vice_logo.svg"
               alt="Vice Logo"
               className="h-8 md:h-12 w-auto"
             />
-          </NavLink>
+          </NavLink> */}
+          <button
+            className="flex items-center relative"
+            onClick={handleMenuNavigation}
+            disabled={isNavigating}
+          >
+            <img
+              src="/vice_logo.svg"
+              alt="Vice Logo"
+              className={`h-8 md:h-12 w-auto transition-opacity ${isNavigating ? 'opacity-50' : 'opacity-100'}`}
+            />
+            {isNavigating && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-black"></div>
+              </div>
+            )}
+          </button>
+
         </div>
 
         {/* Right: Icons */}
