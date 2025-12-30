@@ -51,7 +51,7 @@ export function Youtube({ youtubeVideo }: YoutubeProps) {
     <section className="w-full py-16 md:py-24">
       <div className="w-full">
         <div className="text-center mb-12 max-w-8xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
-          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-3 text-gray-900">
+          <h3 className="text-4xl lg:text-5xl font-extrabold uppercase tracking-tight mb-3 text-gray-900">
             {youtubeVideo?.title}
           </h3>
           {youtubeVideo?.description && (

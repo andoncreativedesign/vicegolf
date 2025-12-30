@@ -23,14 +23,14 @@ export default function TermsOfService() {
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">1. Shipping Services</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">1. Shipping Services</h3>
               <p className="mb-4">
                 We offer door-to-door international delivery from the GCC to selected global destinations. All shipments include tracking. Transit times are estimates only and measured in business days.
               </p>
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">2. Customer Responsibilities</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">2. Customer Responsibilities</h3>
               <p className="mb-4">
                 Customers must:
                 <ol>
@@ -43,21 +43,21 @@ export default function TermsOfService() {
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">3. Shipping Rates</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">3. Shipping Rates</h3>
               <p className="mb-4">
                 Shipping fees are based on weight, volumetric weight, and destination. Estimated Duties and taxes are included.
               </p>
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">4. Customs, Duties & Taxes</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">4. Customs, Duties & Taxes</h3>
               <p className="mb-4">
                 All duties, VAT, and customs charges are paid by the customer. These costs are set by the destination country.
               </p>
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">5. Shipping Insurance</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">5. Shipping Insurance</h3>
               <p className="mb-4">
                Optional insurance is available. If not purchased, liability is limited to:
                <ol>
@@ -68,33 +68,33 @@ export default function TermsOfService() {
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">6. Prohibited or Restricted Items</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">6. Prohibited or Restricted Items</h3>
               <p className="mb-4">
               Customers must ensure items meet destination import rules.            
                </p>
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">7. Failed Deliveries & Return to Sender</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">7. Failed Deliveries & Return to Sender</h3>
               <p className="mb-4">
                 Return shipping fees equal the original outbound fee and apply when deliveries fail due to customer-related issues.             
               </p>
             </section>
 
             <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">8. Force Majeure</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">8. Force Majeure</h3>
               <p className="mb-4">
                Gateway is not liable for delays outside its control, including customs delays, weather, strikes, or regulatory actions.           
                </p>
              </section>
              <section>
-              <h3 className="text-[1.2rem] font-bold text-gray-900 mb-4">9. Governing Law</h3>
+              <h3 className="text-[1.2rem] font-semibold text-gray-900 mb-4">9. Governing Law</h3>
               <p className="mb-4">
               This policy is governed by UAE law. For ASYAD shipments, applicable international conventions may apply.           
            </p>
             </section>
              <section>
-              <h3 className="text-[1.2rem]  font-bold text-gray-900 mb-4"> 10. Amendments</h3>
+              <h3 className="text-[1.2rem]  font-semibold text-gray-900 mb-4"> 10. Amendments</h3>
               <p className="mb-4">
                The online version at the time of purchase applies. Gateway may update terms at any time.       
          </p>
