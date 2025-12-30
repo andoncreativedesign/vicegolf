@@ -1,5 +1,5 @@
-import type {InputHTMLAttributes} from 'react';
-import {useId} from 'react';
+import type { InputHTMLAttributes } from 'react';
+import { useId } from 'react';
 
 type CustomInputFieldProps = {
   label: string;
@@ -9,7 +9,7 @@ type CustomInputFieldProps = {
 } & InputHTMLAttributes<HTMLInputElement>;
 
 const baseInputClasses =
-  'w-full rounded-md border border-[#dcdfe6] bg-[#f7f7f7] px-4 py-[10px] text-[15px] text-[#3f3f46] placeholder:text-[#a1a1aa] transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c7c9d3]/60 focus:border-[#9a9faa]';
+  'w-full rounded-md border border-transparent bg-[#FAFAFA] px-4 py-3 text-base text-gray-900 placeholder:text-gray-500 transition-all duration-200 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black';
 
 export function CustomInputFiled({
   label,

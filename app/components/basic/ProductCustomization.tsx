@@ -191,24 +191,34 @@ const ProductCustomization = ({
 
   if (styling === 'drivers') {
     return (
+  <div className="space-y-4">
+    {/* Hand Orientation (if any) */}
+    {clubVariants?.length > 0 && (
       <div className={styleConfig.club.container(true, borderType)}>
-        {/* Hand Orientation (if any) */}
-        {clubVariants && clubVariants?.length > 0 && (
-          <HandOrientation
-            clubVariants={clubVariants}
-            currentProductId={currentProductId}
-          />
-        )}
-        {/* Loft Option */}
-        {loftOption && renderOption(loftOption, -1, true)}
-        {/* All other options */}
+        <HandOrientation
+          clubVariants={clubVariants}
+          currentProductId={currentProductId}
+        />
+      </div>
+    )}
+    {/* Loft Option in its own container */}
+    {loftOption && (
+      <div className={styleConfig.club.container(true, borderType)}>
+        {renderOption(loftOption, -1, true)}
+      </div>
+    )}
+    {/* All other options */}
+    {otherOptions.length > 0 && (
+      <div className={styleConfig.club.container(true, borderType)}>
         {otherOptions.map((option, index) => (
-          <div key={option.name || index} className="mb-4 last:mb-0">
+          <div key={option.name || index} className="mb-6 last:mb-0">
             {renderOption(option, index, false)}
           </div>
         ))}
       </div>
-    );
+    )}
+  </div>
+);
   }
 
 

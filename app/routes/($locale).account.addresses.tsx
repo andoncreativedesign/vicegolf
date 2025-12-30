@@ -284,18 +284,20 @@ export default function Addresses() {
 
   // Otherwise, show the addresses list with the option to add a new one
   return (
-    <div className="account-addresses" >
-      <div className='flex justify-between items-center'>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">My Address</h2>
+    <div className="account-addresses">
+      <div className='bg-[#F5F5F5] p-8 flex justify-between items-center mb-6'>
+        <h2 className="text-xl font-bold text-gray-900">
+          My addresses ({addresses.nodes.length})
+        </h2>
         <NavLink
           to="update"
-          className="inline-block bg-gray-800 text-white px-4 py-2 rounded-full hover:bg-gray-700 transition-colors duration-200"
-          style={{ textDecoration: 'none', color: "white" }}
+          className="inline-block bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-colors duration-200 text-sm font-bold tracking-wide no-underline"
+          style={{ textDecoration: 'none', color: 'white' }}
         >
           Add new one
         </NavLink>
       </div>
-      <br />
+
       <ExistingAddresses
         addresses={addresses}
         defaultAddress={defaultAddress}
@@ -343,25 +345,23 @@ function ExistingAddresses({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        {addresses.nodes.map((address) => {
-          const isDefault = defaultAddress?.id === address.id;
-          const isRemoving = removingId === address.id && fetcher.state !== 'idle';
+    <div className="space-y-4">
+      {addresses.nodes.map((address) => {
+        const isDefault = defaultAddress?.id === address.id;
+        const isRemoving = removingId === address.id && fetcher.state !== 'idle';
 
-          return (
-            <div key={address.id} className="space-y-6 ">
-              <AddressCard
-                address={address}
-                isDefault={isDefault}
-                onEdit={() => handleEdit(address)}
-                onRemove={() => handleRemove(address)}
-                isRemoving={isRemoving}
-              />
-            </div>
-          );
-        })}
-      </div>
+        return (
+          <div key={address.id} className="bg-[#F5F5F5] p-8">
+            <AddressCard
+              address={address}
+              isDefault={isDefault}
+              onEdit={() => handleEdit(address)}
+              onRemove={() => handleRemove(address)}
+              isRemoving={isRemoving}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

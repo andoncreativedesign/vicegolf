@@ -37,14 +37,14 @@ export default function CustomsGuide() {
               </p>
             </section>
 
-            <section>
+            {/* <section>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Who Pays These Charges?</h2>
               <p className="mb-4">
                The customer/sender pays these charges, usually at check out..
               </p>          
-            </section>
+            </section> */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">3. How Are Charges Calculated?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">2. How Are Charges Calculated?</h2>
               <p className="mb-4">
                 Based on:
                 <ol>
@@ -56,18 +56,18 @@ export default function CustomsGuide() {
               </p>
             </section>
               <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Can VGME Predict These Costs?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Can VGME Predict These Costs?</h2>
               <p className="mb-4">
              Yes, with a high degree of certainty, as every country has different regulations. Estimates will be provided where possible.              </p>        
             </section>
               <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Customs Clearance Delays</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Customs Clearance Delays</h2>
               <p className="mb-4">
                Customs may require inspections, documents, or value verification. These delays are outside VGME’s control.
               </p>
             </section>
               <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Rejected Shipments</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Rejected Shipments</h2>
               <p className="mb-4">
                If duties are not paid or items are prohibited, shipments may be returned or seized. Return shipping costs apply and may not be refundable.              </p>       
             </section>
