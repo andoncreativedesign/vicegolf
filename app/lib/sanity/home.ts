@@ -164,8 +164,13 @@ export interface HomeCategories {
 
 export interface ShippingPoint {
   _key: string;
-  point: string;
+  pointType: 'simple' | 'detailed';
+  simplePoint?: string;
+  pointTitle?: string;
+  pointDescription?: string;
+  showBullet?: boolean;
 }
+
 export interface ShippingDetails {
   _id: string;
   _type: string;
@@ -246,8 +251,6 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
   }
 }
 
-
-
 export const shippingDetailsQuery = `*[_type == "home"][0]{
   shippingDetails {
     _id,
@@ -257,7 +260,11 @@ export const shippingDetailsQuery = `*[_type == "home"][0]{
     description,
     points[] {
       _key,
-      point
+      pointType,
+      simplePoint,
+      pointTitle,
+      pointDescription,
+      showBullet
     }
   }
 }`;
