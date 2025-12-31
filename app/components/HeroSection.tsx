@@ -179,7 +179,7 @@ export function HeroSection({
           {current.buttonText && (
             <button
               onClick={() => handleCTA(current.handle)}
-              className="!text-xs md:!text-sm px-3 py-1.5 md:px-5 md:py-1.5 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-4"
+              className="!text-sm md:!text-base px-6 py-2.5 md:px-8 md:py-3 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-6"
               style={{ backgroundColor: current.buttonBgColor, color: current.buttonTextColor }}
             >
               {current.buttonText}
