@@ -17,7 +17,7 @@ export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
   if (!shippingDetails) return null;
 
   return (
-    <div className="w-full flex items-start gap-3 p-4 border border-gray-200 rounded-lg">
+    <div className="w-full flex items-start gap-4 p-5 border border-gray-200 rounded-lg">
       <div className="flex-shrink-0 mt-0.5">
         <img
           src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/icon-delivery.svg?v=1721740613&width=200&crop=center"
@@ -29,7 +29,7 @@ export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
         />
       </div>
       <div className="flex-1">
-        <h3 className="font-medium text-gray-900 mb-1">
+        <h3 className="font-medium text-gray-900 mb-2 text-base">
           {shippingDetails.title || 'Shipping Information'}
         </h3>
 
@@ -40,24 +40,24 @@ export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
         )}
 
         {shippingDetails.points && shippingDetails.points.length > 0 && (
-          <div className="space-y-2 text-sm text-gray-600">
+          <div className="space-y-3 text-sm text-gray-600 mt-3">
             {(shippingDetails.points as unknown as ShippingPoint[]).map((point) => (
               <div key={point._key} className="space-y-1">
                 {point.pointType === 'simple' ? (
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-start gap-3">
                     <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-2.5 flex-shrink-0" />
-                    <span>{point.simplePoint}</span>
+                    <span className="leading-relaxed">{point.simplePoint}</span>
                   </div>
                 ) : (
-                  <div className="space-y-1">
-                    <div className="flex items-start gap-2">
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
                       {point.showBullet && (
                         <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-2.5 flex-shrink-0" />
                       )}
-                      <div>
+                      <div className="space-y-1">
                         <p className="font-medium">{point.pointTitle}</p>
                         {point.pointDescription && (
-                          <p className="text-gray-600">{point.pointDescription}</p>
+                          <p className="text-gray-600 leading-relaxed">{point.pointDescription}</p>
                         )}
                       </div>
                     </div>
