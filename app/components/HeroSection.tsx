@@ -146,18 +146,21 @@ export function HeroSection({
       </div>
 
       {/* Content Layer */}
-      <div className={`absolute inset-0 z-20 flex px-[clamp(1rem,4vw,3rem)] ${textColor} ${center ? 'items-center justify-start' : 'items-end justify-center md:justify-start pb-12 md:pb-6'}`}>
-        <div className={`max-w-2xl lg:max-w-4xl xl:max-w-5xl py-10 md:py-14 ${bgColor} ${center ? '' : 'text-center md:text-left'}`} style={{ width: '90vw', maxWidth: '1200px' }}>
-          <h1
-            className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-normal"
-            style={{ color: current.titleColor }}
-          >
-            {current.title}
-          </h1>
+      <div className={`absolute inset-0 z-20 flex px-[clamp(1rem,4vw,3rem)] ${textColor} items-end justify-center md:justify-start pb-12 md:pb-6`}>
+        <div className={`max-w-2xl lg:max-w-4xl xl:max-w-5xl py-10 md:py-14 ${bgColor} ${center ? 'md:mx-0 mx-auto' : 'text-center md:text-left'}`} style={{ width: '90vw', maxWidth: '1200px' }}>
+
+          {current.title && (
+            <h2
+              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-extralight"
+              style={{ color: current.titleColor, fontWeight: 200 }}
+            >
+              {current.title}
+            </h2>
+          )}
 
           {current.text2?.text && (
             <h2
-              className="!text-2xl md:!text-3xl lg:!text-4xl xl:!text-4xl font-extrabold uppercase tracking-tight leading-none mb-4"
+              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-normal"
               style={{ color: current.text2.color }}
             >
               {current.text2.text}
@@ -176,7 +179,7 @@ export function HeroSection({
           {current.buttonText && (
             <button
               onClick={() => handleCTA(current.handle)}
-              className="!text-xs md:!text-sm px-3 py-1.5 md:px-5 md:py-1.5 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-4"
+              className="!text-sm md:!text-base px-6 py-2.5 md:px-8 md:py-3 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-6"
               style={{ backgroundColor: current.buttonBgColor, color: current.buttonTextColor }}
             >
               {current.buttonText}
