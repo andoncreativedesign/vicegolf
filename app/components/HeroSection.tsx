@@ -148,25 +148,15 @@ export function HeroSection({
       {/* Content Layer */}
       <div className={`absolute inset-0 z-20 flex px-[clamp(1rem,4vw,3rem)] ${textColor} ${center ? 'items-center justify-start' : 'items-end justify-center md:justify-start pb-12 md:pb-6'}`}>
         <div className={`max-w-2xl lg:max-w-4xl xl:max-w-5xl py-10 md:py-14 ${bgColor} ${center ? '' : 'text-center md:text-left'}`} style={{ width: '90vw', maxWidth: '1200px' }}>
-          {/* <h1
-            className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-normal"
-            style={{ color: current.titleColor }}
-          >
-            {current.title}
-          </h1> */}
 
-
-
-  {current.title && (
+          {current.title && (
             <h2
-              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-normal"
-              style={{ color: current.titleColor }}
+              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-extralight"
+              style={{ color: current.titleColor, fontWeight: 200 }}
             >
               {current.title}
             </h2>
           )}
-
-
 
           {current.text2?.text && (
             <h2
