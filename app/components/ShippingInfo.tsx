@@ -4,6 +4,15 @@ type ShippingInfoProps = {
   shippingDetails: ShippingDetails;
 };
 
+type ShippingPoint = {
+  _key: string;
+  pointType: 'simple' | 'detailed';
+  simplePoint?: string;
+  pointTitle?: string;
+  pointDescription?: string;
+  showBullet?: boolean;
+};
+
 export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
   if (!shippingDetails) return null;
 
@@ -24,20 +33,36 @@ export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
           {shippingDetails.title || 'Shipping Information'}
         </h3>
 
-        {/* Description as plain text */}
         {shippingDetails.description && (
           <p className="text-sm text-gray-600 mb-2">
             {shippingDetails.description}
           </p>
         )}
 
-        {/* Points with dots */}
         {shippingDetails.points && shippingDetails.points.length > 0 && (
-          <div className="space-y-1 text-sm text-gray-600">
-            {shippingDetails.points.map((point) => (
-              <div key={point._key} className="flex items-start gap-2">
-                <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0"></span>
-                <span>{point.point}</span>
+          <div className="space-y-2 text-sm text-gray-600">
+            {(shippingDetails.points as unknown as ShippingPoint[]).map((point) => (
+              <div key={point._key} className="space-y-1">
+                {point.pointType === 'simple' ? (
+                  <div className="flex items-start gap-2">
+                    <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-2.5 flex-shrink-0" />
+                    <span>{point.simplePoint}</span>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-2">
+                      {point.showBullet && (
+                        <span className="inline-block w-1 h-1 bg-gray-400 rounded-full mt-2.5 flex-shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium">{point.pointTitle}</p>
+                        {point.pointDescription && (
+                          <p className="text-gray-600">{point.pointDescription}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
