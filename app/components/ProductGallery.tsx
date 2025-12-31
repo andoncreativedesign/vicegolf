@@ -206,7 +206,7 @@ export function ProductGallery({
     <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
-        <div className="flex md:flex-col gap-2 md:overflow-y-auto max-h-[580.547px] w-[113px]
+        <div className="flex md:flex-col gap-2 md:overflow-y-auto max-h-[500.547px] w-[113px]
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
@@ -245,7 +245,7 @@ export function ProductGallery({
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className={`sm:min-h-[580.547px] min-h-[285px] max-w-[690.547px] max-h-[580.547px]`}
+              className={`sm:min-h-[500.547px] min-h-[285px] max-w-[690.547px] max-h-[500.547px]`}
               aspectRatio="1/1"
             // sizes="(min-width: 1024px) 50vw, 100vw"
             />
