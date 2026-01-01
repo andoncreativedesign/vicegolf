@@ -63,12 +63,19 @@ export default function Orders() {
   const { customer, filters } = useLoaderData<OrdersLoaderData>();
   const { orders } = customer;
 
+  useEffect(() => {
+    console.log("customer loaded", customer);
+  }, [customer])
+
   return (
     <div className="orders w-full">
       {orders.nodes.length > 0 ? (
         <div className="bg-[#F5F5F5] p-8 min-h-[400px]">
           <OrderSearchForm currentFilters={filters} />
-          <OrdersTable orders={orders} filters={filters} />
+          <OrdersTable
+            orders={orders}
+            filters={filters}
+          />
         </div>
       ) : (
         <div className="bg-[#F5F5F5] p-8 w-full min-h-[400px]">
@@ -207,23 +214,39 @@ function OrderSearchForm({
 
 function OrderItem({ order }: { order: OrderItemFragment }) {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
+  // const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
+  const fulfillmentStatus = order.fulfillmentStatus
   const statusColor = order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-800' :
     order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
       'bg-gray-100 text-gray-800';
 
-    useEffect(() => {
-      console.log("order isCancelModalOpen", fulfillmentStatus);
+  useEffect(() => {
+    console.log("order isCancelModalOpen", fulfillmentStatus);
   }, [order]);
 
-  const canCancelOrder = (status?: string) => {
-    if(!status) return true;
-    if (status === 'CANCELLED') return false;
-    // if (status === 'PENDING') return false;
-    // if (status === 'IN_PROGRESS') return false;
-    // if (status === 'FULFILLED') return false;
+  function isOrderCancelable(order: OrderItemFragment): boolean {
+    const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
+    if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
+      return false;
+    }
+
+    const ineligibleFinancialStatuses = ['PENDING', 'AUTHORIZED'];
+    if (order?.financialStatus && ineligibleFinancialStatuses.includes(order.financialStatus)) {
+      return false;
+    }
+
+    const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
+      return f.status !== 'CANCELLED';
+    });
+
+    if (hasActiveFulfillment) {
+      return false;
+    }
+
+    // Passed all rough checks
+    console.log("Order is eligible for cancellation:", order);
     return true;
-  };
+  }
 
 
 
@@ -259,7 +282,7 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
 
           <div className='flex justify-end'>
             <div className="pt-2">
-              {canCancelOrder(fulfillmentStatus) &&
+              {isOrderCancelable(order) &&
                 <button
                   className='inline-block px-4 py-2 rounded-lg bg-white disabled:cursor-not-allowed cursor-pointer'
                   onClick={(e) => {
