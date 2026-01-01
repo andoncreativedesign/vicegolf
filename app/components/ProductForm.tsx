@@ -91,20 +91,37 @@ export const ProductForm = forwardRef<HTMLDivElement, {
     console.log('product type from details', productType)
   }, [productType]);
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
-  const DRIVER_TYPES = ['drivers', 'hybrids', 'fairway woods','mallet putter','blade putter','center mallet putter'];
-const CLUB_TYPES = ['golf club set', 'golf clubs', 'wedges','irons','drivers'];
+    const DRIVER_TYPES = ['drivers', 'hybrids', 'fairway woods', 'mallet putter', 'blade putter', 'center mallet putter'];
+    const CLUB_TYPES = ['golf club set', 'golf clubs', 'wedges', 'irons', 'drivers'];
 
-const type = productType?.toLowerCase();
+    const type = productType?.toLowerCase() || '';
 
-if (DRIVER_TYPES.includes(type)) {
-  return 'drivers';
-} 
+    if (DRIVER_TYPES.some(t => type.includes(t))) {
+      return 'drivers';
+    }
 
-if (CLUB_TYPES.includes(type)) {
-  return 'club';
-}
+    if (CLUB_TYPES.some(t => type.includes(t))) {
+      return 'club';
+    }
 
-return 'default';
+    return 'default';
+  };
+
+  // Check if quantity selector should be shown for the product type
+  const shouldShowQuantitySelector = (productType: string | undefined): boolean => {
+    const typesWithoutQuantity = [
+      'irons',
+      'wedges',
+      'blade putter',
+      'mallet putter',
+      'center mallet putter',
+      'fairway woods',
+      'hybrids',
+      'drivers'
+    ];
+
+    const type = productType?.toLowerCase() || '';
+    return !typesWithoutQuantity.some(t => type.includes(t));
   };
   return (
     <div
@@ -159,18 +176,20 @@ return 'default';
         currentProductId={currentProductId}
       />
       }
-      {/* Quantity Selector */}
-      <div className="mb-6">
-        <QuantitySelector
-          selectedTier={selectedTier}
-          setSelectedTier={setSelectedTier}
-          quantity={quantity}
-          setQuantity={handleCustomQuantity}
-          pricingTiers={pricingTiers}
-          unitPrice={unitPriceAmount}
-          currencyCode={currencyCode}
-        />
-      </div>
+      {/* Quantity Selector - Only show for products that need quantity selection */}
+      {shouldShowQuantitySelector(productType) && (
+        <div className="mb-6">
+          <QuantitySelector
+            selectedTier={selectedTier}
+            setSelectedTier={setSelectedTier}
+            quantity={quantity}
+            setQuantity={handleCustomQuantity}
+            pricingTiers={pricingTiers}
+            unitPrice={unitPriceAmount}
+            currencyCode={currencyCode}
+          />
+        </div>
+      )}
       {/* Add to Cart Button */}
       <div className="mb-6">
         <AddToCartButton
