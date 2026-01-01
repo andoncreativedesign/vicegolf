@@ -40,14 +40,20 @@ export default function AccountLayout() {
 
   const heading = 'My Vice Golf Account';
 
-  // Calculate initials safely
-  const firstName = customer?.firstName || '';
+  // Get email and use its first part as a fallback name
+  const email = customer?.emailAddress?.emailAddress || '';
+  const emailName = email.split('@')[0] || 'User';
+
+  // Calculate names with fallbacks
+  const firstName = customer?.firstName || emailName;
   const lastName = customer?.lastName || '';
+
+  // Calculate initials safely
   const initials = (
     (firstName?.[0] || '') + (lastName?.[0] || '')
-  ).toUpperCase();
-  const fullName = `${firstName} ${lastName}`.trim() || 'Guest';
-  const email = customer?.emailAddress?.emailAddress || '';
+  ).toUpperCase() || emailName[0].toUpperCase();
+
+  const fullName = `${firstName} ${lastName}`.trim() || emailName;
 
   return (
     <div className="account w-full px-4 sm:px-6 lg:px-8 py-12 max-w-[1440px] mx-auto">
