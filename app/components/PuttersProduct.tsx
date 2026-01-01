@@ -10,7 +10,7 @@ type PuttersProductProps = {
 
 export function PuttersProduct({ productDetails }: PuttersProductProps) {
   return (
-    <div>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl w-full">
       {/* YouTube Section */}
       {productDetails?.youtubeVideos && <Youtube youtubeVideo={productDetails.youtubeVideos} />}
 
@@ -23,7 +23,7 @@ export function PuttersProduct({ productDetails }: PuttersProductProps) {
         />
       )}
 
-      <div className="max-w-8xl mx-auto">
+      <div className="container mx-auto  max-w-7xl w-full">
         {productDetails?.productContent1?.content?.slice(0, 1).map((item, index) => (
           <div key={index} className="w-full">
             <div className="flex flex-col space-y-8 py-8">
