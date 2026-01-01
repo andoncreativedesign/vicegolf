@@ -1,6 +1,6 @@
 // Create a new file: app/components/Order/CancelOrderModal.tsx
-import { useEffect, useState } from 'react';
-import { useFetcher } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { useFetcher, useRevalidator } from 'react-router';
 import showToast from '~/components/basic/CustomToast';
 
 
@@ -15,7 +15,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
   const [refundMethod, setRefundMethod] = useState<'originalPaymentMethodsRefund' | 'giftCardRefund'>('originalPaymentMethodsRefund');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fetcher = useFetcher();
-
+  const revalidator = useRevalidator();
 
   const getErrorMessage = (data: any): string | null => {
     if (Array.isArray(data?.errors) && data.errors.length > 0) {
@@ -33,40 +33,55 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
     return null;
   };
 
+  // useEffect(() => {
+  //   if (fetcher.state !== 'idle') return;
+  //   setIsSubmitting(false);
+  //   const data = fetcher.data;
+  //   console.log('[CancelOrder] fetcher.data:', data);
+  //   if (!data) return 
+
+  //   // ✅ Success
+  //   const errorMessage = getErrorMessage(data);
+  //   if (data.job) {
+  //     showToast.success('Your order cancellation request has been submitted.');
+  //   }else if (errorMessage) {
+  //     console.error('[CancelOrder] Error:', errorMessage);
+  //     showToast.error(errorMessage);
+  //   }
+  //   // Default success case (if no job but also no error)
+  //   console.warn('[CancelOrder] Unexpected response:', data);
+  //   showToast.success('Your order cancellation request has been submitted.');
+  //   revalidator.revalidate();
+  //   onClose();
+  // }, [fetcher.state, fetcher.data]);
+  
+  const prevFetcherState = useRef(fetcher.state);
   useEffect(() => {
-    if (fetcher.state !== 'idle') return;
+    const justFinished =
+      prevFetcherState.current !== 'idle' &&
+      fetcher.state === 'idle';
+    prevFetcherState.current = fetcher.state;
+    if (!justFinished) return;
 
     setIsSubmitting(false);
-
     const data = fetcher.data;
-    console.log('[CancelOrder] fetcher.data:', data);
-
     if (!data) return;
-
-    // ✅ Success
-    if (data.job) {
-      showToast.success('Your order cancellation request has been submitted.');
-      onClose();
-      return;
-    }
 
     // ❌ Error
     const errorMessage = getErrorMessage(data);
-
     if (errorMessage) {
-      console.error('[CancelOrder] Error:', errorMessage);
       showToast.error(errorMessage);
       onClose();
       return;
     }
 
-    // Default success case (if no job but also no error)
+    // ✅ Success
     showToast.success('Your order cancellation request has been submitted.');
+    revalidator.revalidate();
     onClose();
-
-    // ⚠️ Unexpected (this will only be reached if getErrorMessage returns falsy but there's no job)
-    console.warn('[CancelOrder] Unexpected response:', data);
-  }, [fetcher.state, fetcher.data]);
+  }, [fetcher.state, fetcher.data, revalidator, onClose]);
+  
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     if (!staffNote) return

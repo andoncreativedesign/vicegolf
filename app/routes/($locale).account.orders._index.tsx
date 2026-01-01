@@ -215,14 +215,13 @@ function OrderSearchForm({
 function OrderItem({ order }: { order: OrderItemFragment }) {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   // const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
-  const fulfillmentStatus = order.fulfillmentStatus
+  const [fulfillmentStatus] = useState(() => {
+    let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
+    return status?.status || (order?.financialStatus as string | undefined);
+  })
   const statusColor = order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-800' :
     order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
       'bg-gray-100 text-gray-800';
-
-  useEffect(() => {
-    console.log("order isCancelModalOpen", fulfillmentStatus);
-  }, [order]);
 
   function isOrderCancelable(order: OrderItemFragment): boolean {
     const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
@@ -267,18 +266,18 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
               </p>
             </div>
             {/* <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
-              {order.fulfillmentStatus}
+              {fulfillmentStatus}
             </span> */}
           </div>
 
-          <div className="pt-3 border-t border-gray-100">
+          {/* <div className="pt-3 border-t border-gray-100">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-700">Total Amount</span>
               <span className="text-base font-semibold text-gray-900">
                 <Money data={order.totalPrice!} />
               </span>
             </div>
-          </div>
+          </div> */}
 
           <div className='flex justify-end'>
             <div className="pt-2">

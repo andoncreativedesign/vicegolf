@@ -201,11 +201,6 @@ export default function OrderRoute() {
 }
 
 function OrderLineRow({ lineItem }: { lineItem: OrderLineItemFullFragment }) {
-  
-  const hadnleOrderCancel = () => {
-    console.log('Order Cancelled');
-  }  
-
   return (
     <tr className="order-line-item border-b border-gray-100 hover:bg-gray-50">
       <td className="py-4 px-4">
