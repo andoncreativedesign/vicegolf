@@ -81,10 +81,10 @@ const ProductCustomization = ({
         <h5 className="font-medium mb-2">
           {option.name}
         </h5>
-        <div className="relative">
+        <div className="relative ">
           <button
             type="button"
-            className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-full shadow-sm text-left"
+            className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-full shadow-sm text-left bg-[#fafafa]"
             onClick={() => toggleDropdown(option.name)}
           >
             <span>{selectedValue}</span>
@@ -95,13 +95,12 @@ const ProductCustomization = ({
           </button>
 
           {isOpen[option.name] && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+            <div className="absolute z-10 mt-1 w-full bg-[#fafafa] border border-gray-300 shadow-lg max-h-60 overflow-auto">
               {option.optionValues.map((value: any) => (
                 <button
                   key={value.name}
                   type="button"
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${value.selected ? 'bg-gray-100 font-medium' : ''
-                    }`}
+                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-[#2563eb] hover:text-white ${value.selected ? 'font-medium' : ''}`}
                   onClick={() => {
                     if (value.variantUriQuery) {
                       void navigate(`?${value.variantUriQuery}`, {
