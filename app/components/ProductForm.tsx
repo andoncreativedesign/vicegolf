@@ -111,7 +111,7 @@ return 'default';
       ref={ref}
       className="product-form p-4 md:p-5 scrollbar-hide w-full max-w-[600px] overflow-y-auto"
       style={{
-        maxHeight: 'calc(100vh - 200px)',
+        maxHeight: 'calc(100vh - 170px)',
         minHeight: '400px',
         msOverflowStyle: 'none',
         scrollbarWidth: 'none',
@@ -140,7 +140,8 @@ return 'default';
       {/* Product Description */}
       {description && (
         <div
-          className="product-description mb-6 text-gray-600 text-sm"
+          className="product-description mb-6  text-sm"
+          style={{ color: '#1d1d1f' }}
           dangerouslySetInnerHTML={{ __html: description }}
         />
       )}
