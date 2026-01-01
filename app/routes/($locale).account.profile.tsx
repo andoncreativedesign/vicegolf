@@ -36,222 +36,226 @@ export async function loader({ context }: Route.LoaderArgs) {
   return {};
 }
 
-// export async function action({ request, context }: Route.ActionArgs) {
-//   const { customerAccount, storefront } = context;
-
-//   if (request.method !== 'PUT') {
-//     return data({ error: 'Method not allowed' }, { status: 405 });
-//   }
-
-//   // Check if user is logged in
-//   const isLoggedIn = await customerAccount.isLoggedIn();
-//   if (!isLoggedIn) {
-//     console.error('User is not logged in');
-//     return data(
-//       { error: 'Please sign in to update your profile', customer: null },
-//       { status: 401 },
-//     );
-//   }
-
-//   const form = await request.formData();
-//   const formData = Object.fromEntries(form.entries()) as {
-//     customerId?: string;
-//     firstName?: string;
-//     lastName?: string;
-//     email?: string;
-//     phone?: string;
-//     newPassword?: string;
-//     confirmNewPassword?: string;
-//   };
-
-//   const customerId = formData.customerId;
-//   const { firstName, lastName, email, phone, newPassword, confirmNewPassword } = formData;
-//   console.log("\n\ncustomerId ", customerId)
-
-//   // Validate passwords match if provided
-//   if (newPassword && newPassword !== confirmNewPassword) {
-//     return data(
-//       { error: 'Passwords do not match', customer: null },
-//       { status: 400 },
-//     );
-//   }
-
-//   try {
-//     let updatedCustomer = null;
-
-//     // Update name fields using Customer Account API
-//     if ((firstName !== undefined && firstName.trim()) || (lastName !== undefined && lastName.trim())) {
-//       const customerUpdateInput: {
-//         firstName?: string;
-//         lastName?: string;
-//       } = {};
-
-//       if (firstName !== undefined && firstName.trim()) {
-//         customerUpdateInput.firstName = String(firstName).trim();
-//       }
-//       if (lastName !== undefined && lastName.trim()) {
-//         customerUpdateInput.lastName = String(lastName).trim();
-//       }
-
-//       console.log('Updating customer name with Customer Account API:', customerUpdateInput);
-//       const { data: nameUpdateData, errors: nameErrors } = await customerAccount.mutate(
-//         CUSTOMER_UPDATE_MUTATION,
-//         {
-//           variables: {
-//             input: customerUpdateInput,
-//           },
-//         },
-//       );
-
-//       if (nameErrors?.length) {
-//         console.error('Name Update GraphQL Errors:', JSON.stringify(nameErrors, null, 2));
-//         throw new Error(nameErrors[0].message || 'Failed to update name');
-//       }
-
-//       const nameUpdate = nameUpdateData?.customerUpdate;
-
-//       if (nameUpdate?.userErrors?.length) {
-//         console.error('Name Update Errors:', JSON.stringify(nameUpdate.userErrors, null, 2));
-//         const error = nameUpdate.userErrors[0];
-//         throw new Error(error.message || 'Failed to update name');
-//       }
-
-//       updatedCustomer = nameUpdate?.customer;
-//     }
-
-//     // Update email/phone using Storefront API if provided
-//     if (email || phone) {
-//       const { env } = context;
-//       const customerNumberId = customerId?.split('/').pop()?.split('Customer/').pop() || ''
-//       // const ADMIN_ACCESS_TOKEN = env.ADMIN_ACCESS_TOKEN; // set in .env file
-//       // const ADMIN_API_URL = `${env.ADMIN_API_URL}/customers/${customerNumberId}.json`;
-//       const ADMIN_ACCESS_TOKEN = 'REMOVED_TOKEN'
-//       const ADMIN_API_URL = `https://tzasu4-jj.myshopify.com/admin/api/2025-01/customers/${customerNumberId}.json`
-
-//       const res = await fetch(ADMIN_API_URL, {
-//         method: 'PUT',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN,
-//         },
-//         body: JSON.stringify({
-//           customer: {
-//             id: customerNumberId,
-//             firstName: firstName,
-//             lastName: lastName,
-//             email: email,
-//             phone: phone,
-//           },
-//         }),
-//       })
-
-//       const data = await res.json()
-//     }
-
-//     if (newPassword) {
-//       console.log('Password update is not supported via Customer Account API');
-//       // You could implement password reset flow here if needed
-//     }
-
-//     return {
-//       error: null,
-//       customer: updatedCustomer,
-//     };
-//   } catch (error: any) {
-//     console.error('Profile update error:', {
-//       message: error.message,
-//       stack: error.stack,
-//     });
-
-//     return data(
-//       { error: error.message || 'An error occurred while updating your profile', customer: null },
-//       { status: 400 },
-//     );
-//   }
-// }
-
-
-interface CustomerData {
-  first_name: string | undefined;
-  last_name: string | undefined;
-  email: string | undefined;
-  phone: string | undefined;
-  verified_email: boolean;
-  password: string | undefined;
-  password_confirmation: string | undefined;
-  send_email_welcome: boolean;
-}
-
 export async function action({ request, context }: Route.ActionArgs) {
+  const { customerAccount } = context;
+
+  if (request.method !== 'PUT') {
+    return data({ error: 'Method not allowed' }, { status: 405 });
+  }
+
+  // Check if user is logged in
+  const isLoggedIn = await customerAccount.isLoggedIn();
+  if (!isLoggedIn) {
+    console.error('User is not logged in');
+    return data(
+      { error: 'Please sign in to update your profile', customer: null },
+      { status: 401 },
+    );
+  }
+
+  const form = await request.formData();
+  const formData = Object.fromEntries(form.entries()) as {
+    customerId?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  };
+
+  const { firstName, lastName, email, phone, customerId } = formData;
+  const customerNumberId = customerId?.split('/').pop()?.split('Customer/').pop() || '';
+
   try {
-    const form = await request.formData();
-    const formData = Object.fromEntries(form.entries()) as {
-      customerId?: string;
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-      phone?: string;
-      newPassword?: string;
-      confirmNewPassword?: string;
-    };
+    // First, update the name using Customer Account API if first name or last name is provided
+    if (firstName !== undefined || lastName !== undefined) {
+      const customerUpdateInput: { firstName?: string; lastName?: string } = {};
 
-    const customerId = formData.customerId;
-    const customerNumberId = customerId?.split('/').pop()?.split('Customer/').pop() || ''
-    const { firstName, lastName, email, phone, newPassword, confirmNewPassword } = formData;
+      if (firstName !== undefined) customerUpdateInput.firstName = firstName;
+      if (lastName !== undefined) customerUpdateInput.lastName = lastName;
 
-    const customerData: CustomerData = {
-      first_name: firstName ? firstName : undefined,
-      last_name: lastName ? lastName : undefined,
-      email: email ? email : undefined,
-      phone: phone ? phone : undefined,
-      verified_email: true,
-      password: newPassword ? newPassword : undefined,
-      password_confirmation: confirmNewPassword ? confirmNewPassword : undefined,
-      send_email_welcome: false
+      console.log('Updating customer name with Customer Account API:', customerUpdateInput);
+
+      try {
+        const { data: nameUpdateData, errors: nameErrors } = await customerAccount.mutate(
+          CUSTOMER_UPDATE_MUTATION,
+          {
+            variables: {
+              input: customerUpdateInput,
+            },
+          },
+        );
+
+        if (nameErrors?.length) {
+          console.error('Name Update GraphQL Errors:', JSON.stringify(nameErrors, null, 2));
+          throw new Error(nameErrors[0].message || 'Failed to update name');
+        }
+
+        const nameUpdate = nameUpdateData?.customerUpdate;
+        if (nameUpdate?.userErrors?.length) {
+          console.error('Name Update Errors:', JSON.stringify(nameUpdate.userErrors, null, 2));
+          const error = nameUpdate.userErrors[0];
+          throw new Error(error.message || 'Failed to update name');
+        }
+
+        console.log('Successfully updated customer name');
+      } catch (error: any) {
+        console.error('Error updating customer name:', error);
+        throw new Error(`Failed to update name: ${error.message}`);
+      }
     }
 
-    const response = await axiosShopifyAdminCustomerApi.put(`/customers/${customerNumberId}.json`, {
-      customer: customerData
-    });
+    // Then, update email/phone using Admin API if provided
+    if ((email || phone) && customerNumberId) {
+      try {
+        const customerData: {
+          first_name?: string;
+          last_name?: string;
+          email?: string;
+          phone?: string;
+          verified_email: boolean;
+          send_email_welcome: boolean;
+        } = {
+          first_name: firstName || undefined,
+          last_name: lastName || undefined,
+          email: email || undefined,
+          phone: phone || undefined,
+          verified_email: true,
+          send_email_welcome: false
+        };
 
-    console.log("\n\nresponse.data")
-    console.log(response.data)
+        // Log the request payload for debugging
+        console.log('Updating customer contact info with Admin API:', {
+          customerId: customerNumberId,
+          data: customerData,
+          url: `/customers/${customerNumberId}.json`
+        });
+
+        const response = await axiosShopifyAdminCustomerApi.put(
+          `/customers/${customerNumberId}.json`,
+          { customer: customerData },
+          {
+            validateStatus: (status) => status < 500 // Don't throw for 4xx errors
+          }
+        );
+
+        console.log('Admin API Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: response.data,
+          headers: response.headers
+        });
+
+        if (response.status >= 400) {
+          // Extract and format a user-friendly error message
+          let errorMessage = 'Failed to update your information. ';
+
+          if (response.data?.errors) {
+            // Handle phone number validation specifically
+            if (response.data.errors.phone) {
+              errorMessage += 'Phone is invalid';
+            } else {
+              // Handle other validation errors
+              const errorObj = response.data.errors;
+              const errorMessages = Object.entries(errorObj).map(([field, errors]) => {
+                const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const errorList = Array.isArray(errors) ? errors.join(', ') : String(errors);
+                return `${fieldName}: ${errorList}`;
+              });
+              errorMessage += errorMessages.join('. ');
+            }
+          } else if (response.data?.error) {
+            errorMessage += typeof response.data.error === 'string'
+              ? response.data.error
+              : 'An unknown error occurred';
+          } else if (response.data?.message) {
+            errorMessage += response.data.message;
+          } else {
+            errorMessage += 'Please check your information and try again.';
+          }
+
+          console.error('Admin API Error Details:', {
+            status: response.status,
+            error: response.data?.errors || response.data?.error || 'Unknown error',
+            responseData: response.data
+          });
+
+          throw new Error(errorMessage.trim());
+        }
+
+        console.log('Successfully updated customer via Admin API:', response.data);
+        return response.data.customer; // Return the updated customer data
+      } catch (error: any) {
+        console.error('Error in Admin API call:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
+          config: {
+            url: error.config?.url,
+            method: error.config?.method,
+            headers: error.config?.headers,
+            data: error.config?.data
+          }
+        });
+        throw new Error(`Failed to update contact information: ${error.message}`);
+      }
+    }
 
     return {
       error: null,
-      customer: response.data,
+      customer: { email, firstName, lastName, phone },
     };
+  } catch (error: any) {
+    console.error('Profile update error:', {
+      message: error.message,
+      stack: error.stack,
+    });
 
-  } catch (error) {
-    console.log('\n\nerror while creating customer\n')
-    if (error?.response) {
-      console.log("STATUS:", error.response.status);
-      console.log("HEADERS:", error.response.headers);
-      console.log("DATA:", JSON.stringify(error.response.data, null, 2));  // ← IMPORTANT
-    } else {
-      console.log(error);
-    }
+    return {
+      error: error.message || 'An error occurred while updating your profile',
+      customer: null,
+    };
   }
 }
 
-
 export default function AccountProfile() {
-  const account = useOutletContext<{ customer: CustomerFragment }>();
   const { state } = useNavigation();
   const action = useActionData<ActionResponse>();
-  const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment }>();
+  const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment & CustomerFragment }>();
 
   // Debug: Log the customer data to see its structure
   React.useEffect(() => {
-    console.log('Customer Data:', JSON.stringify(customer, null, 2));
+    console.log('Customer Data:', customer);
+    console.log('Email from customer:', customer?.emailAddress?.emailAddress);
+    console.log('First name from customer:', customer?.firstName);
+    console.log('Last name from customer:', customer?.lastName);
+
+    // Update form data when customer data changes
+    if (customer) {
+      const email = customer?.emailAddress?.emailAddress || customer?.email || '';
+      const emailName = email.split('@')[0] || '';
+
+      setFormData(prev => ({
+        ...prev,
+        email: email,
+        firstName: customer?.firstName || emailName,
+        lastName: customer?.lastName || '',
+        phone: customer?.phoneNumber?.phoneNumber ?
+          customer.phoneNumber.phoneNumber.replace('+', '') :
+          prev.phone,
+      }));
+    }
   }, [customer]);
+
+  // Get email and use its first part as a fallback name
+  const email = customer?.emailAddress?.emailAddress || customer?.email || '';
+  const emailName = email.split('@')[0] || '';
+
   const [formData, setFormData] = React.useState({
-    email: customer?.emailAddress?.emailAddress || customer?.email || '',
+    email: email,
     phone: customer?.phoneNumber?.phoneNumber ? customer.phoneNumber.phoneNumber.replace('+', '') : '',
-    firstName: customer?.firstName || '',
+    firstName: customer?.firstName || emailName,
     lastName: customer?.lastName || '',
-    newPassword: '',
-    confirmNewPassword: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -272,9 +276,7 @@ export default function AccountProfile() {
       formData.firstName !== originalFirstName ||
       formData.lastName !== originalLastName ||
       formData.email !== originalEmail ||
-      formData.phone !== originalPhone ||
-      formData.newPassword !== '' ||
-      formData.confirmNewPassword !== ''
+      formData.phone !== originalPhone
     );
   }, [formData, customer]);
 
@@ -334,32 +336,6 @@ export default function AccountProfile() {
               title="Please enter a valid phone number (10-15 digits)"
               required
             />
-
-            {/* <CustomInputFiled
-              label="New Password"
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleInputChange}
-              autoComplete="new-password"
-              placeholder="New password"
-              aria-label="New password"
-              minLength={8}
-              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-              title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character"
-            />
-
-            <CustomInputFiled
-              label="Confirm New Password"
-              name="confirmNewPassword"
-              type="password"
-              value={formData.confirmNewPassword}
-              onChange={handleInputChange}
-              autoComplete="new-password"
-              placeholder="Confirm new password"
-              aria-label="Confirm new password"
-              minLength={8}
-            /> */}
 
             <input type="hidden" name="customerId" value={customer?.id} />
           </fieldset>
