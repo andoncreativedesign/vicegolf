@@ -1,6 +1,6 @@
 // Create a new file: app/components/Order/CancelOrderModal.tsx
-import { useEffect, useState } from 'react';
-import { useFetcher } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { useFetcher, useRevalidator } from 'react-router';
 import showToast from '~/components/basic/CustomToast';
 
 
@@ -15,7 +15,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
   const [refundMethod, setRefundMethod] = useState<'originalPaymentMethodsRefund' | 'giftCardRefund'>('originalPaymentMethodsRefund');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fetcher = useFetcher();
-
+  const revalidator = useRevalidator();
 
   const getErrorMessage = (data: any): string | null => {
     if (Array.isArray(data?.errors) && data.errors.length > 0) {
@@ -33,40 +33,33 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
     return null;
   };
 
+  const prevFetcherState = useRef(fetcher.state);
   useEffect(() => {
-    if (fetcher.state !== 'idle') return;
+    const justFinished =
+      prevFetcherState.current !== 'idle' &&
+      fetcher.state === 'idle';
+    prevFetcherState.current = fetcher.state;
+    if (!justFinished) return;
 
     setIsSubmitting(false);
-
     const data = fetcher.data;
-    console.log('[CancelOrder] fetcher.data:', data);
-
     if (!data) return;
-
-    // ✅ Success
-    if (data.job) {
-      showToast.success('Your order cancellation request has been submitted.');
-      onClose();
-      return;
-    }
 
     // ❌ Error
     const errorMessage = getErrorMessage(data);
-
     if (errorMessage) {
-      console.error('[CancelOrder] Error:', errorMessage);
       showToast.error(errorMessage);
       onClose();
       return;
     }
 
-    // Default success case (if no job but also no error)
+    // ✅ Success
     showToast.success('Your order cancellation request has been submitted.');
+    revalidator.revalidate();
     onClose();
-
-    // ⚠️ Unexpected (this will only be reached if getErrorMessage returns falsy but there's no job)
-    console.warn('[CancelOrder] Unexpected response:', data);
-  }, [fetcher.state, fetcher.data]);
+  }, [fetcher.state, fetcher.data, revalidator, onClose]);
+  
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     if (!staffNote) return
@@ -78,7 +71,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
         orderId, // already full GID
         staffNote: staffNote,
       },
-      { method: "post", action: "/api/order" }
+      { method: "post", action: "/api/order/cancel" }
     );
   };
 
@@ -86,7 +79,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
 
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-xs p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Cancel Order</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -128,14 +121,14 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
               disabled={isSubmitting || !staffNote.trim()}
             >
               {isSubmitting ? 'Processing...' : 'Confirm Cancellation'}

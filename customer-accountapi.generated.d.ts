@@ -316,6 +316,7 @@ export type OrderQuery = {
       | 'confirmationNumber'
       | 'statusPageUrl'
       | 'fulfillmentStatus'
+      | 'financialStatus'
       | 'processedAt'
     > & {
       fulfillments: {
