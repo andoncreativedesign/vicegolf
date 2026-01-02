@@ -82,7 +82,7 @@ export default function Login() {
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link to="/return-policy" className="underline hover:text-gray-700">
+              <Link to="/privacy-policy" className="underline hover:text-gray-700">
                 Privacy Policy
               </Link>
             </p>

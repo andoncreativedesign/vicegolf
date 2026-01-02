@@ -21,8 +21,8 @@ export default function PrivacyPolicy() {
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Privacy Policy</h3>
 
           <div className="mb-6">
-            <p className="font-semibold text-gray-900 mb-1">USA / CANADA</p>
-            <p className="font-semibold text-gray-900 mb-4">VICE SPORTING GOODS, INC. (08-28-2023)</p>
+            <p className="font-semibold text-gray-900 mb-1">United Arab Emirates (UAE)</p>
+            <p className="font-semibold text-gray-900 mb-4">VICE SPORTING GOODS</p>
           </div>
 
           <div className="space-y text-gray-700 leading-relaxed">
