@@ -48,6 +48,7 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
     confirmationNumber
     statusPageUrl
     fulfillmentStatus
+    financialStatus
     processedAt
     fulfillments(first: 1) {
       nodes {

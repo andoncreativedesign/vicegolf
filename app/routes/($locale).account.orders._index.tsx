@@ -223,31 +223,6 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
     order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
       'bg-gray-100 text-gray-800';
 
-  function isOrderCancelable(order: OrderItemFragment): boolean {
-    const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
-    if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
-      return false;
-    }
-
-    const ineligibleFinancialStatuses = ['PENDING', 'AUTHORIZED'];
-    if (order?.financialStatus && ineligibleFinancialStatuses.includes(order.financialStatus)) {
-      return false;
-    }
-
-    const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
-      return f.status !== 'CANCELLED';
-    });
-
-    if (hasActiveFulfillment) {
-      return false;
-    }
-
-    // Passed all rough checks
-    console.log("Order is eligible for cancellation:", order);
-    return true;
-  }
-
-
 
   return (
     <div className="mb-4 last:mb-0">
@@ -281,17 +256,6 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
 
           <div className='flex justify-end'>
             <div className="pt-2">
-              {isOrderCancelable(order) &&
-                <button
-                  className='inline-block px-4 py-2 rounded-lg bg-white disabled:cursor-not-allowed cursor-pointer'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCancelModalOpen(true);
-                  }}
-                >
-                  Cancel Order
-                </button>
-              }
               <Link
                 to={`/account/orders/${btoa(order.id)}`}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
@@ -304,13 +268,6 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
 
         </div>
       </div>
-
-      <CancelOrderModal
-        orderId={order.id}
-        isOpen={isCancelModalOpen}
-        onClose={() => setIsCancelModalOpen(false)}
-      />
-
     </div>
   );
 }

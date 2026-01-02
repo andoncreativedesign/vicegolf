@@ -1,24 +1,27 @@
-import {redirect, useLoaderData} from 'react-router';
-import type {Route} from './+types/account.orders.$id';
-import {Money, Image} from '@shopify/hydrogen';
+import { redirect, useLoaderData } from 'react-router';
+import type { Route } from './+types/account.orders.$id';
+import { Money, Image } from '@shopify/hydrogen';
 import type {
+  OrderItemFragment,
   OrderLineItemFullFragment,
   OrderQuery,
 } from 'customer-accountapi.generated';
-import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
+import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
+import { useState } from 'react';
+import { CancelOrderModal } from '~/components/Profile/CancelOrderModal';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Order ${data?.order?.name}`}];
+export const meta: Route.MetaFunction = ({ data }) => {
+  return [{ title: `Order ${data?.order?.name}` }];
 };
 
-export async function loader({params, context}: Route.LoaderArgs) {
-  const {customerAccount} = context;
+export async function loader({ params, context }: Route.LoaderArgs) {
+  const { customerAccount } = context;
   if (!params.id) {
     return redirect('/account/orders');
   }
 
   const orderId = atob(params.id);
-  const {data, errors}: {data: OrderQuery; errors?: Array<{message: string}>} =
+  const { data, errors }: { data: OrderQuery; errors?: Array<{ message: string }> } =
     await customerAccount.query(CUSTOMER_ORDER_QUERY, {
       variables: {
         orderId,
@@ -30,7 +33,7 @@ export async function loader({params, context}: Route.LoaderArgs) {
     throw new Error('Order not found');
   }
 
-  const {order} = data;
+  const { order } = data;
 
   // Extract line items directly from nodes array
   const lineItems = order.lineItems.nodes;
@@ -48,20 +51,20 @@ export async function loader({params, context}: Route.LoaderArgs) {
   const discountValue =
     firstDiscount?.__typename === 'MoneyV2'
       ? (firstDiscount as Extract<
-          typeof firstDiscount,
-          {__typename: 'MoneyV2'}
-        >)
+        typeof firstDiscount,
+        { __typename: 'MoneyV2' }
+      >)
       : null;
 
   // Type guard for percentage discount
   const discountPercentage =
     firstDiscount?.__typename === 'PricingPercentageValue'
       ? (
-          firstDiscount as Extract<
-            typeof firstDiscount,
-            {__typename: 'PricingPercentageValue'}
-          >
-        ).percentage
+        firstDiscount as Extract<
+          typeof firstDiscount,
+          { __typename: 'PricingPercentageValue' }
+        >
+      ).percentage
       : null;
 
   return {
@@ -79,9 +82,41 @@ export default function OrderRoute() {
     lineItems,
     discountValue,
     discountPercentage,
-    fulfillmentStatus,
+    // fulfillmentStatus,
   } = useLoaderData<typeof loader>();
-  
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [fulfillmentStatus] = useState(() => {
+    let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
+    return status?.status || (order?.financialStatus as string | undefined);
+  })
+
+  function isOrderCancelable(order: OrderQuery['order']): boolean {
+    if (!order) return false;
+    console.log("Checking order eligibility:", order);
+
+    const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
+    if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
+      return false;
+    }
+
+    const ineligibleFinancialStatuses = ['PENDING', 'AUTHORIZED'];
+    if (order?.financialStatus && ineligibleFinancialStatuses.includes(order.financialStatus)) {
+      return false;
+    }
+
+    const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
+      return f.status !== 'CANCELLED';
+    });
+
+    if (hasActiveFulfillment) {
+      return false;
+    }
+
+    // Passed all rough checks
+    console.log("Order is eligible for cancellation:", order);
+    return true;
+  }
+
   return (
     <div className="order-details">
       <div className="order-header">
@@ -103,57 +138,57 @@ export default function OrderRoute() {
                 <th scope="col" className="text-right py-3 px-4 w-1/6 font-medium">Total</th>
               </tr>
             </thead>
-          <tbody>
-            {lineItems.map((lineItem, lineItemIndex) => (
-              <OrderLineRow key={lineItemIndex} lineItem={lineItem} />
-            ))}
-          </tbody>
+            <tbody>
+              {lineItems.map((lineItem, lineItemIndex) => (
+                <OrderLineRow key={lineItemIndex} lineItem={lineItem} />
+              ))}
+            </tbody>
           </table>
         </div>
-        
+
         <div className="order-summary mt-8">
           <table className="w-full max-w-md ml-auto">
             <tfoot className="text-right">
-            {((discountValue && discountValue.amount) || discountPercentage) && (
-              <tr>
-                <td className="py-2 text-right">
-                  {discountPercentage ? 'Discount' : 'Discounts'}:
-                </td>
-                <td className="py-2 pl-4 text-right font-medium">
-                  {discountPercentage ? (
-                    <span className="text-red-600">-{discountPercentage}% OFF</span>
-                  ) : (
-                    discountValue && <Money data={discountValue!} className="text-red-600" />
-                  )}
+              {((discountValue && discountValue.amount) || discountPercentage) && (
+                <tr>
+                  <td className="py-2 text-right">
+                    {discountPercentage ? 'Discount' : 'Discounts'}:
+                  </td>
+                  <td className="py-2 pl-4 text-right font-medium">
+                    {discountPercentage ? (
+                      <span className="text-red-600">-{discountPercentage}% OFF</span>
+                    ) : (
+                      discountValue && <Money data={discountValue!} className="text-red-600" />
+                    )}
+                  </td>
+                </tr>
+              )}
+              <tr className="order-totals-row">
+                <th scope="row" colSpan={3} className="label">
+                  Subtotal
+                </th>
+                <td className="value">
+                  <Money data={order.subtotal!} />
                 </td>
               </tr>
-            )}
-            <tr className="order-totals-row">
-              <th scope="row" colSpan={3} className="label">
-                Subtotal
-              </th>
-              <td className="value">
-                <Money data={order.subtotal!} />
-              </td>
-            </tr>
-            <tr className="order-totals-row">
-              <th scope="row" colSpan={3} className="label">
-                Tax
-              </th>
-              <td className="value">
-                <Money data={order.totalTax!} />
-              </td>
-            </tr>
-            <tr className="order-totals-row total">
-              <th scope="row" colSpan={3} className="label">
-                Total
-              </th>
-              <td className="value">
-                <Money data={order.totalPrice!} />
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+              <tr className="order-totals-row">
+                <th scope="row" colSpan={3} className="label">
+                  Tax
+                </th>
+                <td className="value">
+                  <Money data={order.totalTax!} />
+                </td>
+              </tr>
+              <tr className="order-totals-row total">
+                <th scope="row" colSpan={3} className="label">
+                  Total
+                </th>
+                <td className="value">
+                  <Money data={order.totalPrice!} />
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </div>
 
@@ -195,7 +230,25 @@ export default function OrderRoute() {
         >
           View Order Status →
         </a> */}
+        {isOrderCancelable(order) &&
+          <button
+            className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCancelModalOpen(true);
+            }}
+          >
+            Cancel Order
+          </button>
+        }
       </div>
+
+      <CancelOrderModal
+        orderId={order.id}
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+      />
+
     </div>
   );
 }
@@ -207,9 +260,9 @@ function OrderLineRow({ lineItem }: { lineItem: OrderLineItemFullFragment }) {
         <div className="flex items-center">
           {lineItem?.image && (
             <div className="flex-shrink-0 mr-4">
-              <Image 
-                data={lineItem.image} 
-                width={64} 
+              <Image
+                data={lineItem.image}
+                width={64}
                 height={64}
                 alt={lineItem.title || 'Product image'}
                 className="h-16 w-16 rounded-md object-cover object-center"
