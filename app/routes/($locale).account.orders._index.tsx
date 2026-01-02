@@ -63,12 +63,19 @@ export default function Orders() {
   const { customer, filters } = useLoaderData<OrdersLoaderData>();
   const { orders } = customer;
 
+  useEffect(() => {
+    console.log("customer loaded", customer);
+  }, [customer])
+
   return (
     <div className="orders w-full">
       {orders.nodes.length > 0 ? (
         <div className="bg-[#F5F5F5] p-8 min-h-[400px]">
           <OrderSearchForm currentFilters={filters} />
-          <OrdersTable orders={orders} filters={filters} />
+          <OrdersTable
+            orders={orders}
+            filters={filters}
+          />
         </div>
       ) : (
         <div className="bg-[#F5F5F5] p-8 w-full min-h-[400px]">
@@ -206,27 +213,6 @@ function OrderSearchForm({
 }
 
 function OrderItem({ order }: { order: OrderItemFragment }) {
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
-  const statusColor = order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-800' :
-    order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
-      'bg-gray-100 text-gray-800';
-
-    useEffect(() => {
-      console.log("order isCancelModalOpen", fulfillmentStatus);
-  }, [order]);
-
-  const canCancelOrder = (status?: string) => {
-    if(!status) return true;
-    if (status === 'CANCELLED') return false;
-    // if (status === 'PENDING') return false;
-    // if (status === 'IN_PROGRESS') return false;
-    // if (status === 'FULFILLED') return false;
-    return true;
-  };
-
-
-
   return (
     <div className="mb-4 last:mb-0">
       <div className="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200" >
@@ -244,32 +230,21 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
               </p>
             </div>
             {/* <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
-              {order.fulfillmentStatus}
+              {fulfillmentStatus}
             </span> */}
           </div>
 
-          <div className="pt-3 border-t border-gray-100">
+          {/* <div className="pt-3 border-t border-gray-100">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-700">Total Amount</span>
               <span className="text-base font-semibold text-gray-900">
                 <Money data={order.totalPrice!} />
               </span>
             </div>
-          </div>
+          </div> */}
 
           <div className='flex justify-end'>
             <div className="pt-2">
-              {canCancelOrder(fulfillmentStatus) &&
-                <button
-                  className='inline-block px-4 py-2 rounded-lg bg-white disabled:cursor-not-allowed cursor-pointer'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCancelModalOpen(true);
-                  }}
-                >
-                  Cancel Order
-                </button>
-              }
               <Link
                 to={`/account/orders/${btoa(order.id)}`}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
@@ -282,13 +257,6 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
 
         </div>
       </div>
-
-      <CancelOrderModal
-        orderId={order.id}
-        isOpen={isCancelModalOpen}
-        onClose={() => setIsCancelModalOpen(false)}
-      />
-
     </div>
   );
 }
