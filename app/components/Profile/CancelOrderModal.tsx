@@ -33,28 +33,6 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
     return null;
   };
 
-  // useEffect(() => {
-  //   if (fetcher.state !== 'idle') return;
-  //   setIsSubmitting(false);
-  //   const data = fetcher.data;
-  //   console.log('[CancelOrder] fetcher.data:', data);
-  //   if (!data) return 
-
-  //   // ✅ Success
-  //   const errorMessage = getErrorMessage(data);
-  //   if (data.job) {
-  //     showToast.success('Your order cancellation request has been submitted.');
-  //   }else if (errorMessage) {
-  //     console.error('[CancelOrder] Error:', errorMessage);
-  //     showToast.error(errorMessage);
-  //   }
-  //   // Default success case (if no job but also no error)
-  //   console.warn('[CancelOrder] Unexpected response:', data);
-  //   showToast.success('Your order cancellation request has been submitted.');
-  //   revalidator.revalidate();
-  //   onClose();
-  // }, [fetcher.state, fetcher.data]);
-  
   const prevFetcherState = useRef(fetcher.state);
   useEffect(() => {
     const justFinished =
@@ -93,7 +71,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
         orderId, // already full GID
         staffNote: staffNote,
       },
-      { method: "post", action: "/api/order" }
+      { method: "post", action: "/api/order/cancel" }
     );
   };
 
@@ -101,7 +79,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
 
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-xs p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Cancel Order</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -143,14 +121,14 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
               disabled={isSubmitting || !staffNote.trim()}
             >
               {isSubmitting ? 'Processing...' : 'Confirm Cancellation'}

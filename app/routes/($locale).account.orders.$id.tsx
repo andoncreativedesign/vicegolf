@@ -9,6 +9,7 @@ import type {
 import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
 import { useState } from 'react';
 import { CancelOrderModal } from '~/components/Profile/CancelOrderModal';
+import { ReturnOrderModal } from '~/components/Profile/ReturnOrderModal';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [{ title: `Order ${data?.order?.name}` }];
@@ -85,6 +86,7 @@ export default function OrderRoute() {
     // fulfillmentStatus,
   } = useLoaderData<typeof loader>();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [fulfillmentStatus] = useState(() => {
     let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
     return status?.status || (order?.financialStatus as string | undefined);
@@ -105,15 +107,43 @@ export default function OrderRoute() {
     }
 
     const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
-      return f.status !== 'CANCELLED';
+      return f.status !== 'CANCELLED'
     });
-
+    
     if (hasActiveFulfillment) {
       return false;
     }
 
     // Passed all rough checks
     console.log("Order is eligible for cancellation:", order);
+    return true;
+  }
+
+  function isOrderReturnable(order: OrderQuery['order']): boolean {
+    if (!order) return false;
+
+    // Use the same checks as isOrderCancelable for financial status
+    const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
+    if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
+      return false;
+    }
+
+    const ineligibleFinancialStatuses = ['PENDING', 'AUTHORIZED'];
+    if (order?.financialStatus && ineligibleFinancialStatuses.includes(order.financialStatus)) {
+      return false;
+    }
+
+    // Check for at least one fulfilled line item that hasn't been refunded
+    const hasFulfilledLineItems = order.fulfillments.nodes.some((f) => {
+      return f.status === 'FULFILLED' || f.status === 'SUCCESS';
+    });
+
+    if (!hasFulfilledLineItems) {
+      return false;
+    }
+
+    // Passed all checks - order is returnable
+    console.log("Order is eligible for return:", order);
     return true;
   }
 
@@ -220,7 +250,7 @@ export default function OrderRoute() {
         </div>
       </div>
 
-      <div className="order-actions mt-8">
+      <div className="order-actions mt-8 space-x-3">
         {/* <a 
           target="_blank" 
           href={order.statusPageUrl} 
@@ -241,6 +271,17 @@ export default function OrderRoute() {
             Cancel Order
           </button>
         }
+        {isOrderReturnable(order) &&
+          <button
+            className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsReturnModalOpen(true);
+            }}
+          >
+            Return Order
+          </button>
+        }
       </div>
 
       <CancelOrderModal
@@ -249,6 +290,13 @@ export default function OrderRoute() {
         onClose={() => setIsCancelModalOpen(false)}
       />
 
+      <ReturnOrderModal
+        orderId={order.id}
+        isOpen={isReturnModalOpen}
+        onClose={() => setIsReturnModalOpen(false)}
+        lineItems={order.lineItems.nodes}
+        fulfillments={order.fulfillments.nodes}
+      />
     </div>
   );
 }

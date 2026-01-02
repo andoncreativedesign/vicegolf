@@ -213,17 +213,6 @@ function OrderSearchForm({
 }
 
 function OrderItem({ order }: { order: OrderItemFragment }) {
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  // const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
-  const [fulfillmentStatus] = useState(() => {
-    let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
-    return status?.status || (order?.financialStatus as string | undefined);
-  })
-  const statusColor = order.fulfillmentStatus === 'FULFILLED' ? 'bg-green-100 text-green-800' :
-    order.fulfillmentStatus === 'UNFULFILLED' ? 'bg-yellow-100 text-yellow-800' :
-      'bg-gray-100 text-gray-800';
-
-
   return (
     <div className="mb-4 last:mb-0">
       <div className="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200" >
