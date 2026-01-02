@@ -1,5 +1,5 @@
 import { redirect, useLoaderData, Link, useNavigate, useFetcher } from 'react-router';
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -271,138 +271,14 @@ export default function Product() {
       navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
     }
   }, [fetcher.state, fetcher.data, navigate]);
-  const formRef = useRef<HTMLDivElement>(null);
-  const galleryRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (window.innerWidth < 1280) return;
-
-    const form = formRef.current;
-    if (!form) return;
-
-    let targetScroll = form.scrollTop;
-    let currentScroll = form.scrollTop;
-    let rafId: number | null = null;
-    let lastDelta = 0;
-
-    // Track window scroll so we can "redirect" it into the form
-    let lastWindowScrollY = window.scrollY;
-    let isSyncingWindow = false;
-
-    // Scale factor to match native page scroll speed
-    const SCROLL_SCALE = 1.0;
-
-    const animate = () => {
-      // Smoother easing for more natural scroll feel
-      const easing = 0.5; // Increased for more responsive feel
-      currentScroll += (targetScroll - currentScroll) * easing;
-      form.scrollTop = currentScroll;
-
-      if (Math.abs(targetScroll - currentScroll) > 0.05) {
-        rafId = requestAnimationFrame(animate);
-      } else {
-        rafId = null;
-        form.scrollTop = targetScroll; // Snap to final position
-      }
-    };
-
-    const maybeScrollForm = (deltaY: number, options?: { immediate?: boolean }) => {
-      const { scrollTop, scrollHeight, clientHeight } = form;
-      const atTop = scrollTop <= 1;
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
-
-      const scrollingDown = deltaY > 0;
-      const scrollingUp = deltaY < 0;
-
-      const canScroll =
-        (scrollingUp && !atTop) || (scrollingDown && !atBottom);
-
-      if (!canScroll) {
-        // reset scroll targets to prevent stuck animation
-        targetScroll = form.scrollTop;
-        currentScroll = form.scrollTop;
-        return false;
-      }
-
-      // Apply scale factor with deltaY normalization for consistent behavior
-      const delta = Math.sign(deltaY) * Math.min(Math.abs(deltaY), 50); // Cap delta for large wheel events
-      const scaledDelta = delta * SCROLL_SCALE;
-
-      if (options?.immediate) {
-        // For scroll-bar drags, apply scaled delta
-        currentScroll = Math.max(
-          0,
-          Math.min(scrollTop + scaledDelta, scrollHeight - clientHeight),
-        );
-        targetScroll = currentScroll;
-        form.scrollTop = currentScroll;
-      } else {
-        // For wheel events, use scaled delta
-        lastDelta = scaledDelta;
-        targetScroll += scaledDelta;
-
-        // clamp targetScroll inside form
-        targetScroll = Math.max(0, Math.min(targetScroll, scrollHeight - clientHeight));
-
-        if (!rafId) {
-          rafId = requestAnimationFrame(animate);
-        }
-      }
-
-      return true;
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-
-      // Only prevent default and handle when form can scroll
-      const handled = maybeScrollForm(e.deltaY);
-      if (handled) {
-        e.preventDefault();
-      }
-    };
-
-    const handleWindowScroll = () => {
-      if (isSyncingWindow) return;
-
-      const currentY = window.scrollY;
-      const deltaY = currentY - lastWindowScrollY;
-      lastWindowScrollY = currentY;
-
-      if (deltaY === 0) return;
-
-      const handled = maybeScrollForm(deltaY, { immediate: true });
-      if (!handled) return;
-
-      // If the form handled the scroll, keep the page fixed by
-      // restoring the previous scroll position.
-      isSyncingWindow = true;
-      window.scrollTo({ top: currentY - deltaY });
-      lastWindowScrollY = currentY - deltaY;
-      isSyncingWindow = false;
-    };
-
-    document.addEventListener('wheel', handleWheel, {
-      passive: false,
-      capture: true,
-    });
-    window.addEventListener('scroll', handleWindowScroll, { passive: true });
-
-    return () => {
-      document.removeEventListener('wheel', handleWheel, {
-        capture: true,
-      });
-      window.removeEventListener('scroll', handleWindowScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
 
 
 
   return (
-    <div className="home w-full max-w-[2560px] mx-auto px-2 sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
+    <div className="home w-full max-w-[2560px] mx-auto sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
       {/* Breadcrumbs - Moved outside the main container */}
-      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-4 px-4 md:px-10">
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-4 px-0 md:px-10">
         <div className="flex items-center text-gray-600">
           {productType.display && (
             <>
@@ -420,8 +296,8 @@ export default function Product() {
           </span>
         </div>
       </div>
-      <div className="flex flex-col xl:flex-row gap-8 2xl:gap-16 w-full pb-10 px-4 md:px-10 pt-2 justify-center items-center xl:items-start relative">
-        <div ref={galleryRef} className="xl:sticky xl:top-24">
+      <div className="flex flex-col lg:flex-row gap-8 2xl:gap-16 w-full pb-10 px-0 md:px-10 pt-2 justify-center items-center lg:items-start relative">
+        <div className="lg:sticky lg:top-20 h-fit self-start">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
@@ -436,7 +312,6 @@ export default function Product() {
         </div>
         <div className="flex flex-col items-start">
           <ProductForm
-            ref={formRef}
             productOptions={productOptions}
             selectedVariant={selectedVariant}
             title={title}

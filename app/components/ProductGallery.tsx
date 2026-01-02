@@ -188,7 +188,7 @@ export function ProductGallery({
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobileView(window.innerWidth <= 1024);
+      setIsMobileView(window.innerWidth < 1024);
     };
 
     // Initial check
@@ -203,10 +203,10 @@ export function ProductGallery({
 
 
   return (
-    <div className="flex flex-col md:flex-row gap-5 md:gap-6 items-start">
+    <div className="product-gallery flex flex-col md:flex-row gap-4 pb-4 md:gap-6 items-start">
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
-        <div className="flex md:flex-col gap-2 md:overflow-y-auto max-h-[500.547px] w-[113px]
+        <div className="flex md:flex-col gap-2 md:overflow-y-auto lg:h-[480px] xl:h-[580px] w-fit
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
@@ -215,13 +215,13 @@ export function ProductGallery({
               <button
                 key={image.id}
                 onClick={() => handleThumbnailClick(image)}
-                className={`w-[92px] h-[92px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200 ${isActive
+                className={`lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200 ${isActive
                   ? '' : ''}`}
               >
                 <Image
                   data={image}
                   alt={image.altText || 'Thumbnail'}
-                  className="w-[92px] h-[92px] bg-[#f6f6f6] object-cover"
+                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] bg-[#f6f6f6] object-cover"
                   loading="lazy"
                 />
               </button>
@@ -245,7 +245,7 @@ export function ProductGallery({
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className={`sm:min-h-[500.547px] min-h-[285px] max-w-[690.547px] max-h-[500.547px]`}
+              className={`min-h-[350px] sm:min-h-[400px] lg:min-h-[480px] xl:min-h-[580px] lg:max-h-[480px] xl:max-h-[580px] lg:max-w-[500px] xl:max-w-[750px]`}
               aspectRatio="1/1"
             // sizes="(min-width: 1024px) 50vw, 100vw"
             />
@@ -308,3 +308,5 @@ export function ProductGallery({
 }
 
 export default ProductGallery
+
+
