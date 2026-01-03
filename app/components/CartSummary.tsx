@@ -124,7 +124,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
           alt="Apple Pay"
           className="h-6 w-auto"
         />
-        <img
+        {/* <img
           src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=50&crop=center"
           srcSet="
       https://cdn.shopify.com/s/files/1/0835/8445/0850/files/gpay_1.svg?v=1715242244&width=50&crop=center 1x,
@@ -133,7 +133,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
     "
           alt="Google Pay"
           className="h-6 w-auto"
-        />
+        /> */}
         <img
           src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center"
           srcSet="
