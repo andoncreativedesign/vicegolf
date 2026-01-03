@@ -66,6 +66,41 @@ export default function PrivacyPolicy() {
                 </a>.
               </p>
             </div>
+
+            {/* section added for google oauth verification*/}
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">Google OAuth Authentication</h4>
+              <p>
+                Our application uses Google OAuth to enable secure user sign-in.
+                During this process, we access only the user’s email address and publicly available profile information.
+                This data is used exclusively for authentication and account management purposes and is not used for advertising, marketing, or profiling.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">Data Sharing</h4>
+              <p>
+                Personal data is shared only with trusted service providers when required to operate the service or comply with legal obligations.
+              </p>
+            </div>
+           
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">Data Security and Retention</h4>
+              <p>
+                We apply appropriate security measures to protect user data.
+                Information is retained only as long as necessary to provide our services or as required by law.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">User Rights</h4>
+              <p>
+                Users may request access to, correction of,
+                or deletion of their personal data by contacting us.
+              </p>
+            </div>
+
+
           </div>
         </div>
       </div>
