@@ -164,12 +164,24 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   const productType = product?.productType?.toLowerCase();
   const isWedge = productType === 'wedge' || productType === 'wedges';
   const isIron = productType === 'iron' || productType === 'irons';
+  const isFairwayWood = productType === 'fairway woods';
+  const isHybrid = productType === 'hybrids';
+  const isDriver = productType === 'drivers';
+  const isPutter = productType === 'blade putter' || productType === 'mallet putter' || productType === 'center mallet putter';
 
   let collectionHandle = null;
   if (isWedge) {
     collectionHandle = 'embrace';
   } else if (isIron) {
     collectionHandle = 'black-friday';
+  } else if (isFairwayWood) {
+    collectionHandle = 'fairway-woods-hybrids';
+  } else if (isHybrid) {
+    collectionHandle = 'golf-clubs';
+  } else if (isDriver) {
+    collectionHandle = 'drivers-1';
+  } else if (isPutter) {
+    collectionHandle = 'drip-balls';
   } else if (isDivotJuniorProduct) {
     collectionHandle = 'divot-junior-best-sellers';
   }
