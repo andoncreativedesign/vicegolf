@@ -161,11 +161,24 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
     (field: any) => field?.key === 'category_variant' && field?.value === 'Divot Junior'
   );
 
+  const productType = product?.productType?.toLowerCase();
+  const isWedge = productType === 'wedge' || productType === 'wedges';
+  const isIron = productType === 'iron' || productType === 'irons';
+
+  let collectionHandle = null;
+  if (isWedge) {
+    collectionHandle = 'embrace';
+  } else if (isIron) {
+    collectionHandle = 'black-friday';
+  } else if (isDivotJuniorProduct) {
+    collectionHandle = 'divot-junior-best-sellers';
+  }
+
   let recommendedProducts;
-  if (isDivotJuniorProduct) {
+  if (collectionHandle) {
     const response = await context.storefront.query(COLLECTION_PRODUCTS_PAGINATED_QUERY, {
       variables: {
-        handle: 'divot-junior-best-sellers',
+        handle: collectionHandle,
         first: 15,
         after: recommendedCursor || undefined,
       },
