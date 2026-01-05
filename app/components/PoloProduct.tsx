@@ -93,9 +93,7 @@ export function PoloProduct({
           </div>
         )}
         {showBestSellers &&
-          initialRecommended?.products?.nodes?.length > 0 &&
-          (product.productType?.toLowerCase().includes('polo') ||
-            product.tags?.some((tag: any) => typeof tag === 'string' && tag.toLowerCase().includes('polo'))) && (
+          initialRecommended?.products?.nodes?.length > 0 && (
             <div className="mt-16 md:mt-20 lg:mt-24 px-4 sm:px-6 lg:px-8">
               <BestSellers
                 products={initialRecommended.products.nodes}

@@ -487,7 +487,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={true}
               />
             );
           /** 👇 Golf club sets */
