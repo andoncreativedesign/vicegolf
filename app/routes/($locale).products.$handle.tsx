@@ -168,6 +168,11 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   const isHybrid = productType === 'hybrids';
   const isDriver = productType === 'drivers';
   const isPutter = productType === 'blade putter' || productType === 'mallet putter' || productType === 'center mallet putter';
+  const isPolo = productType === 'polo' || productType === 'polos';
+  const isShoes = productType === 'shoes';
+  const isGlovesMen = productType === 'gloves men';
+  const isGlovesWomen = productType === 'gloves women';
+  const isLongsleeve = productType === 'longsleeve';
 
   let collectionHandle = null;
   if (isWedge) {
@@ -182,6 +187,16 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
     collectionHandle = 'drivers-1';
   } else if (isPutter) {
     collectionHandle = 'drip-balls';
+  } else if (isPolo) {
+    collectionHandle = 'gear';
+  } else if (isShoes) {
+    collectionHandle = 'vice-pro-plus';
+  } else if (isGlovesMen) {
+    collectionHandle = 'golf-clubs';
+  } else if (isGlovesWomen) {
+    collectionHandle = 'golf-hats';
+  } else if (isLongsleeve) {
+    collectionHandle = 'junior-hats';
   } else if (isDivotJuniorProduct) {
     collectionHandle = 'divot-junior-best-sellers';
   }

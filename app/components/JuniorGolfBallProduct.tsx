@@ -6,11 +6,15 @@ import type { ProductDetails } from '~/lib/sanity/products';
 type JuniorGolfBallProductProps = {
     product: ProductFragment;
     productDetails: ProductDetails | null;
+    initialRecommended?: any;
+    showBestSellers?: boolean;
 };
 
 export function JuniorGolfBallProduct({
     product,
     productDetails,
+    initialRecommended,
+    showBestSellers = false
 }: JuniorGolfBallProductProps) {
 
     return (

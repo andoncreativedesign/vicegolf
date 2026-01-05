@@ -10,9 +10,11 @@ import { Youtube } from './Youtube';
 type JuniorCapProductProps = {
     product: ProductFragment;
     productDetails: ProductDetails | null;
+    initialRecommended?: any;
+    showBestSellers?: boolean;
 };
 
-export function JuniorCapProduct({ product, productDetails }: JuniorCapProductProps) {
+export function JuniorCapProduct({ product, productDetails, initialRecommended, showBestSellers = false }: JuniorCapProductProps) {
     const [productDetailsState, setProductDetails] = useState<ProductDetails | null>(productDetails);
 
     // Fetch product details if not provided
