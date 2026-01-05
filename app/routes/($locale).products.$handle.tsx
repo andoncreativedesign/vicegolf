@@ -173,6 +173,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   const isGlovesMen = productType === 'gloves men';
   const isGlovesWomen = productType === 'gloves women';
   const isLongsleeve = productType === 'longsleeve';
+  const isRangefinder = productType === 'rangefinder';
 
   let collectionHandle = null;
   if (isWedge) {
@@ -199,6 +200,8 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
     collectionHandle = 'junior-hats';
   } else if (isDivotJuniorProduct) {
     collectionHandle = 'divot-junior-best-sellers';
+  } else if (isRangefinder) {
+    collectionHandle = 'rangefinder';
   }
 
   let recommendedProducts;
