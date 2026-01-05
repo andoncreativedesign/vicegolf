@@ -436,6 +436,8 @@ export default function Product() {
             <TowelJuniorProduct
               product={product}
               productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
             />
           );
         }
@@ -455,6 +457,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
+              showBestSellers={true}
             />
           );
         }
@@ -464,7 +467,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={true} // or false, depending on your design
+              showBestSellers={true}
             />
           );
         }
@@ -474,7 +477,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={true} // adjust as needed
+              showBestSellers={true}
             />
           );
         }
@@ -544,10 +547,23 @@ export default function Product() {
             );
           /** 👇 Tees */
           case "tees":
-            return <TeeProduct productDetails={productDetails} />;
+            return (
+              <TeeProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           /** 👇 Rangefinder */
           case "rangefinder":
-            return <RangefinderProduct productDetails={productDetails} />;
+            return (
+              <RangefinderProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           /** 👇 Divot Tool */
           case "divot tool":
           case "divot tools":
@@ -566,6 +582,8 @@ export default function Product() {
               <TowelProduct
                 product={product}
                 productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
               />
             );
           /** 👇 Golf balls (main category) */
@@ -574,7 +592,7 @@ export default function Product() {
               <GolfBallProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={true}
                 isGolfBallProduct={true}
               />
             );
@@ -617,7 +635,7 @@ export default function Product() {
               <GolfBallProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={true}
                 isGolfBallProduct={false}
               />
             );
