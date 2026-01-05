@@ -30,7 +30,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
-import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type ClubVariant, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type ClubVariant, type UIColorVariant, COLLECTION_PRODUCTS_PAGINATED_QUERY } from '~/lib/shopify/product-queries';
 import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
@@ -55,8 +55,8 @@ export const meta: Route.MetaFunction = ({ data }) => {
   ];
 };
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+  const deferredData = await loadDeferredData({ ...args, product: criticalData.product });
   return { ...deferredData, ...criticalData };
 }
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
@@ -153,15 +153,38 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
   return { product, colorVariants, clubVariants };
 }
-async function loadDeferredData({ context, request }: Route.LoaderArgs) {
+async function loadDeferredData({ context, request, product }: Route.LoaderArgs & { product?: any }) {
   const url = new URL(request.url);
   const recommendedCursor = url.searchParams.get('recommendedCursor');
-  const recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
-    variables: {
-      first: 15,
-      after: recommendedCursor || undefined,
-    },
-  }).catch(() => null);
+
+  const isDivotJuniorProduct = product?.metafields?.some(
+    (field: any) => field?.key === 'category_variant' && field?.value === 'Divot Junior'
+  );
+
+  let recommendedProducts;
+  if (isDivotJuniorProduct) {
+    const response = await context.storefront.query(COLLECTION_PRODUCTS_PAGINATED_QUERY, {
+      variables: {
+        handle: 'divot-junior-best-sellers',
+        first: 15,
+        after: recommendedCursor || undefined,
+      },
+    }).catch((err: Error) => {
+      console.error('Error fetching collection products:', err);
+      return null;
+    });
+    recommendedProducts = {
+      products: response?.collection?.products || { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } }
+    };
+  } else {
+    recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
+      variables: {
+        first: 15,
+        after: recommendedCursor || undefined,
+      },
+    }).catch(() => null);
+  }
+
   const shippingDetails = await getShippingDetails();
   return { recommendedProducts, shippingDetails };
 }
