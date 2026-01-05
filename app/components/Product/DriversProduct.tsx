@@ -4,13 +4,27 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { ProductDetailContents } from '../Product/ProductDetailContents';
 import ProductDetailsContent1 from '../Product/ProductDetailsContent1';
 import { Youtube } from '../Youtube';
+import { BestSellers } from '../BestSellers';
 
 
-type PoloProductProps = {
+type DriversProductProps = {
+  product: {
+    id: string;
+    productType?: string;
+    tags?: string[];
+    [key: string]: any;
+  };
   productDetails: ProductDetails | null;
+  initialRecommended?: any;
+  showBestSellers?: boolean;
 };
 
-export function DriversProduct({ productDetails }: PoloProductProps) {
+export function DriversProduct({
+  product,
+  productDetails,
+  initialRecommended,
+  showBestSellers = false
+}: DriversProductProps) {
   return (
     <div>
       <div className="w-full max-w-[1536px] mx-auto">
@@ -66,6 +80,17 @@ export function DriversProduct({ productDetails }: PoloProductProps) {
             </div>
           );
         })}
+
+        {showBestSellers &&
+          initialRecommended?.products?.nodes?.length > 0 && (
+            <div className="mt-16 md:mt-20 lg:mt-24 px-8">
+              <BestSellers
+                products={initialRecommended.products.nodes}
+                title={null}
+                sectionTitle="Explore our golf clubs"
+              />
+            </div>
+          )}
 
       </div>
     </div>

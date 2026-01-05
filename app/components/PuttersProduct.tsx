@@ -3,12 +3,26 @@ import ProductDetailsContent1 from './Product/ProductDetailsContent1';
 import ProductDetailsContent2 from './Product/ProductDetailsContent2';
 import { Youtube } from './Youtube';
 import { VideoSection } from './Product/VideoSection';
+import { BestSellers } from './BestSellers';
 
 type PuttersProductProps = {
+  product: {
+    id: string;
+    productType?: string;
+    tags?: string[];
+    [key: string]: any;
+  };
   productDetails: ProductDetails | null;
+  initialRecommended?: any;
+  showBestSellers?: boolean;
 };
 
-export function PuttersProduct({ productDetails }: PuttersProductProps) {
+export function PuttersProduct({
+  product,
+  productDetails,
+  initialRecommended,
+  showBestSellers = false
+}: PuttersProductProps) {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl w-full">
       {/* YouTube Section */}
@@ -47,6 +61,17 @@ export function PuttersProduct({ productDetails }: PuttersProductProps) {
           </div>
         ))}
       </div>
+
+      {showBestSellers &&
+        initialRecommended?.products?.nodes?.length > 0 && (
+          <div className="mt-16 md:mt-20 lg:mt-24">
+            <BestSellers
+              products={initialRecommended.products.nodes}
+              title={null}
+              sectionTitle="Explore our golf clubs"
+            />
+          </div>
+        )}
     </div>
   );
 }

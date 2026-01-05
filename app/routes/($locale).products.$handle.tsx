@@ -472,7 +472,14 @@ export default function Product() {
           case "wedges":
           case "iron":
           case "irons":
-            return <GolfClubSetProduct productDetails={productDetails} />;
+            return (
+              <GolfClubSetProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           /** 👇 Golf bags */
           case "golf bag":
           case "golf bags":
@@ -558,7 +565,10 @@ export default function Product() {
           case "fairway woods":
             return (
               <DriversProduct
+                product={product}
                 productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
               />
             )
           /** 👇 Default — fallback to golf balls layout */
