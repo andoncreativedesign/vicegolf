@@ -12,11 +12,13 @@ type BestSellersProps = {
      * If set to null or empty string, no title will be shown
      */
     title?: string | null;
+    sectionTitle?: string | null;
 };
 
 export function BestSellers({
     products,
-    title = 'BEST SELLERS'
+    title = 'BEST SELLERS',
+    sectionTitle = 'Our Best Sellers'
 }: BestSellersProps) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export function BestSellers({
         <div className="best-sellers w-full">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="uppercase whitespace-pre-wrap max-w-prose text-title3 font-extrabold text-main-900">
-                    Our Best Sellers
+                    {sectionTitle}
                 </h2>
                 {title && (
                     <h2 className="text-2xl font-bold text-gray-900">

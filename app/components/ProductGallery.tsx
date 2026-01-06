@@ -15,7 +15,8 @@ type ProductGalleryProps = {
   images: ProductImageType[];
   selectedImage: ProductImageType | null;
   onImageSelect: (image: ProductImageType) => void;
-  mainImageClassNames?: string
+  mainImageClassNames?: string;
+  isAvailable?: boolean;
 };
 
 export function ProductGallery({
@@ -23,6 +24,7 @@ export function ProductGallery({
   selectedImage,
   onImageSelect,
   mainImageClassNames = '',
+  isAvailable = true,
 }: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -237,6 +239,11 @@ export function ProductGallery({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
+        {isAvailable === false && (
+          <div className="absolute top-4 left-4 z-10 bg-[#e5e5e5] text-[#333333] px-3 py-1.5 rounded-sm text-sm font-medium">
+            Sold out
+          </div>
+        )}
         <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"

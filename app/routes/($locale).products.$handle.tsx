@@ -30,7 +30,7 @@ import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
-import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type ClubVariant, type UIColorVariant } from '~/lib/shopify/product-queries';
+import { ADMIN_PRODUCTS_BY_CLUB_FAMILY, ADMIN_PRODUCTS_BY_FAMILY, PRODUCT_QUERY, PRODUCTS_BY_FAMILY_QUERY, type ClubVariant, type UIColorVariant, COLLECTION_PRODUCTS_PAGINATED_QUERY } from '~/lib/shopify/product-queries';
 import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
@@ -55,8 +55,8 @@ export const meta: Route.MetaFunction = ({ data }) => {
   ];
 };
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+  const deferredData = await loadDeferredData({ ...args, product: criticalData.product });
   return { ...deferredData, ...criticalData };
 }
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
@@ -153,15 +153,81 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
   return { product, colorVariants, clubVariants };
 }
-async function loadDeferredData({ context, request }: Route.LoaderArgs) {
+async function loadDeferredData({ context, request, product }: Route.LoaderArgs & { product?: any }) {
   const url = new URL(request.url);
   const recommendedCursor = url.searchParams.get('recommendedCursor');
-  const recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
-    variables: {
-      first: 15,
-      after: recommendedCursor || undefined,
-    },
-  }).catch(() => null);
+
+  const isDivotJuniorProduct = product?.metafields?.some(
+    (field: any) => field?.key === 'category_variant' && field?.value === 'Divot Junior'
+  );
+
+  const productType = product?.productType?.toLowerCase();
+  const isWedge = productType === 'wedge' || productType === 'wedges';
+  const isIron = productType === 'iron' || productType === 'irons';
+  const isFairwayWood = productType === 'fairway woods';
+  const isHybrid = productType === 'hybrids';
+  const isDriver = productType === 'drivers';
+  const isPutter = productType === 'blade putter' || productType === 'mallet putter' || productType === 'center mallet putter';
+  const isPolo = productType === 'polo' || productType === 'polos';
+  const isShoes = productType === 'shoes';
+  const isGlovesMen = productType === 'gloves men';
+  const isGlovesWomen = productType === 'gloves women';
+  const isLongsleeve = productType === 'longsleeve';
+  const isRangefinder = productType === 'rangefinder';
+
+  let collectionHandle = null;
+  if (isWedge) {
+    collectionHandle = 'embrace';
+  } else if (isIron) {
+    collectionHandle = 'black-friday';
+  } else if (isFairwayWood) {
+    collectionHandle = 'fairway-woods-hybrids';
+  } else if (isHybrid) {
+    collectionHandle = 'golf-clubs';
+  } else if (isDriver) {
+    collectionHandle = 'drivers-1';
+  } else if (isPutter) {
+    collectionHandle = 'drip-balls';
+  } else if (isPolo) {
+    collectionHandle = 'gear';
+  } else if (isShoes) {
+    collectionHandle = 'vice-pro-plus';
+  } else if (isGlovesMen) {
+    collectionHandle = 'golf-clubs';
+  } else if (isGlovesWomen) {
+    collectionHandle = 'golf-hats';
+  } else if (isLongsleeve) {
+    collectionHandle = 'junior-hats';
+  } else if (isDivotJuniorProduct) {
+    collectionHandle = 'divot-junior-best-sellers';
+  } else if (isRangefinder) {
+    collectionHandle = 'rangefinder';
+  }
+
+  let recommendedProducts;
+  if (collectionHandle) {
+    const response = await context.storefront.query(COLLECTION_PRODUCTS_PAGINATED_QUERY, {
+      variables: {
+        handle: collectionHandle,
+        first: 15,
+        after: recommendedCursor || undefined,
+      },
+    }).catch((err: Error) => {
+      console.error('Error fetching collection products:', err);
+      return null;
+    });
+    recommendedProducts = {
+      products: response?.collection?.products || { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } }
+    };
+  } else {
+    recommendedProducts = await context.storefront.query(RECOMMENDED_PRODUCTS_QUERY, {
+      variables: {
+        first: 15,
+        after: recommendedCursor || undefined,
+      },
+    }).catch(() => null);
+  }
+
   const shippingDetails = await getShippingDetails();
   return { recommendedProducts, shippingDetails };
 }
@@ -303,6 +369,7 @@ export default function Product() {
               images={images.nodes as ProductImageType[]}
               selectedImage={selectedImage}
               onImageSelect={handleImageSelect}
+              isAvailable={selectedVariant?.availableForSale}
             />
           ) : (
             <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
@@ -373,6 +440,8 @@ export default function Product() {
             <TowelJuniorProduct
               product={product}
               productDetails={productDetails}
+              initialRecommended={recommendedProducts}
+              showBestSellers={true}
             />
           );
         }
@@ -392,6 +461,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
+              showBestSellers={true}
             />
           );
         }
@@ -401,7 +471,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={true} // or false, depending on your design
+              showBestSellers={true}
             />
           );
         }
@@ -411,7 +481,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={true} // adjust as needed
+              showBestSellers={true}
             />
           );
         }
@@ -439,7 +509,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={true}
               />
             );
           /** 👇 Golf club sets */
@@ -449,7 +519,14 @@ export default function Product() {
           case "wedges":
           case "iron":
           case "irons":
-            return <GolfClubSetProduct productDetails={productDetails} />;
+            return (
+              <GolfClubSetProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           /** 👇 Golf bags */
           case "golf bag":
           case "golf bags":
@@ -474,10 +551,23 @@ export default function Product() {
             );
           /** 👇 Tees */
           case "tees":
-            return <TeeProduct productDetails={productDetails} />;
+            return (
+              <TeeProduct
+                product={product}
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           /** 👇 Rangefinder */
           case "rangefinder":
-            return <RangefinderProduct productDetails={productDetails} />;
+            return (
+              <RangefinderProduct
+                productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
+              />
+            );
           /** 👇 Divot Tool */
           case "divot tool":
           case "divot tools":
@@ -496,6 +586,8 @@ export default function Product() {
               <TowelProduct
                 product={product}
                 productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
               />
             );
           /** 👇 Golf balls (main category) */
@@ -504,7 +596,7 @@ export default function Product() {
               <GolfBallProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={true}
                 isGolfBallProduct={true}
               />
             );
@@ -535,7 +627,10 @@ export default function Product() {
           case "fairway woods":
             return (
               <DriversProduct
+                product={product}
                 productDetails={productDetails}
+                initialRecommended={recommendedProducts}
+                showBestSellers={true}
               />
             )
           /** 👇 Default — fallback to golf balls layout */
@@ -544,7 +639,7 @@ export default function Product() {
               <GolfBallProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={true}
                 isGolfBallProduct={false}
               />
             );

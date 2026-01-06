@@ -64,6 +64,66 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
   }
 ` as const;
 
+export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
+  query CollectionProducts(
+    $handle: String!
+    $first: Int = 10
+    $after: String
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      products(first: $first, after: $after) {
+        nodes {
+          id
+          title
+          handle
+          productType
+          vendor
+          featuredImage {
+            id
+            url
+            altText
+            width
+            height
+          }
+          images(first: 2) {
+            nodes {
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+          variants(first: 1) {
+            nodes {
+              id
+              availableForSale
+              price {
+                amount
+                currencyCode
+              }
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+` as const;
+
+
 
 export interface MenuItemImage {
   url: string;
