@@ -239,11 +239,11 @@ export function ProductGallery({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {isAvailable === false && (
+        {/* {isAvailable === false && (
           <div className="absolute top-4 left-4 z-10 bg-[#e5e5e5] text-[#333333] px-3 py-1.5 rounded-sm text-sm font-medium">
             Sold out
           </div>
-        )}
+        )} */}
         <div
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
