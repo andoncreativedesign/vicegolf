@@ -63,33 +63,55 @@ export function RangefinderProduct({
         )}
 
         {/* Product Content Sections */}
-        {productDetails?.productContent1?.content?.map((item, index) => {
-          const isFirst = index === 0;
+        {productDetails?.productContent1?.content?.[0] && (
+          <div className="w-full">
+            <div className="flex items-center">
+              <div className="w-full py-8 mb-0">
+                <ProductDetailsContent1
+                  content={productDetails.productContent1.content[0]}
+                  showImageLeft={true}
+                  isTextFull={false}
+                  isImageFull={false}
+                  isFirst={true}
+                  isDescriptionFull={false}
+                  isSquareAspect={true}
+                  imageSize="large"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
-          // Alternate between image left/text right (odd) and text left/image right (even)
-          const showImageLeft = index % 2 === 0;
-
-          return (
-            <div key={index} className={isFirst ? 'w-full' : ''}>
-              <div className="w-full">
-                <div className="flex items-center">
-                  <div className="w-full py-8 mb-0">
-                    <ProductDetailsContent1
-                      content={item}
-                      showImageLeft={showImageLeft}
-                      isTextFull={false}
-                      isImageFull={false}
-                      isFirst={isFirst}
-                      isDescriptionFull={false}
-                      isSquareAspect={isFirst}  // Apply square aspect ratio to first item
-                      imageSize="large"
+        {/* Second Product Content Section */}
+        {productDetails?.productContent1?.content?.[1] && (
+          <div className="w-full">
+            <div className="flex flex-col lg:flex-row items-center">
+              <div className="w-full lg:w-1/2 pl-0 pr-8 py-8">
+                <div className="max-w-2xl mx-auto text-center lg:text-left">
+                  <h3 className="lg:text-[48px] text-[32px] font-semibold w-full mt-6">
+                    {productDetails.productContent1.content[1].title}
+                  </h3>
+                  {productDetails.productContent1.content[1].description && (
+                    <p className="text-gray-600 !text-xl font-light leading-relaxed mt-1">
+                      {productDetails.productContent1.content[1].description}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="w-full lg:w-1/2 h-96 lg:h-auto">
+                <div className="w-full h-full flex items-center justify-center">
+                  {productDetails.productContent1.content[1]?.images?.[0]?.asset?.url && (
+                    <img
+                      src={productDetails.productContent1.content[1].images[0].asset.url}
+                      alt={productDetails.productContent1.content[1].title || 'Product'}
+                      className="w-full h-full object-cover"
                     />
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
-          );
-        })}
+          </div>
+        )}
 
         {/* Youtube Video Section */}
         {productDetails?.youtubeVideos && (
