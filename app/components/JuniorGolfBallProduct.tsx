@@ -1,3 +1,6 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useFetcher } from 'react-router';
+import { ProductGrid } from '~/components/ProductGrid';
 import type { ProductFragment } from 'storefrontapi.generated';
 import ProductDetailsContent1 from '~/components/Product/ProductDetailsContent1';
 import ProductAccordion2 from '~/components/Product/ProductAccordion2';
@@ -6,12 +9,52 @@ import type { ProductDetails } from '~/lib/sanity/products';
 type JuniorGolfBallProductProps = {
     product: ProductFragment;
     productDetails: ProductDetails | null;
+    initialRecommended?: any;
+    showBestSellers?: boolean;
 };
 
 export function JuniorGolfBallProduct({
     product,
     productDetails,
+    initialRecommended,
+    showBestSellers = false
 }: JuniorGolfBallProductProps) {
+    const fetcher = useFetcher();
+    const [recommendedProducts, setRecommendedProducts] = useState<ProductFragment[]>([]);
+    const [cursor, setCursor] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Initialize from loader data
+    useEffect(() => {
+        if (initialRecommended?.products?.nodes) {
+            setRecommendedProducts(initialRecommended.products.nodes);
+            setCursor(initialRecommended.products.pageInfo.endCursor || null);
+            setHasMore(!!initialRecommended.products.pageInfo.hasNextPage);
+        }
+    }, [initialRecommended]);
+
+    // Handle fetcher updates
+    useEffect(() => {
+        if (fetcher.state === 'idle' && fetcher.data) {
+            const data = fetcher.data;
+            if (data.recommendedProducts?.products?.nodes?.length > 0) {
+                setRecommendedProducts(prev => [...prev, ...data.recommendedProducts.products.nodes]);
+                setCursor(data.recommendedProducts.products.pageInfo.endCursor || null);
+                setHasMore(!!data.recommendedProducts.products.pageInfo.hasNextPage);
+                setIsLoading(false);
+            }
+        }
+    }, [fetcher.state, fetcher.data]);
+
+    const handleLoadMore = useCallback(() => {
+        if (!cursor || isLoading || !hasMore) return;
+        setIsLoading(true);
+        fetcher.submit(
+            { recommendedCursor: cursor },
+            { method: 'get', action: '.' }
+        );
+    }, [cursor, hasMore, isLoading, fetcher]);
 
     return (
         <div>
@@ -41,8 +84,7 @@ export function JuniorGolfBallProduct({
                                 imageContainerClassName={`px-4 md:px-8 lg:px-12 ${isSideBySide ? 'flex items-center' : ''} ${isSideBySide ? 'lg:flex-1' : ''}`}
                                 imageClassName={isSideBySide ? "w-auto max-w-full h-auto max-h-[70vh] lg:max-h-[80vh] object-contain mx-auto" : "w-full h-auto max-h-[60vh] object-cover"}
                                 imageCentered={isSideBySide}
-                                containerClassName={isSideBySide ? "items-center" : ""}
-                                contentContainerClassName={isSideBySide ? "flex-1 flex flex-col justify-center" : ""}
+                                titleContainerClassName={isSideBySide ? "items-center" : ""}
                                 imageObjectFit={isSideBySide ? 'contain' : 'cover'}
                             />
                             {index === 2 && (
@@ -51,6 +93,19 @@ export function JuniorGolfBallProduct({
                         </div>
                     );
                 })}
+
+                {/* Best Sellers Section */}
+                {showBestSellers && recommendedProducts.length > 0 && (
+                    <div className="mt-16 px-4 sm:px-6 lg:px-8">
+                        <ProductGrid
+                            products={recommendedProducts}
+                            title="OUR BEST SELLERS"
+                            onLoadMore={handleLoadMore}
+                            hasMore={hasMore}
+                            loading={isLoading}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

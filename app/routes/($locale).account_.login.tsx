@@ -37,9 +37,9 @@ export default function Login() {
             />
           </Link>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+        {/* <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
           Sign in to your account
-        </h2>
+        </h2> */}
         {/* <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
           <Link
@@ -63,7 +63,7 @@ export default function Login() {
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
-                Continue with Shopify Account
+                Sign in or Create an account
               </button>
 
               <p className="text-xs text-center text-gray-500">

@@ -126,7 +126,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   return (
     <div
       ref={ref}
-      className="product-form p-4 md:p-5 w-full lg:max-w-[400px] xl:max-w-[560px]"
+      className="product-form py-4 md:py-5 w-full lg:max-w-[400px] xl:max-w-[560px]"
     >
 
       {/* Product Title */}

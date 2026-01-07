@@ -1,3 +1,6 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useFetcher } from 'react-router';
+import { ProductGrid } from '~/components/ProductGrid';
 import type { ProductFragment } from 'storefrontapi.generated';
 import type { ProductDetails, VideoContentItem, ProductContent1Item, Accordion2 } from '~/lib/sanity/products';
 import ProductDetailsContent1 from './Product/ProductDetailsContent1';
@@ -13,6 +16,43 @@ type TracerProductProps = {
 };
 
 export function TracerProduct({ product, productDetails, initialRecommended, showBestSellers = true }: TracerProductProps) {
+    const fetcher = useFetcher();
+    const [recommendedProducts, setRecommendedProducts] = useState<ProductFragment[]>([]);
+    const [cursor, setCursor] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Initialize from loader data
+    useEffect(() => {
+        if (initialRecommended?.products?.nodes) {
+            setRecommendedProducts(initialRecommended.products.nodes);
+            setCursor(initialRecommended.products.pageInfo.endCursor || null);
+            setHasMore(!!initialRecommended.products.pageInfo.hasNextPage);
+        }
+    }, [initialRecommended]);
+
+    // Handle fetcher updates
+    useEffect(() => {
+        if (fetcher.state === 'idle' && fetcher.data) {
+            const data = fetcher.data;
+            if (data.recommendedProducts?.products?.nodes?.length > 0) {
+                setRecommendedProducts(prev => [...prev, ...data.recommendedProducts.products.nodes]);
+                setCursor(data.recommendedProducts.products.pageInfo.endCursor || null);
+                setHasMore(!!data.recommendedProducts.products.pageInfo.hasNextPage);
+                setIsLoading(false);
+            }
+        }
+    }, [fetcher.state, fetcher.data]);
+
+    const handleLoadMore = useCallback(() => {
+        if (!cursor || isLoading || !hasMore) return;
+        setIsLoading(true);
+        fetcher.submit(
+            { recommendedCursor: cursor },
+            { method: 'get', action: '.' }
+        );
+    }, [cursor, hasMore, isLoading, fetcher]);
+
     const firstContent = productDetails?.productContent1?.content?.[0];
     const secondContent = productDetails?.productContent1?.content?.[1];
     const thirdContent = productDetails?.productContent1?.content?.[2];
@@ -101,6 +141,19 @@ export function TracerProduct({ product, productDetails, initialRecommended, sho
                 {productDetails?.accordion2 && (
                     <div className="mt-12">
                         <ProductAccordion2 accordion2={productDetails.accordion2} />
+                    </div>
+                )}
+
+                {/* Best Sellers Section */}
+                {showBestSellers && recommendedProducts.length > 0 && (
+                    <div className="mt-16">
+                        <ProductGrid
+                            products={recommendedProducts}
+                            title="OUR BEST SELLERS"
+                            onLoadMore={handleLoadMore}
+                            hasMore={hasMore}
+                            loading={isLoading}
+                        />
                     </div>
                 )}
             </div>

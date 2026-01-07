@@ -1,6 +1,6 @@
-// app/components/JuniorCapProduct.tsx
-import { useState, useEffect } from 'react';
-import type { Product } from '@shopify/hydrogen/storefront-api-types';
+import { useState, useEffect, useCallback } from 'react';
+import { useFetcher } from 'react-router';
+import { ProductGrid } from '~/components/ProductGrid';
 import type { ProductFragment } from 'storefrontapi.generated';
 import type { ProductDetails } from '~/lib/sanity/products';
 import { getProductDetails } from '~/lib/sanity/products';
@@ -10,10 +10,48 @@ import { Youtube } from './Youtube';
 type JuniorCapProductProps = {
     product: ProductFragment;
     productDetails: ProductDetails | null;
+    initialRecommended?: any;
+    showBestSellers?: boolean;
 };
 
-export function JuniorCapProduct({ product, productDetails }: JuniorCapProductProps) {
+export function JuniorCapProduct({ product, productDetails, initialRecommended, showBestSellers = false }: JuniorCapProductProps) {
+    const fetcher = useFetcher();
+    const [recommendedProducts, setRecommendedProducts] = useState<ProductFragment[]>([]);
+    const [cursor, setCursor] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [productDetailsState, setProductDetails] = useState<ProductDetails | null>(productDetails);
+
+    // Initialize from loader data
+    useEffect(() => {
+        if (initialRecommended?.products?.nodes) {
+            setRecommendedProducts(initialRecommended.products.nodes);
+            setCursor(initialRecommended.products.pageInfo.endCursor || null);
+            setHasMore(!!initialRecommended.products.pageInfo.hasNextPage);
+        }
+    }, [initialRecommended]);
+
+    // Handle fetcher updates
+    useEffect(() => {
+        if (fetcher.state === 'idle' && fetcher.data) {
+            const data = fetcher.data;
+            if (data.recommendedProducts?.products?.nodes?.length > 0) {
+                setRecommendedProducts(prev => [...prev, ...data.recommendedProducts.products.nodes]);
+                setCursor(data.recommendedProducts.products.pageInfo.endCursor || null);
+                setHasMore(!!data.recommendedProducts.products.pageInfo.hasNextPage);
+                setIsLoading(false);
+            }
+        }
+    }, [fetcher.state, fetcher.data]);
+
+    const handleLoadMore = useCallback(() => {
+        if (!cursor || isLoading || !hasMore) return;
+        setIsLoading(true);
+        fetcher.submit(
+            { recommendedCursor: cursor },
+            { method: 'get', action: '.' }
+        );
+    }, [cursor, hasMore, isLoading, fetcher]);
 
     // Fetch product details if not provided
     useEffect(() => {
@@ -72,6 +110,19 @@ export function JuniorCapProduct({ product, productDetails }: JuniorCapProductPr
                 {productDetails?.youtubeVideos && (
                     <div className="mt-16 md:mt-20 lg:mt-24">
                         <Youtube youtubeVideo={productDetails.youtubeVideos} />
+                    </div>
+                )}
+
+                {/* Best Sellers Section */}
+                {showBestSellers && recommendedProducts.length > 0 && (
+                    <div className="mt-16 px-4 sm:px-6 lg:px-8">
+                        <ProductGrid
+                            products={recommendedProducts}
+                            title="OUR BEST SELLERS"
+                            onLoadMore={handleLoadMore}
+                            hasMore={hasMore}
+                            loading={isLoading}
+                        />
                     </div>
                 )}
             </div>
