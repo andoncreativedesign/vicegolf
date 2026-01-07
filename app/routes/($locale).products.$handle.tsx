@@ -188,8 +188,8 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
     collectionHandle = 'drivers-1';
   } else if (isPutter) {
     collectionHandle = 'drip-balls';
-  // } else if (isPolo) {
-  //   collectionHandle = 'gear';
+    // } else if (isPolo) {
+    //   collectionHandle = 'gear';
   } else if (isShoes) {
     collectionHandle = 'vice-pro-plus';
   } else if (isGlovesMen) {
