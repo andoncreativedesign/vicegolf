@@ -234,7 +234,7 @@ export function ProductGallery({
 
       {/* Main Image */}
       <div
-        className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden"
+        className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[580px]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -248,13 +248,13 @@ export function ProductGallery({
           ref={imageContainerRef}
           className="w-full h-full transition-transform duration-300 ease-in-out"
         >
-          <div className="">
+          <div className="w-full h-full">
             <Image
               data={mainImage}
               alt={mainImage.altText || 'Product Image'}
-              className={`min-h-[350px] sm:min-h-[400px] lg:min-h-[480px] xl:min-h-[580px] lg:max-h-[480px] xl:max-h-[580px] lg:max-w-[500px] xl:max-w-[750px]`}
+              className="w-full h-full object-contain"
               aspectRatio="1/1"
-            // sizes="(min-width: 1024px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
         </div>
