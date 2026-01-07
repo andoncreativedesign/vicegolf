@@ -86,7 +86,7 @@ export function RangefinderProduct({
         {productDetails?.productContent1?.content?.[1] && (
           <div className="w-full">
             <div className="flex flex-col lg:flex-row items-center">
-              <div className="w-full lg:w-1/2 p-8">
+              <div className="w-full lg:w-1/2 pl-0 pr-8 py-8">
                 <div className="max-w-2xl mx-auto text-center lg:text-left">
                   <h3 className="lg:text-[48px] text-[32px] font-semibold w-full mt-6">
                     {productDetails.productContent1.content[1].title}
