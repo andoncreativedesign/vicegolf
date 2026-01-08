@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -29,6 +29,7 @@ export function ProductGallery({
 }: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobileView, setIsMobileView] = useState(false);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
 
   // Initialize Embla with loop enabled
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -93,6 +94,29 @@ export function ProductGallery({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Synchronize thumbnail scroll
+  useEffect(() => {
+    if (thumbnailsRef.current && !isMobileView) {
+      const activeThumbnail = thumbnailsRef.current.children[currentIndex] as HTMLElement;
+      if (activeThumbnail) {
+        const container = thumbnailsRef.current;
+        const containerHeight = container.offsetHeight;
+        const thumbnailTop = activeThumbnail.offsetTop;
+        const thumbnailHeight = activeThumbnail.offsetHeight;
+
+        // Calculate scroll position - using a fixed offset to ensure it moves immediately
+        // This puts the active thumbnail near the top, causing it to scroll up on every 'next' click
+        const scrollOffset = 20; // Padding from top
+        const scrollPosition = thumbnailTop - scrollOffset;
+
+        container.scrollTo({
+          top: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [currentIndex, isMobileView]);
+
   if (!images.length) {
     return (
       <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-xl">
@@ -108,8 +132,10 @@ export function ProductGallery({
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
         <div className="relative flex-shrink-0 lg:w-[70px] xl:w-[88px]">
-          <div className="absolute inset-0 flex md:flex-col gap-2 md:overflow-y-auto w-full
-            [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          <div
+            ref={thumbnailsRef}
+            className="absolute inset-0 flex md:flex-col gap-2 md:overflow-y-auto w-full
+            [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
           >
             {images.map((image, idx) => {
               const isActive = (selectedImage?.id || images[currentIndex].id) === image.id;
@@ -117,7 +143,8 @@ export function ProductGallery({
                 <button
                   key={image.id}
                   onClick={() => handleThumbnailClick(image)}
-                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200"
+                  className={`lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 ${isActive ? 'border-black opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
                 >
                   <Image
                     data={image}
