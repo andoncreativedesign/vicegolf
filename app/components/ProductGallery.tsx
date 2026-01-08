@@ -205,10 +205,10 @@ export function ProductGallery({
 
 
   return (
-    <div className="product-gallery flex flex-col md:flex-row gap-4 pb-4 md:gap-6 items-start">
+    <div className="product-gallery flex flex-col md:flex-row gap-4 pb-4 md:gap-6 items-stretch">
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
-        <div className="flex md:flex-col gap-2 md:overflow-y-auto lg:h-[480px] xl:h-[580px] w-fit
+        <div className="flex md:flex-col gap-2 md:overflow-y-auto w-fit max-h-[700px] h-full min-h-0
           [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {images.map((image) => {
@@ -234,7 +234,7 @@ export function ProductGallery({
 
       {/* Main Image */}
       <div
-        className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[580px]"
+        className="relative w-full mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[700px]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
