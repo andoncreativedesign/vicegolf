@@ -208,27 +208,29 @@ export function ProductGallery({
     <div className="product-gallery flex flex-col md:flex-row gap-4 pb-4 md:gap-6 items-stretch">
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
-        <div className="flex md:flex-col gap-2 md:overflow-y-auto w-fit max-h-[700px] h-full min-h-0
-          [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
-          {images.map((image) => {
-            const isActive = mainImage.id === image.id;
-            return (
-              <button
-                key={image.id}
-                onClick={() => handleThumbnailClick(image)}
-                className={`lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200 ${isActive
-                  ? '' : ''}`}
-              >
-                <Image
-                  data={image}
-                  alt={image.altText || 'Thumbnail'}
-                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] bg-[#f6f6f6] object-cover"
-                  loading="lazy"
-                />
-              </button>
-            );
-          })}
+        <div className="relative flex-shrink-0 lg:w-[70px] xl:w-[88px]">
+          <div className="absolute inset-0 flex md:flex-col gap-2 md:overflow-y-auto w-full
+            [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          >
+            {images.map((image) => {
+              const isActive = mainImage.id === image.id;
+              return (
+                <button
+                  key={image.id}
+                  onClick={() => handleThumbnailClick(image)}
+                  className={`lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200 ${isActive
+                    ? '' : ''}`}
+                >
+                  <Image
+                    data={image}
+                    alt={image.altText || 'Thumbnail'}
+                    className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] bg-[#f6f6f6] object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
