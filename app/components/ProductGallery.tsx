@@ -138,13 +138,11 @@ export function ProductGallery({
             [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
           >
             {images.map((image, idx) => {
-              const isActive = (selectedImage?.id || images[currentIndex].id) === image.id;
               return (
                 <button
                   key={image.id}
                   onClick={() => handleThumbnailClick(image)}
-                  className={`lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 ${isActive ? 'border-black opacity-100 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
+                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 border-transparent"
                 >
                   <Image
                     data={image}
