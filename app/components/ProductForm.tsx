@@ -215,7 +215,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
               }).format(totalPriceAmount)}
             </span>
           ) : (
-            'Sold out'
+            'Out of stock'
           )}
         </AddToCartButton>
       </div>
