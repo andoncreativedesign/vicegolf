@@ -126,14 +126,15 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   return (
     <div
       ref={ref}
-      className="product-form py-4 md:py-5 w-full lg:max-w-[400px] xl:max-w-[560px]"
+      className="product-form py-4 md:py-5 w-full md:max-w-[400px] lg:max-w-[400px] xl:max-w-[560px]"
     >
 
-      {/* Product Title */}
+       {/* Product Title */}
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
       {productType && (
         <div className="text-sm text-gray-500 mb-2">{productType}</div>
       )}
+      
       {/* Product Price */}
       <div className="mb-6">
         <ProductPrice

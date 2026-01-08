@@ -362,8 +362,13 @@ export default function Product() {
           </span>
         </div>
       </div>
-      <div className="flex flex-col lg:flex-row gap-8 2xl:gap-16 w-full pb-10 px-0 md:px-10 pt-2 justify-center items-center lg:items-start relative">
-        <div className="lg:sticky lg:top-20 h-fit self-start">
+
+
+
+
+        <div className="flex flex-col md:flex-row gap-8 2xl:gap-16 w-full pb-10 px-0 md:px-10 pt-2 justify-center items-center md:items-start relative">
+        {/* Gallery - Changed: Make it sticky on tablet and up */}
+        <div className="md:sticky md:top-20 h-fit self-start w-full md:w-auto">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
@@ -377,7 +382,9 @@ export default function Product() {
             </div>
           )}
         </div>
-        <div className="flex flex-col items-start">
+        
+        {/* Form - Changed: Adjust width for tablet */}
+        <div className="flex flex-col items-start w-full md:w-auto">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
@@ -392,6 +399,10 @@ export default function Product() {
           />
         </div>
       </div>
+
+
+
+
       {/* Spacer */}
       <div className="h-8"></div>
       {/* Product-specific sections */}
