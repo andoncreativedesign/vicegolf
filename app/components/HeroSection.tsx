@@ -122,8 +122,7 @@ export function HeroSection({
   const current = slides[currentSlide];
 
   return (
-    <section className="relative w-full overflow-hidden mb-8 h-[74vh] min-h-[490px] max-h-[740px] w-screen max-w-[100vw] left-1/2 -ml-[50vw]">
-      {/* Background Layer */}
+<section className="relative w-full h-[74vh] min-h-[490px] max-h-[740px] mx-auto overflow-x-hidden">
       <div className="absolute inset-0 z-0">
         {slides.map((slide, index) => (
           <div
