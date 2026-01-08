@@ -58,7 +58,7 @@ export function JuniorGolfBallProduct({
 
     return (
         <div>
-            <div className="max-w-8xl mx-auto">
+            <div className="w-full max-w-[1340px] mx-auto">
                 {productDetails?.productContent1?.content?.slice(0, 3).map((item, index) => {
                     const isFirst = index === 0;
                     const isSecond = index === 1;
