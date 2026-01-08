@@ -125,11 +125,12 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   };
   return (
     <div
-      ref={ref}
-      className="product-form py-4 md:py-5 w-full md:max-w-[400px] lg:max-w-[400px] xl:max-w-[560px]"
+    ref={ref}
+      // REMOVED: max-width constraints, KEEP: width 100%
+      // ADDED: Some padding for better spacing on larger screens
+      className="product-form py-4 md:py-5 w-full md:px-4 lg:px-8"
     >
-
-       {/* Product Title */}
+      {/* Product Title */}
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
       {productType && (
         <div className="text-sm text-gray-500 mb-2">{productType}</div>
@@ -147,6 +148,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           </span>
         )}
       </div>
+      
       {/* Product Description */}
       {description && (
         <div
@@ -154,6 +156,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           dangerouslySetInnerHTML={{ __html: description }}
         />
       )}
+      
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <ColorVariant
@@ -162,6 +165,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           selectedVariant={selectedVariant}
         />
       )}
+      
       {<ProductCustomization
         productOptions={productOptions}
         styling={getProductCustomizationStyleType(productType)}
@@ -169,6 +173,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
         currentProductId={currentProductId}
       />
       }
+      
       {/* Quantity Selector - Only show for products that need quantity selection */}
       {shouldShowQuantitySelector(productType) && (
         <div className="mb-6">
@@ -183,6 +188,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           />
         </div>
       )}
+      
       {/* Add to Cart Button */}
       <div className="mb-6">
         <AddToCartButton
@@ -213,12 +219,14 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           )}
         </AddToCartButton>
       </div>
+      
       {/* Shipping Info */}
       {shippingDetails &&
         <div className="mb-6">
           <ShippingInfo shippingDetails={shippingDetails} />
         </div>
       }
+      
       {/* Details Accordions */}
       <ProductDetailsAccordions accordions={productAccordions} />
     </div>

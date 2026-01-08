@@ -342,8 +342,7 @@ export default function Product() {
 
 
   return (
-    <div className="home w-full max-w-[2560px] mx-auto sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">
-      {/* Breadcrumbs - Moved outside the main container */}
+   <div className="home w-full max-w-[2560px] mx-auto sm:px-4 lg:px-8 xl:px-12 2xl:px-16 3xl:px-24 4xl:px-32 pt-6">  {/* Breadcrumbs - Moved outside the main container */}
       <div className="w-full max-w-[1600px] 2xl:max-w-[1800px] 3xl:max-w-[2000px] 4xl:max-w-[2200px] mx-auto mb-4 px-0 md:px-10">
         <div className="flex items-center text-gray-600">
           {productType.display && (
@@ -366,9 +365,9 @@ export default function Product() {
 
 
 
-        <div className="flex flex-col md:flex-row gap-8 2xl:gap-16 w-full pb-10 px-0 md:px-10 pt-2 justify-center items-center md:items-start relative">
-        {/* Gallery - Changed: Make it sticky on tablet and up */}
-        <div className="md:sticky md:top-20 h-fit self-start w-full md:w-auto">
+   <div className="flex flex-col md:flex-row gap-8 2xl:gap-16 w-full pb-10 px-0 md:px-10 pt-2 justify-center items-center md:items-start">
+        {/* Gallery - Let it take natural width */}
+        <div className="md:sticky md:top-20 h-fit self-start w-full md:w-1/2 lg:w-1/2">
           {images?.nodes?.length > 0 ? (
             <ProductGallery
               images={images.nodes as ProductImageType[]}
@@ -383,8 +382,8 @@ export default function Product() {
           )}
         </div>
         
-        {/* Form - Changed: Adjust width for tablet */}
-        <div className="flex flex-col items-start w-full md:w-auto">
+        {/* Form - Take remaining space */}
+        <div className="flex flex-col items-start w-full md:w-1/2">
           <ProductForm
             productOptions={productOptions}
             selectedVariant={selectedVariant}
@@ -399,7 +398,6 @@ export default function Product() {
           />
         </div>
       </div>
-
 
 
 
