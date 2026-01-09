@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import './ProductGallery.animations.css';
 
 type ProductImageType = {
@@ -27,147 +28,94 @@ export function ProductGallery({
   isAvailable = true,
 }: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
-  const imageContainerRef = useRef<HTMLDivElement>(null);
-  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
   const [isMobileView, setIsMobileView] = useState(false);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Embla with loop enabled
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    duration: 30, // Adjust speed if needed
+    skipSnaps: false,
+  });
+
+  // Handle scroll events from Embla
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const index = emblaApi.selectedScrollSnap();
+    setCurrentIndex(index);
+    onImageSelect(images[index]);
+  }, [emblaApi, images, onImageSelect]);
 
   useEffect(() => {
-    if (!selectedImage) return;
-    const index = images.findIndex((img) => img.id === selectedImage.id);
-    if (index !== -1 && index !== currentIndex) {
-      setCurrentIndex(index);
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // Sync Embla with parent selectedImage (e.g., from variant change)
+  useEffect(() => {
+    if (emblaApi && selectedImage) {
+      const index = images.findIndex((img) => img.id === selectedImage.id);
+      if (index !== -1 && index !== emblaApi.selectedScrollSnap()) {
+        emblaApi.scrollTo(index);
+      }
     }
-  }, [selectedImage, images, currentIndex]);
+  }, [emblaApi, selectedImage, images]);
 
   const handleNavigate = (dir: 'prev' | 'next') => {
-    if (!images.length || isAnimating) return;
-
-    setIsAnimating(true);
-    setDirection(dir === 'next' ? 'right' : 'left');
-
-    // Calculate new index based on direction
-    let newIndex;
+    if (!emblaApi) return;
     if (dir === 'next') {
-      newIndex = (currentIndex + 1) % images.length;
+      emblaApi.scrollNext();
     } else {
-      newIndex = (currentIndex - 1 + images.length) % images.length;
+      emblaApi.scrollPrev();
     }
-
-    // Start the slide out animation
-    if (imageContainerRef.current) {
-      imageContainerRef.current.style.transform =
-        dir === 'next' ? 'translateX(-100%)' : 'translateX(100%)';
-      imageContainerRef.current.style.opacity = '0';
-    }
-
-    // After slide out, update the image and slide back in
-    setTimeout(() => {
-      setCurrentIndex(newIndex);
-      onImageSelect(images[newIndex]);
-
-      // Reset position and animate back in
-      requestAnimationFrame(() => {
-        if (imageContainerRef.current) {
-          imageContainerRef.current.style.transition = 'none';
-          imageContainerRef.current.style.transform =
-            dir === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
-
-          // Force reflow
-          imageContainerRef.current.offsetHeight;
-
-          // Start slide in animation
-          requestAnimationFrame(() => {
-            if (imageContainerRef.current) {
-              imageContainerRef.current.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
-              imageContainerRef.current.style.transform = 'translateX(0)';
-              imageContainerRef.current.style.opacity = '1';
-            }
-          });
-        }
-      });
-
-      // Reset animation state
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 300);
-    }, 300);
   };
 
   const handleDotClick = (index: number) => {
-    if (index === currentIndex || isAnimating) return;
-
-    setIsAnimating(true);
-    const dir = index > currentIndex ? 'next' : 'prev';
-    setDirection(dir === 'next' ? 'right' : 'left');
-
-    // Start the slide out animation
-    if (imageContainerRef.current) {
-      imageContainerRef.current.style.transform =
-        dir === 'next' ? 'translateX(-100%)' : 'translateX(100%)';
-      imageContainerRef.current.style.opacity = '0';
-    }
-
-    // After slide out, update the image and slide back in
-    setTimeout(() => {
-      setCurrentIndex(index);
-      onImageSelect(images[index]);
-
-      // Reset position and animate back in
-      requestAnimationFrame(() => {
-        if (imageContainerRef.current) {
-          imageContainerRef.current.style.transition = 'none';
-          imageContainerRef.current.style.transform =
-            dir === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
-
-          // Force reflow
-          imageContainerRef.current.offsetHeight;
-
-          // Start slide in animation
-          requestAnimationFrame(() => {
-            if (imageContainerRef.current) {
-              imageContainerRef.current.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
-              imageContainerRef.current.style.transform = 'translateX(0)';
-              imageContainerRef.current.style.opacity = '1';
-            }
-          });
-        }
-      });
-
-      // Reset animation state
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 300);
-    }, 300);
+    if (!emblaApi) return;
+    emblaApi.scrollTo(index);
   };
 
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) {
-      handleNavigate('next');
-    }
-    if (isRightSwipe) {
-      handleNavigate('prev');
+  const handleThumbnailClick = (image: ProductImageType) => {
+    const index = images.findIndex(img => img.id === image.id);
+    if (index !== -1 && emblaApi) {
+      emblaApi.scrollTo(index);
     }
   };
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobileView(window.innerWidth < 1024);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Synchronize thumbnail scroll
+  useEffect(() => {
+    if (thumbnailsRef.current && !isMobileView) {
+      const activeThumbnail = thumbnailsRef.current.children[currentIndex] as HTMLElement;
+      if (activeThumbnail) {
+        const container = thumbnailsRef.current;
+        const containerHeight = container.offsetHeight;
+        const thumbnailTop = activeThumbnail.offsetTop;
+        const thumbnailHeight = activeThumbnail.offsetHeight;
+
+        // Calculate scroll position - using a fixed offset to ensure it moves immediately
+        // This puts the active thumbnail near the top, causing it to scroll up on every 'next' click
+        const scrollOffset = 20; // Padding from top
+        const scrollPosition = thumbnailTop - scrollOffset;
+
+        container.scrollTo({
+          top: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [currentIndex, isMobileView]);
 
   if (!images.length) {
     return (
@@ -177,85 +125,56 @@ export function ProductGallery({
     );
   }
 
-  const mainImage = selectedImage || images[0];
   const hasMultiple = images.length > 1;
 
-  const handleThumbnailClick = (image: ProductImageType) => {
-    const index = images.findIndex(img => img.id === image.id);
-    if (index !== -1) {
-      setCurrentIndex(index);
-      onImageSelect(image);
-    }
-  };
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobileView(window.innerWidth < 1024);
-    };
-
-    // Initial check
-    checkScreenSize();
-
-    // Add event listener
-    window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-
   return (
-    <div className="product-gallery flex flex-col md:flex-row gap-4 pb-4 md:gap-6 items-start">
+    <div className="product-gallery flex flex-col md:flex-row gap-4 pb-4 md:gap-6 items-stretch w-full overflow-visible">
       {/* Thumbnails */}
       {hasMultiple && !isMobileView && (
-        <div className="flex md:flex-col gap-2 md:overflow-y-auto lg:h-[480px] xl:h-[580px] w-fit
-          [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
-          {images.map((image) => {
-            const isActive = mainImage.id === image.id;
-            return (
-              <button
-                key={image.id}
-                onClick={() => handleThumbnailClick(image)}
-                className={`lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-200 ${isActive
-                  ? '' : ''}`}
-              >
-                <Image
-                  data={image}
-                  alt={image.altText || 'Thumbnail'}
-                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] bg-[#f6f6f6] object-cover"
-                  loading="lazy"
-                />
-              </button>
-            );
-          })}
+        <div className="relative flex-shrink-0 lg:w-[70px] xl:w-[88px]">
+          <div
+            ref={thumbnailsRef}
+            className="absolute inset-0 flex md:flex-col gap-2 md:overflow-y-auto w-full
+            [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+          >
+            {images.map((image, idx) => {
+              return (
+                <button
+                  key={image.id}
+                  onClick={() => handleThumbnailClick(image)}
+                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 border-transparent"
+                >
+                  <Image
+                    data={image}
+                    alt={image.altText || 'Thumbnail'}
+                    className="w-full h-full bg-[#f6f6f6] object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Main Image */}
+      {/* Main Image Slider with Embla */}
       <div
-        className="relative w-full max-w-3xl mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[580px]"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+        className="relative w-full mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[700px]"
       >
-        {/* {isAvailable === false && (
-          <div className="absolute top-4 left-4 z-10 bg-[#e5e5e5] text-[#333333] px-3 py-1.5 rounded-sm text-sm font-medium">
-            Sold out
-          </div>
-        )} */}
-        <div
-          ref={imageContainerRef}
-          className="w-full h-full transition-transform duration-300 ease-in-out"
-        >
-          <div className="w-full h-full">
-            <Image
-              data={mainImage}
-              alt={mainImage.altText || 'Product Image'}
-              className="w-full h-full object-contain"
-              aspectRatio="1/1"
-              sizes="(min-width: 1024px) 50vw, 100vw"
-            />
+        <div className="w-full h-full overflow-hidden" ref={emblaRef}>
+          <div className="flex w-full h-full touch-pan-y">
+            {images.map((image, idx) => (
+              <div key={image.id} className="flex-[0_0_100%] min-w-0 h-full relative">
+                <Image
+                  data={image}
+                  alt={image.altText || 'Product Image'}
+                  className="w-full h-full object-contain"
+                  aspectRatio="1/1"
+                  loading={idx === currentIndex || Math.abs(idx - currentIndex) === 1 ? 'eager' : 'lazy'}
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -287,9 +206,8 @@ export function ProductGallery({
                     e.stopPropagation();
                     handleNavigate('prev');
                   }}
-                  className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90 hover:opacity-100"
+                  className="bg-white/90 p-3 rounded-full shadow-sm hover:bg-white transition-all opacity-90 hover:opacity-100"
                   aria-label="Previous image"
-                  disabled={isAnimating}
                 >
                   <ChevronLeft className="w-5 h-5 text-gray-700" />
                 </button>
@@ -298,9 +216,8 @@ export function ProductGallery({
                     e.stopPropagation();
                     handleNavigate('next');
                   }}
-                  className="bg-white/90 p-3 rounded-full transition-opacity duration-300 opacity-90 hover:opacity-100"
+                  className="bg-white/90 p-3 rounded-full shadow-sm hover:bg-white transition-all opacity-90 hover:opacity-100"
                   aria-label="Next image"
-                  disabled={isAnimating}
                 >
                   <ChevronRight className="w-5 h-5 text-gray-700" />
                 </button>
@@ -309,11 +226,10 @@ export function ProductGallery({
           </>
         )}
       </div>
-
     </div>
   );
 }
 
-export default ProductGallery
+export default ProductGallery;
 
 

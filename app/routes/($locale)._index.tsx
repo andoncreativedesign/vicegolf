@@ -446,11 +446,13 @@ export default function Homepage() {
   }, [menuItems]);
 
   return (
-    <div className="home">
+    <div >
       <HeroSection
         heroData={data.homePageData?.heroes}
         bgColor="bg-transparent"
       />
+    
+      <div className="home">
       <div className="py-8 space-y-12">
         {/* VICE GOLF BALLS - Infinite Scroll */}
         {golfBalls.length > 0 && (
@@ -504,6 +506,7 @@ export default function Homepage() {
           loading={isLoadingApparel}
         />
       )}
+      </div>
       <HeroSection
         heroData={data.homePageData?.secondaryHero || null}
         textColor="text-black"
@@ -522,7 +525,9 @@ export default function Homepage() {
           loading={isLoadingRecommended}
         />
       )} */}
+      <div className='home'>
       <ViceLookSection />
+    </div>
     </div>
   );
 }
@@ -570,6 +575,7 @@ function RecommendedProducts({
       </Suspense>
       <br /> */}
     </div>
+
   );
 }
 
@@ -600,4 +606,4 @@ function RecommendedProducts({
 // }
 // }
 // }
-// ` as const;
+// ` as con
