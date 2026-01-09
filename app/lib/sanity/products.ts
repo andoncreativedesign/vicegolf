@@ -378,8 +378,9 @@ export interface SanityListing {
 }
 
 export interface ProductTypeCollection {
-  productType: string;
+  productType?: string;
   collectionHandle: string;
+  isSpecific?: boolean;
 }
 
 // ==================== FETCH FUNCTIONS ====================
@@ -560,15 +561,16 @@ export async function getAllListings(): Promise<SanityListing[]> {
   }
 }
 
-export async function getProductTypeCollection(identifiers: string[]): Promise<ProductTypeCollection | null> {
+export async function getProductTypeCollection(identifiers: string[], productGid?: string): Promise<ProductTypeCollection | null> {
   try {
     // Escape strings for GROQ
     const idList = identifiers.map(id => `"${id.replace(/"/g, '\\"')}"`).join(', ');
-    const query = `*[_type == "productTypeCollection" && productType in [${idList}]]{
-      productType,
-      collectionHandle
-    }`;
-    
+    const query = `*[_type == "productTypeCollection" && (product->store.gid == "${productGid}" || productType in [${idList}])]{
+        productType,
+        collectionHandle,
+        "isSpecific": defined(product)
+      }`;
+
     const response = await axiosSanity.post("/", { query });
 
     if (response.status !== HttpStatusCode.Ok) {
@@ -578,8 +580,12 @@ export async function getProductTypeCollection(identifiers: string[]): Promise<P
     const matches = response.data.result || [];
     if (matches.length === 0) return null;
 
-    // Return the match that appears earliest in the identifiers array (highest priority)
-    return matches.sort((a: ProductTypeCollection, b: ProductTypeCollection) => {
+    // Prioritization:
+    // 1. Specific product match
+    // 2. Earliest match in identifiers array
+    return matches.sort((a: any, b: any) => {
+      if (a.isSpecific && !b.isSpecific) return -1;
+      if (!a.isSpecific && b.isSpecific) return 1;
       return identifiers.indexOf(a.productType) - identifiers.indexOf(b.productType);
     })[0];
   } catch (error) {

@@ -163,7 +163,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   )?.value;
 
   const identifiers = [categoryVariant, productType, product?.productType].filter(Boolean) as string[];
-  const sanityCollection = await getProductTypeCollection(identifiers);
+  const sanityCollection = await getProductTypeCollection(identifiers, product?.id);
 
   const collectionHandle = sanityCollection?.collectionHandle || null;
 
@@ -467,7 +467,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-               showBestSellers={showBestSellers}
+                showBestSellers={showBestSellers}
               />
             );
           case "shoes":
@@ -482,7 +482,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-               showBestSellers={showBestSellers}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Golf club sets */
