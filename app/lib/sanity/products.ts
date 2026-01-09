@@ -311,6 +311,8 @@ export interface StoreProduct {
   status?: string;
   options?: any[];
   variants: StoreVariant[];
+  tags?: any[];
+  collections?: any[];
 }
 
 export interface YoutubeVideo {
@@ -353,6 +355,31 @@ export interface ProductDetails {
   youtubeVideos?: YoutubeVideo;
   videoContent?: VideoContentItem;
   store: StoreProduct;
+}
+
+export interface SanityListing {
+  _id: string;
+  _type: string;
+  title: string;
+  collectionHandle: string;
+  subtitle?: string;
+  description?: string;
+  images?: Array<{
+    _type: string;
+    asset: SanityImageAsset;
+    alt?: string;
+  }>;
+  videos?: Array<{
+    _type: string;
+    asset: SanityImageAsset;
+    title?: string;
+    description?: string;
+  }>;
+}
+
+export interface ProductTypeCollection {
+  productType: string;
+  collectionHandle: string;
 }
 
 // ==================== FETCH FUNCTIONS ====================
@@ -530,5 +557,33 @@ export async function getAllListings(): Promise<SanityListing[]> {
   } catch (error) {
     console.error('Error fetching all listings:', error);
     return [];
+  }
+}
+
+export async function getProductTypeCollection(identifiers: string[]): Promise<ProductTypeCollection | null> {
+  try {
+    // Escape strings for GROQ
+    const idList = identifiers.map(id => `"${id.replace(/"/g, '\\"')}"`).join(', ');
+    const query = `*[_type == "productTypeCollection" && productType in [${idList}]]{
+      productType,
+      collectionHandle
+    }`;
+    
+    const response = await axiosSanity.post("/", { query });
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const matches = response.data.result || [];
+    if (matches.length === 0) return null;
+
+    // Return the match that appears earliest in the identifiers array (highest priority)
+    return matches.sort((a: ProductTypeCollection, b: ProductTypeCollection) => {
+      return identifiers.indexOf(a.productType) - identifiers.indexOf(b.productType);
+    })[0];
+  } catch (error) {
+    console.error('Error fetching product type collection:', error);
+    return null;
   }
 }
