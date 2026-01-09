@@ -26,7 +26,7 @@ import { CustomerReviews } from '~/components/CustomerReviews';
 import { BeaniesProduct } from '~/components/BeaniesProduct';
 import { PuttersProduct } from '~/components/PuttersProduct';
 import { CapProduct } from '~/components/CapProduct';
-import { getProductDetails, getProductTypeCollection, type ProductDetails } from '~/lib/sanity/products';
+import { getProductDetails, getBestSellersMapping, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
@@ -163,7 +163,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   )?.value;
 
   const identifiers = [categoryVariant, productType, product?.productType].filter(Boolean) as string[];
-  const sanityCollection = await getProductTypeCollection(identifiers, product?.id);
+  const sanityCollection = await getBestSellersMapping(identifiers, product?.id);
 
   const collectionHandle = sanityCollection?.collectionHandle || null;
 

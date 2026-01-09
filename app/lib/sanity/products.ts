@@ -377,7 +377,7 @@ export interface SanityListing {
   }>;
 }
 
-export interface ProductTypeCollection {
+export interface BestSellersMapping {
   productType?: string;
   collectionHandle: string;
   isSpecific?: boolean;
@@ -561,11 +561,11 @@ export async function getAllListings(): Promise<SanityListing[]> {
   }
 }
 
-export async function getProductTypeCollection(identifiers: string[], productGid?: string): Promise<ProductTypeCollection | null> {
+export async function getBestSellersMapping(identifiers: string[], productGid?: string): Promise<BestSellersMapping | null> {
   try {
     // Escape strings for GROQ
     const idList = identifiers.map(id => `"${id.replace(/"/g, '\\"')}"`).join(', ');
-    const query = `*[_type == "productTypeCollection" && (product->store.gid == "${productGid}" || productType in [${idList}])]{
+    const query = `*[_type == "bestSellers" && (product->store.gid == "${productGid}" || productType in [${idList}])]{
         productType,
         collectionHandle,
         "isSpecific": defined(product)
@@ -589,7 +589,7 @@ export async function getProductTypeCollection(identifiers: string[], productGid
       return identifiers.indexOf(a.productType) - identifiers.indexOf(b.productType);
     })[0];
   } catch (error) {
-    console.error('Error fetching product type collection:', error);
+    console.error('Error fetching best sellers mapping:', error);
     return null;
   }
 }
