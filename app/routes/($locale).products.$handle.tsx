@@ -467,7 +467,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={true}
+               showBestSellers={showBestSellers}
               />
             );
           case "shoes":
