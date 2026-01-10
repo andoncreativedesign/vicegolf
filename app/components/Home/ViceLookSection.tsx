@@ -30,11 +30,12 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
     }
 
     // Helper to format price
+    // Helper to format price
     const formatPrice = (priceRange: any) => {
         const amount = priceRange?.minVariantPrice;
         if (!amount) return '';
-        // Assuming simple formatting or pass currency code if available
-        return `$${amount}`;
+        // Returning just the amount, symbol handled in JSX
+        return `${amount}`;
     };
 
     useEffect(() => {
@@ -103,13 +104,18 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
                                                     setHideTimeout(timeout);
                                                 }}
                                             >
-                                                <div className="bg-black rounded-full w-8 h-8 flex items-center justify-center shadow-lg cursor-pointer">
-                                                    <span className="text-white font-bold">+</span>
+                                                {/* Hotspot Dot */}
+                                                <div className={`rounded-full w-8 h-8 flex items-center justify-center cursor-pointer transition-transform duration-200 ${activeTooltip === tooltip._key ? 'scale-110' : ''} bg-black`}>
+                                                    <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                                                 </div>
 
                                                 {activeTooltip === tooltip._key && (
                                                     <button
-                                                        className="absolute cursor-pointer left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-61 z-20"
+                                                        className="absolute cursor-pointer left-full top-1/2 transform -translate-y-1/2 ml-3 bg-white p-4 rounded-md shadow-xl w-64 z-20 text-left transition-all duration-200"
+                                                        // Adjust positioning logic if needed for mobile or edge cases via CSS or logic, 
+                                                        // currently 'left-full ml-3' places it to the right of the dot.
+                                                        // If it goes off screen on the right, we might need logic, but for now we stick to this or center it if mobile.
+                                                        style={{ minWidth: '250px' }}
                                                         onMouseEnter={(e) => {
                                                             e.stopPropagation();
                                                             setActiveTooltip(tooltip._key);
@@ -117,17 +123,24 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
                                                         onMouseLeave={() => setActiveTooltip(null)}
                                                         onClick={(e) => handleClick(e, tooltip)}
                                                     >
-                                                        <div className="flex flex-col text-left">
-                                                            <span className="font-bold text-gray-900 leading-tight">
-                                                                {tooltip.title || tooltip.linkTitle || "Shop Now"}
-                                                            </span>
-                                                            <div className="flex justify-between items-center mt-2">
-                                                                <span className="text-sm text-gray-600">{tooltip.product?.store?.productType || ''}</span>
+                                                        <div className="flex justify-between items-center w-full">
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="font-bold text-gray-900 text-sm leading-tight">
+                                                                    {tooltip.title || tooltip.linkTitle || "Shop Now"}
+                                                                </span>
+                                                                <span className="text-xs text-gray-500 font-medium tracking-wide">
+                                                                    {tooltip.product?.store?.productType || 'Product'}
+                                                                </span>
                                                                 {tooltip.product?.store?.priceRange && (
-                                                                    <span className="text-gray-900 font-medium">{formatPrice(tooltip.product.store.priceRange)}</span>
+                                                                    <div className="flex items-center gap-1 mt-0.5">
+                                                                        <img src="/uae-dirham-symbol.svg" alt="AED" className="h-3 w-auto" />
+                                                                        <span className="text-gray-900 font-bold text-sm leading-none">{formatPrice(tooltip.product.store.priceRange)}</span>
+                                                                    </div>
                                                                 )}
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                            </div>
+                                                            <div className="pl-2">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                                                 </svg>
                                                             </div>
                                                         </div>
