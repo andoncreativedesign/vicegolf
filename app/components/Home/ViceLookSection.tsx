@@ -1,181 +1,42 @@
 import { Image } from '@shopify/hydrogen';
-import { Link, useFetcher, useNavigate } from 'react-router';
+import { useFetcher, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
-import Collection from '~/routes/($locale).collections.$ids.$handle';
+import type { ViceLookSectionData } from '~/lib/sanity/home';
 
-interface ProductTooltip {
-    id: string;
-    title: string;
-    category: string;
-    price: string;
-    position: {
-        top: string;
-        left: string;
-    };
-    handle: string
-    type: 'product' | 'collection';
-}
-
-interface ViceLookItem {
-    id: string;
-    title: string;
-    image: {
-        url: string;
-        altText?: string;
-    };
-    url: string;
-    tooltips: ProductTooltip[];
-}
-
-export function ViceLookSection() {
-    const items: ViceLookItem[] = [
-        {
-            id: '1',
-            title: 'VICE GOLF BALLS',
-            image: {
-                url: 'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/Vice_Golf_Next_Up_Big_OG_Polo_White-59_1.jpg?v=1766224447',
-                altText: 'VICE Golf Balls',
-            },
-            url: '/',
-            tooltips: [
-                {
-                    id: '1-1',
-                    title: 'vice-solid-polo-white',
-                    category: 'Polo',
-                    price: '$49.99',
-                    position: { top: '33%', left: '50%' },
-                    handle: 'vice-solid-polo-white-2025',
-                    type: 'product'
-
-                },
-                // {
-                //     id: '1-2',
-                //     title: 'Vice Golf Performance Tees',
-                //     category: 'Tees',
-                //     price: '$59.99',
-                //     position: { top: '60%', left: '60%' },
-                //     handle: 'tees'
-                // },
-                {
-                    id: '1-3',
-                    title: 'vice-verve-white',
-                    category: 'Shoes',
-                    price: '$59.99',
-                    position: { top: '92%', left: '40%' },
-                    handle: 'vice-verve-white',
-                    type: 'product'
-
-                }
-            ]
-        },
-        {
-            id: '2',
-            title: 'VICE GOLF APPAREL',
-            image: {
-                url: 'https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-homepage-get-the-look-3.jpg?v=1718636826',
-                altText: 'VICE Golf Apparel',
-            },
-            url: '/',
-            tooltips: [
-                {
-                    id: '2-1',
-                    title: 'Vice Long Sleeve',
-                    category: 'Long Sleeve',
-                    price: '$59.99',
-                    position: { top: '30%', left: '50%' },
-                    handle: 'polos',
-                    type: 'collection'
-                },
-                // {
-                //     id: '2-2',
-                //     title: 'Vice Golf Performance Shorts',
-                //     category: 'Shorts',
-                //     price: '$49.99',
-                //     position: { top: '60%', left: '60%' },
-                //     handle: 'vice-shorts'
-                // },
-                {
-                    id: '2-3',
-                    title: 'Vice Verve Black',
-                    category: 'Shoes',
-                    price: '$59.99',
-                    position: { top: '92%', left: '40%' },
-                    handle: 'shoes',
-                    type: 'collection'
-
-                }
-            ]
-        },
-        {
-            id: '3',
-            title: 'VICE GOLF GEAR',
-            image: {
-                url: 'https://cdn.shopify.com/s/files/1/0835/8445/0850/files/vice-golf-homepage-get-the-look-4.jpg?v=1718643720',
-                altText: 'VICE Golf Gear',
-            },
-            url: '/',
-            tooltips: [
-                {
-                    id: '3-1',
-                    title: 'Vice Golf Performance Polo',
-                    category: 'Polos',
-                    price: '$59.99',
-                    position: { top: '30%', left: '50%' },
-                    handle: 'vice-solid-polo-navy-2025',
-                    type: 'product'
-
-                },
-                // {
-                //     id: '3-2',
-                //     title: 'Vice Golf Performance Shorts',
-                //     category: 'Shorts',
-                //     price: '$49.99',
-                //     position: { top: '60%', left: '40%' },
-                //     handle: 'vice-shorts'
-                // },
-                {
-                    id: '3-3',
-                    title: 'Vice Verve Black',
-                    category: 'Shoes',
-                    price: '$59.99',
-                    position: { top: '92%', left: '40%' },
-                    handle: 'shoes',
-                    type: 'collection'
-
-                }
-            ]
-        },
-    ];
-
+export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
     const navigate = useNavigate()
     const fetcher = useFetcher()
     const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
     const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
 
-    const title = "GET THE VICE LOOK";
-    if (!items || items.length === 0) return null;
+    const title = data?.title || "GET THE VICE LOOK";
+    const items = data?.items || [];
 
-    const handleClick = async (e: React.MouseEvent<HTMLButtonElement>, item: ProductTooltip) => {
+    if (items.length === 0) return null;
+
+    const handleClick = async (e: React.MouseEvent<HTMLButtonElement>, item: any) => {
         e.preventDefault();
-        if (!item.handle) return;
 
-        const itemType = item.type.trim();
-        console.log("vice look itemType", itemType)
-        try {
-            if (itemType === 'collection') {
-                fetcher.submit(
-                    { handle: item.handle },
-                    { method: "post", action: "/api/collection" }
-                );
-            } else {
-                navigate(`/products/${encodeURIComponent(item.handle)}/`);
-            }
-        } catch (error) {
-            console.log("vice look eror", error)
-            console.error(' Error in handleClick:', error);
-
+        // Use custom link if provided
+        if (item.link) {
+            navigate(item.link);
+            return;
         }
+
+        const handle = item.product?.store?.slug?.current;
+        if (!handle) return;
+
+        navigate(`/products/${encodeURIComponent(handle)}/`);
     }
+
+    // Helper to format price
+    const formatPrice = (priceRange: any) => {
+        const amount = priceRange?.minVariantPrice;
+        if (!amount) return '';
+        // Assuming simple formatting or pass currency code if available
+        return `$${amount}`;
+    };
+
     useEffect(() => {
         if (
             fetcher.state === "idle"
@@ -185,8 +46,6 @@ export function ViceLookSection() {
             const { id, title } = fetcher.data.collection
             navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
         }
-        console.log("vice look data", fetcher.data)
-        console.log("vice look state", fetcher.data)
     }, [fetcher.state, fetcher.data, navigate]);
 
     return (
@@ -195,33 +54,35 @@ export function ViceLookSection() {
                 <h2 className="text-base sm:text-lg font-extrabold tracking-tight mb-6 lg:mb-10 uppercase" style={{ fontSize: '1.375rem', fontWeight: '800' }}>{title}</h2>
                 <div className="w-full overflow-x-auto scrollbar-hide md:overflow-visible">
                     <div className="flex md:grid md:grid-cols-3 gap-6 w-max md:w-auto">
-                        {items.map((item) => (
+                        {items.map((item, index) => (
                             <div
-                                key={item.id}
+                                key={index}
                                 className="group block overflow-visible w-80 flex-shrink-0 md:w-full"
                             >
                                 <div
                                     className="relative overflow-visible lg:w-auto group"
                                     onMouseLeave={() => setActiveTooltip(null)}
                                 >
-                                    <Image
-                                        data={{
-                                            url: item.image.url,
-                                            altText: item.image.altText || item.title,
-                                            width: 1200,
-                                            height: 1600,
-                                        }}
-                                        className="w-full h-auto object-cover"
-                                        loading="lazy"
-                                    />
+                                    {item.image && (
+                                        <Image
+                                            data={{
+                                                url: item.image,
+                                                altText: item.title,
+                                                width: 1200,
+                                                height: 1600,
+                                            }}
+                                            className="w-full h-auto object-cover"
+                                            loading="lazy"
+                                        />
+                                    )}
 
-                                    {item.tooltips.map((tooltip) => (
+                                    {item.tooltips?.map((tooltip) => (
                                         <div
-                                            key={tooltip.id}
+                                            key={tooltip._key}
                                             className="absolute"
                                             style={{
-                                                top: tooltip.position.top,
-                                                left: tooltip.position.left,
+                                                top: `${tooltip.y}%`,
+                                                left: `${tooltip.x}%`,
                                                 transform: 'translate(-50%, -50%)',
                                                 zIndex: 10
                                             }}
@@ -233,7 +94,7 @@ export function ViceLookSection() {
                                                         clearTimeout(hideTimeout);
                                                         setHideTimeout(null);
                                                     }
-                                                    setActiveTooltip(tooltip.id);
+                                                    setActiveTooltip(tooltip._key);
                                                 }}
                                                 onMouseLeave={() => {
                                                     const timeout = setTimeout(() => {
@@ -246,22 +107,26 @@ export function ViceLookSection() {
                                                     <span className="text-white font-bold">+</span>
                                                 </div>
 
-                                                {activeTooltip === tooltip.id && (
+                                                {activeTooltip === tooltip._key && (
                                                     <button
                                                         className="absolute cursor-pointer left-1/2 transform -translate-x-1/2 top-full mt-2 bg-white p-4 rounded-lg shadow-lg w-61 z-20"
                                                         onMouseEnter={(e) => {
                                                             e.stopPropagation();
-                                                            setActiveTooltip(tooltip.id);
+                                                            setActiveTooltip(tooltip._key);
                                                         }}
                                                         onMouseLeave={() => setActiveTooltip(null)}
                                                         onClick={(e) => handleClick(e, tooltip)}
                                                     >
-                                                        <div className="flex flex-col">
-                                                            <span className="font-bold text-gray-900">{tooltip.title}</span>
+                                                        <div className="flex flex-col text-left">
+                                                            <span className="font-bold text-gray-900 leading-tight">
+                                                                {tooltip.title || tooltip.linkTitle || "Shop Now"}
+                                                            </span>
                                                             <div className="flex justify-between items-center mt-2">
-                                                                <span className="text-sm text-gray-600">{tooltip.category}</span>
-                                                                {/* <span className="text-gray-900 font-medium">{tooltip.price}</span> */}
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <span className="text-sm text-gray-600">{tooltip.product?.store?.productType || ''}</span>
+                                                                {tooltip.product?.store?.priceRange && (
+                                                                    <span className="text-gray-900 font-medium">{formatPrice(tooltip.product.store.priceRange)}</span>
+                                                                )}
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                                 </svg>
                                                             </div>
