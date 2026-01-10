@@ -91,12 +91,11 @@ export function DriversProduct({
                     <ProductDetailsContent1
                       content={item}
                       showImageLeft={false}
-                      isTextFull={true}
+                      isTextFull={false}
                       isImageFull={true}
                       isDescriptionFull={true}
                       imageObjectFit='contain'
-                      titleContainerClassName='lg:w-[1000px]'
-                      titleClassName='lg:text-[48px] text-[32px] font-semibold w-full'
+                      titleClassName='lg:text-[48px] text-[32px] font-semibold w-full !text-center'
                       imageClassName="max-h-[672px] object-contain"
                     />
                   </div>
@@ -107,11 +106,13 @@ export function DriversProduct({
                     <ProductDetailsContent1
                       content={item}
                       showImageLeft={false}
-                      isTextFull={true}
+                      isTextFull={false}
+                      isImageFull={true}
                       isDescriptionFull={true}
-                      titleClassName='lg:text-[48px] text-[32px] font-semibold'
+                      titleClassName='lg:text-[48px] text-[32px] font-semibold w-full !text-center'
                       imageInnerContainerClassName='flex items-center justify-center'
                       imageSize='large'
+                      imageClassName="max-w-xl lg:max-w-2xl"
                     />
                   </div>
                 </div>
