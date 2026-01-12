@@ -220,9 +220,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
                     }}
                   />
                   {allVariants[selectedVariant] && !allVariants[selectedVariant].availableForSale && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <span className="bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded">
-                        Sold Out
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded">
+                        Sold out
                       </span>
                     </div>
                   )}

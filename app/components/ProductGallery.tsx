@@ -162,9 +162,9 @@ export function ProductGallery({
         className="relative w-full mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[700px]"
       >
         {!isAvailable && (
-          <div className="absolute top-4 left-4 z-20">
-            <span className="bg-black text-white text-xs font-bold px-3 py-1.5 uppercase tracking-wider rounded">
-              Sold Out
+          <div className="absolute top-5 left-5 z-20">
+            <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-5 py-2.5 rounded-md">
+              Sold out
             </span>
           </div>
         )}
