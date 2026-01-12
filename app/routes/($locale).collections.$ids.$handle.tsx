@@ -350,6 +350,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 width: node.variantImage.reference.image.width,
                 height: node.variantImage.reference.image.height
             } : null,
+            availableForSale: node.availableForSale > 0,
             family: node.family ? {
                 id: node.family.id,
                 namespace: node.family.namespace,

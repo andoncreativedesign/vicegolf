@@ -26,7 +26,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
       >
         <div className="relative w-full bg-[#f6f6f6] overflow-hidden aspect-square">
           {image ? (
-            <div className="w-full h-full">
+            <div className="w-full h-full relative">
               <Image
                 data={image}
                 alt={image.altText || product.title}
@@ -42,12 +42,26 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                   height: '100%'
                 }}
               />
+              {!product.availableForSale && (
+                <div className="absolute top-3 left-3 z-10">
+                  <span className="bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded">
+                    Sold Out
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center relative">
               <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
+              {!product.availableForSale && (
+                <div className="absolute top-3 left-3 z-10">
+                  <span className="bg-black text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded">
+                    Sold Out
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
