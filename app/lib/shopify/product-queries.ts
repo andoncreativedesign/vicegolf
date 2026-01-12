@@ -11,6 +11,7 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
     id
     title
     handle
+    availableForSale
     productType
     vendor
     featuredImage {
@@ -364,6 +365,7 @@ fragment ProductItem on Product {
   id
   handle
   title
+  availableForSale
   productType
   vendor
   
@@ -574,6 +576,7 @@ fragment ProductCardFragment on Product {
     id
     title
     handle
+    availableForSale
     productType
     vendor
     featuredImage {
@@ -614,6 +617,7 @@ fragment ProductCardFragment on Product {
     id
     title
     handle
+    availableForSale
     productType
     vendor
     featuredImage {
@@ -667,6 +671,7 @@ fragment ColorVariantProduct on Product {
   id
   title
   handle
+  availableForSale
   productType
   vendor
   metafield(namespace: "custom", key: "family") {
@@ -776,6 +781,7 @@ export const ADMIN_PRODUCTS_BY_CLUB_FAMILY = `#graphql
           id
           title
           handle
+          availableForSale: totalInventory
           productType
           vendor
 
@@ -824,6 +830,7 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
           id
           title
           handle
+          availableForSale: totalInventory
           productType
           vendor
 
@@ -873,6 +880,7 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
           id
           handle
           title
+          availableForSale: totalInventory
           productType
           vendor
 
@@ -987,6 +995,7 @@ const PRODUCT_FRAGMENT = `#graphql
     title
     vendor
     handle
+    availableForSale
     productType
     descriptionHtml
     description
