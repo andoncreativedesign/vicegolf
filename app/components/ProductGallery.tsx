@@ -161,6 +161,13 @@ export function ProductGallery({
       <div
         className="relative w-full mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[700px]"
       >
+        {!isAvailable && (
+          <div className="absolute top-4 left-4 z-20">
+            <span className="bg-black text-white text-xs font-bold px-3 py-1.5 uppercase tracking-wider rounded">
+              Sold Out
+            </span>
+          </div>
+        )}
         <div className="w-full h-full overflow-hidden" ref={emblaRef}>
           <div className="flex w-full h-full touch-pan-y">
             {images.map((image, idx) => (
