@@ -75,8 +75,8 @@ export const homePageQuery = `*[_type == "home"][0]{
           _key,
           x,
           y,
-          link,
           linkTitle,
+          collectionHandle,
           product->{
             store {
               title,
@@ -215,9 +215,10 @@ export interface ViceLookTooltip {
   _key: string;
   x: number;
   y: number;
-  link?: string;
+ 
   linkTitle?: string;
   title?: string;
+  collectionHandle?: string;
   product?: {
     store: {
       title: string;
@@ -308,9 +309,10 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
             _key: tooltip._key,
             x: tooltip.x,
             y: tooltip.y,
-            link: tooltip.link,
+         
             linkTitle: tooltip.linkTitle,
-            title: tooltip.product?.store?.title,
+            collectionHandle: tooltip.collectionHandle,
+            title: tooltip.product?.store?.title || tooltip.linkTitle,
             product: tooltip.product ? {
               store: {
                 title: tooltip.product.store.title,

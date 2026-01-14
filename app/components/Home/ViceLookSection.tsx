@@ -17,16 +17,20 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
     const handleClick = async (e: React.MouseEvent<HTMLButtonElement>, item: any) => {
         e.preventDefault();
 
-        // Use custom link if provided
-        if (item.link) {
-            navigate(item.link);
+        // Handle collection navigation
+        if (item.collectionHandle) {
+            fetcher.submit(
+                { handle: item.collectionHandle },
+                { method: 'POST', action: '/api/collection' }
+            );
             return;
         }
 
+        // Handle product navigation
         const handle = item.product?.store?.slug?.current;
-        if (!handle) return;
-
-        navigate(`/products/${encodeURIComponent(handle)}/`);
+        if (handle) {
+            navigate(`/products/${encodeURIComponent(handle)}/`);
+        }
     }
 
     // Helper to format price
@@ -129,7 +133,7 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
                                                                     {tooltip.title || tooltip.linkTitle || "Shop Now"}
                                                                 </span>
                                                                 <span className="text-xs text-gray-500 font-medium tracking-wide">
-                                                                    {tooltip.product?.store?.productType || 'Product'}
+                                                                    {tooltip.collectionHandle ? 'Collection' : (tooltip.product?.store?.productType || 'Product')}
                                                                 </span>
                                                                 {tooltip.product?.store?.priceRange && (
                                                                     <div className="flex items-center gap-1 mt-0.5">
