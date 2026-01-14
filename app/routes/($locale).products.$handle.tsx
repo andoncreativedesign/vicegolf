@@ -26,7 +26,7 @@ import { CustomerReviews } from '~/components/CustomerReviews';
 import { BeaniesProduct } from '~/components/BeaniesProduct';
 import { PuttersProduct } from '~/components/PuttersProduct';
 import { CapProduct } from '~/components/CapProduct';
-import { getProductDetails, type ProductDetails } from '~/lib/sanity/products';
+import { getProductDetails, getBestSellersMapping, type ProductDetails } from '~/lib/sanity/products';
 import { TeeProduct } from '~/components/TeesProduct';
 import { TowelProduct } from '~/components/TowelProduct';
 import { TowelJuniorProduct } from '~/components/TowelJuniorProduct';
@@ -157,52 +157,15 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   const url = new URL(request.url);
   const recommendedCursor = url.searchParams.get('recommendedCursor');
 
-  const isDivotJuniorProduct = product?.metafields?.some(
-    (field: any) => field?.key === 'category_variant' && field?.value === 'Divot Junior'
-  );
-
   const productType = product?.productType?.toLowerCase();
-  const isWedge = productType === 'wedge' || productType === 'wedges';
-  const isIron = productType === 'iron' || productType === 'irons';
-  const isFairwayWood = productType === 'fairway woods';
-  const isHybrid = productType === 'hybrids';
-  const isDriver = productType === 'drivers';
-  const isPutter = productType === 'blade putter' || productType === 'mallet putter' || productType === 'center mallet putter';
-  // const isPolo = productType === 'polo' || productType === 'polos';
-  const isShoes = productType === 'shoes';
-  const isGlovesMen = productType === 'gloves men';
-  const isGlovesWomen = productType === 'gloves women';
-  const isLongsleeve = productType === 'longsleeve';
-  const isRangefinder = productType === 'rangefinder';
+  const categoryVariant = product?.metafields?.find(
+    (field: any) => field?.key === 'category_variant'
+  )?.value;
 
-  let collectionHandle = null;
-  if (isWedge) {
-    collectionHandle = 'embrace';
-  } else if (isIron) {
-    collectionHandle = 'black-friday';
-  } else if (isFairwayWood) {
-    collectionHandle = 'fairway-woods-hybrids';
-  } else if (isHybrid) {
-    collectionHandle = 'golf-clubs';
-  } else if (isDriver) {
-    collectionHandle = 'drivers-1';
-  } else if (isPutter) {
-    collectionHandle = 'drip-balls';
-    // } else if (isPolo) {
-    //   collectionHandle = 'gear';
-  } else if (isShoes) {
-    collectionHandle = 'vice-pro-plus';
-  } else if (isGlovesMen) {
-    collectionHandle = 'golf-clubs';
-  } else if (isGlovesWomen) {
-    collectionHandle = 'golf-hats';
-  } else if (isLongsleeve) {
-    collectionHandle = 'junior-hats';
-  } else if (isDivotJuniorProduct) {
-    collectionHandle = 'divot-junior-best-sellers';
-  } else if (isRangefinder) {
-    collectionHandle = 'rangefinder';
-  }
+  const identifiers = [categoryVariant, productType, product?.productType].filter(Boolean) as string[];
+  const sanityCollection = await getBestSellersMapping(identifiers, product?.id);
+
+  const collectionHandle = sanityCollection?.collectionHandle || null;
 
   let recommendedProducts;
   if (collectionHandle) {
@@ -229,10 +192,11 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   }
 
   const shippingDetails = await getShippingDetails();
-  return { recommendedProducts, shippingDetails };
+  const showBestSellers = !!collectionHandle;
+  return { recommendedProducts, shippingDetails, showBestSellers };
 }
 export default function Product() {
-  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   // useEffect(() => {
@@ -440,7 +404,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={false}
+              showBestSellers={showBestSellers}
             />
           );
         }
@@ -450,7 +414,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={false}
+              showBestSellers={showBestSellers}
             />
           );
         }
@@ -460,7 +424,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={false}
+              showBestSellers={showBestSellers}
             />
           );
         }
@@ -470,7 +434,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={false}
+              showBestSellers={showBestSellers}
             />
           );
         }
@@ -480,7 +444,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={false}
+              showBestSellers={showBestSellers}
             />
           );
         }
@@ -490,7 +454,7 @@ export default function Product() {
               product={product}
               productDetails={productDetails}
               initialRecommended={recommendedProducts}
-              showBestSellers={true}
+              showBestSellers={showBestSellers}
             />
           );
         }
@@ -503,7 +467,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={true}
+                showBestSellers={showBestSellers}
               />
             );
           case "shoes":
@@ -518,7 +482,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={true}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Golf club sets */
@@ -533,7 +497,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Golf bags */
@@ -544,7 +508,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Caps */
@@ -555,7 +519,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Tees */
@@ -565,7 +529,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Rangefinder */
@@ -574,7 +538,7 @@ export default function Product() {
               <RangefinderProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Divot Tool */
@@ -585,7 +549,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Towels */
@@ -596,7 +560,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           /** 👇 Golf balls (main category) */
@@ -605,7 +569,7 @@ export default function Product() {
               <GolfBallProduct
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
                 isGolfBallProduct={true}
               />
             );
@@ -616,7 +580,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
 
@@ -628,7 +592,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             );
           case "drivers":
@@ -639,7 +603,7 @@ export default function Product() {
                 product={product}
                 productDetails={productDetails}
                 initialRecommended={recommendedProducts}
-                showBestSellers={false}
+                showBestSellers={showBestSellers}
               />
             )
           /** 👇 Default — fallback to golf balls layout */

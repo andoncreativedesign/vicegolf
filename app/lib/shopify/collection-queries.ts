@@ -167,6 +167,7 @@ fragment ProductCard on Product {
   id
   title
   handle
+  availableForSale
   productType
   vendor
   featuredImage {

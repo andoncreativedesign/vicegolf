@@ -139,6 +139,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         width: node.variantImage.reference.image.width,
         height: node.variantImage.reference.image.height
       } : null,
+      availableForSale: node.availableForSale > 0,
       family: node.family ? {
         id: node.family.id,
         namespace: node.family.namespace,
@@ -451,61 +452,61 @@ export default function Homepage() {
         heroData={data.homePageData?.heroes}
         bgColor="bg-transparent"
       />
-    
+
       <div className="home">
-      <div className="py-8 space-y-12">
-        {/* VICE GOLF BALLS - Infinite Scroll */}
-        {golfBalls.length > 0 && (
-          <ProductGrid
-            products={golfBalls}
-            title="VICE GOLF BALLS"
-            categoryHandle="golf-balls"
-            onLoadMore={handleLoadMoreGolfBalls}
-            hasMore={hasMoreGolfBalls}
-            loading={isLoadingGolfBalls}
+        <div className="py-8 space-y-12">
+          {/* VICE GOLF BALLS - Infinite Scroll */}
+          {golfBalls.length > 0 && (
+            <ProductGrid
+              products={golfBalls}
+              title="VICE GOLF BALLS"
+              categoryHandle="golf-balls"
+              onLoadMore={handleLoadMoreGolfBalls}
+              hasMore={hasMoreGolfBalls}
+              loading={isLoadingGolfBalls}
+            />
+          )}
+          {/* VICE GOLF CLUBS - Infinite Scroll */}
+          {golfClubs.length > 0 && (
+            <ProductGrid
+              products={golfClubs}
+              title="VICE GOLF CLUBS"
+              categoryHandle="golf-clubs"
+              onLoadMore={handleLoadMoreGolfClubs}
+              hasMore={hasMoreGolfClubs}
+              loading={isLoadingGolfClubs}
+            />
+          )}
+          {/* VICE GEAR - Now with Infinite Scroll */}
+          {gearProducts.length > 0 && (
+            <ProductGrid
+              products={gearProducts}
+              title="VICE GEAR"
+              categoryHandle="gear"
+              onLoadMore={handleLoadMoreGear}
+              hasMore={hasMoreGear}
+              loading={isLoadingGear}
+            />
+          )}
+        </div>
+        <ClientLogos brands={data.homePageData?.brand || []} />
+        {data?.homePageData?.homeCategories && (
+          <ShopByCategories
+            menuItems={menu.slice(0, 4)}
+            sanityHomeCategories={data?.homePageData?.homeCategories}
           />
         )}
-        {/* VICE GOLF CLUBS - Infinite Scroll */}
-        {golfClubs.length > 0 && (
+        {/* VICE APPAREL - Infinite Scroll */}
+        {apparelProducts.length > 0 && (
           <ProductGrid
-            products={golfClubs}
-            title="VICE GOLF CLUBS"
-            categoryHandle="golf-clubs"
-            onLoadMore={handleLoadMoreGolfClubs}
-            hasMore={hasMoreGolfClubs}
-            loading={isLoadingGolfClubs}
+            products={apparelProducts}
+            title="VICE APPAREL"
+            categoryHandle="apparel"
+            onLoadMore={handleLoadMoreApparel}
+            hasMore={hasMoreApparel}
+            loading={isLoadingApparel}
           />
         )}
-        {/* VICE GEAR - Now with Infinite Scroll */}
-        {gearProducts.length > 0 && (
-          <ProductGrid
-            products={gearProducts}
-            title="VICE GEAR"
-            categoryHandle="gear"
-            onLoadMore={handleLoadMoreGear}
-            hasMore={hasMoreGear}
-            loading={isLoadingGear}
-          />
-        )}
-      </div>
-      <ClientLogos brands={data.homePageData?.brand || []} />
-      {data?.homePageData?.homeCategories && (
-        <ShopByCategories
-          menuItems={menu.slice(0, 4)}
-          sanityHomeCategories={data?.homePageData?.homeCategories}
-        />
-      )}
-      {/* VICE APPAREL - Infinite Scroll */}
-      {apparelProducts.length > 0 && (
-        <ProductGrid
-          products={apparelProducts}
-          title="VICE APPAREL"
-          categoryHandle="apparel"
-          onLoadMore={handleLoadMoreApparel}
-          hasMore={hasMoreApparel}
-          loading={isLoadingApparel}
-        />
-      )}
       </div>
       <HeroSection
         heroData={data.homePageData?.secondaryHero || null}
@@ -526,8 +527,8 @@ export default function Homepage() {
         />
       )} */}
       <div className='home'>
-      <ViceLookSection />
-    </div>
+        <ViceLookSection data={data.homePageData?.viceLook} />
+      </div>
     </div>
   );
 }

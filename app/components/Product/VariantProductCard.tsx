@@ -42,6 +42,7 @@ type ProductCardProps = {
         };
       }>;
     };
+    availableForSale: boolean;
     productType?: string;
     tags?: string[];
     family: FamilyMetaField;
@@ -218,6 +219,13 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       objectPosition: 'center',
                     }}
                   />
+                  {allVariants[selectedVariant] && !allVariants[selectedVariant].availableForSale && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded">
+                        Sold out
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -242,9 +250,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 ?.map((variant, index) => (
                   <button
                     key={variant.id}
-                    className={`aspect-square rounded-lg  ${selectedVariant === index
+                    className={`aspect-square rounded-lg transition-opacity duration-200 ${selectedVariant === index
                       ? '' : ''
-                      }`}
+                      } ${!variant.availableForSale ? 'opacity-40' : ''}`}
                     onClick={(e) => handleVariantSelect(e, variant, index)}
                     onMouseEnter={() => {
                       setIsOverVariants(true);
@@ -334,8 +342,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
                           }
                         }}
                         className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
-                          }`}
-                        title={variant.title}
+                          } ${!variant.availableForSale ? 'opacity-40' : ''}`}
+                        title={`${variant.title}${!variant.availableForSale ? ' (Sold Out)' : ''}`}
                       >
                         {typeof variant.variantImage === 'object' && variant.variantImage?.url ? (
                           <img

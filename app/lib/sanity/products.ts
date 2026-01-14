@@ -311,6 +311,8 @@ export interface StoreProduct {
   status?: string;
   options?: any[];
   variants: StoreVariant[];
+  tags?: any[];
+  collections?: any[];
 }
 
 export interface YoutubeVideo {
@@ -353,6 +355,32 @@ export interface ProductDetails {
   youtubeVideos?: YoutubeVideo;
   videoContent?: VideoContentItem;
   store: StoreProduct;
+}
+
+export interface SanityListing {
+  _id: string;
+  _type: string;
+  title: string;
+  collectionHandle: string;
+  subtitle?: string;
+  description?: string;
+  images?: Array<{
+    _type: string;
+    asset: SanityImageAsset;
+    alt?: string;
+  }>;
+  videos?: Array<{
+    _type: string;
+    asset: SanityImageAsset;
+    title?: string;
+    description?: string;
+  }>;
+}
+
+export interface BestSellersMapping {
+  productType?: string;
+  collectionHandle: string;
+  isSpecific?: boolean;
 }
 
 // ==================== FETCH FUNCTIONS ====================
@@ -530,5 +558,38 @@ export async function getAllListings(): Promise<SanityListing[]> {
   } catch (error) {
     console.error('Error fetching all listings:', error);
     return [];
+  }
+}
+
+export async function getBestSellersMapping(identifiers: string[], productGid?: string): Promise<BestSellersMapping | null> {
+  try {
+    // Escape strings for GROQ
+    const idList = identifiers.map(id => `"${id.replace(/"/g, '\\"')}"`).join(', ');
+    const query = `*[_type == "bestSellers" && (product->store.gid == "${productGid}" || productType in [${idList}])]{
+        productType,
+        collectionHandle,
+        "isSpecific": defined(product)
+      }`;
+
+    const response = await axiosSanity.post("/", { query });
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const matches = response.data.result || [];
+    if (matches.length === 0) return null;
+
+    // Prioritization:
+    // 1. Specific product match
+    // 2. Earliest match in identifiers array
+    return matches.sort((a: any, b: any) => {
+      if (a.isSpecific && !b.isSpecific) return -1;
+      if (!a.isSpecific && b.isSpecific) return 1;
+      return identifiers.indexOf(a.productType) - identifiers.indexOf(b.productType);
+    })[0];
+  } catch (error) {
+    console.error('Error fetching best sellers mapping:', error);
+    return null;
   }
 }
