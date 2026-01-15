@@ -198,7 +198,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   // })
 
   console.log('\n\ncategoryProducts.golfBalls.nodes')
-  console.log(categoryProducts.golfBalls.products.pageInfo)
+  console.log(categoryProducts?.golfBalls?.products?.pageInfo)
   console.log('\n\ncategoryProducts.golfBalls.nodes end')
 
   // 7️⃣ Return final combined output

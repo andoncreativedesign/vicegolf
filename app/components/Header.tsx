@@ -1,18 +1,14 @@
 import { Suspense, useEffect, useState } from 'react';
 import { LuUser } from 'react-icons/lu';
 import { Await, NavLink, useAsyncValue, useLoaderData, useNavigate, type LoaderFunctionArgs } from 'react-router';
-import {
-  type CartViewPayload,
-  Image,
-  useAnalytics,
-  useOptimisticCart,
-} from '@shopify/hydrogen';
+import { type CartViewPayload, Image, useAnalytics, useOptimisticCart, } from '@shopify/hydrogen';
 import type { HeaderQuery, CartApiQueryFragment } from 'storefrontapi.generated';
 import { useAside } from '~/components/Aside';
 import { debugMenuItems } from '~/utils/debug-menu';
 import type { loader } from '~/root';
-import { BlackFridayBanner } from './Banner';
+import Banner from './Banner';
 import type { MenuData } from '~/lib/shopify/product-queries';
+import type { BannerData } from '~/lib/sanity/home';
 import DropdownItem from './Header/NavDropdownItem';
 import HeaderMenu from './Header/HeaderMenu';
 
@@ -31,11 +27,7 @@ interface DropdownSection {
 interface ProductDropdownItem {
   name: string;
   href: string;
-  image: {
-    id: string;
-    altText: string;
-    url: string;
-  };
+  image: { id: string; altText: string; url: string; };
   description?: string;
 }
 
@@ -58,13 +50,12 @@ const transformCollectionsToDropdown = (collections: any[]): ProductDropdownItem
       description: item?.description || ''
     }
   })
-
   return dropdowns;
 };
 
 // Country flag URLs
 const flagUrls: Record<string, string> = {
-    UAE: 'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/WhatsApp_Image_2025-12-19_at_12.17.59_PM.jpg?v=1766127036&width=30&height=30&crop=center',
+  UAE: 'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/WhatsApp_Image_2025-12-19_at_12.17.59_PM.jpg?v=1766127036&width=30&height=30&crop=center',
   // US: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/united_states.svg?v=1708075042&width=40&height=40&crop=center',
   // CA: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/canada.svg?v=1708075041&width=40&height=40&crop=center',
   // DE: 'https://cdn.shopify.com/s/files/1/0832/9235/6897/files/germany.svg?v=1708075042&width=40&height=40&crop=center',
@@ -79,11 +70,16 @@ export function Header({
   isLoggedIn,
   cart,
   publicStoreDomain,
-}: HeaderProps) {
+  banner,
+}: HeaderProps & { banner?: BannerData }) {
+  // Debug log to check banner prop in Header
+  console.log('Header component - banner prop:', banner);
+
   const { shop, menu } = header;
   const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
+
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -101,6 +97,7 @@ export function Header({
 
   const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
+
   const handleMenuNavigation = async () => {
     const isHomePage = window.location.pathname === '/';
     if (isHomePage) return; // Already on home page, do nothing
@@ -119,7 +116,7 @@ export function Header({
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 shadow-xs" style={{ width: '100%', margin: 0 }}>
       {/* Marquee Banner - Always Visible */}
-      {/* <BlackFridayBanner /> */}
+      {banner && <Banner banner={banner} />}
 
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
@@ -135,11 +132,7 @@ export function Header({
         {/* Center: Logo */}
         <div className="flex-1 flex justify-center pl-12 md:pl-0">
           {/* <NavLink prefetch="intent" to="/" className="flex items-center">
-            <img
-              src="/vice_logo.svg"
-              alt="Vice Logo"
-              className="h-8 md:h-12 w-auto"
-            />
+            <img src="/vice_logo.svg" alt="Vice Logo" className="h-8 md:h-12 w-auto" />
           </NavLink> */}
           <button
             className="flex items-center relative"
@@ -157,7 +150,6 @@ export function Header({
               </div>
             )}
           </button>
-
         </div>
 
         {/* Right: Icons */}
@@ -171,18 +163,12 @@ export function Header({
       {/* Navigation Menu - Visible only on desktop */}
       <nav className="hidden md:block w-full py-3">
         <div className="w-full px-2">
-          {menuItems &&
-            <HeaderMenu
-              viewport="desktop"
-              menuItems={menuItems}
-            />}
+          {menuItems && <HeaderMenu viewport="desktop" menuItems={menuItems} />}
         </div>
       </nav>
     </header>
   );
 }
-
-
 
 function HeaderMenuMobileToggle() {
   const { open } = useAside();
@@ -266,7 +252,7 @@ function CartBanner() {
 
 // Country/Currency data - Specified countries
 const countries = [
-  { code: 'UAE', name: 'United Arab Emirates', currency: 'AED', symbol:'', url: 'https://www.vicegolf.com' },
+  { code: 'UAE', name: 'United Arab Emirates', currency: 'AED', symbol: '', url: 'https://www.vicegolf.com' },
   // { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
   // { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
   // { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
@@ -302,6 +288,7 @@ function AccountIcon() {
     </div>
   );
 }
+
 export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default to US
@@ -331,7 +318,6 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
     setSelectedCountry(country);
     setIsOpen(false);
     setSearchTerm('');
-
     // Redirect to the selected country site
     window.location.href = country.url;
   };
@@ -366,7 +352,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
 
       {/* Dropdown Menu */}
       {/* {isOpen && (
-        <> */}
+        <>
           {/* Backdrop */}
           {/* <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} /> */}
 
@@ -376,10 +362,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
               {filteredCountries.map((country) => (
                 <button
                   key={country.code}
-                  className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code
-                    ? 'bg-gray-100 text-gray-900 font-medium'
-                    : 'text-gray-700'
-                    }`}
+                  className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'}`}
                   onClick={() => handleCountrySelect(country)}
                 >
                   <img

@@ -1,122 +1,123 @@
 import { HttpStatusCode } from "axios";
 import { axiosSanity } from "~/utils/axiosInsatances";
 
-
 // GraphQL query for home page data
 export const homePageQuery = `*[_type == "home"][0]{
-    heroes[] {
-      title,
-      text2,
-      description,
-      buttonText,
-      handle,
-      content[0]{
-        image{
-          asset->{
-            _id,
-            url
-          }
-        }
-      },
-      mobileContent[0]{
-        image{
-          asset->{
-            _id,
-            url
-          }
-        }
-      },
-    },
-
-    secondaryHero[] {
-      title,
-      text2,
-      description,
-      handle,
-      buttonText,
-      buttonLink,
-      backgroundImage{
-        asset->{
-          _id,
-          url
-        }
-      },
-      mobileBackgroundImage{
-        asset->{
-          _id,
-          url
-        }
-      }
-    },
-
-    brand[] {
-      name,
-      logo{
-        asset->{
-          _id,
-          url
-        }
-      },
-      url
-    },
-
-    viceLook {
-      title,
-      items[] {
-        title,
-        url,
-        image {
-          asset->{
-            _id,
-            url
-          }
-        },
-        tooltips[] {
-          _key,
-          x,
-          y,
-          linkTitle,
-          collectionHandle,
-          product->{
-            store {
-              title,
-              slug,
-              priceRange {
-                minVariantPrice
-              },
-              productType
-            }
-          }
-        }
-      }
-    },
-
-    homeCategories[] {
-      title,
-      description,
+  banner {
+    enabled,
+    backgroundColor,
+    textColor,
+    content
+  },
+  heroes[] {
+    title,
+    text2,
+    description,
+    buttonText,
+    handle,
+    content[0]{
       image{
         asset->{
           _id,
           url
         }
-      },
+      }
     },
-
-    shippingDetails {
-      _id,
-      _type,
-      title,
-      contentType,
-      description,
-      points[] {
-        _key,
-        point
+    mobileContent[0]{
+      image{
+        asset->{
+          _id,
+          url
+        }
+      }
+    },
+  },
+  secondaryHero[] {
+    title,
+    text2,
+    description,
+    handle,
+    buttonText,
+    buttonLink,
+    backgroundImage{
+      asset->{
+        _id,
+        url
+      }
+    },
+    mobileBackgroundImage{
+      asset->{
+        _id,
+        url
       }
     }
-
-
-
-  }`;
+  },
+  brand[] {
+    name,
+    logo{
+      asset->{
+        _id,
+        url
+      }
+    },
+    url
+  },
+  viceLook {
+    title,
+    items[] {
+      title,
+      url,
+      image {
+        asset->{
+          _id,
+          url
+        }
+      },
+      tooltips[] {
+        _key,
+        x,
+        y,
+        linkTitle,
+        collectionHandle,
+        product->{
+          store {
+            title,
+            slug,
+            priceRange {
+              minVariantPrice
+            },
+            productType
+          }
+        }
+      }
+    }
+  },
+  homeCategories[] {
+    title,
+    description,
+    image{
+      asset->{
+        _id,
+        url
+      }
+    },
+  },
+  shippingDetails {
+    _id,
+    _type,
+    title,
+    contentType,
+    description,
+    points[] {
+      _key,
+      pointType,
+      simplePoint,
+      pointTitle,
+      pointDescription,
+      showBullet
+    }
+  }
+}`;
 
 // Types for the home page data
 export interface SanityImageAsset {
@@ -126,9 +127,7 @@ export interface SanityImageAsset {
 }
 
 export interface HeroContentImage {
-  image: {
-    asset: SanityImageAsset;
-  };
+  image: { asset: SanityImageAsset; };
 }
 
 export interface HeroItem {
@@ -144,37 +143,20 @@ export interface SecondaryHeroItem {
   description?: string;
   buttonText?: string;
   buttonLink?: string;
-  backgroundImage?: {
-    asset: SanityImageAsset;
-  };
+  backgroundImage?: { asset: SanityImageAsset; };
 }
 
 export interface BrandItem {
   name: string;
-  logo?: {
-    asset: SanityImageAsset;
-  };
+  logo?: { asset: SanityImageAsset; };
   url?: string;
 }
 
 export interface HeroItemTransformed {
-  title?: {
-    text?: string;
-    color?: string;
-  };
-  text2?: {
-    text?: string;
-    color?: string;
-  };
-  description?: {
-    text?: string;
-    color?: string;
-  };
-  buttonText?: {
-    text?: string;
-    textColor?: string;
-    backgroundColor?: string;
-  };
+  title?: { text?: string; color?: string; };
+  text2?: { text?: string; color?: string; };
+  description?: { text?: string; color?: string; };
+  buttonText?: { text?: string; textColor?: string; backgroundColor?: string; };
   image?: string;
   mobileImage?: string;
   handle: string;
@@ -215,7 +197,6 @@ export interface ViceLookTooltip {
   _key: string;
   x: number;
   y: number;
- 
   linkTitle?: string;
   title?: string;
   collectionHandle?: string;
@@ -223,9 +204,7 @@ export interface ViceLookTooltip {
     store: {
       title: string;
       slug: { current: string };
-      priceRange: {
-        minVariantPrice: number;
-      };
+      priceRange: { minVariantPrice: number; };
       productType?: string;
     }
   }
@@ -243,13 +222,26 @@ export interface ViceLookSectionData {
   items: ViceLookItem[];
 }
 
-export interface HomePageData {
-  heroes?: HeroContentImage[];
-  secondaryHero?: HeroContentImage[];
-  brand?: BrandItemTransformed[];
+export interface BannerData {
+  enabled: boolean;
+  backgroundColor: string;
+  textColor: string;
+  content: Array<{
+    _key: string;
+    _type: string;
+    children: Array<{
+      _key: string;
+      _type: string;
+      marks: string[];
+      text: string;
+    }>;
+    markDefs: any[];
+    style: string;
+  }>;
 }
 
 export interface HomePageDataTransformed {
+  banner?: BannerData;
   heroes?: HeroItemTransformed[];
   secondaryHero?: HeroItemTransformed[];
   brand?: BrandItemTransformed[];
@@ -271,6 +263,7 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
 
     // Transform the data to match our types
     const transformedData: HomePageDataTransformed = {
+      banner: result.result.banner,
       heroes: result.result.heroes?.map((hero: any) => ({
         title: hero.title,
         text2: hero.text2,
@@ -309,7 +302,6 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
             _key: tooltip._key,
             x: tooltip.x,
             y: tooltip.y,
-         
             linkTitle: tooltip.linkTitle,
             collectionHandle: tooltip.collectionHandle,
             title: tooltip.product?.store?.title || tooltip.linkTitle,
@@ -334,6 +326,7 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
     // console.log(JSON.stringify(transformedData?.brand?.[0]))
 
     return transformedData;
+
   } catch (error) {
     console.error('Error fetching home page data:', error);
     return null;
@@ -371,6 +364,7 @@ export async function getShippingDetails(): Promise<ShippingDetails | null> {
 
     // Return the shipping details directly since that's all we're querying for
     return result.result?.shippingDetails || null;
+
   } catch (error) {
     console.error('Error fetching shipping details:', error);
     return null;
