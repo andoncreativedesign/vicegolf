@@ -254,13 +254,23 @@ function FooterContent({
 
           <div>
             <h4 className="font-semibold text-white mb-2">Safe & Fast Shipping</h4>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
+               <a href="https://jeebly.com/" aria-label="Jeebly Home">
               <img
                 src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/logo.svg?v=1765342145'
                 alt="Jeebly"
+                className="h-9 w-auto"
+                loading="lazy"
+              />
+              </a>
+               <a href="https://asyad.om/" aria-label="asyad Home">
+              <img
+                src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/asyad_logo.png?v=1768477591'
+                alt="asyad "
                 className="h-8 w-auto"
                 loading="lazy"
               />
+              </a>
             </div>
           </div>
         </div>
