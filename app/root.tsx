@@ -1,19 +1,10 @@
 import { Analytics, getShopAnalytics, useNonce } from '@shopify/hydrogen';
-import {
-  Outlet,
-  useRouteError,
-  isRouteErrorResponse,
-  type ShouldRevalidateFunction,
-  Links,
-  Meta,
-  Scripts,
-  ScrollRestoration,
-  useRouteLoaderData,
-} from 'react-router';
+import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, } from 'react-router';
 import type { Route } from './+types/root';
 import favicon from '~/assets/vicefav.svg';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { createCategoryQuery, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, type MenuData } from '~/lib/shopify/product-queries';
+import { getHomePageData } from '~/lib/sanity/home';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -21,6 +12,7 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
+
 export type RootLoader = typeof loader;
 
 /**
@@ -40,7 +32,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
   // Defaulting to no revalidation for root loader data to improve performance.
   // When using this feature, you risk your UI getting out of sync with your server.
   // Use with caution. If you are uncomfortable with this optimization, update the
-  // line below to `return defaultShouldRevalidate` instead.
+  // line below to return defaultShouldRevalidate instead.
   // For more details see: https://remix.run/docs/en/main/route/should-revalidate
   return false;
 };
@@ -57,14 +49,8 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
  */
 export function links() {
   return [
-    {
-      rel: 'preconnect',
-      href: 'https://cdn.shopify.com',
-    },
-    {
-      rel: 'preconnect',
-      href: 'https://shop.app',
-    },
+    { rel: 'preconnect', href: 'https://cdn.shopify.com' },
+    { rel: 'preconnect', href: 'https://shop.app' },
     { rel: 'icon', type: 'image/svg+xml', href: favicon },
     { rel: "stylesheet", href: toastStyles }
   ];
@@ -90,8 +76,7 @@ export async function loader(args: Route.LoaderArgs) {
     consent: {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-      withPrivacyBanner: false,
-      // localize the privacy banner
+      withPrivacyBanner: false, // localize the privacy banner
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
@@ -104,6 +89,7 @@ export async function loader(args: Route.LoaderArgs) {
  */
 async function loadCriticalData({ context }: Route.LoaderArgs) {
   const { storefront } = context;
+
   const golfBallsHandle = createCategoryQuery('Golf Balls');
   const golfClubsHandle = createCategoryQuery('Golf Club Set');
   const apparelHandle = createCategoryQuery('Gloves Men');
@@ -112,12 +98,12 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  const [header, productsForNav] = await Promise.all([
+  console.log('Fetching critical data...');
+
+  const [header, productsForNav, homePageData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
+      variables: { headerMenuHandle: 'main-menu' }, // Adjust to your header menu handle
     }),
     storefront.query<MenuData>(MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, {
       cache: storefront.CacheLong(),
@@ -127,10 +113,21 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
         language: "EN",
       }
     }),
-    // Add other queries here, so that they are loaded in parallel
+    // Fetch home page data including banner
+    getHomePageData().then(data => {
+      console.log('Home page data from Sanity:', data);
+      return data;
+    }).catch(error => {
+      console.error('Error fetching home page data:', error);
+      return null;
+    }),
   ]);
 
-  return { header, productsForNav };
+  const bannerData = homePageData?.banner;
+
+  console.log('Returning banner data from loader:', bannerData);
+
+  return { header, productsForNav, banner: bannerData };
 }
 
 /**
@@ -145,15 +142,14 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
   const footer = storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
+      variables: { footerMenuHandle: 'footer' }, // Adjust to your footer menu handle
     })
     .catch((error: Error) => {
       // Log query errors, but don't throw them so the page can still render
       console.error(error);
       return null;
     });
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
@@ -179,7 +175,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
       </head>
       <body className='font-sans'>
         <CookieConsentWrapper>
-        {children}
+          {children}
         </CookieConsentWrapper>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -196,16 +192,11 @@ export default function App() {
   }
 
   return (
-    <Analytics.Provider
-      cart={data.cart}
-      shop={data.shop}
-      consent={data.consent}
-    >
-      <PageLayout {...data}>
+    <Analytics.Provider cart={data.cart} shop={data.shop} consent={data.consent}>
+      <PageLayout {...data} banner={data.banner}>
         <Outlet />
         <CustomToastContainer />
       </PageLayout>
-
     </Analytics.Provider>
   );
 }
