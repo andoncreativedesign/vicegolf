@@ -3,23 +3,17 @@ import { Suspense, useId, useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AedIcon } from './ui/AedIcon';
-import type {
-  CartApiQueryFragment,
-  FooterQuery,
-  HeaderQuery,
-} from 'storefrontapi.generated';
+import type { CartApiQueryFragment, FooterQuery, HeaderQuery, } from 'storefrontapi.generated';
 import { Aside, useAside } from '~/components/Aside';
 import { Footer } from '~/components/Footer';
 import { Header } from '~/components/Header';
 import HeaderMenu from './Header/HeaderMenu';
 import { CartMain } from '~/components/CartMain';
-import {
-  SEARCH_ENDPOINT,
-  SearchFormPredictive,
-} from '~/components/SearchFormPredictive';
+import { SEARCH_ENDPOINT, SearchFormPredictive, } from '~/components/SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
 import type { MenuData } from '~/lib/shopify/product-queries';
 import type { Collection } from '@shopify/hydrogen/storefront-api-types';
+import type { BannerData } from '~/lib/sanity/home';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -27,6 +21,7 @@ interface PageLayoutProps {
   header: HeaderQuery;
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
+  banner?: BannerData;
   children?: React.ReactNode;
 }
 
@@ -37,6 +32,7 @@ export function PageLayout({
   header,
   isLoggedIn,
   publicStoreDomain,
+  banner,
 }: PageLayoutProps) {
   return (
     <Aside.Provider>
@@ -44,25 +40,16 @@ export function PageLayout({
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
+        <Header header={header} cart={cart} isLoggedIn={isLoggedIn} publicStoreDomain={publicStoreDomain} banner={banner} />
       )}
-      <main className="bg-[#fafafa] pt-[120px] md:pt-[140px]">
+      <main className={`bg-[#fafafa] ${banner?.enabled ? 'pt-[160px] md:pt-[180px]' : 'pt-[120px] md:pt-[140px]'}`}>
         <div className="w-full max-w-[2560px] mx-auto">
           <div className="w-full max-w-[1920px] mx-auto ">
             {children}
           </div>
         </div>
       </main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <Footer footer={footer} header={header} publicStoreDomain={publicStoreDomain} />
     </Aside.Provider>
   );
 }
@@ -72,14 +59,11 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
     <Suspense fallback={<p>Loading cart ...</p>}>
       <Await resolve={cart}>
         {(cartData) => (
-          <Aside
-            type="cart"
-            heading={
-              <span className="text-base font-normal">
-                {`Your Cart${cartData?.totalQuantity ? ` (${cartData.totalQuantity})` : ''}`}
-              </span>
-            }
-          >
+          <Aside type="cart" heading={
+            <span className="text-base font-normal">
+              {`Your Cart${cartData?.totalQuantity ? ` (${cartData.totalQuantity})` : ''}`}
+            </span>
+          }>
             <CartMain cart={cartData} layout="aside" />
           </Aside>
         )}
@@ -104,36 +88,11 @@ function SearchAside() {
   // ];
 
   const trendingSearches: Pick<Collection, "handle" | "id" | "title" | "trackingParameters">[] = [
-    {
-      id: 'gid://shopify/Collection/1',
-      handle: 'golf-balls',
-      title: 'Vice Pro Plus',
-      trackingParameters: null
-    },
-    {
-      id: 'gid://shopify/Collection/2',
-      handle: 'golf-balls',
-      title: 'Vice Pro',
-      trackingParameters: null
-    },
-    {
-      id: 'gid://shopify/Collection/3',
-      handle: 'golf-balls',
-      title: 'Vice Golf Pure 2024',
-      trackingParameters: null
-    },
-    {
-      id: 'gid://shopify/Collection/4',
-      handle: 'golf-balls',
-      title: 'Vice Drive',
-      trackingParameters: null
-    },
-    {
-      id: 'gid://shopify/Collection/5',
-      handle: 'golf-balls',
-      title: 'Vice Tour',
-      trackingParameters: null
-    }
+    { id: 'gid://shopify/Collection/1', handle: 'golf-balls', title: 'Vice Pro Plus', trackingParameters: null },
+    { id: 'gid://shopify/Collection/2', handle: 'golf-balls', title: 'Vice Pro', trackingParameters: null },
+    { id: 'gid://shopify/Collection/3', handle: 'golf-balls', title: 'Vice Golf Pure 2024', trackingParameters: null },
+    { id: 'gid://shopify/Collection/4', handle: 'golf-balls', title: 'Vice Drive', trackingParameters: null },
+    { id: 'gid://shopify/Collection/5', handle: 'golf-balls', title: 'Vice Tour', trackingParameters: null }
   ];
 
   const handleCollectionNavigate = (
@@ -154,9 +113,9 @@ function SearchAside() {
 
   useEffect(() => {
     if (
-      fetcher.state === "idle"
-      && fetcher.data?.collection?.id
-      && fetcher.data?.collection?.title
+      fetcher.state === "idle" &&
+      fetcher.data?.collection?.id &&
+      fetcher.data?.collection?.title
     ) {
       const { id, title } = fetcher.data.collection
       close()
@@ -194,7 +153,16 @@ function SearchAside() {
                         list={queriesDatalistId}
                         autoComplete="off"
                         autoFocus
-                        style={{ borderRadius: '9999px', margin: 0, padding: '12px 16px 12px 48px', width: '100%', maxWidth: 'none', flex: '1 1 auto', border: 'none', outline: 'none' }}
+                        style={{
+                          borderRadius: '9999px',
+                          margin: 0,
+                          padding: '12px 16px 12px 48px',
+                          width: '100%',
+                          maxWidth: 'none',
+                          flex: '1 1 auto',
+                          border: 'none',
+                          outline: 'none'
+                        }}
                         className="appearance-none bg-gray-200 border-0 text-base md:text-lg focus:ring-0 focus:outline-none transition-colors placeholder:text-gray-500 rounded-full m-0"
                       />
                     </div>
@@ -244,7 +212,7 @@ function SearchAside() {
                           Suggestions
                         </h3>
                         <div className="flex flex-col gap-2">
-                          {/* ! quires map  */}
+                          {/* ! quires map */}
                           {/* {queries.map((item, i) => {
                             const text = typeof item === 'string' ? item : item.text;
                             if (!text) return null;
@@ -382,6 +350,7 @@ function MobileMenuAside({
   const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
+
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (

@@ -11,10 +11,11 @@
     "lint": "eslint --no-error-on-unmatched-pattern .",
     "typecheck": "react-router typegen && tsc --noEmit",
     "codegen": "shopify hydrogen codegen && react-router typegen",
-    "deploy" : "shopify hydrogen deploy"
+    "deploy": "shopify hydrogen deploy"
   },
   "prettier": "@shopify/prettier-config",
   "dependencies": {
+    "@portabletext/react": "^6.0.2",
     "@shopify/hydrogen": "2025.7.0",
     "axios": "^1.13.1",
     "country-currency-map": "^2.1.7",
