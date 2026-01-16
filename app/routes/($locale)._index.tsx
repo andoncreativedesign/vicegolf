@@ -123,24 +123,25 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       id: node.id,
       title: node.title,
       productType: node.productType,
-      vendor: node.vendor,
-      handle: node.handle,
-      featuredImage: node.featuredImage ? {
+      tags: node?.tags,
+      vendor: node?.vendor,
+      handle: node?.handle,
+      featuredImage: node?.featuredImage ? {
         id: node.featuredImage.id,
         url: node.featuredImage.url,
         altText: node.featuredImage.altText,
         width: node.featuredImage.width,
         height: node.featuredImage.height
       } : null,
-      variantImage: node.variantImage?.reference?.image ? {
+      variantImage: node?.variantImage?.reference?.image ? {
         id: node.variantImage.reference.id,
         url: node.variantImage.reference.image.url,
         altText: node.variantImage.reference.image.altText,
         width: node.variantImage.reference.image.width,
         height: node.variantImage.reference.image.height
       } : null,
-      availableForSale: node.availableForSale > 0,
-      family: node.family ? {
+      availableForSale: (node?.availableForSale || 0) > 0,
+      family: node?.family ? {
         id: node.family.id,
         namespace: node.family.namespace,
         key: node.family.key,
@@ -159,7 +160,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     const updatedProduct = products?.map(p => {
       const obj = {
         ...p,
-        variantFamilyProducts: familyGroups[p.family?.value] || [],
+        tags: p?.tags || [],
+        variantFamilyProducts: familyGroups[p?.family?.value] || [],
       }
       if (obj?.variantFamilyProducts?.length > 0) {
         // console.log(obj)

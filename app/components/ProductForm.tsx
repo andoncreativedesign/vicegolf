@@ -29,6 +29,10 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   shippingDetails?: ShippingDetails | null;
   clubVariants?: ClubVariant[];
   currentProductId: string;
+  bundleBtn: {
+    text: string;
+    handle: string;
+  } | null
 }>(({
   productOptions,
   selectedVariant,
@@ -39,7 +43,8 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   colorVariants,
   shippingDetails,
   clubVariants,
-  currentProductId
+  currentProductId,
+  bundleBtn,
 }, ref) => {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -123,6 +128,12 @@ export const ProductForm = forwardRef<HTMLDivElement, {
     const type = productType?.toLowerCase() || '';
     return !typesWithoutQuantity.some(t => type.includes(t));
   };
+
+  const handleBundleBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    navigate(`/products/${bundleBtn?.handle}`);
+  };
+
   return (
     <div
       ref={ref}
@@ -186,6 +197,17 @@ export const ProductForm = forwardRef<HTMLDivElement, {
             unitPrice={unitPriceAmount}
             currencyCode={currencyCode}
           />
+        </div>
+      )}
+
+      {bundleBtn && (
+        <div className="mb-6 md:max-w-[399px]">
+          <button
+            className="w-full cursor-pointer bg-white text-black border border-black py-4 px-6 rounded-full font-medium text-base transition-all duration-300"
+            onClick={(e) => handleBundleBtnClick(e)}
+          >
+            {bundleBtn?.text || 'not text'}
+          </button>
         </div>
       )}
 
