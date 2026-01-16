@@ -73,7 +73,6 @@ export function Header({
   banner,
 }: HeaderProps & { banner?: BannerData }) {
   // Debug log to check banner prop in Header
-  console.log('Header component - banner prop:', banner);
 
   const { shop, menu } = header;
   const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
