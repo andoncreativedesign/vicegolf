@@ -77,8 +77,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   // Fetch color variants if product has family metafield
   const bundleBtnHandle = product?.metafields?.find((item: any) => item?.key === "bundle_btn_handle")
   const bundleBtnText = product?.metafields?.find((item: any) => item?.key === "bundle_btn_text")
-  const bundleBtn = bundleBtnHandle && bundleBtnText ? { handle: bundleBtnHandle.value, text: bundleBtnText.value } : null
-
+  const bundleBtn = bundleBtnHandle && bundleBtnText ? { handle: bundleBtnHandle?.value, text: bundleBtnText?.value } : null
+           
   const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
   const family = product?.metafields?.find((item: any) => item?.key === "family")
   let colorVariants: UIColorVariant[] = [];
