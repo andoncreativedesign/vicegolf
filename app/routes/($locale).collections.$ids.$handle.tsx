@@ -334,6 +334,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             id: node.id,
             title: node.title,
             productType: node.productType,
+            tags: node.tags || [],
             vendor: node.vendor,
             handle: node.handle,
             featuredImage: node.featuredImage ? {

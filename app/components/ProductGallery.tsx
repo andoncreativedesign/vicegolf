@@ -18,6 +18,7 @@ type ProductGalleryProps = {
   onImageSelect: (image: ProductImageType) => void;
   mainImageClassNames?: string;
   isAvailable?: boolean;
+  tags?: string[];
 };
 
 export function ProductGallery({
@@ -26,6 +27,7 @@ export function ProductGallery({
   onImageSelect,
   mainImageClassNames = '',
   isAvailable = true,
+  tags = [],
 }: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobileView, setIsMobileView] = useState(false);
@@ -161,13 +163,21 @@ export function ProductGallery({
       <div
         className="relative w-full mx-auto group bg-[#f6f6f6] rounded-md overflow-hidden aspect-square max-h-[700px]"
       >
-        {!isAvailable && (
-          <div className="absolute top-5 left-5 z-20">
-            <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-5 py-2.5 rounded-md">
+        <div className="absolute top-5 left-5 z-20 flex flex-col gap-2">
+          {!isAvailable && (
+            <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-5 py-2.5 rounded-md shadow-sm">
               Sold out
             </span>
-          </div>
-        )}
+          )}
+          {isAvailable && (tags || [])?.filter((tag: string) => {
+            const t = tag.trim().toLowerCase();
+            return t.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
+          }).map((tag: string) => (
+            <span key={tag} className="bg-black text-white text-[15px] font-medium px-5 py-2.5 rounded-md shadow-sm capitalize">
+              {tag.trim().replace(/^badge:/i, '')}
+            </span>
+          ))}
+        </div>
         <div className="w-full h-full overflow-hidden" ref={emblaRef}>
           <div className="flex w-full h-full touch-pan-y">
             {images.map((image, idx) => (

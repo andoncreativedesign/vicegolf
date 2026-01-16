@@ -53,6 +53,7 @@ fragment ProductCard on Product {
   title
   handle
   productType
+  tags
   vendor
   featuredImage {
     id
@@ -169,6 +170,7 @@ fragment ProductCard on Product {
   handle
   availableForSale
   productType
+  tags
   vendor
   featuredImage {
     id
@@ -183,10 +185,6 @@ fragment ProductCard on Product {
       id
       availableForSale
       price {
-        amount
-        currencyCode
-      }
-      compareAtPrice {
         amount
         currencyCode
       }
@@ -331,6 +329,7 @@ export const FAMILY_GROUP_QUERY = `#graphql
         title
         handle
         productType
+        tags
         vendor
         featuredImage {
           id

@@ -42,26 +42,39 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                   height: '100%'
                 }}
               />
-              {!product.availableForSale && (
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded">
+              <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                {!product.availableForSale && (
+                  <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded shadow-sm">
                     Sold out
                   </span>
-                </div>
-              )}
+                )}
+                {product.availableForSale && (product.tags || [])?.filter((tag: string) => {
+                  const t = tag.trim().toLowerCase();
+                  return t.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
+                }).map((tag: string) => (
+                  <span key={tag} className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm capitalize">
+                    {tag.trim().replace(/^badge:/i, '')}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center relative">
               <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {!product.availableForSale && (
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded">
+              <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                {!product.availableForSale && (
+                  <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded shadow-sm">
                     Sold out
                   </span>
-                </div>
-              )}
+                )}
+                {product.tags?.filter((tag: string) => tag.startsWith('badge:')).map((tag: string) => (
+                  <span key={tag} className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm">
+                    {tag.replace('badge:', '')}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>

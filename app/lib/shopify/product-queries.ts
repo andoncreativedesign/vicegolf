@@ -13,6 +13,7 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
     handle
     availableForSale
     productType
+    tags
     vendor
     featuredImage {
       id
@@ -83,6 +84,7 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
           title
           handle
           productType
+          tags
           vendor
           featuredImage {
             id
@@ -367,6 +369,7 @@ fragment ProductItem on Product {
   title
   availableForSale
   productType
+  tags
   vendor
   
   metafield(namespace: "custom", key: "family") {
@@ -578,6 +581,7 @@ fragment ProductCardFragment on Product {
     handle
     availableForSale
     productType
+    tags
     vendor
     featuredImage {
       id
@@ -619,6 +623,7 @@ fragment ProductCardFragment on Product {
     handle
     availableForSale
     productType
+    tags
     vendor
     featuredImage {
       id
@@ -673,6 +678,7 @@ fragment ColorVariantProduct on Product {
   handle
   availableForSale
   productType
+  tags
   vendor
   metafield(namespace: "custom", key: "family") {
     id
@@ -882,6 +888,7 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
           title
           availableForSale: totalInventory
           productType
+          tags
           vendor
 
           # MAIN: Variant image metafield (file_reference)
@@ -997,6 +1004,7 @@ const PRODUCT_FRAGMENT = `#graphql
     handle
     availableForSale
     productType
+    tags
     descriptionHtml
     description
     encodedVariantExistence

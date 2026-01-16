@@ -338,6 +338,7 @@ export default function Product() {
               selectedImage={selectedImage}
               onImageSelect={handleImageSelect}
               isAvailable={selectedVariant?.availableForSale}
+              tags={product.tags}
             />
           ) : (
             <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">

@@ -123,6 +123,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       id: node.id,
       title: node.title,
       productType: node.productType,
+      tags: node.tags || [],
       vendor: node.vendor,
       handle: node.handle,
       featuredImage: node.featuredImage ? {
@@ -159,6 +160,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     const updatedProduct = products?.map(p => {
       const obj = {
         ...p,
+        tags: p.tags || [],
         variantFamilyProducts: familyGroups[p.family?.value] || [],
       }
       if (obj?.variantFamilyProducts?.length > 0) {
