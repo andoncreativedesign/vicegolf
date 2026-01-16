@@ -19,6 +19,7 @@ type ProductGalleryProps = {
   mainImageClassNames?: string;
   isAvailable?: boolean;
   tags?: string[];
+  badge_colors?: string;
 };
 
 export function ProductGallery({
@@ -28,6 +29,7 @@ export function ProductGallery({
   mainImageClassNames = '',
   isAvailable = true,
   tags = [],
+  badge_colors,
 }: ProductGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobileView, setIsMobileView] = useState(false);
@@ -170,13 +172,34 @@ export function ProductGallery({
             </span>
           )}
           {isAvailable && (tags || [])?.filter((tag: string) => {
-            const t = tag?.trim()?.toLowerCase();
+            const t = tag?.trim()?.toLowerCase()?.replace(/[^a-z0-9:]/g, '');
             return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
-          }).map((tag: string) => (
-            <span key={tag} className="bg-black text-white text-[15px] font-medium px-5 py-2.5 rounded-md shadow-sm capitalize">
-              {tag?.trim()?.replace(/^badge:/i, '')}
-            </span>
-          ))}
+          }).map((tag: string) => {
+            const tagText = tag?.trim()?.replace(/^badge:/i, '')?.replace(/[^a-z0-9\s]/gi, '');
+            const normalizedTag = tagText?.trim()?.toLowerCase();
+            let customStyles = {};
+            try {
+              const rawColors = badge_colors;
+              const colorsString = typeof rawColors === 'string'
+                ? rawColors
+                : (rawColors as any)?.value;
+              const parsedColors = colorsString ? JSON.parse(colorsString) : {};
+              customStyles = parsedColors[normalizedTag] || {};
+            } catch (e) { }
+
+            return (
+              <span
+                key={tag}
+                className="text-[15px] font-medium px-5 py-2.5 rounded-md shadow-sm capitalize"
+                style={{
+                  backgroundColor: (customStyles as any).bg || 'black',
+                  color: (customStyles as any).text || 'white'
+                }}
+              >
+                {tagText}
+              </span>
+            );
+          })}
         </div>
         <div className="w-full h-full overflow-hidden" ref={emblaRef}>
           <div className="flex w-full h-full touch-pan-y">

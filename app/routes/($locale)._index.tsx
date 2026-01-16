@@ -147,7 +147,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         key: node.family.key,
         type: node.family.type,
         value: node.family.value
-      } : null
+      } : null,
+      badge_colors: node?.badge_colors?.value || null
     }));
 
     familyGroups[fam.value] = products;
@@ -161,6 +162,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       const obj = {
         ...p,
         tags: p?.tags || [],
+        badge_colors: p?.badge_colors || null,
         variantFamilyProducts: familyGroups[p?.family?.value] || [],
       }
       if (obj?.variantFamilyProducts?.length > 0) {

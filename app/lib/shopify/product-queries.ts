@@ -15,6 +15,9 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
     productType
     tags
     vendor
+    badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+      value
+    }
     featuredImage {
       id
       url
@@ -86,6 +89,9 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
           productType
           tags
           vendor
+          badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+            value
+          }
           featuredImage {
             id
             url
@@ -371,6 +377,9 @@ fragment ProductItem on Product {
   productType
   tags
   vendor
+  badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+    value
+  }
   
   metafield(namespace: "custom", key: "family") {
     id
@@ -583,6 +592,9 @@ fragment ProductCardFragment on Product {
     productType
     tags
     vendor
+    badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+      value
+    }
     featuredImage {
       id
       url
@@ -625,6 +637,9 @@ fragment ProductCardFragment on Product {
     productType
     tags
     vendor
+    badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+      value
+    }
     featuredImage {
       id
       url
@@ -680,6 +695,9 @@ fragment ColorVariantProduct on Product {
   productType
   tags
   vendor
+  badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+    value
+  }
   metafield(namespace: "custom", key: "family") {
     id
     namespace
@@ -822,6 +840,9 @@ export const ADMIN_PRODUCTS_BY_CLUB_FAMILY = `#graphql
             width
             height
           }
+          badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+            value
+          }
         }
       }
     }
@@ -870,6 +891,9 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
             altText
             width
             height
+          }
+          badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+            value
           }
         }
       }
@@ -930,6 +954,10 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
             altText
             width
             height
+          }
+
+          badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+            value
           }
 
           # Product family tag/metafield
@@ -1022,6 +1050,7 @@ const PRODUCT_FRAGMENT = `#graphql
       {namespace: "custom", key: "primary_collection_handle"}
       {namespace: "custom", key: "club_family"}
       {namespace: "custom", key: "club_hand_orientation"}
+      {namespace: "custom", key: "badge_colors"}
     ]) {
       id
       namespace

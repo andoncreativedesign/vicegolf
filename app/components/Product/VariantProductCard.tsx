@@ -45,6 +45,7 @@ type ProductCardProps = {
     availableForSale: boolean;
     productType?: string;
     tags?: string[];
+    badge_colors?: string;
     family: FamilyMetaField;
     variantFamilyProducts: Omit<
       ProductCardProps['product'],
@@ -226,13 +227,34 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       </span>
                     )}
                     {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.filter((tag: string) => {
-                      const t = tag?.trim()?.toLowerCase();
+                      const t = tag?.trim()?.toLowerCase()?.replace(/[^a-z0-9:]/g, '');
                       return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
-                    }).map((tag: string) => (
-                      <span key={tag} className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm capitalize">
-                        {tag?.trim()?.replace(/^badge:/i, '')}
-                      </span>
-                    ))}
+                    }).map((tag: string) => {
+                      const tagText = tag?.trim()?.replace(/^badge:/i, '')?.replace(/[^a-z0-9\s]/gi, '');
+                      const normalizedTag = tagText?.trim()?.toLowerCase();
+                      let customStyles = {};
+                      try {
+                        const rawColors = allVariants[selectedVariant]?.badge_colors || product.badge_colors;
+                        const colorsString = typeof rawColors === 'string'
+                          ? rawColors
+                          : (rawColors as any)?.value;
+                        const badgeColors = colorsString ? JSON.parse(colorsString) : {};
+                        customStyles = badgeColors[normalizedTag] || {};
+                      } catch (e) { }
+
+                      return (
+                        <span
+                          key={tag}
+                          className="text-[15px] font-medium px-4 py-2 rounded shadow-sm capitalize"
+                          style={{
+                            backgroundColor: (customStyles as any).bg || 'black',
+                            color: (customStyles as any).text || 'white'
+                          }}
+                        >
+                          {tagText}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               )}

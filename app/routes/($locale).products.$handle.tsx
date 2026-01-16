@@ -339,6 +339,7 @@ export default function Product() {
               onImageSelect={handleImageSelect}
               isAvailable={selectedVariant?.availableForSale}
               tags={product.tags}
+              badge_colors={product?.metafields?.find((m: any) => m?.key === 'badge_colors')?.value}
             />
           ) : (
             <div className="bg-gray-100 aspect-square flex items-center justify-center rounded-lg">
