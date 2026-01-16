@@ -75,6 +75,10 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   }
   redirectIfHandleIsLocalized(request, { handle, data: product });
   // Fetch color variants if product has family metafield
+  const bundleBtnHandle = product?.metafields?.find((item: any) => item?.key === "bundle_btn_handle")
+  const bundleBtnText = product?.metafields?.find((item: any) => item?.key === "bundle_btn_text")
+  const bundleBtn = bundleBtnHandle && bundleBtnText ? { handle: bundleBtnHandle?.value, text: bundleBtnText?.value } : null
+           
   const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
   const family = product?.metafields?.find((item: any) => item?.key === "family")
   let colorVariants: UIColorVariant[] = [];
@@ -151,8 +155,9 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       console.error('Error fetching club variants:', error);
     }
   }
-  return { product, colorVariants, clubVariants };
+  return { product, colorVariants, clubVariants, bundleBtn };
 }
+
 async function loadDeferredData({ context, request, product }: Route.LoaderArgs & { product?: any }) {
   const url = new URL(request.url);
   const recommendedCursor = url.searchParams.get('recommendedCursor');
@@ -196,7 +201,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   return { recommendedProducts, shippingDetails, showBestSellers };
 }
 export default function Product() {
-  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   // useEffect(() => {
@@ -360,6 +365,7 @@ export default function Product() {
             shippingDetails={shippingDetails}
             currentProductId={product.id}
             clubVariants={clubVariants}
+            bundleBtn={bundleBtn}
           />
         </div>
       </div>

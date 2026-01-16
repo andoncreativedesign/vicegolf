@@ -1022,6 +1022,8 @@ const PRODUCT_FRAGMENT = `#graphql
       {namespace: "custom", key: "primary_collection_handle"}
       {namespace: "custom", key: "club_family"}
       {namespace: "custom", key: "club_hand_orientation"}
+      {namespace: "custom", key: "bundle_btn_text"}
+      {namespace: "custom", key: "bundle_btn_handle"}
     ]) {
       id
       namespace
