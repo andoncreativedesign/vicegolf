@@ -226,11 +226,11 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       </span>
                     )}
                     {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.filter((tag: string) => {
-                      const t = tag.trim().toLowerCase();
-                      return t.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
+                      const t = tag?.trim()?.toLowerCase();
+                      return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
                     }).map((tag: string) => (
                       <span key={tag} className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm capitalize">
-                        {tag.trim().replace(/^badge:/i, '')}
+                        {tag?.trim()?.replace(/^badge:/i, '')}
                       </span>
                     ))}
                   </div>

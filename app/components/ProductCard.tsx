@@ -48,12 +48,12 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {product.availableForSale && (product.tags || [])?.filter((tag: string) => {
-                  const t = tag.trim().toLowerCase();
-                  return t.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
+                {product?.availableForSale && (product?.tags || [])?.filter((tag: string) => {
+                  const t = tag?.trim()?.toLowerCase();
+                  return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
                 }).map((tag: string) => (
                   <span key={tag} className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm capitalize">
-                    {tag.trim().replace(/^badge:/i, '')}
+                    {tag?.trim()?.replace(/^badge:/i, '')}
                   </span>
                 ))}
               </div>
