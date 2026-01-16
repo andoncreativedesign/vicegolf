@@ -219,13 +219,21 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       objectPosition: 'center',
                     }}
                   />
-                  {allVariants[selectedVariant] && !allVariants[selectedVariant].availableForSale && (
-                    <div className="absolute top-4 left-4 z-10">
-                      <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded">
+                  <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                    {allVariants[selectedVariant] && !allVariants[selectedVariant].availableForSale && (
+                      <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded shadow-sm">
                         Sold out
                       </span>
-                    </div>
-                  )}
+                    )}
+                    {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.filter((tag: string) => {
+                      const t = tag?.trim()?.toLowerCase();
+                      return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
+                    }).map((tag: string) => (
+                      <span key={tag} className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm capitalize">
+                        {tag?.trim()?.replace(/^badge:/i, '')}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
