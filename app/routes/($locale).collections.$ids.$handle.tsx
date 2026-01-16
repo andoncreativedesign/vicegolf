@@ -202,7 +202,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     ]);
 
     console.log('\n\ngolf collection ');
-    console.log(JSON.stringify(collection.nodes[0].products.edges));
+    console.log(JSON.stringify(collection?.nodes[0]?.products?.edges));
 
     if (!collection || !collection.nodes?.length) {
         throw new Response(`Collection ${decodedHandle} not found`, {

@@ -160,17 +160,6 @@ export const ProductForm = forwardRef<HTMLDivElement, {
         )}
       </div>
 
-      {bundleBtn && (
-        <div className="mb-6 md:max-w-[399px]">
-          <button
-            className="w-full cursor-pointer bg-white text-black border border-black py-4 px-6 rounded-full font-medium text-base transition-all duration-300"
-            onClick={(e) => handleBundleBtnClick(e)}
-          >
-            {bundleBtn?.text || 'not text'}
-          </button>
-        </div>
-      )}
-
       {/* Product Description */}
       {description && (
         <div
@@ -208,6 +197,17 @@ export const ProductForm = forwardRef<HTMLDivElement, {
             unitPrice={unitPriceAmount}
             currencyCode={currencyCode}
           />
+        </div>
+      )}
+
+      {bundleBtn && (
+        <div className="mb-6 md:max-w-[399px]">
+          <button
+            className="w-full cursor-pointer bg-white text-black border border-black py-4 px-6 rounded-full font-medium text-base transition-all duration-300"
+            onClick={(e) => handleBundleBtnClick(e)}
+          >
+            {bundleBtn?.text || 'not text'}
+          </button>
         </div>
       )}
 
