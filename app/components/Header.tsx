@@ -82,7 +82,6 @@ export function Header({
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    console.log('navigation items', menuItems)
   }, [])
 
   useEffect(() => {

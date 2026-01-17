@@ -70,7 +70,6 @@ export async function getMenuItems(
 
     return transformMenuItems(menu);
   } catch (error) {
-    console.error('Error fetching menu items:', error);
     return [];
   }
 }

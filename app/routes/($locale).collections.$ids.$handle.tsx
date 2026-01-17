@@ -182,8 +182,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     const decodedIds = JSON.parse(decodeURIComponent(ids));
     const decodedHandle = decodeURIComponent(handle); // Keep for UI/display (e.g., breadcrumbs)
 
-    console.log('🔍 Debug: URL handle:', handle);
-    console.log('🔍 Debug: Decoded handle:', decodedHandle);
+    
 
     // OLD: Convert space-separated handle to Shopify format (golf-balls)
     // const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');
@@ -226,7 +225,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     const combineCollectionProducts = (collections: ShopifyCollectionResponse): ShopifyCollection | null => {
         try {
             if (!collections?.nodes?.length) {
-                console.warn('No collection nodes returned from Shopify');
                 return null;
             }
 
@@ -236,7 +234,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             );
 
             if (validCollections.length === 0) {
-                console.warn('No collections with products found');
                 // Instead of returning null, return the first node with empty products
                 return {
                     ...collections.nodes[0]!,
@@ -278,7 +275,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 }
             };
         } catch (error) {
-            console.error('Error in combineCollectionProducts:', error);
+            // console.error('Error in combineCollectionProducts:', error);
             // Fallback: return first collection even if empty
             return collections.nodes[0] ? {
                 ...collections.nodes[0],
@@ -394,10 +391,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         }
     };
 
-    console.log('\n\n updatedCollection');
-    console.log(updatedCollection?.products.edges[0].node);
-    console.log('\n\nproductsWithColorVariants');
-    console.log(updatedCollectionWithVariants.products.edges[0].node);
 
     return {
         collection: updatedCollectionWithVariants,

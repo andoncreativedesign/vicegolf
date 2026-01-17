@@ -17,7 +17,6 @@ export function CustomerReviews() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ rating, review, headline, name, email });
     setShowModal(false);
     setRating(0);
     setReview("");

@@ -26,7 +26,6 @@ export async function loader({request, context}: Route.LoaderArgs) {
       : regularSearch({request, context});
 
   searchPromise.catch((error: Error) => {
-    console.error(error);
     return {term: '', result: null, error: error.message};
   });
 

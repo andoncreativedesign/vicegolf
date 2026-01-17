@@ -556,7 +556,7 @@ export async function getAllListings(): Promise<SanityListing[]> {
     console.log('🔍 Debug: All listings in Sanity:', result);
     return result || [];
   } catch (error) {
-    console.error('Error fetching all listings:', error);
+    .error('Error fetching all listings:', error);
     return [];
   }
 }

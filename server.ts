@@ -54,7 +54,6 @@ export default {
 
       return response;
     } catch (error) {
-      console.error(error);
       return new Response('An unexpected error occurred', {status: 500});
     }
   },

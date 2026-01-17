@@ -94,7 +94,6 @@ export default function OrderRoute() {
 
   function isOrderCancelable(order: OrderQuery['order']): boolean {
     if (!order) return false;
-    console.log("Checking order eligibility:", order);
 
     const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
     if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
@@ -115,7 +114,6 @@ export default function OrderRoute() {
     }
 
     // Passed all rough checks
-    console.log("Order is eligible for cancellation:", order);
     return true;
   }
 
@@ -143,7 +141,6 @@ export default function OrderRoute() {
     }
 
     // Passed all checks - order is returnable
-    console.log("Order is eligible for return:", order);
     return true;
   }
 

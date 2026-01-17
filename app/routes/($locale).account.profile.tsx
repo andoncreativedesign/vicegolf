@@ -46,7 +46,6 @@ export async function action({ request, context }: Route.ActionArgs) {
   // Check if user is logged in
   const isLoggedIn = await customerAccount.isLoggedIn();
   if (!isLoggedIn) {
-    console.error('User is not logged in');
     return data(
       { error: 'Please sign in to update your profile', customer: null },
       { status: 401 },
@@ -73,7 +72,6 @@ export async function action({ request, context }: Route.ActionArgs) {
       if (firstName !== undefined) customerUpdateInput.firstName = firstName;
       if (lastName !== undefined) customerUpdateInput.lastName = lastName;
 
-      console.log('Updating customer name with Customer Account API:', customerUpdateInput);
 
       try {
         const { data: nameUpdateData, errors: nameErrors } = await customerAccount.mutate(
@@ -86,20 +84,16 @@ export async function action({ request, context }: Route.ActionArgs) {
         );
 
         if (nameErrors?.length) {
-          console.error('Name Update GraphQL Errors:', JSON.stringify(nameErrors, null, 2));
           throw new Error(nameErrors[0].message || 'Failed to update name');
         }
 
         const nameUpdate = nameUpdateData?.customerUpdate;
         if (nameUpdate?.userErrors?.length) {
-          console.error('Name Update Errors:', JSON.stringify(nameUpdate.userErrors, null, 2));
           const error = nameUpdate.userErrors[0];
           throw new Error(error.message || 'Failed to update name');
         }
 
-        console.log('Successfully updated customer name');
       } catch (error: any) {
-        console.error('Error updating customer name:', error);
         throw new Error(`Failed to update name: ${error.message}`);
       }
     }
@@ -182,7 +176,6 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Error(errorMessage.trim());
         }
 
-        console.log('Successfully updated customer via Admin API:', response.data);
         return response.data.customer; // Return the updated customer data
       } catch (error: any) {
         console.error('Error in Admin API call:', {
@@ -206,10 +199,6 @@ export async function action({ request, context }: Route.ActionArgs) {
       customer: { email, firstName, lastName, phone },
     };
   } catch (error: any) {
-    console.error('Profile update error:', {
-      message: error.message,
-      stack: error.stack,
-    });
 
     return {
       error: error.message || 'An error occurred while updating your profile',
@@ -225,11 +214,6 @@ export default function AccountProfile() {
 
   // Debug: Log the customer data to see its structure
   React.useEffect(() => {
-    console.log('Customer Data:', customer);
-    console.log('Email from customer:', customer?.emailAddress?.emailAddress);
-    console.log('First name from customer:', customer?.firstName);
-    console.log('Last name from customer:', customer?.lastName);
-
     // Update form data when customer data changes
     if (customer) {
       const email = customer?.emailAddress?.emailAddress || customer?.email || '';
