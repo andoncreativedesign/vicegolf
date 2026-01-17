@@ -358,7 +358,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 key: node.family.key,
                 type: node.family.type,
                 value: node.family.value
-            } : null
+            } : null,
+            badge_colors: node?.badge_colors?.value || null
         }));
 
         familyGroups[fam.value] = products;
@@ -368,6 +369,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         const updatedProduct = products?.map(p => ({
             ...p,
             tags: p?.tags || [],
+            badge_colors: p?.badge_colors || null,
             variantFamilyProducts: familyGroups[p?.family?.value] || [],
         }));
         return updatedProduct;
