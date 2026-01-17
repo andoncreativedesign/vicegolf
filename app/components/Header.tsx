@@ -121,7 +121,7 @@ export function Header({
       {/* Top Header Bar - Collapses on Scroll */}
       <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
         {/* Left: Mobile Menu Toggle */}
-        <div className="flex items-center">
+        <div className="flex-1 flex items-center">
           <HeaderMenuMobileToggle />
           {/* Country selector is now only in the mobile menu */}
           <div className="hidden lg:block ml-4">
@@ -130,7 +130,7 @@ export function Header({
         </div>
 
         {/* Center: Logo */}
-        <div className="flex-1 flex justify-center pl-12 md:pl-0">
+        <div className="flex-none flex justify-center">
           {/* <NavLink prefetch="intent" to="/" className="flex items-center">
             <img src="/vice_logo.svg" alt="Vice Logo" className="h-8 md:h-12 w-auto" />
           </NavLink> */}
@@ -153,7 +153,7 @@ export function Header({
         </div>
 
         {/* Right: Icons */}
-        <div className="flex items-center space-x-2">
+        <div className="flex-1 flex items-center justify-end space-x-2">
           <SearchToggle />
           <AccountToggle isLoggedIn={isLoggedIn} />
           <CartToggle cart={cart} />
@@ -354,10 +354,10 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
       {/* {isOpen && (
         <>
           {/* Backdrop */}
-          {/* <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} /> */}
+      {/* <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} /> */}
 
-          {/* Dropdown Content */}
-          {/* <div className={`fixed ${isMobile ? 'bottom-16 left-4 right-4' : 'top-[var(--header-height, 80px)] left-4 w-64'} bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[50vh] overflow-y-auto px-4`}>
+      {/* Dropdown Content */}
+      {/* <div className={`fixed ${isMobile ? 'bottom-16 left-4 right-4' : 'top-[var(--header-height, 80px)] left-4 w-64'} bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[50vh] overflow-y-auto px-4`}>
             <div className={`py-2 ${isMobile ? 'flex flex-col-reverse' : ''}`}>
               {filteredCountries.map((country) => (
                 <button
