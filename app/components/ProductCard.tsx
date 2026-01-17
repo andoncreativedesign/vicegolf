@@ -48,7 +48,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {(product?.tags || [])?.map((tag: string) => {
+                {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                   const normalizedTag = tagText?.toLowerCase();
                   let customStyles = {};
@@ -87,7 +87,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {(product?.tags || [])?.map((tag: string) => {
+                {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                   const normalizedTag = tagText?.toLowerCase();
                   let customStyles = {};

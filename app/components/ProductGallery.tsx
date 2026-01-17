@@ -171,7 +171,7 @@ export function ProductGallery({
               Sold out
             </span>
           )}
-          {(tags || [])?.map((tag: string) => {
+          {isAvailable && (tags || [])?.map((tag: string) => {
             const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
             const normalizedTag = tagText?.toLowerCase();
             let customStyles = {};
