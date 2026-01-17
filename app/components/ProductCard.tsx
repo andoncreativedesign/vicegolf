@@ -57,7 +57,12 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     const colorsString = typeof rawColors === 'string'
                       ? rawColors
                       : (rawColors as any)?.value;
-                    const badgeColors = colorsString ? JSON.parse(colorsString) : {};
+                    const parsed = colorsString ? JSON.parse(colorsString) : {};
+                    // Create case-insensitive lookup object
+                    const badgeColors = Object.keys(parsed).reduce((acc: any, key) => {
+                      acc[key.toLowerCase()] = parsed[key];
+                      return acc;
+                    }, {});
                     customStyles = badgeColors[normalizedTag] || {};
                   } catch (e) { }
 
@@ -95,7 +100,11 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     const colorsString = typeof product.badge_colors === 'string'
                       ? product.badge_colors
                       : (product.badge_colors as any)?.value;
-                    const badgeColors = colorsString ? JSON.parse(colorsString) : {};
+                    const parsed = colorsString ? JSON.parse(colorsString) : {};
+                    const badgeColors = Object.keys(parsed).reduce((acc: any, key) => {
+                      acc[key.toLowerCase()] = parsed[key];
+                      return acc;
+                    }, {});
                     customStyles = badgeColors[normalizedTag] || {};
                   } catch (e) { }
 

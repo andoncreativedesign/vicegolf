@@ -235,7 +235,11 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         const colorsString = typeof rawColors === 'string'
                           ? rawColors
                           : (rawColors as any)?.value;
-                        const badgeColors = colorsString ? JSON.parse(colorsString) : {};
+                        const parsed = colorsString ? JSON.parse(colorsString) : {};
+                        const badgeColors = Object.keys(parsed).reduce((acc: any, key) => {
+                          acc[key.toLowerCase()] = parsed[key];
+                          return acc;
+                        }, {});
                         customStyles = badgeColors[normalizedTag] || {};
                       } catch (e) { }
 
