@@ -1051,6 +1051,8 @@ const PRODUCT_FRAGMENT = `#graphql
       {namespace: "custom", key: "club_family"}
       {namespace: "custom", key: "club_hand_orientation"}
       {namespace: "custom", key: "badge_colors"}
+      {namespace: "custom", key: "bundle_btn_text"}
+      {namespace: "custom", key: "bundle_btn_handle"}
     ]) {
       id
       namespace
