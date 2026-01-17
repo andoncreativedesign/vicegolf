@@ -180,8 +180,12 @@ export function ProductGallery({
               const colorsString = typeof rawColors === 'string'
                 ? rawColors
                 : (rawColors as any)?.value;
-              const parsedColors = colorsString ? JSON.parse(colorsString) : {};
-              customStyles = parsedColors[normalizedTag] || {};
+              const parsed = colorsString ? JSON.parse(colorsString) : {};
+              const badgeColors = Object.keys(parsed).reduce((acc: any, key) => {
+                acc[key.toLowerCase()] = parsed[key];
+                return acc;
+              }, {});
+              customStyles = badgeColors[normalizedTag] || {};
             } catch (e) { }
 
             return (
