@@ -58,6 +58,7 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
         setShowBanner(true);
       }
     } catch (error) {
+      console.error('Error loading cookie:', error);
       setShowBanner(true);
     }
   }, []);
@@ -78,6 +79,7 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
       setConsent(updatedConsent);
       setShowBanner(false);
     } catch (error) {
+      console.error('Error saving cookie:', error);
     }
   };
   // Debug render

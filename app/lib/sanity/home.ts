@@ -328,6 +328,7 @@ export async function getHomePageData(): Promise<HomePageDataTransformed | null>
     return transformedData;
 
   } catch (error) {
+    console.error('Error fetching home page data:', error);
     return null;
   }
 }
@@ -365,6 +366,7 @@ export async function getShippingDetails(): Promise<ShippingDetails | null> {
     return result.result?.shippingDetails || null;
 
   } catch (error) {
+    console.error('Error fetching shipping details:', error);
     return null;
   }
 }

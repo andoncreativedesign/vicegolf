@@ -208,8 +208,12 @@ export default function AddressEditor() {
     if (addressFromState) {
       // Store the address data when it's available from navigation state
       setPreservedAddress(addressFromState);
+     } else if (preservedAddress) {
+      console.log('Using preserved address data', preservedAddress);
+    } else {
+      console.warn('No address found in navigation state. This can happen after a full page refresh.');
     }
-  }, [addressFromState]);
+  }, [addressFromState, location, preservedAddress]);
 
   useEffect(() => {
     if ((action?.createdAddress || action?.updatedAddress) && !action?.error) {

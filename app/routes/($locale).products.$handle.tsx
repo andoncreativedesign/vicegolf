@@ -128,7 +128,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       // The current product will be identified by matching the handle
     } catch (error) {
          console.error('Error fetching color variants:', error);
-  console.log("clubFamily", clubFamily)
+  // console.log("clubFamily", clubFamily)
     }
   }
   let clubVariants = [] as ClubVariant[]

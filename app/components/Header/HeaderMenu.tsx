@@ -66,11 +66,13 @@ const HeaderMenu = ({
 
     // guard: Shopify sometimes returns "Internal Server Error" or HTML
     if (trimmed.startsWith("<") || trimmed.startsWith("Internal")) {
+      console.error("Invalid metafield content:", trimmed);
       return null;
     }
 
     // guard: must start with JSON array `[`
     if (!trimmed.startsWith("[")) {
+      console.error("Not JSON array:", trimmed);
       return null;
     }
 
@@ -78,6 +80,7 @@ const HeaderMenu = ({
       const parsed = JSON.parse(trimmed);
 
       if (!Array.isArray(parsed)) {
+        console.error("Parsed value is not an array:", parsed);
         return null;
       }
 
@@ -92,6 +95,7 @@ const HeaderMenu = ({
           : []
       }));
     } catch (e) {
+      console.error("JSON parse failed:", e);
       return null;
     }
   }

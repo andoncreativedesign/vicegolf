@@ -115,6 +115,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     getHomePageData().then(data => {
       return data;
     }).catch(error => {
+      console.error('Error fetching home page data:', error);
       return null;
     }),
   ]);
