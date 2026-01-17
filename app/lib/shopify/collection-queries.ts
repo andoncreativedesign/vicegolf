@@ -55,6 +55,9 @@ fragment ProductCard on Product {
   productType
   tags
   vendor
+  badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+    value
+  }
   featuredImage {
     id
     url
@@ -172,6 +175,9 @@ fragment ProductCard on Product {
   productType
   tags
   vendor
+  badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+    value
+  }
   featuredImage {
     id
     url
@@ -331,6 +337,9 @@ export const FAMILY_GROUP_QUERY = `#graphql
         productType
         tags
         vendor
+        badge_colors: metafield(namespace: "custom", key: "badge_colors") {
+          value
+        }
         featuredImage {
           id
           url
