@@ -132,12 +132,12 @@ export async function action({ request, context }: Route.ActionArgs) {
           }
         );
 
-        console.log('Admin API Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          data: response.data,
-          headers: response.headers
-        });
+        // console.log('Admin API Response:', {
+        //   status: response.status,
+        //   statusText: response.statusText,
+        //   data: response.data,
+        //   headers: response.headers
+        // });
 
         if (response.status >= 400) {
           // Extract and format a user-friendly error message

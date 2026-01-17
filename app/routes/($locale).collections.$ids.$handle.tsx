@@ -53,7 +53,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const decodedIds = JSON.parse(decodeURIComponent(ids));
   const decodedHandle = decodeURIComponent(handle);
 
-  console.log('🔍 Debug: URL handle:', handle);
+  ('🔍 Debug: URL handle:', handle);
   console.log('🔍 Debug: Decoded handle:', decodedHandle);
 
   // Convert space-separated handle to Shopify format (golf-balls)

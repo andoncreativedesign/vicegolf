@@ -20,8 +20,6 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
     )
   );
 
-  console.log("orientationOptions", orientationOptions)
-
   // If no specific orientations found, use left/right
   if (orientationOptions.length === 0) {
     return (
@@ -64,10 +62,8 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
 
 
   useEffect(() => {
-    console.log("variantsByOrientation ", variantsByOrientation)
     variantsByOrientation.map(({ orientation, variants }) => {
       const currentVariant = variants.find(v => v.node.id === currentProductId);
-      console.log('variant product id  - ', currentVariant)
     })
   },[])
 
