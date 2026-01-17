@@ -48,12 +48,9 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {product?.availableForSale && (product?.tags || [])?.filter((tag: string) => {
-                  const t = tag?.trim()?.toLowerCase()?.replace(/[^a-z0-9:]/g, '');
-                  return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
-                }).map((tag: string) => {
-                  const tagText = tag?.trim()?.replace(/^badge:/i, '')?.replace(/[^a-z0-9\s]/gi, '');
-                  const normalizedTag = tagText?.trim()?.toLowerCase();
+                {(product?.tags || [])?.map((tag: string) => {
+                  const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
+                  const normalizedTag = tagText?.toLowerCase();
                   let customStyles = {};
                   try {
                     const rawColors = product.badge_colors;
@@ -90,15 +87,15 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {product?.availableForSale && (product?.tags || [])?.filter((tag: string) => {
-                  const t = tag?.trim()?.toLowerCase()?.replace(/[^a-z0-9:]/g, '');
-                  return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
-                }).map((tag: string) => {
-                  const tagText = tag?.trim()?.replace(/^badge:/i, '')?.replace(/[^a-z0-9\s]/gi, '');
-                  const normalizedTag = tagText?.trim()?.toLowerCase();
+                {(product?.tags || [])?.map((tag: string) => {
+                  const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
+                  const normalizedTag = tagText?.toLowerCase();
                   let customStyles = {};
                   try {
-                    const badgeColors = product.badge_colors ? JSON.parse(product.badge_colors) : {};
+                    const colorsString = typeof product.badge_colors === 'string'
+                      ? product.badge_colors
+                      : (product.badge_colors as any)?.value;
+                    const badgeColors = colorsString ? JSON.parse(colorsString) : {};
                     customStyles = badgeColors[normalizedTag] || {};
                   } catch (e) { }
 

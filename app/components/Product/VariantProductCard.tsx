@@ -226,12 +226,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         Sold out
                       </span>
                     )}
-                    {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.filter((tag: string) => {
-                      const t = tag?.trim()?.toLowerCase()?.replace(/[^a-z0-9:]/g, '');
-                      return t?.startsWith('badge:') || ['best', 'new', 'sale', 'trending', 'hot'].includes(t);
-                    }).map((tag: string) => {
-                      const tagText = tag?.trim()?.replace(/^badge:/i, '')?.replace(/[^a-z0-9\s]/gi, '');
-                      const normalizedTag = tagText?.trim()?.toLowerCase();
+                    {(allVariants[selectedVariant]?.tags || [])?.map((tag: string) => {
+                      const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
+                      const normalizedTag = tagText?.toLowerCase();
                       let customStyles = {};
                       try {
                         const rawColors = allVariants[selectedVariant]?.badge_colors || product.badge_colors;
