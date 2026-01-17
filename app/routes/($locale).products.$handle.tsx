@@ -127,6 +127,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       // Include all variants, we'll handle the current product styling in the UI
       // The current product will be identified by matching the handle
     } catch (error) {
+         console.error('Error fetching color variants:', error);
+  console.log("clubFamily", clubFamily)
     }
   }
   let clubVariants = [] as ClubVariant[]
@@ -144,6 +146,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         throw new Error(JSON.stringify(response?.data?.errors))
       }
     } catch (error) {
+      console.error('Error fetching club variants:', error);
     }
   }
   return { product, colorVariants, clubVariants, bundleBtn };
@@ -172,6 +175,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
         after: recommendedCursor || undefined,
       },
     }).catch((err: Error) => {
+      console.error('Error fetching collection products:', err);
       return null;
     });
     recommendedProducts = {

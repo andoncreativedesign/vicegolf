@@ -41,6 +41,7 @@ export async function action({ request, context }: any) {
         countryCode: context.storefront.i18n.country,
       });
     } catch (error) {
+      console.error('Social login error:', error);
       return data(
         { error: 'Social login is not available at the moment. Please try the regular registration form.' },
         { status: 500 }
@@ -111,6 +112,7 @@ export async function action({ request, context }: any) {
       }
     });
   } catch (error) {
+    console.error('Registration error:', error);
     return data(
       { error: 'An error occurred during registration. Please try again.' },
       { status: 500 }

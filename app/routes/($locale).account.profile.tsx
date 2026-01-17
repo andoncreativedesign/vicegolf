@@ -46,6 +46,7 @@ export async function action({ request, context }: Route.ActionArgs) {
   // Check if user is logged in
   const isLoggedIn = await customerAccount.isLoggedIn();
   if (!isLoggedIn) {
+    console.error('User is not logged in');
     return data(
       { error: 'Please sign in to update your profile', customer: null },
       { status: 401 },
@@ -84,16 +85,19 @@ export async function action({ request, context }: Route.ActionArgs) {
         );
 
         if (nameErrors?.length) {
+          console.error('Name Update GraphQL Errors:', JSON.stringify(nameErrors, null, 2));
           throw new Error(nameErrors[0].message || 'Failed to update name');
         }
 
         const nameUpdate = nameUpdateData?.customerUpdate;
         if (nameUpdate?.userErrors?.length) {
+          console.error('Name Update Errors:', JSON.stringify(nameUpdate.userErrors, null, 2));
           const error = nameUpdate.userErrors[0];
           throw new Error(error.message || 'Failed to update name');
         }
 
       } catch (error: any) {
+        console.error('Error updating customer name:', error);
         throw new Error(`Failed to update name: ${error.message}`);
       }
     }
@@ -199,7 +203,10 @@ export async function action({ request, context }: Route.ActionArgs) {
       customer: { email, firstName, lastName, phone },
     };
   } catch (error: any) {
-
+console.error('Profile update error:', {
+      message: error.message,
+      stack: error.stack,
+    });
     return {
       error: error.message || 'An error occurred while updating your profile',
       customer: null,
