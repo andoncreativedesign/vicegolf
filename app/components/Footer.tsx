@@ -161,7 +161,7 @@ function FooterContent({
             <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
           </ul>   
               <p className="!text-white text-sm mt-2">For any queries,</p>
-              <p>Mail us at    <a href="mailto:info@vgmesportstrading.com" className="underline !text-white">info@vgmesportstrading.com</a></p>
+              <p>email us at    <a href="mailto:info@vgmesportstrading.com" className="underline !text-white">info@vgmesportstrading.com</a></p>
             </div>
         </div>
 
