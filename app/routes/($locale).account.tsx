@@ -8,8 +8,9 @@ import {
 } from 'react-router';
 import { useState, useEffect } from 'react';
 import type { Route } from './+types/account';
-import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
+import { CUSTOMER_DETAILS_QUERY, GET_DISCOUNT_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon } from 'lucide-react'
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 
 export function shouldRevalidate() {
   return true;
@@ -22,6 +23,20 @@ export async function loader({ context }: Route.LoaderArgs) {
       language: customerAccount.i18n.language,
     },
   });
+
+  const discountCode = 'plus-member-discount-code';
+  const discountData = await axiosShopifyAdmin.post('', {
+    query: GET_DISCOUNT_QUERY,
+    variables: {
+      query: `title:'${discountCode}'`
+    }
+  })
+
+  console.log('\n\n discount response ')
+  console.log(discountData.data)
+  console.log(JSON.stringify(discountData.data))
+  console.log('\n\n discount response end')
+  
 
   if (errors?.length || !data?.customer) {
     throw new Error('Customer not found');
