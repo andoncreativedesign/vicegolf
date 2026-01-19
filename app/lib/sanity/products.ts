@@ -508,8 +508,6 @@ export const listingQuery = (collectionHandle: string) => `
 // Get listing data by collection handle
 export async function getListingByCollectionHandle(collectionHandle: string): Promise<SanityListing | null> {
   try {
-    console.log('🔍 Debug: Fetching listing for collectionHandle:', collectionHandle);
-    
     const query = listingQuery(collectionHandle);
     const response = await axiosSanity.post("/", { query });
 
@@ -518,10 +516,9 @@ export async function getListingByCollectionHandle(collectionHandle: string): Pr
     }
 
     const result = response.data.result;
-    console.log('🔍 Debug: Sanity result:', result);
 
     if (!result) {
-      console.log('🔍 Debug: No listing found for handle:', collectionHandle);
+      // console.log('🔍 Debug: No listing found for handle:', collectionHandle);
       return null;
     }
 
@@ -553,7 +550,6 @@ export async function getAllListings(): Promise<SanityListing[]> {
     }
 
     const result = response.data.result;
-    console.log('🔍 Debug: All listings in Sanity:', result);
     return result || [];
   } catch (error) {
     console.error('Error fetching all listings:', error);

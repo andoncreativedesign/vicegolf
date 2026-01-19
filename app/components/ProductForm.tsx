@@ -92,15 +92,10 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   const handleAddToCart = () => {
     open('cart');
   };
-  useEffect(() => {
-    console.log('product type from details', productType)
-  }, [productType]);
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
     const DRIVER_TYPES = ['drivers', 'hybrids', 'fairway woods', 'mallet putter', 'blade putter', 'center mallet putter'];
     const CLUB_TYPES = ['golf club set', 'golf clubs', 'wedges', 'irons', 'drivers'];
-
     const type = productType?.toLowerCase() || '';
-
     if (DRIVER_TYPES.some(t => type.includes(t))) {
       return 'drivers';
     }

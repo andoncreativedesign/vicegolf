@@ -48,10 +48,10 @@ export default function Banner({ banner }: BannerProps) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   // Debug log
-  console.log('Banner component - banner prop:', banner);
+  // console.log('Banner component - banner prop:', banner);
 
   useEffect(() => {
-    console.log('Banner mounted with banner:', banner);
+    // console.log('Banner mounted with banner:', banner);
     const track = trackRef.current;
     if (!track) return;
 
@@ -62,7 +62,7 @@ export default function Banner({ banner }: BannerProps) {
 
   // If banner is not enabled or not provided, don't render anything
   if (!banner?.enabled || !banner?.content?.length) {
-    console.log('Banner not rendered - banner is disabled or has no content');
+    // console.log('Banner not rendered - banner is disabled or has no content');
     return null;
   }
 

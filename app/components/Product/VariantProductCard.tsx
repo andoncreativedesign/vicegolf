@@ -70,7 +70,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const allVariants = useMemo(() => {
     // Create a Set to track unique variant handles
     if (product.title === "Vice Pro Plus")
-      console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
+      // console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
 
     const seenHandles = new Set();
     const variants = [];
@@ -161,7 +161,6 @@ export function VariantProductCard({ product }: ProductCardProps) {
   useEffect(() => {
     // if (product.productType === 'Golf Balls' && product.variantFamilyProducts)
     if (product.variantFamilyProducts?.length > 0)
-      console.log('product card golf balls', product)
   }, [product])
 
   // Add this effect to clean up the timeout when the component unmounts

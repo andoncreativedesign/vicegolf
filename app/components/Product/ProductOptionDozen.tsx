@@ -35,8 +35,6 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
   }
 
   useEffect(() => {
-    console.log("option for dozen", option.optionValues[0])
-    console.log('\n\n')
     setSingleDozenPrice(parseFloat(option?.optionValues[0]?.variant?.price?.amount || '0'))
   }, [option])
 

@@ -98,8 +98,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  console.log('Fetching critical data...');
-
   const [header, productsForNav, homePageData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
@@ -115,7 +113,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }),
     // Fetch home page data including banner
     getHomePageData().then(data => {
-      console.log('Home page data from Sanity:', data);
       return data;
     }).catch(error => {
       console.error('Error fetching home page data:', error);
@@ -124,8 +121,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   ]);
 
   const bannerData = homePageData?.banner;
-
-  console.log('Returning banner data from loader:', bannerData);
 
   return { header, productsForNav, banner: bannerData };
 }
