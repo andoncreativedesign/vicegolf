@@ -8,9 +8,10 @@ import {
 } from 'react-router';
 import { useState, useEffect } from 'react';
 import type { Route } from './+types/account';
-import { CUSTOMER_DETAILS_QUERY, GET_DISCOUNT_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
-import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon } from 'lucide-react'
-import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
+import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon } from 'lucide-react'
+import { GET_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+
 
 export function shouldRevalidate() {
   return true;
@@ -24,19 +25,7 @@ export async function loader({ context }: Route.LoaderArgs) {
     },
   });
 
-  const discountCode = 'plus-member-discount-code';
-  const discountData = await axiosShopifyAdmin.post('', {
-    query: GET_DISCOUNT_QUERY,
-    variables: {
-      query: `title:'${discountCode}'`
-    }
-  })
 
-  console.log('\n\n discount response ')
-  console.log(discountData.data)
-  console.log(JSON.stringify(discountData.data))
-  console.log('\n\n discount response end')
-  
 
   if (errors?.length || !data?.customer) {
     throw new Error('Customer not found');
@@ -44,13 +33,39 @@ export async function loader({ context }: Route.LoaderArgs) {
 
   // Check if the customer has already requested membership by checking tags
   let membershipRequested = false;
+  let isPlusMember = false;
+  let discountDetails = null;
+
   if (env.ADMIN_API_URL && env.ADMIN_ACCESS_TOKEN) {
     try {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
-      const customerQuery = `#graphql
-        query getCustomerTags($id: ID!) {
+
+      // Query both customer tags and discount details
+      const adminQuery = `#graphql
+        query getAccountInfo($id: ID!, $discountQuery: String!) {
           customer(id: $id) {
             tags
+          }
+          codeDiscountNodes(first: 1, query: $discountQuery) {
+            nodes {
+              codeDiscount {
+                ... on DiscountCodeBasic {
+                  status
+                  codes(first: 1) {
+                    nodes {
+                      code
+                    }
+                  }
+                  customerGets {
+                    value {
+                      ... on DiscountPercentage {
+                        percentage
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       `;
@@ -62,23 +77,42 @@ export async function loader({ context }: Route.LoaderArgs) {
           'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
         },
         body: JSON.stringify({
-          query: customerQuery,
-          variables: { id: data.customer.id },
+          query: adminQuery,
+          variables: {
+            id: data.customer.id,
+            discountQuery: 'code:plus-member-discount-code'
+          },
         }),
       });
 
-      const responseData = await response.json();
+      const responseData = (await response.json()) as any;
       const tags = responseData.data?.customer?.tags || [];
+
       if (tags.includes('membership_requested')) {
         membershipRequested = true;
       }
+
+      // Check if user is a Plus Member (assuming tag 'Plus Member')
+      if (tags.some((tag: string) => tag.toLowerCase() === 'plus member' || tag.toLowerCase() === 'plus_member')) {
+        isPlusMember = true;
+      }
+
+      const discountNode = responseData.data?.codeDiscountNodes?.nodes[0]?.codeDiscount;
+      if (discountNode && discountNode.status === 'ACTIVE') {
+        discountDetails = {
+          code: discountNode.codes.nodes[0].code,
+          percentage: (discountNode.customerGets.value.percentage * 100).toFixed(0)
+        };
+        console.log('Discount Details:', discountDetails);
+      }
+
     } catch (error) {
-      console.error('Error fetching customer tags:', error);
+      console.error('Error fetching admin info:', error);
     }
   }
 
   return remixData(
-    { customer: data.customer, membershipRequested },
+    { customer: data.customer, membershipRequested, isPlusMember, discountDetails },
     {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -151,7 +185,12 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function AccountLayout() {
-  const { customer, membershipRequested: initialMembershipRequested } = useLoaderData<typeof loader>();
+  const {
+    customer,
+    membershipRequested: initialMembershipRequested,
+    isPlusMember,
+    discountDetails
+  } = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
   const heading = 'My Vice Golf Account';
@@ -282,4 +321,11 @@ function Logout() {
     </Form>
   );
 }
+
+
+
+
+
+
+
 

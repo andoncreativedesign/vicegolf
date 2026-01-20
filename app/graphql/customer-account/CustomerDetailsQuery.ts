@@ -47,29 +47,3 @@ export const CUSTOMER_DETAILS_QUERY = `#graphql
   ${CUSTOMER_FRAGMENT}
 ` as const;
 
-
-export const GET_DISCOUNT_QUERY = `#graphql
-query GetDiscountCode($query: String!) {
-  discountCodeNodes(first: 5, query: $query) {
-    nodes {
-      id
-      discountCode {
-        ... on DiscountCode {
-          title
-          status
-          codes(first: 10) {
-            nodes {
-              code
-            }
-          }
-        }
-      }
-    }
-  }
-}
-` as const;
-
-
-
-
-
