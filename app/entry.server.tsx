@@ -27,6 +27,7 @@ export default async function handleRequest(
       'https://cdn.sanity.io',
       'https://i.ytimg.com',
       'https://img.youtube.com',
+      'https://www.googletagmanager.com',
       'data:',
     ],
 
@@ -35,6 +36,10 @@ export default async function handleRequest(
       'https://shopify.com',
       'https://*.shopify.com',
       'https://c248y25j.api.sanity.io',
+      'https://www.google-analytics.com',
+      'https://*.google-analytics.com',
+      'https://*.analytics.google.com',
+      'https://*.googletagmanager.com',
     ],
 
     mediaSrc: [
@@ -53,6 +58,13 @@ export default async function handleRequest(
       'https://youtu.be', // ✅ add shortened YouTube domain
       'https://cdn.sanity.io', // ✅ allow Sanity-hosted videos in iframe
       'https://player.vimeo.com',
+      'https://www.googletagmanager.com',
+    ],
+
+    scriptSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://www.googletagmanager.com',
     ],
 
     defaultSrc: [
