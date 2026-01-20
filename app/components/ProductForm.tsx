@@ -156,8 +156,8 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
         />
         {showCompare && (
-          <span className="text-sm text-emerald-600 font-medium ml-2">
-            (Save ${(totalCompareAmount - totalPriceAmount).toFixed(2)})
+          <span className="text-sm text-emerald-600 font-medium ml-2 flex items-center inline-flex">
+            (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
           </span>
         )}
       </div>

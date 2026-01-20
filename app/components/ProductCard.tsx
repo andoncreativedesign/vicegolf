@@ -56,11 +56,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {isPlusMember && (
-                  <span className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm">
-                    {displayPercentage}% Plus Discount
-                  </span>
-                )}
+
                 {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                   if (tagText?.toLowerCase() === 'plus member') return null; // Hide the tag if we're showing the badge
@@ -106,11 +102,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
-                {isPlusMember && (
-                  <span className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm">
-                    {displayPercentage}% Plus Discount
-                  </span>
-                )}
+
                 {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                   if (tagText?.toLowerCase() === 'plus member') return null;
@@ -174,7 +166,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                       {originalPrice.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex items-center text-[#d11111]">
+                  <div className="flex items-center text-gray-900">
                     <AedIcon className="mr-1" />
                     <span className="text-xl font-bold tracking-tight">
                       {plusDiscountedPrice.toFixed(2)}

@@ -231,11 +231,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         Sold out
                       </span>
                     )}
-                    {isPlusMember && (
-                      <span className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm">
-                        {displayPercentage}% Plus Discount
-                      </span>
-                    )}
+
                     {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.map((tag: string) => {
                       const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                       if (tagText?.toLowerCase() === 'plus member') return null;
