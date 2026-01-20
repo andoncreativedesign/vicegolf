@@ -18,6 +18,8 @@ import ColorVariant from './Product/ColorVariant';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
+import { usePlusMember } from '~/hooks/usePlusMember';
+
 export const ProductForm = forwardRef<HTMLDivElement, {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -46,17 +48,22 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   currentProductId,
   bundleBtn,
 }, ref) => {
+  const { isPlusMember, discountPercentage } = usePlusMember();
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
-  const unitPriceAmount = parseFloat(selectedVariant?.price?.amount || '0');
-  const unitCompareAmount = parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+
+  const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
+  const unitPriceAmount = isPlusMember ? originalUnitPrice * (1 - discountPercentage) : originalUnitPrice;
+
+  const unitCompareAmount = isPlusMember ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+
   const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = unitCompareAmount > unitPriceAmount;
+  const showCompare = isPlusMember || unitCompareAmount > unitPriceAmount;
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

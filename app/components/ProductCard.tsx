@@ -8,13 +8,21 @@ interface ProductCardProps {
   product: ProductFragment;
 }
 
+import { usePlusMember } from "~/hooks/usePlusMember";
+
 export function ProductCard({ product: _product }: ProductCardProps) {
+  const { isPlusMember, discountPercentage } = usePlusMember();
   const product = _product as any;
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
 
   const rating = 4.5 + Math.random() * 0.5;
   const reviewCount = Math.floor(Math.random() * 50) + 10;
+
+  // Calculate discounted price for Plus members
+  const originalPrice = parseFloat(product.variants?.nodes[0]?.price?.amount || '0');
+  const plusDiscountedPrice = originalPrice * (1 - discountPercentage);
+  const displayPercentage = (discountPercentage * 100).toFixed(0);
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -48,8 +56,14 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
+                {isPlusMember && (
+                  <span className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm">
+                    {displayPercentage}% Plus Discount
+                  </span>
+                )}
                 {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
+                  if (tagText?.toLowerCase() === 'plus member') return null; // Hide the tag if we're showing the badge
                   const normalizedTag = tagText?.toLowerCase();
                   let customStyles = {};
                   try {
@@ -92,8 +106,14 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
+                {isPlusMember && (
+                  <span className="bg-black text-white text-[15px] font-medium px-4 py-2 rounded shadow-sm">
+                    {displayPercentage}% Plus Discount
+                  </span>
+                )}
                 {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
+                  if (tagText?.toLowerCase() === 'plus member') return null;
                   const normalizedTag = tagText?.toLowerCase();
                   let customStyles = {};
                   try {
@@ -146,21 +166,40 @@ export function ProductCard({ product: _product }: ProductCardProps) {
         <div className="mt-auto pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {product.variants?.nodes[0]?.compareAtPrice && (
-                <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
-                  <AedIcon className="mr-0.5" />
-                  <span>
-                    {parseFloat(product.variants.nodes[0].compareAtPrice.amount).toFixed(2)}
-                  </span>
-                </div>
-              )}
-              {product.variants?.nodes[0]?.price && (
-                <div className="flex items-center">
-                  <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold tracking-tight">
-                    {parseFloat(product.variants.nodes[0].price.amount).toFixed(2)}
-                  </span>
-                </div>
+              {isPlusMember ? (
+                <>
+                  <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
+                    <AedIcon className="mr-0.5" />
+                    <span>
+                      {originalPrice.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-[#d11111]">
+                    <AedIcon className="mr-1" />
+                    <span className="text-xl font-bold tracking-tight">
+                      {plusDiscountedPrice.toFixed(2)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {product.variants?.nodes[0]?.compareAtPrice && (
+                    <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
+                      <AedIcon className="mr-0.5" />
+                      <span>
+                        {parseFloat(product.variants.nodes[0].compareAtPrice.amount).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {product.variants?.nodes[0]?.price && (
+                    <div className="flex items-center">
+                      <AedIcon className="mr-1" />
+                      <span className="text-xl font-bold tracking-tight">
+                        {parseFloat(product.variants.nodes[0].price.amount).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
