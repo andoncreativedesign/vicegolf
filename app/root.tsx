@@ -12,6 +12,7 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
+import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 export type RootLoader = typeof loader;
 
@@ -179,26 +180,6 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
     try {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
-      const query = `#graphql
-        query getPlusDiscount {
-          automaticDiscountNodes(first: 50, query: "status:active") {
-            nodes {
-              automaticDiscount {
-                ... on DiscountAutomaticBasic {
-                  title
-                  customerGets {
-                    value {
-                      ... on DiscountPercentage {
-                        percentage
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      `;
 
       const response = await fetch(adminApiUrl, {
         method: 'POST',
@@ -206,7 +187,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
           'Content-Type': 'application/json',
           'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: GET_AUTOMATIC_DISCOUNT_QUERY }),
       });
 
       if (!response.ok) {

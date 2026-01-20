@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import type { Route } from './+types/account';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon } from 'lucide-react'
-import { GET_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { GET_CUSTOMER_AND_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 
 export function shouldRevalidate() {
@@ -40,36 +40,6 @@ export async function loader({ context }: Route.LoaderArgs) {
     try {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
 
-      // Query both customer tags and discount details
-      const adminQuery = `#graphql
-        query getAccountInfo($id: ID!, $discountQuery: String!) {
-          customer(id: $id) {
-            tags
-          }
-          codeDiscountNodes(first: 1, query: $discountQuery) {
-            nodes {
-              codeDiscount {
-                ... on DiscountCodeBasic {
-                  status
-                  codes(first: 1) {
-                    nodes {
-                      code
-                    }
-                  }
-                  customerGets {
-                    value {
-                      ... on DiscountPercentage {
-                        percentage
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      `;
-
       const response = await fetch(adminApiUrl, {
         method: 'POST',
         headers: {
@@ -77,7 +47,7 @@ export async function loader({ context }: Route.LoaderArgs) {
           'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
         },
         body: JSON.stringify({
-          query: adminQuery,
+          query: GET_CUSTOMER_AND_DISCOUNT_QUERY,
           variables: {
             id: data.customer.id,
             discountQuery: 'code:plus-member-discount-code'
