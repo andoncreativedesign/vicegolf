@@ -5,15 +5,20 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 
+import { usePlusMember } from '~/hooks/usePlusMember';
+
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
   layout: CartLayout;
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
+  const { isPlusMember, discountPercentage } = usePlusMember();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
+
+  const displayPercentage = (discountPercentage * 100).toFixed(0);
 
   return (
     <div
@@ -32,14 +37,21 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </span>
           </div>
 
+          {isPlusMember && (
+            <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
+              <span>Plus membership {displayPercentage}% discount applied</span>
+              <span>Automatic</span>
+            </div>
+          )}
+
           {total && (
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-900 font-medium">
                   Total{' '}
                   <span className="text-gray-600 font-normal">
-                    {subtotal?.amount === total.amount 
-                      ? '(Incl. taxes and excl. shipping)' 
+                    {subtotal?.amount === total.amount
+                      ? '(Incl. taxes and excl. shipping)'
                       : '(Incl. taxes and shipping)'}
                   </span>
                 </span>

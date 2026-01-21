@@ -73,7 +73,6 @@ export async function action({ request, context }: Route.ActionArgs) {
       if (firstName !== undefined) customerUpdateInput.firstName = firstName;
       if (lastName !== undefined) customerUpdateInput.lastName = lastName;
 
-      console.log('Updating customer name with Customer Account API:', customerUpdateInput);
 
       try {
         const { data: nameUpdateData, errors: nameErrors } = await customerAccount.mutate(
@@ -97,7 +96,6 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Error(error.message || 'Failed to update name');
         }
 
-        console.log('Successfully updated customer name');
       } catch (error: any) {
         console.error('Error updating customer name:', error);
         throw new Error(`Failed to update name: ${error.message}`);
@@ -138,12 +136,12 @@ export async function action({ request, context }: Route.ActionArgs) {
           }
         );
 
-        console.log('Admin API Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          data: response.data,
-          headers: response.headers
-        });
+        // console.log('Admin API Response:', {
+        //   status: response.status,
+        //   statusText: response.statusText,
+        //   data: response.data,
+        //   headers: response.headers
+        // });
 
         if (response.status >= 400) {
           // Extract and format a user-friendly error message
@@ -182,7 +180,6 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Error(errorMessage.trim());
         }
 
-        console.log('Successfully updated customer via Admin API:', response.data);
         return response.data.customer; // Return the updated customer data
       } catch (error: any) {
         console.error('Error in Admin API call:', {
@@ -206,11 +203,10 @@ export async function action({ request, context }: Route.ActionArgs) {
       customer: { email, firstName, lastName, phone },
     };
   } catch (error: any) {
-    console.error('Profile update error:', {
+console.error('Profile update error:', {
       message: error.message,
       stack: error.stack,
     });
-
     return {
       error: error.message || 'An error occurred while updating your profile',
       customer: null,
@@ -225,11 +221,6 @@ export default function AccountProfile() {
 
   // Debug: Log the customer data to see its structure
   React.useEffect(() => {
-    console.log('Customer Data:', customer);
-    console.log('Email from customer:', customer?.emailAddress?.emailAddress);
-    console.log('First name from customer:', customer?.firstName);
-    console.log('Last name from customer:', customer?.lastName);
-
     // Update form data when customer data changes
     if (customer) {
       const email = customer?.emailAddress?.emailAddress || customer?.email || '';

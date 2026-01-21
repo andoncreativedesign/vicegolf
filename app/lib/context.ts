@@ -57,5 +57,11 @@ export async function createHydrogenRouterContext(
     additionalContext,
   );
 
+  // Link the customer account to the cart handler
+  // This is required for segment-based discounts to work automatically
+  if (hydrogenContext.cart && hydrogenContext.customerAccount) {
+    (hydrogenContext.cart as any).customerAccount = hydrogenContext.customerAccount;
+  }
+
   return hydrogenContext;
 }

@@ -44,7 +44,6 @@ const ShopByCategories: React.FC<ShopByCategoriesProps> = ({
   };
 
   useEffect(() => {
-    console.log('menuItems ShopByCategories', menuItems);
   }, [menuItems]);
 
   return (

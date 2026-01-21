@@ -18,6 +18,8 @@ import ColorVariant from './Product/ColorVariant';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
+import { usePlusMember } from '~/hooks/usePlusMember';
+
 export const ProductForm = forwardRef<HTMLDivElement, {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -46,17 +48,22 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   currentProductId,
   bundleBtn,
 }, ref) => {
+  const { isPlusMember, discountPercentage } = usePlusMember();
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
-  const unitPriceAmount = parseFloat(selectedVariant?.price?.amount || '0');
-  const unitCompareAmount = parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+
+  const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
+  const unitPriceAmount = isPlusMember ? originalUnitPrice * (1 - discountPercentage) : originalUnitPrice;
+
+  const unitCompareAmount = isPlusMember ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+
   const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = unitCompareAmount > unitPriceAmount;
+  const showCompare = isPlusMember || unitCompareAmount > unitPriceAmount;
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -92,15 +99,10 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   const handleAddToCart = () => {
     open('cart');
   };
-  useEffect(() => {
-    console.log('product type from details', productType)
-  }, [productType]);
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
     const DRIVER_TYPES = ['drivers', 'hybrids', 'fairway woods', 'mallet putter', 'blade putter', 'center mallet putter'];
     const CLUB_TYPES = ['golf club set', 'golf clubs', 'wedges', 'irons', 'drivers'];
-
     const type = productType?.toLowerCase() || '';
-
     if (DRIVER_TYPES.some(t => type.includes(t))) {
       return 'drivers';
     }
@@ -154,8 +156,8 @@ export const ProductForm = forwardRef<HTMLDivElement, {
           compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
         />
         {showCompare && (
-          <span className="text-sm text-emerald-600 font-medium ml-2">
-            (Save ${(totalCompareAmount - totalPriceAmount).toFixed(2)})
+          <span className="text-sm text-emerald-600 font-medium ml-2 flex items-center inline-flex">
+            (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
           </span>
         )}
       </div>

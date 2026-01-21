@@ -12,6 +12,7 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
+import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 export type RootLoader = typeof loader;
 
@@ -57,7 +58,7 @@ export function links() {
 }
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
+  // Start fetching non-critical data
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
@@ -65,8 +66,18 @@ export async function loader(args: Route.LoaderArgs) {
 
   const { storefront, env } = args.context;
 
+  // Resolve critical deferred data so it's available immediately for pricing logic
+  const [customer, plusDiscountPercentage] = await Promise.all([
+    deferredData.customer,
+    deferredData.plusDiscountPercentage
+  ]);
+
+  console.log('Loader returning Plus Discount:', plusDiscountPercentage);
+
   return {
     ...deferredData,
+    customer,
+    plusDiscountPercentage,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -98,8 +109,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  console.log('Fetching critical data...');
-
   const [header, productsForNav, homePageData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
@@ -115,7 +124,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }),
     // Fetch home page data including banner
     getHomePageData().then(data => {
-      console.log('Home page data from Sanity:', data);
       return data;
     }).catch(error => {
       console.error('Error fetching home page data:', error);
@@ -125,10 +133,10 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
 
   const bannerData = homePageData?.banner;
 
-  console.log('Returning banner data from loader:', bannerData);
-
   return { header, productsForNav, banner: bannerData };
 }
+
+import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -150,9 +158,84 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       return null;
     });
 
+  const customer = customerAccount.isLoggedIn().then(async (isLoggedIn) => {
+    if (isLoggedIn) {
+      try {
+        const { data } = await customerAccount.query(CUSTOMER_DETAILS_QUERY);
+        return data?.customer;
+      } catch (error) {
+        console.error('Error fetching customer details in root:', error);
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const plusDiscountPercentage = (async () => {
+    const { env } = context;
+    if (!env.ADMIN_API_URL || !env.ADMIN_ACCESS_TOKEN) {
+      console.warn('Admin API credentials missing, using fallback discount');
+      return 0.05;
+    }
+
+    try {
+      const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
+
+      const response = await fetch(adminApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+        },
+        body: JSON.stringify({ query: GET_AUTOMATIC_DISCOUNT_QUERY }),
+      });
+
+      if (!response.ok) {
+        console.error('Admin API fetch failed:', response.status);
+        return 0.05;
+      }
+
+      const json = await response.json() as any;
+      const nodes = json.data?.automaticDiscountNodes?.nodes || [];
+
+      nodes.forEach((n: any) => {
+        const title = n.automaticDiscount?.title;
+        const percentage = n.automaticDiscount?.customerGets?.value?.percentage;
+        console.log(`Active Discount: "${title}" - Percentage: ${percentage}`);
+      });
+
+      // Find the discount that matches "Automatic Discount" or "Plus" or "Member"
+      const plusNode = nodes.find((node: any) => {
+        const title = (node.automaticDiscount?.title || '').toLowerCase().trim();
+        return title === 'automatic discount' || title.includes('plus') || title.includes('member');
+      });
+
+      let percentage = plusNode?.automaticDiscount?.customerGets?.value?.percentage;
+
+      if (typeof percentage !== 'number') {
+        // Fallback: search for any discount that is for Plus Members if title match failed
+        // (Just in case the title is something else, we take the first one that mentions plus/member in the query results)
+        // Actually, let's keep it strict but maybe it's a Code Discount?
+      }
+
+      if (typeof percentage === 'number') {
+        console.log(`Found Plus Discount: ${percentage * 100}%`);
+        return percentage;
+      }
+
+      console.log('No matching automatic discount found, using default 5%');
+      return 0.05;
+    } catch (e) {
+      console.error('Error fetching plus discount percentage:', e);
+      return 0.05;
+    }
+  })();
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
+    customer,
+    plusDiscountPercentage,
     footer,
   };
 }
