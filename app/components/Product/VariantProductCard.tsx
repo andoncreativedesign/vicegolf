@@ -420,7 +420,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
-                    {(parseFloat(firstVariant.price.amount) * (isPlusMember ? (1 - discountPercentage) : 1)).toFixed(2)}
+                    {(parseFloat(firstVariant.price?.amount || '0') * (isPlusMember ? (1 - discountPercentage) : 1)).toFixed(2)}
                   </span>
                 </div>
               </div>
