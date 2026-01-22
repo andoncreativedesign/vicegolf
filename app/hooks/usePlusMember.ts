@@ -12,7 +12,7 @@ export function usePlusMember() {
   const data = useRouteLoaderData<RootLoader>('root');
   
   const customer = data?.customer;
-  const rawPercentage = data?.plusDiscountPercentage;
+  const plusDiscount = data?.plusDiscount;
 
   // Determine if tagged as a plus member
   const tags = (customer as any)?.tags || [];
@@ -22,8 +22,20 @@ export function usePlusMember() {
       tag.toLowerCase() === 'plus_member'
   );
 
-  // Discount percentage (fallback to 5%)
-  const discountPercentage = typeof rawPercentage === 'number' ? rawPercentage : 0.05;
+  // Discount percentage (fallback to 0 if nothing is set)
+  let discountPercentage = 0;
+  let discountAmount = 0;
 
-  return { isPlusMember, discountPercentage };
+  if (plusDiscount) {
+    if (typeof plusDiscount.percentage === 'number') {
+      discountPercentage = plusDiscount.percentage;
+    } else if (typeof plusDiscount.amount === 'number') {
+      discountAmount = plusDiscount.amount;
+      // We set percentage to 0 if we have a fixed amount, 
+      // components should check discountAmount if they want to support it.
+      discountPercentage = 0; 
+    }
+  }
+
+  return { isPlusMember, discountPercentage, discountAmount, plusDiscount };
 }

@@ -11,6 +11,12 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                 ... on DiscountPercentage {
                   percentage
                 }
+                ... on DiscountAmount {
+                  amount {
+                    amount
+                    currencyCode
+                  }
+                }
               }
             }
           }
@@ -40,6 +46,12 @@ export const GET_CODE_DISCOUNT_QUERY = `#graphql
               value {
                 ... on DiscountPercentage {
                   percentage
+                }
+                ... on DiscountAmount {
+                  amount {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }
@@ -72,6 +84,12 @@ export const GET_CUSTOMER_AND_DISCOUNT_QUERY = `#graphql
               value {
                 ... on DiscountPercentage {
                   percentage
+                }
+                ... on DiscountAmount {
+                  amount {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }

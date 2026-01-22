@@ -203,7 +203,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       customer: { email, firstName, lastName, phone },
     };
   } catch (error: any) {
-console.error('Profile update error:', {
+    console.error('Profile update error:', {
       message: error.message,
       stack: error.stack,
     });

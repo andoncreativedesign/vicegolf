@@ -3,15 +3,14 @@ import { useEffect } from "react";
 import { Link } from "react-router";
 import type { ProductFragment } from "storefrontapi.generated";
 import { AedIcon } from "./ui/AedIcon";
+import { usePlusMember } from "~/hooks/usePlusMember";
 
 interface ProductCardProps {
   product: ProductFragment;
 }
 
-import { usePlusMember } from "~/hooks/usePlusMember";
-
 export function ProductCard({ product: _product }: ProductCardProps) {
-  const { isPlusMember, discountPercentage } = usePlusMember();
+  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
   const product = _product as any;
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
@@ -21,8 +20,18 @@ export function ProductCard({ product: _product }: ProductCardProps) {
 
   // Calculate discounted price for Plus members
   const originalPrice = parseFloat(product.variants?.nodes[0]?.price?.amount || '0');
-  const plusDiscountedPrice = originalPrice * (1 - discountPercentage);
   const displayPercentage = (discountPercentage * 100).toFixed(0);
+
+  let plusDiscountedPrice = originalPrice;
+  if (isPlusMember) {
+    if (discountAmount > 0) {
+      plusDiscountedPrice = Math.max(0, originalPrice - discountAmount);
+    } else if (discountPercentage > 0) {
+      plusDiscountedPrice = originalPrice * (1 - discountPercentage);
+    }
+  }
+
+  const showPriceWithDiscount = isPlusMember && (discountPercentage > 0 || discountAmount > 0);
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -200,4 +209,3 @@ export function ProductCard({ product: _product }: ProductCardProps) {
     </div>
   );
 }
-

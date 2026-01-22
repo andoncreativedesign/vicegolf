@@ -68,17 +68,17 @@ export async function loader(args: Route.LoaderArgs) {
   const { storefront, env } = args.context;
 
   // Resolve critical deferred data so it's available immediately for pricing logic
-  const [customer, plusDiscountPercentage] = await Promise.all([
+  const [customer, plusDiscount] = await Promise.all([
     deferredData.customer,
-    deferredData.plusDiscountPercentage
+    deferredData.plusDiscount
   ]);
 
-  console.log('Loader returning Plus Discount:', plusDiscountPercentage);
+  console.log('Loader returning Plus Discount:', plusDiscount);
 
   return {
     ...deferredData,
     customer,
-    plusDiscountPercentage,
+    plusDiscount,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -172,11 +172,11 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     return null;
   });
 
-  const plusDiscountPercentage = (async () => {
+  const plusDiscount = (async () => {
     const { env } = context;
     if (!env.ADMIN_API_URL || !env.ADMIN_ACCESS_TOKEN) {
       console.warn('Admin API credentials missing, using fallback discount');
-      return 0.05;
+      return { percentage: 0, amount: null, currencyCode: null };
     }
 
     try {
@@ -194,8 +194,6 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       });
 
       const json = response.data;
-
-
       const nodes = json.data?.automaticDiscountNodes?.nodes || [];
 
       console.log('\n\n--- ROOT DISCOUNT API NODES ---');
@@ -203,18 +201,26 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       console.log('-----------------------------------\n');
 
       if (nodes.length > 0) {
-        const percentage = nodes[0]?.automaticDiscount?.customerGets?.value?.percentage;
-        if (typeof percentage === 'number') {
-          console.log(`Found Plus Discount: ${percentage * 100}%`);
-          return percentage;
+        const value = nodes[0]?.automaticDiscount?.customerGets?.value;
+        if (value?.percentage) {
+          const percentage = value.percentage;
+          console.log(`Found Plus Discount (percentage): ${percentage * 100}%`);
+          return { percentage, amount: null, currencyCode: null };
+        } else if (value?.amount) {
+          console.log(`Found Plus Discount (fixed amount): ${value.amount.amount} ${value.amount.currencyCode}`);
+          return {
+            percentage: null,
+            amount: parseFloat(value.amount.amount),
+            currencyCode: value.amount.currencyCode
+          };
         }
       }
 
-      console.log('No matching automatic discount found, using default 5%');
-      return 0.05;
+      console.log('No matching automatic discount found, using fallback 0%');
+      return { percentage: 0, amount: null, currencyCode: null };
     } catch (e) {
-      console.error('Error fetching plus discount percentage:', e);
-      return 0.05;
+      console.error('Error fetching plus discount:', e);
+      return { percentage: 0, amount: null, currencyCode: null };
     }
   })();
 
@@ -222,7 +228,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
-    plusDiscountPercentage,
+    plusDiscount,
     footer,
   };
 }

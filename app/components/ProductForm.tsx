@@ -48,7 +48,7 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   currentProductId,
   bundleBtn,
 }, ref) => {
-  const { isPlusMember, discountPercentage } = usePlusMember();
+  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
@@ -56,14 +56,22 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
 
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
-  const unitPriceAmount = isPlusMember ? originalUnitPrice * (1 - discountPercentage) : originalUnitPrice;
 
-  const unitCompareAmount = isPlusMember ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+  let unitPriceAmount = originalUnitPrice;
+  if (isPlusMember) {
+    if (discountAmount > 0) {
+      unitPriceAmount = Math.max(0, originalUnitPrice - discountAmount);
+    } else if (discountPercentage > 0) {
+      unitPriceAmount = originalUnitPrice * (1 - discountPercentage);
+    }
+  }
+
+  const unitCompareAmount = (isPlusMember && (discountPercentage > 0 || discountAmount > 0)) ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
 
   const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = isPlusMember || unitCompareAmount > unitPriceAmount;
+  const showCompare = (isPlusMember && (discountPercentage > 0 || discountAmount > 0)) || unitCompareAmount > unitPriceAmount;
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
