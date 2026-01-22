@@ -11,6 +11,7 @@ import type { Route } from './+types/account';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon } from 'lucide-react'
 import { GET_CUSTOMER_AND_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 
 
 export function shouldRevalidate() {
@@ -39,23 +40,25 @@ export async function loader({ context }: Route.LoaderArgs) {
   if (env.ADMIN_API_URL && env.ADMIN_ACCESS_TOKEN) {
     try {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
+      const adminId = data.customer.id.replace('CustomerAccountCustomer', 'Customer');
 
-      const response = await fetch(adminApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+      const response = await axiosShopifyAdmin.post(adminApiUrl, {
+        query: GET_CUSTOMER_AND_DISCOUNT_QUERY,
+        variables: {
+          id: adminId,
+          discountQuery: "title:'Plus Member Discount' status:active"
         },
-        body: JSON.stringify({
-          query: GET_CUSTOMER_AND_DISCOUNT_QUERY,
-          variables: {
-            id: data.customer.id,
-            discountQuery: 'code:plus-member-discount-code'
-          },
-        }),
+      }, {
+        headers: {
+          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+        }
       });
 
-      const responseData = (await response.json()) as any;
+      const responseData = response.data;
+      console.log('\n\n--- ADMIN API RESPONSE DATA ---');
+      console.log(JSON.stringify(responseData, null, 2));
+      console.log('-------------------------------');
+
       const tags = responseData.data?.customer?.tags || [];
 
       if (tags.includes('membership_requested')) {
@@ -125,22 +128,21 @@ export async function action({ request, context }: Route.ActionArgs) {
       }
     `;
 
-    const response = await fetch(adminApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+    const adminId = data.customer.id.replace('CustomerAccountCustomer', 'Customer');
+
+    const response = await axiosShopifyAdmin.post(adminApiUrl, {
+      query: tagsAddMutation,
+      variables: {
+        id: adminId,
+        tags: ['membership_requested'],
       },
-      body: JSON.stringify({
-        query: tagsAddMutation,
-        variables: {
-          id: data.customer.id,
-          tags: ['membership_requested'],
-        },
-      }),
+    }, {
+      headers: {
+        'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+      }
     });
 
-    const responseJson = await response.json();
+    const responseJson = response.data;
 
     if (responseJson.data?.tagsAdd?.userErrors?.length > 0) {
       console.error('Tag add errors:', responseJson.data.tagsAdd.userErrors);
