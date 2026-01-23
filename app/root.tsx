@@ -200,17 +200,23 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       console.log(JSON.stringify(nodes, null, 2));
       console.log('-----------------------------------\n');
 
-      if (nodes.length > 0) {
-        const value = nodes[0]?.automaticDiscount?.customerGets?.value;
+      // Find THE specific discount titled 'Automatic Discount'
+      const targetDiscountNode = nodes.find((node: any) =>
+        node?.automaticDiscount?.title === 'Automatic Discount'
+      );
+
+      if (targetDiscountNode) {
+        const value = targetDiscountNode.automaticDiscount?.customerGets?.value;
         if (value?.percentage) {
           const percentage = value.percentage;
           console.log(`Found Plus Discount (percentage): ${percentage * 100}%`);
           return { percentage, amount: null, currencyCode: null };
         } else if (value?.amount) {
-          console.log(`Found Plus Discount (fixed amount): ${value.amount.amount} ${value.amount.currencyCode}`);
+          const amountValue = parseFloat(value.amount.amount);
+          console.log(`Found Plus Discount (fixed amount): ${amountValue} ${value.amount.currencyCode}`);
           return {
-            percentage: null,
-            amount: parseFloat(value.amount.amount),
+            percentage: 0,
+            amount: amountValue,
             currencyCode: value.amount.currencyCode
           };
         }
