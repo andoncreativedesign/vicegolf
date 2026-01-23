@@ -181,11 +181,11 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
     try {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
-
+      const title = "Automatic Discount";
       const response = await axiosShopifyAdmin.post(adminApiUrl, {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
         variables: {
-          query: "title:'Automatic Discount' status:active"
+          query: `title:'${title}' status:active`
         }
       }, {
         headers: {
@@ -200,9 +200,9 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       console.log(JSON.stringify(nodes, null, 2));
       console.log('-----------------------------------\n');
 
-      // Find THE specific discount titled 'Automatic Discount'
+      // Find THE specific discount titled 'Test'
       const targetDiscountNode = nodes.find((node: any) =>
-        node?.automaticDiscount?.title === 'Automatic Discount'
+        node?.automaticDiscount?.title === 'Test'
       );
 
       if (targetDiscountNode) {
@@ -222,7 +222,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         }
       }
 
-      console.log('No matching automatic discount found, using fallback 0%');
+      console.log('No matching Automatic Discount found, using fallback 0%');
       return { percentage: 0, amount: null, currencyCode: null };
     } catch (e) {
       console.error('Error fetching plus discount:', e);
