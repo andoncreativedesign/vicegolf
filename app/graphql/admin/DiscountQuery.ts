@@ -1,7 +1,7 @@
 // Query for fetching automatic discount details from Shopify Admin API
 export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
-  query getPlusDiscount($query: String!) {
-    automaticDiscountNodes(first: 1, query: $query) {
+  query getPlusDiscount($query: String!, $first: Int!) {
+    automaticDiscountNodes(first: $first, query: $query) {
       nodes {
         automaticDiscount {
           ... on DiscountAutomaticBasic {

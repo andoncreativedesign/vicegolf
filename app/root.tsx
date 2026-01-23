@@ -181,11 +181,16 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
     try {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
-      const title = "Automatic Discount";
+
+      // Define the exact discount title you want to apply
+      const DISCOUNT_TITLE = "Test";
+
       const response = await axiosShopifyAdmin.post(adminApiUrl, {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
         variables: {
-          query: `title:'${title}' status:active`
+          // Query for the specific title to narrow down results from Shopify
+          first: 50,
+          query: `title:'${DISCOUNT_TITLE}' status:active`
         }
       }, {
         headers: {
@@ -200,20 +205,20 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       console.log(JSON.stringify(nodes, null, 2));
       console.log('-----------------------------------\n');
 
-      // Find THE specific discount titled 'Test'
+      // Find the specific discount by exact title match
       const targetDiscountNode = nodes.find((node: any) =>
-        node?.automaticDiscount?.title === 'Test'
+        node?.automaticDiscount?.title === DISCOUNT_TITLE
       );
 
       if (targetDiscountNode) {
         const value = targetDiscountNode.automaticDiscount?.customerGets?.value;
         if (value?.percentage) {
           const percentage = value.percentage;
-          console.log(`Found Plus Discount (percentage): ${percentage * 100}%`);
+          console.log(`Found ${DISCOUNT_TITLE} (percentage): ${percentage * 100}%`);
           return { percentage, amount: null, currencyCode: null };
         } else if (value?.amount) {
           const amountValue = parseFloat(value.amount.amount);
-          console.log(`Found Plus Discount (fixed amount): ${amountValue} ${value.amount.currencyCode}`);
+          console.log(`Found ${DISCOUNT_TITLE} (fixed amount): ${amountValue} ${value.amount.currencyCode}`);
           return {
             percentage: 0,
             amount: amountValue,
@@ -222,7 +227,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         }
       }
 
-      console.log('No matching Automatic Discount found, using fallback 0%');
+      console.log(`No matching Automatic Discount found with title "${DISCOUNT_TITLE}", using fallback 0%`);
       return { percentage: 0, amount: null, currencyCode: null };
     } catch (e) {
       console.error('Error fetching plus discount:', e);
