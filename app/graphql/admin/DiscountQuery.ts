@@ -1,3 +1,40 @@
+// Types for GET_AUTOMATIC_DISCOUNT_QUERY
+
+export type AutomaticDiscountQueryVariables = {
+  query: string;
+  first: number;
+};
+
+export type AutomaticDiscountQueryResponse = {
+  automaticDiscountNodes: {
+    nodes: Array<{
+      automaticDiscount:
+        | {
+            __typename?: 'DiscountAutomaticBasic';
+            title: string;
+            customerGets: {
+              value:
+                | {
+                    __typename?: 'DiscountPercentage';
+                    percentage: number;
+                  }
+                | {
+                    __typename?: 'DiscountAmount';
+                    amount: {
+                      amount: string;
+                      currencyCode: string;
+                    };
+                  };
+            };
+          }
+        | null;
+    }>;
+  };
+};
+
+
+
+
 // Query for fetching automatic discount details from Shopify Admin API
 export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
   query getPlusDiscount($query: String!, $first: Int!) {

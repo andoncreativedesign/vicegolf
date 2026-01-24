@@ -12,7 +12,7 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
-import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { GET_AUTOMATIC_DISCOUNT_QUERY, type AutomaticDiscountQueryResponse } from '~/graphql/admin/DiscountQuery';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 
 export type RootLoader = typeof loader;
@@ -183,7 +183,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
 
       // Define the exact discount title you want to apply
-      const DISCOUNT_TITLE = "Test";
+      const DISCOUNT_TITLE = "Automatic Discount";
 
       const response = await axiosShopifyAdmin.post(adminApiUrl, {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
@@ -205,10 +205,57 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       console.log(JSON.stringify(nodes, null, 2));
       console.log('-----------------------------------\n');
 
-      // Find the specific discount by exact title match
-      const targetDiscountNode = nodes.find((node: any) =>
-        node?.automaticDiscount?.title === DISCOUNT_TITLE
+      // Determine if customer is a Plus Member
+      const customerData = await customer;
+      const tags = customerData?.tags || [];
+      const isPlusMember = tags.find((tag: string) =>
+        tag.toLowerCase() === 'plus_member'
       );
+
+
+      console.log('\n\nIs Plus Member:', isPlusMember);
+
+      console.log('Customer Tags:', tags);
+
+      const plusMemberDiscountTitle = 'Automatic Discount';
+      type DiscountNode =
+        AutomaticDiscountQueryResponse['automaticDiscountNodes']['nodes'][number];
+      let targetDiscountNode: any | undefined;
+
+      if (isPlusMember) {
+
+        const sortedNodes = [...nodes].sort(
+          (a: DiscountNode, b: DiscountNode) => {
+            const aPercent =
+              a.automaticDiscount?.customerGets.value?.percentage ?? 0;
+            const bPercent =
+              b.automaticDiscount?.customerGets.value?.percentage ?? 0;
+
+            return bPercent - aPercent; // DESC order
+          }
+        );
+
+        targetDiscountNode = sortedNodes[0];
+      } else {
+        const sortedNodes = [...nodes]
+          .filter((node: any) =>
+            node?.automaticDiscount?.title !== plusMemberDiscountTitle
+          )
+          .sort(
+            (a: DiscountNode, b: DiscountNode) => {
+              const aPercent =
+                a.automaticDiscount?.customerGets.value?.percentage ?? 0;
+              const bPercent =
+                b.automaticDiscount?.customerGets.value?.percentage ?? 0;
+
+              return bPercent - aPercent; // DESC order
+            }
+          );
+
+        targetDiscountNode = sortedNodes[0];
+
+      }
+
 
       if (targetDiscountNode) {
         const value = targetDiscountNode.automaticDiscount?.customerGets?.value;
