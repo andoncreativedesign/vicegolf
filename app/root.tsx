@@ -188,9 +188,8 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       const response = await axiosShopifyAdmin.post(adminApiUrl, {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
         variables: {
-          // Query for the specific title to narrow down results from Shopify
           first: 50,
-          query: `title:'${DISCOUNT_TITLE}' status:active`
+          query: `status:active`
         }
       }, {
         headers: {
@@ -201,59 +200,57 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       const json = response.data;
       const nodes = json.data?.automaticDiscountNodes?.nodes || [];
 
-      console.log('\n\n--- ROOT DISCOUNT API NODES ---');
-      console.log(JSON.stringify(nodes, null, 2));
-      console.log('-----------------------------------\n');
+      const plusMemberDiscountTitle = 'Automatic Discount';
+      type DiscountNode =
+        AutomaticDiscountQueryResponse['automaticDiscountNodes']['nodes'][number];
+
+      // Calculate potential discounts for logging/selection
+      const allSortedNodes = [...nodes].sort(
+        (a: DiscountNode, b: DiscountNode) => {
+          const aPercent = a.automaticDiscount?.customerGets.value?.percentage ?? 0;
+          const bPercent = b.automaticDiscount?.customerGets.value?.percentage ?? 0;
+          return bPercent - aPercent;
+        }
+      );
+
+      const nonPlusSortedNodes = [...nodes]
+        .filter((node: any) => node?.automaticDiscount?.title !== plusMemberDiscountTitle)
+        .sort((a: DiscountNode, b: DiscountNode) => {
+          const aPercent = a.automaticDiscount?.customerGets.value?.percentage ?? 0;
+          const bPercent = b.automaticDiscount?.customerGets.value?.percentage ?? 0;
+          return bPercent - aPercent;
+        });
+
+      const getDiscountLabel = (node: any) => {
+        if (!node?.automaticDiscount) return 'None';
+        const val = node.automaticDiscount.customerGets.value;
+        const title = node.automaticDiscount.title;
+        if (val?.percentage) return `${title} (${(val.percentage * 100).toFixed(0)}%)`;
+        if (val?.amount) return `${title} (${val.amount.amount} ${val.amount.currencyCode})`;
+        return title;
+      };
+
+      console.log('\n\n--- DISCOUNT SUMMARY (Terminal) ---');
+      console.log('Plus Member Discount:', getDiscountLabel(allSortedNodes[0]));
+      console.log('Non-Plus Member Discount:', getDiscountLabel(nonPlusSortedNodes[0]));
+      console.log('----------------------------------\n');
 
       // Determine if customer is a Plus Member
       const customerData = await customer;
       const tags = customerData?.tags || [];
-      const isPlusMember = tags.find((tag: string) =>
-        tag.toLowerCase() === 'plus_member'
+      const isPlusMember = tags.some((tag: string) =>
+        tag.toLowerCase() === 'plus_member' || tag.toLowerCase() === 'plus member'
       );
 
-
-      console.log('\n\nIs Plus Member:', isPlusMember);
-
+      console.log('User Is Plus Member:', !!isPlusMember);
       console.log('Customer Tags:', tags);
 
-      const plusMemberDiscountTitle = 'Automatic Discount';
-      type DiscountNode =
-        AutomaticDiscountQueryResponse['automaticDiscountNodes']['nodes'][number];
       let targetDiscountNode: any | undefined;
 
       if (isPlusMember) {
-
-        const sortedNodes = [...nodes].sort(
-          (a: DiscountNode, b: DiscountNode) => {
-            const aPercent =
-              a.automaticDiscount?.customerGets.value?.percentage ?? 0;
-            const bPercent =
-              b.automaticDiscount?.customerGets.value?.percentage ?? 0;
-
-            return bPercent - aPercent; // DESC order
-          }
-        );
-
-        targetDiscountNode = sortedNodes[0];
+        targetDiscountNode = allSortedNodes[0];
       } else {
-        const sortedNodes = [...nodes]
-          .filter((node: any) =>
-            node?.automaticDiscount?.title !== plusMemberDiscountTitle
-          )
-          .sort(
-            (a: DiscountNode, b: DiscountNode) => {
-              const aPercent =
-                a.automaticDiscount?.customerGets.value?.percentage ?? 0;
-              const bPercent =
-                b.automaticDiscount?.customerGets.value?.percentage ?? 0;
-
-              return bPercent - aPercent; // DESC order
-            }
-          );
-
-        targetDiscountNode = sortedNodes[0];
-
+        targetDiscountNode = nonPlusSortedNodes[0];
       }
 
 
