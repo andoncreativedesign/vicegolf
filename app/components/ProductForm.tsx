@@ -58,20 +58,19 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
   let unitPriceAmount = originalUnitPrice;
-  if (isPlusMember) {
-    if (discountAmount > 0) {
-      unitPriceAmount = Math.max(0, originalUnitPrice - discountAmount);
-    } else if (discountPercentage > 0) {
-      unitPriceAmount = originalUnitPrice * (1 - discountPercentage);
-    }
+  // Apply discount if available (for both Plus Members and regular users)
+  if (discountAmount > 0) {
+    unitPriceAmount = Math.max(0, originalUnitPrice - discountAmount);
+  } else if (discountPercentage > 0) {
+    unitPriceAmount = originalUnitPrice * (1 - discountPercentage);
   }
 
-  const unitCompareAmount = (isPlusMember && (discountPercentage > 0 || discountAmount > 0)) ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+  const unitCompareAmount = (discountPercentage > 0 || discountAmount > 0) ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
 
   const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = (isPlusMember && (discountPercentage > 0 || discountAmount > 0)) || unitCompareAmount > unitPriceAmount;
+  const showCompare = (discountPercentage > 0 || discountAmount > 0) || unitCompareAmount > unitPriceAmount;
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

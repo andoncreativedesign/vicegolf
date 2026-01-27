@@ -409,7 +409,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
           {firstVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
-                {(firstVariant.compareAtPrice || (isPlusMember && (discountPercentage > 0 || discountAmount > 0))) && (
+                {(firstVariant.compareAtPrice || (discountPercentage > 0 || discountAmount > 0)) && (
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium">
                     <AedIcon className="mr-0.5" />
                     {parseFloat(firstVariant.compareAtPrice?.amount || firstVariant.price.amount).toFixed(2)}
@@ -420,13 +420,12 @@ export function VariantProductCard({ product }: ProductCardProps) {
                   <span className="text-xl font-bold tracking-tight">
                     {(() => {
                       const basePrice = parseFloat(firstVariant.price?.amount || '0');
-                      if (isPlusMember) {
-                        if (discountAmount > 0) {
-                          return Math.max(0, basePrice - discountAmount).toFixed(2);
-                        } else if (discountPercentage > 0) {
-                          const discounted = basePrice * (1 - discountPercentage);
-                          return Math.max(0, discounted).toFixed(2);
-                        }
+                      // Apply discount if available (for both Plus Members and regular users)
+                      if (discountAmount > 0) {
+                        return Math.max(0, basePrice - discountAmount).toFixed(2);
+                      } else if (discountPercentage > 0) {
+                        const discounted = basePrice * (1 - discountPercentage);
+                        return Math.max(0, discounted).toFixed(2);
                       }
                       return basePrice.toFixed(2);
                     })()}

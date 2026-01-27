@@ -38,10 +38,10 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </span>
           </div>
 
-          {isPlusMember && (discountPercentage > 0 || discountAmount > 0) && (
+          {(discountPercentage > 0 || discountAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
               <span className="flex items-center">
-                Plus membership {discountAmount > 0 ? (
+                Membership {discountAmount > 0 ? (
                   <span className="flex items-center mx-1">
                     <AedIcon className="w-3 h-3 mx-0.5" />
                     {discountAmount.toFixed(2)}

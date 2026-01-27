@@ -18,20 +18,19 @@ export function ProductCard({ product: _product }: ProductCardProps) {
   const rating = 4.5 + Math.random() * 0.5;
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
-  // Calculate discounted price for Plus members
+  // Calculate discounted price for all users with applicable discounts
   const originalPrice = parseFloat(product.variants?.nodes[0]?.price?.amount || '0');
   const displayPercentage = (discountPercentage * 100).toFixed(0);
 
-  let plusDiscountedPrice = originalPrice;
-  if (isPlusMember) {
-    if (discountAmount > 0) {
-      plusDiscountedPrice = Math.max(0, originalPrice - discountAmount);
-    } else if (discountPercentage > 0) {
-      plusDiscountedPrice = originalPrice * (1 - discountPercentage);
-    }
+  let discountedPrice = originalPrice;
+  // Apply discount if available (for both Plus Members and regular users)
+  if (discountAmount > 0) {
+    discountedPrice = Math.max(0, originalPrice - discountAmount);
+  } else if (discountPercentage > 0) {
+    discountedPrice = originalPrice * (1 - discountPercentage);
   }
 
-  const showPriceWithDiscount = isPlusMember && (discountPercentage > 0 || discountAmount > 0);
+  const showPriceWithDiscount = discountPercentage > 0 || discountAmount > 0;
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -167,7 +166,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
         <div className="mt-auto pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {isPlusMember ? (
+              {showPriceWithDiscount ? (
                 <>
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
                     <AedIcon className="mr-0.5" />
@@ -178,7 +177,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                   <div className="flex items-center text-gray-900">
                     <AedIcon className="mr-1" />
                     <span className="text-xl font-bold tracking-tight">
-                      {plusDiscountedPrice.toFixed(2)}
+                      {discountedPrice.toFixed(2)}
                     </span>
                   </div>
                 </>
