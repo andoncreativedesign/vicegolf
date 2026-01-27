@@ -200,7 +200,7 @@ export default function AddressEditor() {
   const locationState = (location.state ?? null) as LocationState;
   const addressFromState = locationState?.address ?? null;
   const navigate = useNavigate();
-  
+
   // Store address data in state to preserve it during errors
   const [preservedAddress, setPreservedAddress] = useState<Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } | null>(null);
 
@@ -345,13 +345,15 @@ export default function AddressEditor() {
           label="Country Code"
           aria-label="territoryCode"
           autoComplete="country"
-          defaultValue={derivedAddress.territoryCode ?? ''}
+          defaultValue="AE"
           id="territoryCode"
           name="territoryCode"
           placeholder="Country"
           required
           type="text"
           maxLength={2}
+          readOnly
+          containerClassName="hidden"
         />
         <CustomInputFiled
           label="Phone"
