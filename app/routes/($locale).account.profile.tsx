@@ -238,6 +238,19 @@ export default function AccountProfile() {
   const action = useActionData<ActionResponse>();
   const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment & CustomerFragment }>();
 
+  const [showNotification, setShowNotification] = React.useState(false);
+
+  // Clear notification after 5 seconds
+  React.useEffect(() => {
+    if (action) {
+      setShowNotification(true);
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [action]);
+
   // Debug: Log the customer data to see its structure
   React.useEffect(() => {
     console.log('Customer Data:', customer);
@@ -355,13 +368,13 @@ export default function AccountProfile() {
 
             <input type="hidden" name="customerId" value={customer?.id} />
           </fieldset>
-          {action?.error && (
-            <div className="mt-4 mb-6 w-full p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+          {action?.error && showNotification && (
+            <div className="mt-4 mb-6 w-full p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded animate-fade-in">
               <p className="text-sm">{action.error}</p>
             </div>
           )}
-          {action && !action.error && action.customer && (
-            <div className="mt-4 mb-6 w-full p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+          {action && !action.error && action.customer && showNotification && (
+            <div className="mt-4 mb-6 w-full p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded animate-fade-in">
               <p className="text-sm">Profile updated successfully!</p>
             </div>
           )}
