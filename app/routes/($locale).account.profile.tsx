@@ -161,19 +161,21 @@ export async function action({ request, context }: Route.ActionArgs) {
           let errorMessage = 'Failed to update your information. ';
 
           if (response.data?.errors) {
-            // Handle phone number validation specifically
-            if (response.data.errors.phone) {
-              errorMessage += 'Phone is invalid';
-            } else {
-              // Handle other validation errors
-              const errorObj = response.data.errors;
-              const errorMessages = Object.entries(errorObj).map(([field, errors]) => {
-                const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                const errorList = Array.isArray(errors) ? errors.join(', ') : String(errors);
-                return `${fieldName}: ${errorList}`;
-              });
-              errorMessage += errorMessages.join('. ');
-            }
+            // Handle field-specific validation errors
+            const errorObj = response.data.errors;
+            const errorMessages = Object.entries(errorObj).map(([field, errors]) => {
+              const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              const errorList = Array.isArray(errors) ? errors.join(', ') : String(errors);
+
+              // Map specific technical phrases to user-friendly ones if needed
+              let friendlyErrors = errorList;
+              if (errorList.toLowerCase().includes('has already been taken')) {
+                friendlyErrors = 'is already associated with another account';
+              }
+
+              return `${fieldName} ${friendlyErrors}`;
+            });
+            errorMessage = errorMessages.join('. ');
           } else if (response.data?.error) {
             errorMessage += typeof response.data.error === 'string'
               ? response.data.error
