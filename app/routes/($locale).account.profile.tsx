@@ -336,6 +336,7 @@ export default function AccountProfile() {
               title="Please enter a valid phone number (10-15 digits)"
               required
             />
+            <p className="text-xs text-gray-500 -mt-3 ml-1">Please enter your number as 971xxxxxxxxx or 050xxxxxxx (e.g. 0501234567)</p>
 
             <input type="hidden" name="customerId" value={customer?.id} />
           </fieldset>
