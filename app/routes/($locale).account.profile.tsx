@@ -107,6 +107,17 @@ export async function action({ request, context }: Route.ActionArgs) {
     // Then, update email/phone using Admin API if provided
     if ((email || phone) && customerNumberId) {
       try {
+        let formattedPhone = phone;
+        if (phone && !phone.startsWith('+')) {
+          if (phone.startsWith('0')) {
+            // Convert UAE local 05x to +9715x
+            formattedPhone = '+971' + phone.slice(1);
+          } else {
+            // Prepend + to numbers like 971xxxxxxx
+            formattedPhone = '+' + phone;
+          }
+        }
+
         const customerData: {
           first_name?: string;
           last_name?: string;
@@ -118,7 +129,7 @@ export async function action({ request, context }: Route.ActionArgs) {
           first_name: firstName || undefined,
           last_name: lastName || undefined,
           email: email || undefined,
-          phone: phone || undefined,
+          phone: formattedPhone || undefined,
           verified_email: true,
           send_email_welcome: false
         };
@@ -182,8 +193,10 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Error(errorMessage.trim());
         }
 
-        console.log('Successfully updated customer via Admin API:', response.data);
-        return response.data.customer; // Return the updated customer data
+        return {
+          error: null,
+          customer: response.data.customer,
+        };
       } catch (error: any) {
         console.error('Error in Admin API call:', {
           message: error.message,
