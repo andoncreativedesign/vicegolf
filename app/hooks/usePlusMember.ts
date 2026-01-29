@@ -10,15 +10,15 @@ import type { RootLoader } from '~/root';
  */
 export function usePlusMember() {
   const data = useRouteLoaderData<RootLoader>('root');
-  
+
   const customer = data?.customer;
   const plusDiscount = data?.plusDiscount;
 
   // Determine if tagged as a plus member
   const tags = (customer as any)?.tags || [];
   const isPlusMember = tags.some(
-    (tag: string) => 
-      tag.toLowerCase() === 'plus member' || 
+    (tag: string) =>
+      tag.toLowerCase() === 'plus member' ||
       tag.toLowerCase() === 'plus_member'
   );
 
@@ -27,14 +27,20 @@ export function usePlusMember() {
   let discountAmount = 0;
 
   if (plusDiscount) {
-    if (typeof plusDiscount.percentage === 'number') {
-      discountPercentage = plusDiscount.percentage;
-    } else if (typeof plusDiscount.amount === 'number') {
-      discountAmount = plusDiscount.amount;
-      // We set percentage to 0 if we have a fixed amount, 
-      // components should check discountAmount if they want to support it.
-      discountPercentage = 0; 
+    // Check for percentage (strict check for number might fail if serialization box it, or if it's 0)
+    if (plusDiscount.percentage !== null && plusDiscount.percentage !== undefined) {
+      discountPercentage = Number(plusDiscount.percentage);
     }
+
+    // Check for amount if percentage is 0 or not present
+    if (discountPercentage === 0 && plusDiscount.amount !== null && plusDiscount.amount !== undefined) {
+      discountAmount = Number(plusDiscount.amount);
+    }
+  }
+
+  // Debugging logs
+  if (typeof document !== 'undefined') { // Only log on client to avoid server-side noise if double rendering
+    console.log('usePlusMember debug:', { isPlusMember, plusDiscount, discountPercentage, discountAmount });
   }
 
   return { isPlusMember, discountPercentage, discountAmount, plusDiscount };

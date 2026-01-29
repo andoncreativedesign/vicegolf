@@ -256,7 +256,9 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
       if (targetDiscountNode) {
         const value = targetDiscountNode.automaticDiscount?.customerGets?.value;
-        if (value?.percentage) {
+        console.log('Debug: targetDiscountNode value:', JSON.stringify(value));
+
+        if (value && typeof value.percentage === 'number') {
           const percentage = value.percentage;
           console.log(`Found ${DISCOUNT_TITLE} (percentage): ${percentage * 100}%`);
           return { percentage, amount: null, currencyCode: null };
@@ -268,6 +270,8 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
             amount: amountValue,
             currencyCode: value.amount.currencyCode
           };
+        } else {
+          console.log('Debug: value found but neither percentage number nor amount object detected.');
         }
       }
 
