@@ -21,6 +21,7 @@ type FamilyMetaField = {
 
 type ProductCardProps = {
   product: {
+    id: string;
     handle: string;
     title: string;
     featuredImage?: {
@@ -48,6 +49,9 @@ type ProductCardProps = {
     tags?: string[];
     badge_colors?: string;
     family: FamilyMetaField;
+    collections?: {
+      nodes: Array<{ id: string }>;
+    };
     variantFamilyProducts: Omit<
       ProductCardProps['product'],
       'variants' |
@@ -175,8 +179,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
     };
   }, [hoverDelayTimeout]);
 
-  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
-  const displayPercentage = (discountPercentage * 100).toFixed(0);
+  const { isPlusMember, discountPercentage, discountAmount, getBestDiscountForProduct } = usePlusMember();
+
+  const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections);
 
   return (
     <div className="group relative flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -409,7 +415,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
           {firstVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
-                {(firstVariant.compareAtPrice || (discountPercentage > 0 || discountAmount > 0)) && (
+                {(firstVariant.compareAtPrice || (productPercentage > 0 || productAmount > 0)) && (
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium">
                     <AedIcon className="mr-0.5" />
                     {parseFloat(firstVariant.compareAtPrice?.amount || firstVariant.price.amount).toFixed(2)}
@@ -421,10 +427,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
                     {(() => {
                       const basePrice = parseFloat(firstVariant.price?.amount || '0');
                       // Apply discount if available (for both Plus Members and regular users)
-                      if (discountAmount > 0) {
-                        return Math.max(0, basePrice - discountAmount).toFixed(2);
-                      } else if (discountPercentage > 0) {
-                        const discounted = basePrice * (1 - discountPercentage);
+                      if (productAmount > 0) {
+                        return Math.max(0, basePrice - productAmount).toFixed(2);
+                      } else if (productPercentage > 0) {
+                        const discounted = basePrice * (1 - productPercentage);
                         return Math.max(0, discounted).toFixed(2);
                       }
                       return basePrice.toFixed(2);

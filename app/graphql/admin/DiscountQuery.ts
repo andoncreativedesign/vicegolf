@@ -25,6 +25,14 @@ export type AutomaticDiscountQueryResponse = {
                       currencyCode: string;
                     };
                   };
+              items: {
+                products?: {
+                  nodes: Array<{ id: string }>;
+                };
+                collections?: {
+                  nodes: Array<{ id: string }>;
+                };
+              } | any;
             };
           }
         | null;
@@ -52,6 +60,22 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                   amount {
                     amount
                     currencyCode
+                  }
+                }
+              }
+              items {
+                ... on DiscountProducts {
+                  products(first: 100) {
+                    nodes {
+                      id
+                    }
+                  }
+                }
+                ... on DiscountCollections {
+                  collections(first: 100) {
+                    nodes {
+                      id
+                    }
                   }
                 }
               }

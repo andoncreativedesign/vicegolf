@@ -78,7 +78,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const bundleBtnHandle = product?.metafields?.find((item: any) => item?.key === "bundle_btn_handle")
   const bundleBtnText = product?.metafields?.find((item: any) => item?.key === "bundle_btn_text")
   const bundleBtn = bundleBtnHandle && bundleBtnText ? { handle: bundleBtnHandle?.value, text: bundleBtnText?.value } : null
-           
+
   const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
   const family = product?.metafields?.find((item: any) => item?.key === "family")
   let colorVariants: UIColorVariant[] = [];
@@ -127,8 +127,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       // Include all variants, we'll handle the current product styling in the UI
       // The current product will be identified by matching the handle
     } catch (error) {
-         console.error('Error fetching color variants:', error);
-  // console.log("clubFamily", clubFamily)
+      console.error('Error fetching color variants:', error);
+      // console.log("clubFamily", clubFamily)
     }
   }
   let clubVariants = [] as ClubVariant[]
@@ -203,7 +203,7 @@ export default function Product() {
   // console.log("data.homePageData ", data.homePageData)
   // },[data])
   useEffect(() => {
-    
+
     // console.log('color variants from shopify', colorVariants)
     // Debug metafields for Tracer product
     const isTracer = product.metafields?.some(
