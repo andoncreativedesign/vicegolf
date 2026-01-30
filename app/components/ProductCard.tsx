@@ -10,7 +10,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product: _product }: ProductCardProps) {
-  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
+  const { isPlusMember, discountPercentage, discountAmount, getBestDiscountForProduct } = usePlusMember();
   const product = _product as any;
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
@@ -20,17 +20,19 @@ export function ProductCard({ product: _product }: ProductCardProps) {
 
   // Calculate discounted price for all users with applicable discounts
   const originalPrice = parseFloat(product.variants?.nodes[0]?.price?.amount || '0');
-  const displayPercentage = (discountPercentage * 100).toFixed(0);
+
+  const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, originalPrice);
 
   let discountedPrice = originalPrice;
   // Apply discount if available (for both Plus Members and regular users)
-  if (discountAmount > 0) {
-    discountedPrice = Math.max(0, originalPrice - discountAmount);
-  } else if (discountPercentage > 0) {
-    discountedPrice = originalPrice * (1 - discountPercentage);
+  if (productAmount > 0) {
+    discountedPrice = Math.max(0, originalPrice - productAmount);
+  } else if (productPercentage > 0) {
+    discountedPrice = originalPrice * (1 - productPercentage);
   }
 
-  const showPriceWithDiscount = discountPercentage > 0 || discountAmount > 0;
+  const showPriceWithDiscount = productPercentage > 0 || productAmount > 0;
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">

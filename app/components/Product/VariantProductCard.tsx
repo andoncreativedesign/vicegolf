@@ -182,7 +182,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const { isPlusMember, discountPercentage, discountAmount, getBestDiscountForProduct } = usePlusMember();
 
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections);
+  const basePrice = parseFloat(firstVariant?.price?.amount || '0');
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
 
   return (
     <div className="group relative flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">

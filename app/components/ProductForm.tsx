@@ -52,16 +52,15 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   bundleBtn,
   collectionIds,
 }, ref) => {
+  const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
   const { getBestDiscountForProduct } = usePlusMember();
-  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(currentProductId, collectionIds);
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(currentProductId, collectionIds, originalUnitPrice);
 
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
-
-  const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
   let unitPriceAmount = originalUnitPrice;
   // Apply discount if available (for both Plus Members and regular users)

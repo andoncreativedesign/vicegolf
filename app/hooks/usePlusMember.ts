@@ -42,7 +42,7 @@ export function usePlusMember() {
   /**
    * Helper to find the best discount for a specific product
    */
-  const getBestDiscountForProduct = (productId?: string, collections?: string[]) => {
+  const getBestDiscountForProduct = (productId?: string, collections?: string[], basePrice?: number) => {
     if (!automaticDiscounts || automaticDiscounts.length === 0) {
       return { percentage: discountPercentage, amount: discountAmount };
     }
@@ -68,8 +68,20 @@ export function usePlusMember() {
       return d.appliesToAll;
     });
 
-    // Sort by percentage descending
-    const sorted = applicableDiscounts.sort((a: any, b: any) => (b.percentage || 0) - (a.percentage || 0));
+    // Sort by actual savings if basePrice is provided, otherwise fallback to rough sorting
+    const sorted = applicableDiscounts.sort((a: any, b: any) => {
+      if (basePrice) {
+        const savingsA = a.amount ? a.amount : (a.percentage ? basePrice * a.percentage : 0);
+        const savingsB = b.amount ? b.amount : (b.percentage ? basePrice * b.percentage : 0);
+        return savingsB - savingsA;
+      }
+      
+      // If no price, prioritize specific titles or higher values
+      // (This is less accurate but better than nothing)
+      const valA = a.amount || (a.percentage ? a.percentage * 100 : 0);
+      const valB = b.amount || (b.percentage ? b.percentage * 100 : 0);
+      return valB - valA;
+    });
 
     if (sorted.length > 0) {
       const best = sorted[0];
