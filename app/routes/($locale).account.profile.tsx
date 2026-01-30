@@ -107,6 +107,17 @@ export async function action({ request, context }: Route.ActionArgs) {
     // Then, update email/phone using Admin API if provided
     if ((email || phone) && customerNumberId) {
       try {
+        let formattedPhone = phone;
+        if (phone && !phone.startsWith('+')) {
+          if (phone.startsWith('0')) {
+            // Convert UAE local 05x to +9715x
+            formattedPhone = '+971' + phone.slice(1);
+          } else {
+            // Prepend + to numbers like 971xxxxxxx
+            formattedPhone = '+' + phone;
+          }
+        }
+
         const customerData: {
           first_name?: string;
           last_name?: string;
@@ -118,7 +129,7 @@ export async function action({ request, context }: Route.ActionArgs) {
           first_name: firstName || undefined,
           last_name: lastName || undefined,
           email: email || undefined,
-          phone: phone || undefined,
+          phone: formattedPhone || undefined,
           verified_email: true,
           send_email_welcome: false
         };
@@ -150,19 +161,21 @@ export async function action({ request, context }: Route.ActionArgs) {
           let errorMessage = 'Failed to update your information. ';
 
           if (response.data?.errors) {
-            // Handle phone number validation specifically
-            if (response.data.errors.phone) {
-              errorMessage += 'Phone is invalid';
-            } else {
-              // Handle other validation errors
-              const errorObj = response.data.errors;
-              const errorMessages = Object.entries(errorObj).map(([field, errors]) => {
-                const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                const errorList = Array.isArray(errors) ? errors.join(', ') : String(errors);
-                return `${fieldName}: ${errorList}`;
-              });
-              errorMessage += errorMessages.join('. ');
-            }
+            // Handle field-specific validation errors
+            const errorObj = response.data.errors;
+            const errorMessages = Object.entries(errorObj).map(([field, errors]) => {
+              const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              const errorList = Array.isArray(errors) ? errors.join(', ') : String(errors);
+
+              // Map specific technical phrases to user-friendly ones if needed
+              let friendlyErrors = errorList;
+              if (errorList.toLowerCase().includes('has already been taken')) {
+                friendlyErrors = 'is already associated with another account';
+              }
+
+              return `${fieldName} ${friendlyErrors}`;
+            });
+            errorMessage = errorMessages.join('. ');
           } else if (response.data?.error) {
             errorMessage += typeof response.data.error === 'string'
               ? response.data.error
@@ -182,8 +195,10 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Error(errorMessage.trim());
         }
 
-        console.log('Successfully updated customer via Admin API:', response.data);
-        return response.data.customer; // Return the updated customer data
+        return {
+          error: null,
+          customer: response.data.customer,
+        };
       } catch (error: any) {
         console.error('Error in Admin API call:', {
           message: error.message,
@@ -222,6 +237,19 @@ export default function AccountProfile() {
   const { state } = useNavigation();
   const action = useActionData<ActionResponse>();
   const { customer } = useOutletContext<{ customer: ExtendedCustomerFragment & CustomerFragment }>();
+
+  const [showNotification, setShowNotification] = React.useState(false);
+
+  // Clear notification after 5 seconds
+  React.useEffect(() => {
+    if (action) {
+      setShowNotification(true);
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [action]);
 
   // Debug: Log the customer data to see its structure
   React.useEffect(() => {
@@ -336,16 +364,17 @@ export default function AccountProfile() {
               title="Please enter a valid phone number (10-15 digits)"
               required
             />
+            <p className="text-xs text-gray-500 -mt-3 ml-1">Please enter your number as 971xxxxxxxxx or 050xxxxxxx (e.g. 0501234567)</p>
 
             <input type="hidden" name="customerId" value={customer?.id} />
           </fieldset>
-          {action?.error && (
-            <div className="mt-4 mb-6 w-full p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+          {action?.error && showNotification && (
+            <div className="mt-4 mb-6 w-full p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded animate-fade-in">
               <p className="text-sm">{action.error}</p>
             </div>
           )}
-          {action && !action.error && action.customer && (
-            <div className="mt-4 mb-6 w-full p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+          {action && !action.error && action.customer && showNotification && (
+            <div className="mt-4 mb-6 w-full p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded animate-fade-in">
               <p className="text-sm">Profile updated successfully!</p>
             </div>
           )}

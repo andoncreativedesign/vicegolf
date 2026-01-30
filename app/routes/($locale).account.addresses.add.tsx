@@ -527,12 +527,12 @@ export function AddressForm({
             />
           </div>
 
-          <div>
+          <div className="hidden">
             <label htmlFor="territoryCode" className={labelClasses}>Country *</label>
             <input
               aria-label="Country"
               autoComplete="country"
-              defaultValue={address?.territoryCode ?? ''}
+              defaultValue="AE"
               id="territoryCode"
               name="territoryCode"
               placeholder="Country"
@@ -540,6 +540,7 @@ export function AddressForm({
               type="text"
               maxLength={2}
               className={inputClasses}
+              readOnly
             />
           </div>
         </div>
