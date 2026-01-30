@@ -48,23 +48,23 @@ export function usePlusMember() {
     }
 
     const plusMemberDiscountTitle = 'Plus Member Discount';
-    const specificProductDiscountTitle = 'Black Friday Product Discount';
 
     // Filter discounts that apply to this product
     const applicableDiscounts = automaticDiscounts.filter((d: any) => {
-      // If it's the specific product discount, check product eligibility
-      if (d.title === specificProductDiscountTitle) {
-        const isProductEligible = productId && d.eligibleProducts?.includes(productId);
-        const isCollectionEligible = collections && collections.some(cId => d.eligibleCollections?.includes(cId));
-        return isProductEligible || isCollectionEligible;
+      // 1. Check if it specifically applies to this product or its collections
+      const isProductEligible = productId && d.eligibleProducts?.includes(productId);
+      const isCollectionEligible = collections && collections.some(cId => d.eligibleCollections?.includes(cId));
+      
+      if (isProductEligible || isCollectionEligible) {
+        return true;
       }
 
-      // If it's the Plus Member discount, only applicable for plus members and applies to all (usually)
+      // 2. If it's a Plus Member specific discount, only include if user is a member
       if (d.title === plusMemberDiscountTitle) {
         return isPlusMember && d.appliesToAll;
       }
 
-      // Otherwise, return if it applies to all or matches some other logic
+      // 3. Otherwise, return if it applies to all 
       return d.appliesToAll;
     });
 
