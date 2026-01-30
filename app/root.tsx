@@ -183,7 +183,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
 
       // Define the exact discount title you want to apply
-      const DISCOUNT_TITLE = "Automatic Discount";
+      const DISCOUNT_TITLE = "Plus Member Discount";
 
       const response = await axiosShopifyAdmin.post(adminApiUrl, {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
@@ -200,7 +200,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       const json = response.data;
       const nodes = json.data?.automaticDiscountNodes?.nodes || [];
 
-      const plusMemberDiscountTitle = 'Automatic Discount';
+      const plusMemberDiscountTitle = 'Plus Member Discount';
       type DiscountNode =
         AutomaticDiscountQueryResponse['automaticDiscountNodes']['nodes'][number];
 
