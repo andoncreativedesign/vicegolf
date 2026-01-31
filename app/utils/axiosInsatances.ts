@@ -17,12 +17,11 @@ export const axiosSanity = axios.create({
   },
 });
 
-
-const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN;
-const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL;
+const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN
+const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL
 
 export const axiosShopifyAdmin = axios.create({
-  baseURL: `${ADMIN_API_URL}/graphql.json`,
+  baseURL: ADMIN_API_URL + '/graphql.json',
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

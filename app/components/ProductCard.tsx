@@ -3,15 +3,14 @@ import { useEffect } from "react";
 import { Link } from "react-router";
 import type { ProductFragment } from "storefrontapi.generated";
 import { AedIcon } from "./ui/AedIcon";
+import { usePlusMember } from "~/hooks/usePlusMember";
 
 interface ProductCardProps {
   product: ProductFragment;
 }
 
-import { usePlusMember } from "~/hooks/usePlusMember";
-
 export function ProductCard({ product: _product }: ProductCardProps) {
-  const { isPlusMember, discountPercentage } = usePlusMember();
+  const { isPlusMember, discountPercentage, discountAmount, getBestDiscountForProduct } = usePlusMember();
   const product = _product as any;
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
@@ -19,10 +18,21 @@ export function ProductCard({ product: _product }: ProductCardProps) {
   const rating = 4.5 + Math.random() * 0.5;
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
-  // Calculate discounted price for Plus members
+  // Calculate discounted price for all users with applicable discounts
   const originalPrice = parseFloat(product.variants?.nodes[0]?.price?.amount || '0');
-  const plusDiscountedPrice = originalPrice * (1 - discountPercentage);
-  const displayPercentage = (discountPercentage * 100).toFixed(0);
+
+  const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, originalPrice);
+
+  let discountedPrice = originalPrice;
+  // Apply discount if available (for both Plus Members and regular users)
+  if (productAmount > 0) {
+    discountedPrice = Math.max(0, originalPrice - productAmount);
+  } else if (productPercentage > 0) {
+    discountedPrice = originalPrice * (1 - productPercentage);
+  }
+
+  const showPriceWithDiscount = productPercentage > 0 || productAmount > 0;
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -158,7 +168,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
         <div className="mt-auto pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {isPlusMember ? (
+              {showPriceWithDiscount ? (
                 <>
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
                     <AedIcon className="mr-0.5" />
@@ -169,7 +179,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                   <div className="flex items-center text-gray-900">
                     <AedIcon className="mr-1" />
                     <span className="text-xl font-bold tracking-tight">
-                      {plusDiscountedPrice.toFixed(2)}
+                      {discountedPrice.toFixed(2)}
                     </span>
                   </div>
                 </>
@@ -200,4 +210,3 @@ export function ProductCard({ product: _product }: ProductCardProps) {
     </div>
   );
 }
-

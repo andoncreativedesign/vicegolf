@@ -48,6 +48,11 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
         }
       }
     }
+    collections(first: 5) {
+      nodes {
+        id
+      }
+    }
   }
 
   query CollectionProducts(
@@ -120,6 +125,11 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
                 amount
                 currencyCode
               }
+            }
+          }
+          collections(first: 5) {
+            nodes {
+              id
             }
           }
         }
@@ -389,7 +399,7 @@ fragment ProductItem on Product {
     value
   }
 
-  variants(first: 1) {
+    variants(first: 1) {
         nodes {
       id
       availableForSale
@@ -401,6 +411,11 @@ fragment ProductItem on Product {
         amount
         currencyCode
       }
+    }
+  }
+  collections(first: 5) {
+    nodes {
+      id
     }
   }
     featuredImage {
@@ -625,6 +640,11 @@ fragment ProductCardFragment on Product {
         }
       }
     }
+    collections(first: 5) {
+      nodes {
+        id
+      }
+    }
   }
 `;
 
@@ -668,6 +688,11 @@ fragment ProductCardFragment on Product {
           amount
           currencyCode
         }
+      }
+    }
+    collections(first: 5) {
+      nodes {
+        id
       }
     }
   }
@@ -733,6 +758,11 @@ fragment ColorVariantProduct on Product {
         amount
         currencyCode
       }
+    }
+  }
+  collections(first: 5) {
+    nodes {
+      id
     }
   }
 }
@@ -1059,6 +1089,11 @@ const PRODUCT_FRAGMENT = `#graphql
       key
       type
       value
+    }
+    collections(first: 5) {
+      nodes {
+        id
+      }
     }
     images(first: 10) {
       nodes {

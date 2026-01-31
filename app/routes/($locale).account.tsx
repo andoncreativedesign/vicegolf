@@ -11,6 +11,7 @@ import type { Route } from './+types/account';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon } from 'lucide-react'
 import { GET_CUSTOMER_AND_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 
 
 export function shouldRevalidate() {
@@ -18,7 +19,7 @@ export function shouldRevalidate() {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const { customerAccount, env } = context;
+  const { customerAccount } = context;
   const { data, errors } = await customerAccount.query(CUSTOMER_DETAILS_QUERY, {
     variables: {
       language: customerAccount.i18n.language,
@@ -31,55 +32,64 @@ export async function loader({ context }: Route.LoaderArgs) {
     throw new Error('Customer not found');
   }
 
-  // Check if the customer has already requested membership by checking tags
-  let membershipRequested = false;
-  let isPlusMember = false;
+  // Initialize from Hydrogen's customer data first (most reliable fallback)
+  const hydrogenTags = data.customer.tags || [];
+  let membershipRequested = hydrogenTags.includes('membership_requested');
+  let isPlusMember = hydrogenTags.some(
+    (tag: string) => tag.toLowerCase() === 'plus member' || tag.toLowerCase() === 'plus_member'
+  );
   let discountDetails = null;
 
-  if (env.ADMIN_API_URL && env.ADMIN_ACCESS_TOKEN) {
     try {
-      const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
+      const adminId = data.customer.id.replace('CustomerAccountCustomer', 'Customer');
 
-      const response = await fetch(adminApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+      const response = await axiosShopifyAdmin.post("", {
+        query: GET_CUSTOMER_AND_DISCOUNT_QUERY,
+        variables: {
+          id: adminId,
+          discountQuery: "title:'Plus Member Discount' status:active"
         },
-        body: JSON.stringify({
-          query: GET_CUSTOMER_AND_DISCOUNT_QUERY,
-          variables: {
-            id: data.customer.id,
-            discountQuery: 'code:plus-member-discount-code'
-          },
-        }),
       });
 
-      const responseData = (await response.json()) as any;
-      const tags = responseData.data?.customer?.tags || [];
-
-      if (tags.includes('membership_requested')) {
-        membershipRequested = true;
+      const responseData = response.data;
+      console.log('\n\n--- ADMIN API RESPONSE DATA ---');
+      if (responseData.errors) {
+        console.error('GraphQL Errors:', JSON.stringify(responseData.errors, null, 2));
+      } else {
+        console.log(JSON.stringify(responseData, null, 2));
       }
+      console.log('-------------------------------');
 
-      // Check if user is a Plus Member (assuming tag 'Plus Member')
-      if (tags.some((tag: string) => tag.toLowerCase() === 'plus member' || tag.toLowerCase() === 'plus_member')) {
-        isPlusMember = true;
+      const adminCustomer = responseData.data?.customer;
+      if (adminCustomer) {
+        const adminTags = adminCustomer.tags || [];
+
+        // Update statuses based on Admin API (more authoritative)
+        if (adminTags.includes('membership_requested')) {
+          membershipRequested = true;
+        }
+
+        if (adminTags.some((tag: string) => tag.toLowerCase() === 'plus member' || tag.toLowerCase() === 'plus_member')) {
+          isPlusMember = true;
+        }
       }
 
       const discountNode = responseData.data?.codeDiscountNodes?.nodes[0]?.codeDiscount;
       if (discountNode && discountNode.status === 'ACTIVE') {
+        const value = discountNode.customerGets.value;
         discountDetails = {
           code: discountNode.codes.nodes[0].code,
-          percentage: (discountNode.customerGets.value.percentage * 100).toFixed(0)
+          percentage: value.percentage ? (value.percentage * 100).toFixed(0) : null,
+          fixedAmount: value.amount ? value.amount.amount : null,
+          currencyCode: value.amount ? value.amount.currencyCode : null
         };
         console.log('Discount Details:', discountDetails);
       }
 
     } catch (error) {
-      console.error('Error fetching admin info:', error);
+      console.error('Error fetching admin info:', (error as any)?.response?.data || (error as any).message);
     }
-  }
+  
 
   return remixData(
     { customer: data.customer, membershipRequested, isPlusMember, discountDetails },
@@ -92,7 +102,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-  const { customerAccount, env } = context;
+  const { customerAccount} = context;
 
   if (request.method !== 'POST') {
     return remixData({ error: 'Method not allowed' }, { status: 405 });
@@ -104,13 +114,10 @@ export async function action({ request, context }: Route.ActionArgs) {
     return remixData({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!env.ADMIN_API_URL || !env.ADMIN_ACCESS_TOKEN) {
-    console.error('Admin API configuration missing');
-    return remixData({ error: 'Server configuration error' }, { status: 500 });
-  }
-
   try {
-    const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
+    const adminId = data.customer.id.replace('CustomerAccountCustomer', 'Customer');
+    console.log('Requesting membership for Admin ID:', adminId);
+
     const tagsAddMutation = `#graphql
       mutation tagsAdd($id: ID!, $tags: [String!]!) {
         tagsAdd(id: $id, tags: $tags) {
@@ -125,26 +132,25 @@ export async function action({ request, context }: Route.ActionArgs) {
       }
     `;
 
-    const response = await fetch(adminApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
+    const response = await axiosShopifyAdmin.post("", {
+      query: tagsAddMutation,
+      variables: {
+        id: adminId,
+        tags: ['membership_requested'],
       },
-      body: JSON.stringify({
-        query: tagsAddMutation,
-        variables: {
-          id: data.customer.id,
-          tags: ['membership_requested'],
-        },
-      }),
     });
 
-    const responseJson = await response.json();
+    const responseJson = response.data;
+    console.log('Tag Add Response:', JSON.stringify(responseJson, null, 2));
+
+    if (responseJson.errors) {
+      console.error('GraphQL Mutation Errors:', responseJson.errors);
+      return remixData({ error: 'Failed to update status (GraphQL Error)' }, { status: 400 });
+    }
 
     if (responseJson.data?.tagsAdd?.userErrors?.length > 0) {
       console.error('Tag add errors:', responseJson.data.tagsAdd.userErrors);
-      return remixData({ error: 'Failed to update status' }, { status: 400 });
+      return remixData({ error: 'Failed to update status (User Error)' }, { status: 400 });
     }
 
     return remixData({ success: true });

@@ -12,7 +12,8 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
-import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { GET_AUTOMATIC_DISCOUNT_QUERY, type AutomaticDiscountQueryResponse } from '~/graphql/admin/DiscountQuery';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 
 export type RootLoader = typeof loader;
 
@@ -67,17 +68,19 @@ export async function loader(args: Route.LoaderArgs) {
   const { storefront, env } = args.context;
 
   // Resolve critical deferred data so it's available immediately for pricing logic
-  const [customer, plusDiscountPercentage] = await Promise.all([
+  const [customer, plusDiscount, automaticDiscounts] = await Promise.all([
     deferredData.customer,
-    deferredData.plusDiscountPercentage
+    deferredData.plusDiscount,
+    deferredData.automaticDiscounts,
   ]);
 
-  console.log('Loader returning Plus Discount:', plusDiscountPercentage);
+  console.log('Loader returning Plus Discount:', plusDiscount);
 
   return {
     ...deferredData,
     customer,
-    plusDiscountPercentage,
+    plusDiscount,
+    automaticDiscounts,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -171,71 +174,82 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     return null;
   });
 
-  const plusDiscountPercentage = (async () => {
-    const { env } = context;
-    if (!env.ADMIN_API_URL || !env.ADMIN_ACCESS_TOKEN) {
-      console.warn('Admin API credentials missing, using fallback discount');
-      return 0.05;
-    }
+  const automaticDiscounts = (async () => {
 
     try {
-      const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
-
-      const response = await fetch(adminApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
-        },
-        body: JSON.stringify({ query: GET_AUTOMATIC_DISCOUNT_QUERY }),
+      const response = await axiosShopifyAdmin.post("", {
+        query: GET_AUTOMATIC_DISCOUNT_QUERY,
+        variables: {
+          first: 50,
+          query: `status:active`
+        }
       });
 
-      if (!response.ok) {
-        console.error('Admin API fetch failed:', response.status);
-        return 0.05;
-      }
-
-      const json = await response.json() as any;
+      const json = response.data;
       const nodes = json.data?.automaticDiscountNodes?.nodes || [];
 
-      nodes.forEach((n: any) => {
-        const title = n.automaticDiscount?.title;
-        const percentage = n.automaticDiscount?.customerGets?.value?.percentage;
-        console.log(`Active Discount: "${title}" - Percentage: ${percentage}`);
-      });
+      return nodes.map((node: any) => {
+        const ad = node.automaticDiscount;
+        if (!ad) return null;
 
-      // Find the discount that matches "Automatic Discount" or "Plus" or "Member"
-      const plusNode = nodes.find((node: any) => {
-        const title = (node.automaticDiscount?.title || '').toLowerCase().trim();
-        return title === 'automatic discount' || title.includes('plus') || title.includes('member');
-      });
+        const value = ad.customerGets?.value;
+        const items = ad.customerGets?.items;
 
-      let percentage = plusNode?.automaticDiscount?.customerGets?.value?.percentage;
-
-      if (typeof percentage !== 'number') {
-        // Fallback: search for any discount that is for Plus Members if title match failed
-        // (Just in case the title is something else, we take the first one that mentions plus/member in the query results)
-        // Actually, let's keep it strict but maybe it's a Code Discount?
-      }
-
-      if (typeof percentage === 'number') {
-        console.log(`Found Plus Discount: ${percentage * 100}%`);
-        return percentage;
-      }
-
-      console.log('No matching automatic discount found, using default 5%');
-      return 0.05;
+        return {
+          title: ad.title,
+          percentage: value?.percentage || 0,
+          amount: value?.amount ? parseFloat(value.amount.amount) : null,
+          currencyCode: value?.amount?.currencyCode || null,
+          eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
+          eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
+          appliesToAll: !items || (!items.products && !items.collections)
+        };
+      }).filter(Boolean);
     } catch (e) {
-      console.error('Error fetching plus discount percentage:', e);
-      return 0.05;
+      console.error('Error fetching automatic discounts:', e);
+      return [];
     }
+  })();
+
+  const plusDiscount = (async () => {
+    const allDiscounts = await automaticDiscounts;
+    const customerData = await customer;
+    const tags = customerData?.tags || [];
+    const isPlusMember = tags.some((tag: string) =>
+      tag.toLowerCase() === 'plus_member' || tag.toLowerCase() === 'plus member'
+    );
+
+    const plusMemberDiscountTitle = 'Plus Member Discount';
+
+    // Sort and filter discounts for the global/fallback discount
+    const availableGlobalDiscounts = allDiscounts
+      .filter((d: any) => {
+        // Only include Plus Member discount if user is a member
+        if (d.title === plusMemberDiscountTitle) {
+          return isPlusMember;
+        }
+        // Black Friday discount is usually product-specific, but if it's global, we can include it
+        return d.appliesToAll;
+      })
+      .sort((a: any, b: any) => (b.percentage || 0) - (a.percentage || 0));
+
+    let targetDiscount = availableGlobalDiscounts[0];
+
+    // If it's a plus member, prioritize the "Plus Member Discount" title if it exists
+    if (isPlusMember) {
+      const plusDiscount = allDiscounts.find((d: any) => d.title === plusMemberDiscountTitle);
+      if (plusDiscount) targetDiscount = plusDiscount;
+    }
+
+    return targetDiscount || { percentage: 0, amount: null, currencyCode: null, title: '' };
   })();
 
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
-    plusDiscountPercentage,
+    plusDiscount,
+    automaticDiscounts,
     footer,
   };
 }

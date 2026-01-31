@@ -20,7 +20,7 @@ import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
 import { usePlusMember } from '~/hooks/usePlusMember';
 
-export const ProductForm = forwardRef<HTMLDivElement, {
+export type ProductFormProps = {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   title: string;
@@ -31,11 +31,14 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   shippingDetails?: ShippingDetails | null;
   clubVariants?: ClubVariant[];
   currentProductId: string;
+  collectionIds?: string[];
   bundleBtn: {
     text: string;
     handle: string;
   } | null
-}>(({
+};
+
+export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   productOptions,
   selectedVariant,
   title,
@@ -47,23 +50,32 @@ export const ProductForm = forwardRef<HTMLDivElement, {
   clubVariants,
   currentProductId,
   bundleBtn,
+  collectionIds,
 }, ref) => {
-  const { isPlusMember, discountPercentage } = usePlusMember();
+  const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
+  const { getBestDiscountForProduct } = usePlusMember();
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(currentProductId, collectionIds, originalUnitPrice);
+
   const navigate = useNavigate();
   const { open } = useAside();
   const [quantity, setQuantity] = useState(1);
   const [selectedTier, setSelectedTier] = useState('1');
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
 
-  const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
-  const unitPriceAmount = isPlusMember ? originalUnitPrice * (1 - discountPercentage) : originalUnitPrice;
+  let unitPriceAmount = originalUnitPrice;
+  // Apply discount if available (for both Plus Members and regular users)
+  if (productAmount > 0) {
+    unitPriceAmount = Math.max(0, originalUnitPrice - productAmount);
+  } else if (productPercentage > 0) {
+    unitPriceAmount = originalUnitPrice * (1 - productPercentage);
+  }
 
-  const unitCompareAmount = isPlusMember ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+  const unitCompareAmount = (productPercentage > 0 || productAmount > 0) ? originalUnitPrice : parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
 
   const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = isPlusMember || unitCompareAmount > unitPriceAmount;
+  const showCompare = (productPercentage > 0 || productAmount > 0) || unitCompareAmount > unitPriceAmount;
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

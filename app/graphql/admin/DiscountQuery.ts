@@ -1,7 +1,52 @@
+// Types for GET_AUTOMATIC_DISCOUNT_QUERY
+
+export type AutomaticDiscountQueryVariables = {
+  query: string;
+  first: number;
+};
+
+export type AutomaticDiscountQueryResponse = {
+  automaticDiscountNodes: {
+    nodes: Array<{
+      automaticDiscount:
+        | {
+            __typename?: 'DiscountAutomaticBasic';
+            title: string;
+            customerGets: {
+              value:
+                | {
+                    __typename?: 'DiscountPercentage';
+                    percentage: number;
+                  }
+                | {
+                    __typename?: 'DiscountAmount';
+                    amount: {
+                      amount: string;
+                      currencyCode: string;
+                    };
+                  };
+              items: {
+                products?: {
+                  nodes: Array<{ id: string }>;
+                };
+                collections?: {
+                  nodes: Array<{ id: string }>;
+                };
+              } | any;
+            };
+          }
+        | null;
+    }>;
+  };
+};
+
+
+
+
 // Query for fetching automatic discount details from Shopify Admin API
 export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
-  query getPlusDiscount {
-    automaticDiscountNodes(first: 50, query: "status:active") {
+  query getPlusDiscount($query: String!, $first: Int!) {
+    automaticDiscountNodes(first: $first, query: $query) {
       nodes {
         automaticDiscount {
           ... on DiscountAutomaticBasic {
@@ -10,6 +55,28 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
               value {
                 ... on DiscountPercentage {
                   percentage
+                }
+                ... on DiscountAmount {
+                  amount {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
+              items {
+                ... on DiscountProducts {
+                  products(first: 100) {
+                    nodes {
+                      id
+                    }
+                  }
+                }
+                ... on DiscountCollections {
+                  collections(first: 100) {
+                    nodes {
+                      id
+                    }
+                  }
                 }
               }
             }
@@ -40,6 +107,12 @@ export const GET_CODE_DISCOUNT_QUERY = `#graphql
               value {
                 ... on DiscountPercentage {
                   percentage
+                }
+                ... on DiscountAmount {
+                  amount {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }
@@ -72,6 +145,12 @@ export const GET_CUSTOMER_AND_DISCOUNT_QUERY = `#graphql
               value {
                 ... on DiscountPercentage {
                   percentage
+                }
+                ... on DiscountAmount {
+                  amount {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }

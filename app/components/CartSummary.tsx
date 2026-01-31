@@ -6,6 +6,7 @@ import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 
 import { usePlusMember } from '~/hooks/usePlusMember';
+import { AedIcon } from './ui/AedIcon';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -13,7 +14,7 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
-  const { isPlusMember, discountPercentage } = usePlusMember();
+  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
@@ -37,9 +38,16 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </span>
           </div>
 
-          {isPlusMember && (
+          {(discountPercentage > 0 || discountAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
-              <span>Plus membership {displayPercentage}% discount applied</span>
+              <span className="flex items-center">
+                Membership {discountAmount > 0 ? (
+                  <span className="flex items-center mx-1">
+                    <AedIcon className="w-3 h-3 mx-0.5" />
+                    {discountAmount.toFixed(2)}
+                  </span>
+                ) : `${displayPercentage}%`} discount applied
+              </span>
               <span>Automatic</span>
             </div>
           )}
@@ -246,7 +254,6 @@ function UpdateDiscountForm({
       inputs={{
         discountCodes: discountCodes || [],
       }}
-      onSuccess={onSuccess}
     >
       {children}
     </CartForm>
