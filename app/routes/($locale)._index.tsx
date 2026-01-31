@@ -74,16 +74,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     ...(categoryProducts?.gear?.products?.nodes || []),
   ];
 
-  console.log("\n\n alll products ")
-  console.log(allProducts[0])
-
   // 3️⃣ Extract unique family values
   const families = [
     ...new Set(allProducts.map(p => p.family?.value).filter(Boolean)),
   ];
-
-  console.log("\n\nfamilies ")
-  console.log(families)
 
   // 4️⃣ Build Shopify search queries for each family
   const familyQueries = families.map(fam => ({
@@ -201,9 +195,9 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   //   }
   // })
 
-  console.log('\n\ncategoryProducts.golfBalls.nodes')
-  console.log(categoryProducts?.golfBalls?.products?.pageInfo)
-  console.log('\n\ncategoryProducts.golfBalls.nodes end')
+  // console.log('\n\ncategoryProducts.golfBalls.nodes')
+  // console.log(categoryProducts?.golfBalls?.products?.pageInfo)
+  // console.log('\n\ncategoryProducts.golfBalls.nodes end')
 
   // 7️⃣ Return final combined output
   return {

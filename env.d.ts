@@ -14,6 +14,13 @@ declare global {
     interface Env {
         // Your custom environment variables
         SOME_API_KEY?: string;
+        ADMIN_API_URL?: string;
+        ADMIN_ACCESS_TOKEN?: string;
+        PUBLIC_STORE_DOMAIN: string;
+        PUBLIC_STOREFRONT_ID: string;
+        PUBLIC_CHECKOUT_DOMAIN: string;
+        PUBLIC_STOREFRONT_API_TOKEN: string;
+        SESSION_SECRET: string;
     }
 }
 

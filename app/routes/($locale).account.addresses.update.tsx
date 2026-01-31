@@ -205,16 +205,10 @@ export default function AddressEditor() {
   const [preservedAddress, setPreservedAddress] = useState<Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } | null>(null);
 
   useEffect(() => {
-    console.log('AddressEditor mounted', {
-      pathname: location.pathname,
-      state: location.state,
-    });
-
     if (addressFromState) {
-      console.log('Loaded address from navigation state', addressFromState);
       // Store the address data when it's available from navigation state
       setPreservedAddress(addressFromState);
-    } else if (preservedAddress) {
+     } else if (preservedAddress) {
       console.log('Using preserved address data', preservedAddress);
     } else {
       console.warn('No address found in navigation state. This can happen after a full page refresh.');

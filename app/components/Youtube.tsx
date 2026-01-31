@@ -43,10 +43,6 @@ export function Youtube({ youtubeVideo }: YoutubeProps) {
       : url;
   };
 
-  useEffect(() => {
-    console.log("youtubeVideo ", youtubeVideo)
-  }, [youtubeVideo])
-
   return (
     <section className="w-full py-16 md:py-24">
       <div className="w-full">

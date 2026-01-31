@@ -14,7 +14,6 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   const fetcher = useFetcher<{ collection?: { id: string } }>();
 
   useEffect(() => {
-    console.log("menuItem nav dropdown", menuItem)
   }, [menuItem])
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +47,6 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   }, [menuItem]);
 
   const handleNavigate = (navItem: SecondaryMenuItem) => {
-    console.log('Navigation item:', navItem);
     if (onClose) onClose();
 
     if (navItem.type === "COLLECTION") {
@@ -68,7 +66,6 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
       && fetcher.data?.collection?.title
     ) {
       const { id, title } = fetcher.data.collection
-      console.log("fetcher.data ", id, title)
       navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
     }
   }, [fetcher.state, fetcher.data, navigate]);

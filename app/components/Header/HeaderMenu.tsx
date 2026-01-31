@@ -127,7 +127,6 @@ const HeaderMenu = ({
         };
       } else if (item.type === 'PAGE') {
         const reconstructed = reconstructMenuObject(item.resource?.metafield?.value);
-        console.log("reconstructed ", reconstructed)
 
         updatedItem = {
           ...item,
@@ -166,7 +165,6 @@ const HeaderMenu = ({
   useEffect(() => {
     if (menuItems.length === 0) return;
     const updatedMenu = updateMenuItems(menuItems);
-    console.log('updated menuitems reconstructed  - ', updatedMenu)
     setMenu(updatedMenu);
   }, [menuItems]);
 
@@ -191,7 +189,6 @@ const HeaderMenu = ({
       && fetcher.data?.collection?.title
     ) {
       const { id, title } = fetcher.data.collection
-      console.log("fetcher.data ", id, title)
       close(); // Ensure menu is closed before navigation
       navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
     }

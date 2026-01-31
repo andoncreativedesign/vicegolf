@@ -2,6 +2,7 @@ import { Image, Money } from "@shopify/hydrogen";
 import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import { AedIcon } from '../ui/AedIcon';
+import { usePlusMember } from "~/hooks/usePlusMember";
 
 type ColorOption = {
   id: string;
@@ -69,8 +70,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
   const allVariants = useMemo(() => {
     // Create a Set to track unique variant handles
-    if (product.title === "Vice Pro Plus")
-      console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
+    if (product.title === "Vice Pro Plus") {
+      // console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
+    }
 
     const seenHandles = new Set();
     const variants = [];
@@ -159,10 +161,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   useEffect(() => {
-    // if (product.productType === 'Golf Balls' && product.variantFamilyProducts)
-    if (product.variantFamilyProducts?.length > 0)
-      console.log('product card golf balls', product)
-  }, [product])
+    if (product.variantFamilyProducts?.length > 0) {
+      // Add your effect logic here
+    }
+  }, [product]);
 
   // Add this effect to clean up the timeout when the component unmounts
   useEffect(() => {
@@ -173,6 +175,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
     };
   }, [hoverDelayTimeout]);
 
+
+  const { isPlusMember, discountPercentage } = usePlusMember();
+  const displayPercentage = (discountPercentage * 100).toFixed(0);
 
   return (
     <div className="group relative flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -226,8 +231,10 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         Sold out
                       </span>
                     )}
+
                     {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.map((tag: string) => {
                       const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
+                      if (tagText?.toLowerCase() === 'plus member') return null;
                       const normalizedTag = tagText?.toLowerCase();
                       let customStyles = {};
                       try {
@@ -404,16 +411,16 @@ export function VariantProductCard({ product }: ProductCardProps) {
           {firstVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
-                {firstVariant.compareAtPrice && (
+                {(firstVariant.compareAtPrice || isPlusMember) && (
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium">
                     <AedIcon className="mr-0.5" />
-                    {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)}
+                    {parseFloat(firstVariant.compareAtPrice?.amount || firstVariant.price.amount).toFixed(2)}
                   </div>
                 )}
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
-                    {parseFloat(firstVariant.price.amount).toFixed(2)}
+                    {(parseFloat(firstVariant.price?.amount || '0') * (isPlusMember ? (1 - discountPercentage) : 1)).toFixed(2)}
                   </span>
                 </div>
               </div>

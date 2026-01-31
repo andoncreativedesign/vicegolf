@@ -44,7 +44,6 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
   }, []);
   // Load cookie on mount
   useEffect(() => {
-    console.log('Running load cookie effect');
     try {
       const savedConsent = Cookies.get(COOKIE_NAME);
       // console.log('Raw cookie value:', savedConsent);
@@ -77,7 +76,6 @@ export function CookieProvider({ children }: { children: React.ReactNode }) {
       };
 
       Cookies.set(COOKIE_NAME, JSON.stringify(updatedConsent), cookieOptions);
-      console.log('Cookie set successfully');
       setConsent(updatedConsent);
       setShowBanner(false);
     } catch (error) {

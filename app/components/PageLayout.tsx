@@ -191,8 +191,6 @@ function SearchAside() {
             const isLoading = state === 'loading' && term.current;
             const hasTerm = !!term.current;
 
-            console.log('search collections - ', collections)
-
             if (isLoading) {
               return (
                 <div className="flex justify-center py-12">
