@@ -1,7 +1,10 @@
 // app/components/CustomerReviews.tsx
 import { useState } from "react";
 import { Star, X } from "lucide-react";
-import { ReviewFilters, ReviewsList, PopularTopics } from './CustomerReview';
+import { ReviewFilters } from "./CustomerReview/ReviewFilters";
+import { ReviewsList } from "./CustomerReview/ReviewsList";
+import { PopularTopics } from "./CustomerReview/PopularTopics"; 
+
 import React from "react"; 
 
 export function CustomerReviews() {

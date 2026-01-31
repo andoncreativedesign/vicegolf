@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import React from 'react';
-import { CustomerReview } from './CustomerReview';
+import { CustomerReview } from './CustomerReview'; 
 
 interface Review {
   name: string;
