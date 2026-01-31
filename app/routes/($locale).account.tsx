@@ -19,7 +19,7 @@ export function shouldRevalidate() {
 }
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const { customerAccount, env } = context;
+  const { customerAccount } = context;
   const { data, errors } = await customerAccount.query(CUSTOMER_DETAILS_QUERY, {
     variables: {
       language: customerAccount.i18n.language,
@@ -40,22 +40,15 @@ export async function loader({ context }: Route.LoaderArgs) {
   );
   let discountDetails = null;
 
-  if (env.ADMIN_API_URL && env.ADMIN_ACCESS_TOKEN) {
     try {
-      const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
       const adminId = data.customer.id.replace('CustomerAccountCustomer', 'Customer');
 
-      const response = await axiosShopifyAdmin.post(adminApiUrl, {
+      const response = await axiosShopifyAdmin.post("", {
         query: GET_CUSTOMER_AND_DISCOUNT_QUERY,
         variables: {
           id: adminId,
           discountQuery: "title:'Plus Member Discount' status:active"
         },
-      }, {
-        timeout: 10000,
-        headers: {
-          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
-        }
       });
 
       const responseData = response.data;
@@ -96,7 +89,7 @@ export async function loader({ context }: Route.LoaderArgs) {
     } catch (error) {
       console.error('Error fetching admin info:', (error as any)?.response?.data || (error as any).message);
     }
-  }
+  
 
   return remixData(
     { customer: data.customer, membershipRequested, isPlusMember, discountDetails },
@@ -109,7 +102,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
-  const { customerAccount, env } = context;
+  const { customerAccount} = context;
 
   if (request.method !== 'POST') {
     return remixData({ error: 'Method not allowed' }, { status: 405 });
@@ -121,13 +114,7 @@ export async function action({ request, context }: Route.ActionArgs) {
     return remixData({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!env.ADMIN_API_URL || !env.ADMIN_ACCESS_TOKEN) {
-    console.error('Admin API configuration missing');
-    return remixData({ error: 'Server configuration error' }, { status: 500 });
-  }
-
   try {
-    const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
     const adminId = data.customer.id.replace('CustomerAccountCustomer', 'Customer');
     console.log('Requesting membership for Admin ID:', adminId);
 
@@ -145,17 +132,12 @@ export async function action({ request, context }: Route.ActionArgs) {
       }
     `;
 
-    const response = await axiosShopifyAdmin.post(adminApiUrl, {
+    const response = await axiosShopifyAdmin.post("", {
       query: tagsAddMutation,
       variables: {
         id: adminId,
         tags: ['membership_requested'],
       },
-    }, {
-      timeout: 10000,
-      headers: {
-        'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
-      }
     });
 
     const responseJson = response.data;
