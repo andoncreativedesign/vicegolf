@@ -123,13 +123,15 @@ export function AddressForm({
           label="Country Code"
           aria-label="territoryCode"
           autoComplete="country"
-          defaultValue={address?.territoryCode ?? ''}
+          defaultValue="AE"
           id="territoryCode"
           name="territoryCode"
           placeholder="Country"
           required
           type="text"
           maxLength={2}
+          readOnly
+          containerClassName="hidden"
         />
         <CustomInputFiled
           label="Phone"
