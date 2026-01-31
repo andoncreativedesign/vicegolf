@@ -17,12 +17,11 @@ export const axiosSanity = axios.create({
   },
 });
 
-
-const ADMIN_ACCESS_TOKEN = 'REMOVED_TOKEN'
-const ADMIN_API_URL = `https://tzasu4-jj.myshopify.com/admin/api/2025-01/graphql.json`
+const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN
+const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL
 
 export const axiosShopifyAdmin = axios.create({
-  baseURL: ADMIN_API_URL,
+  baseURL: ADMIN_API_URL + '/graphql.json',
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -31,7 +30,7 @@ export const axiosShopifyAdmin = axios.create({
 });
 
 export const axiosShopifyAdminCustomerApi = axios.create({
-  baseURL: 'https://tzasu4-jj.myshopify.com/admin/api/2025-01',
+  baseURL: ADMIN_API_URL,
   headers: {
     'Content-Type': 'application/json',
     'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN, // Reusing the same access token from above

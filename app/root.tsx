@@ -175,24 +175,13 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
   });
 
   const automaticDiscounts = (async () => {
-    const { env } = context;
-    if (!env.ADMIN_API_URL || !env.ADMIN_ACCESS_TOKEN) {
-      console.warn('Admin API credentials missing');
-      return [];
-    }
 
     try {
-      const adminApiUrl = `${env.ADMIN_API_URL}/graphql.json`;
-
-      const response = await axiosShopifyAdmin.post(adminApiUrl, {
+      const response = await axiosShopifyAdmin.post("", {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
         variables: {
           first: 50,
           query: `status:active`
-        }
-      }, {
-        headers: {
-          'X-Shopify-Access-Token': env.ADMIN_ACCESS_TOKEN,
         }
       });
 
