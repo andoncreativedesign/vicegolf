@@ -33,6 +33,6 @@ export const axiosShopifyAdminCustomerApi = axios.create({
   baseURL: ADMIN_API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN, // Reusing the same access token from above
+    'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN,
   },
 });
