@@ -11,6 +11,7 @@ import {
 } from 'react-router';
 import { CustomInputFiled } from '~/components/basic/CustomInputFiled';
 import { PhoneInputField } from '~/components/basic/PhoneInputField';
+import { CountrySelector } from '~/components/basic/CountrySelector';
 import { useState } from 'react';
 
 
@@ -124,19 +125,12 @@ export function AddressForm({
           required
           type="text"
         />
-        <CustomInputFiled
-          label="Country Code"
-          aria-label="territoryCode"
-          autoComplete="country"
-          defaultValue="AE"
+        <CountrySelector
+          label="Country"
           id="territoryCode"
           name="territoryCode"
-          placeholder="Country"
+          defaultValue={address?.territoryCode || 'AE'}
           required
-          type="text"
-          maxLength={2}
-          readOnly
-          containerClassName="hidden"
         />
         <PhoneInputField
           label="Phone"
