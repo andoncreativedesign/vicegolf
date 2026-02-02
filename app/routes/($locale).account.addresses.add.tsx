@@ -19,6 +19,7 @@ import {
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
 import { createAddress } from '~/lib/shopify/profile';
+import { PhoneInputField } from '~/components/basic/PhoneInputField';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -396,6 +397,8 @@ export function AddressForm({
   const isDefaultAddress = defaultAddress?.id === addressId;
   const address = initialAddress; // Use the initialAddress prop as address
 
+  const [phone, setPhone] = React.useState(address?.phoneNumber ?? '');
+
   const inputClasses = "w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent";
   const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
@@ -547,17 +550,15 @@ export function AddressForm({
 
         <div>
           <label htmlFor="phoneNumber" className={labelClasses}>Phone (optional)</label>
-          <input
-            aria-label="Phone Number"
+          <PhoneInputField
+            label="" // Label is already handled above
+            id="phoneNumber-input"
+            value={phone}
+            onChange={(val) => setPhone(val || '')}
+            placeholder="Enter phone number"
             autoComplete="tel"
-            defaultValue={address?.phoneNumber ?? ''}
-            id="phoneNumber"
-            name="phoneNumber"
-            placeholder="+1 (123) 456-7890"
-            pattern="^\+?[1-9]\d{3,14}$"
-            type="tel"
-            className={inputClasses}
           />
+          <input type="hidden" name="phoneNumber" value={phone} />
         </div>
 
         <div className="flex items-center">

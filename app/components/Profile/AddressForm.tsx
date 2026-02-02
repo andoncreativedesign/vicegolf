@@ -10,6 +10,8 @@ import {
   type Fetcher,
 } from 'react-router';
 import { CustomInputFiled } from '~/components/basic/CustomInputFiled';
+import { PhoneInputField } from '~/components/basic/PhoneInputField';
+import { useState } from 'react';
 
 
 export function AddressForm({
@@ -29,6 +31,9 @@ export function AddressForm({
   const action = useActionData<ActionResponse>();
   const error = action?.error?.[addressId];
   const isDefaultAddress = defaultAddress?.id === addressId;
+
+  const [phone, setPhone] = useState(address?.phoneNumber ?? '');
+
   return (
     <Form id={addressId} className='text-gray-700'>
       <fieldset>
@@ -133,17 +138,15 @@ export function AddressForm({
           readOnly
           containerClassName="hidden"
         />
-        <CustomInputFiled
+        <PhoneInputField
           label="Phone"
-          aria-label="Phone Number"
+          id="phoneNumber-input"
+          value={phone}
+          onChange={(val) => setPhone(val || '')}
+          placeholder="Enter phone number"
           autoComplete="tel"
-          defaultValue={address?.phoneNumber ?? ''}
-          id="phoneNumber"
-          name="phoneNumber"
-          placeholder="+16135551111"
-          pattern="^\+?[1-9]\d{3,14}$"
-          type="tel"
         />
+        <input type="hidden" name="phoneNumber" value={phone} />
         <div>
           <input
             defaultChecked={isDefaultAddress}

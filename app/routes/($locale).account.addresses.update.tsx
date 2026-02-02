@@ -2,6 +2,7 @@ import type { CustomerAddressInput } from '@shopify/hydrogen/customer-account-ap
 import type { AddressFragment } from 'customer-accountapi.generated';
 import { data, Form, useActionData, useNavigation, useLocation, useNavigate } from 'react-router';
 import { CustomInputFiled } from '~/components/basic/CustomInputFiled';
+import { PhoneInputField } from '~/components/basic/PhoneInputField';
 import type { Route } from './+types/account.addresses';
 import {
   UPDATE_ADDRESS_MUTATION,
@@ -203,12 +204,14 @@ export default function AddressEditor() {
 
   // Store address data in state to preserve it during errors
   const [preservedAddress, setPreservedAddress] = useState<Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } | null>(null);
+  const [phone, setPhone] = useState('');
 
   useEffect(() => {
     if (addressFromState) {
       // Store the address data when it's available from navigation state
       setPreservedAddress(addressFromState);
-     } else if (preservedAddress) {
+      setPhone(addressFromState.phoneNumber ?? '');
+    } else if (preservedAddress) {
       console.log('Using preserved address data', preservedAddress);
     } else {
       console.warn('No address found in navigation state. This can happen after a full page refresh.');
@@ -349,17 +352,15 @@ export default function AddressEditor() {
           readOnly
           containerClassName="hidden"
         />
-        <CustomInputFiled
+        <PhoneInputField
           label="Phone"
-          aria-label="Phone Number"
+          id="phoneNumber-input"
+          value={phone}
+          onChange={(val) => setPhone(val || '')}
+          placeholder="Enter phone number"
           autoComplete="tel"
-          defaultValue={derivedAddress.phoneNumber ?? ''}
-          id="phoneNumber"
-          name="phoneNumber"
-          placeholder="+16135551111"
-          pattern="^\+?[1-9]\d{3,14}$"
-          type="tel"
         />
+        <input type="hidden" name="phoneNumber" value={phone} />
         <div className="flex items-center">
           <input
             defaultChecked={Boolean(derivedAddress.defaultAddress)}
