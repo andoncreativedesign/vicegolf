@@ -201,7 +201,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 type LocationState = {
-  address?: AddressFragment | (CustomerAddressInput & { id?: AddressFragment['id'] | null });
+  address?: (AddressFragment | (CustomerAddressInput & { id?: AddressFragment['id'] | null })) & { defaultAddress?: boolean };
 } | null;
 
 export default function AddressEditor() {
@@ -214,7 +214,7 @@ export default function AddressEditor() {
   const navigate = useNavigate();
 
   // Store address data in state to preserve it during errors
-  const [preservedAddress, setPreservedAddress] = useState<Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } | null>(null);
+  const [preservedAddress, setPreservedAddress] = useState<(Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } & { defaultAddress?: boolean }) | null>(null);
   const [phone, setPhone] = useState('');
 
   useEffect(() => {
@@ -236,7 +236,7 @@ export default function AddressEditor() {
   }, [action?.createdAddress, action?.updatedAddress, action?.error, navigate]);
 
   const isEditMode = Boolean(addressFromState?.id || preservedAddress?.id);
-  const derivedAddress: Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } =
+  const derivedAddress: Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } & { defaultAddress?: boolean } =
     addressFromState ?? preservedAddress ?? {
       address1: '',
       address2: '',

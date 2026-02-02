@@ -331,7 +331,12 @@ function ExistingAddresses({
 
   const handleEdit = (address: AddressFragment) => {
     navigate('update', {
-      state: { address },
+      state: {
+        address: {
+          ...address,
+          defaultAddress: defaultAddress?.id === address.id,
+        },
+      },
     });
   };
 
