@@ -10,6 +10,7 @@ import {
   useActionData,
   useNavigation,
   useOutletContext,
+  useLoaderData,
   type Fetcher,
 } from 'react-router';
 import type { Route } from './+types/account.addresses';
@@ -19,6 +20,10 @@ import {
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
 import { createAddress } from '~/lib/shopify/profile';
+import { PhoneInputField } from '~/components/basic/PhoneInputField';
+import { CountrySelector } from '~/components/basic/CountrySelector';
+import { COUNTRIES_QUERY } from '~/graphql/CountriesQuery';
+import { useEffect, useState, useMemo } from 'react';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -36,7 +41,15 @@ export const meta: Route.MetaFunction = () => {
 export async function loader({ context }: Route.LoaderArgs) {
   context.customerAccount.handleAuthStatus();
 
-  return {};
+  try {
+    const data = await context.storefront.query(COUNTRIES_QUERY);
+    return {
+      countries: data?.localization?.availableCountries || [],
+    };
+  } catch (error) {
+    console.error('Failed to load countries:', error);
+    return { countries: [] };
+  }
 }
 
 
@@ -396,6 +409,15 @@ export function AddressForm({
   const isDefaultAddress = defaultAddress?.id === addressId;
   const address = initialAddress; // Use the initialAddress prop as address
 
+  const { countries } = useLoaderData<typeof loader>();
+  const [phone, setPhone] = useState(address?.phoneNumber ?? '');
+  const [selectedCountryCode, setSelectedCountryCode] = useState(address?.territoryCode || 'AE');
+
+  const availableProvinces = useMemo(() => {
+    const country = countries.find((c: any) => c.isoCode === selectedCountryCode);
+    return country?.availableProvinces || [];
+  }, [countries, selectedCountryCode]);
+
   const inputClasses = "w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent";
   const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
@@ -514,50 +536,64 @@ export function AddressForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="zoneCode" className={labelClasses}>State / Province *</label>
-            <input
-              aria-label="State/Province"
-              autoComplete="address-level1"
-              defaultValue={address?.zoneCode ?? ''}
-              id="zoneCode"
-              name="zoneCode"
-              placeholder="State / Province"
-              required
-              type="text"
-              className={inputClasses}
-            />
+            {availableProvinces.length > 0 ? (
+              <div className="relative">
+                <select
+                  id="zoneCode"
+                  name="zoneCode"
+                  defaultValue={address?.zoneCode ?? ''}
+                  required
+                  className={inputClasses + " appearance-none"}
+                >
+                  <option value="" disabled>Select region</option>
+                  {availableProvinces.map((province: any) => (
+                    <option key={province.code} value={province.code}>
+                      {province.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              <input
+                aria-label="State/Province"
+                autoComplete="address-level1"
+                defaultValue={address?.zoneCode ?? ''}
+                id="zoneCode"
+                name="zoneCode"
+                placeholder="State / Province"
+                required
+                type="text"
+                className={inputClasses}
+              />
+            )}
           </div>
 
-          <div className="hidden">
-            <label htmlFor="territoryCode" className={labelClasses}>Country *</label>
-            <input
-              aria-label="Country"
-              autoComplete="country"
-              defaultValue="AE"
-              id="territoryCode"
-              name="territoryCode"
-              placeholder="Country"
-              required
-              type="text"
-              maxLength={2}
-              className={inputClasses}
-              readOnly
-            />
-          </div>
+          <CountrySelector
+            label="Country"
+            id="territoryCode"
+            name="territoryCode"
+            defaultValue={selectedCountryCode}
+            onChange={(e) => setSelectedCountryCode(e.target.value)}
+            required
+          />
         </div>
 
         <div>
           <label htmlFor="phoneNumber" className={labelClasses}>Phone (optional)</label>
-          <input
-            aria-label="Phone Number"
+          <PhoneInputField
+            label="" // Label is already handled above
+            id="phoneNumber-input"
+            value={phone}
+            onChange={(val) => setPhone(val || '')}
+            placeholder="Enter phone number"
             autoComplete="tel"
-            defaultValue={address?.phoneNumber ?? ''}
-            id="phoneNumber"
-            name="phoneNumber"
-            placeholder="+1 (123) 456-7890"
-            pattern="^\+?[1-9]\d{3,14}$"
-            type="tel"
-            className={inputClasses}
           />
+          <input type="hidden" name="phoneNumber" value={phone} />
         </div>
 
         <div className="flex items-center">
