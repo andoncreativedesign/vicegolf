@@ -88,6 +88,13 @@ export default function OrderRoute() {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [fulfillmentStatus] = useState(() => {
+    const activeReturn = order.returns?.nodes.find((r) => r.status !== 'CANCELLED');
+    if (activeReturn) {
+      if(activeReturn.status === 'OPEN')  return 'RETURN_REQUESTED'
+      if (activeReturn.status === 'CLOSED') return 'RETURNED'
+      return activeReturn.status
+    }
+
     let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
     return status?.status || (order?.financialStatus as string | undefined);
   })
@@ -108,7 +115,7 @@ export default function OrderRoute() {
     const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
       return f.status !== 'CANCELLED'
     });
-    
+
     if (hasActiveFulfillment) {
       return false;
     }
@@ -137,6 +144,12 @@ export default function OrderRoute() {
     });
 
     if (!hasFulfilledLineItems) {
+      return false;
+    }
+
+    // Check if a return has already been requested or is in progress
+    const hasActiveReturn = order.returns?.nodes.some((r) => r.status !== 'CANCELLED');
+    if (hasActiveReturn) {
       return false;
     }
 

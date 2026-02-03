@@ -49,6 +49,11 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
     statusPageUrl
     fulfillmentStatus
     financialStatus
+    returns(first: 10) {
+      nodes {
+        status
+      }
+    }
     processedAt
     fulfillments(first: 1) {
       nodes {
