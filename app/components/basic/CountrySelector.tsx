@@ -20,7 +20,10 @@ export function CountrySelector({
     const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
     // Sort countries by name
-    const countries = getCountries().sort((a, b) => (en[a] || '').localeCompare(en[b] || ''));
+    // rmeove the filter show all countries - now store only avilable for UAE 
+    const countries = getCountries()
+        .sort((a, b) => (en[a] || '').localeCompare(en[b] || ''))
+        .filter((country) => country === 'AE');
 
     return (
         <div className={containerClassName}>
