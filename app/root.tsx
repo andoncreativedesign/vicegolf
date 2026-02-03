@@ -194,10 +194,13 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
         const value = ad.customerGets?.value;
         const items = ad.customerGets?.items;
+        // Shopify returns percentage as 0.1 for 10% (decimal); some APIs use 10 (whole). Normalize to 0–1.
+        let pct = value?.percentage ?? 0;
+        if (typeof pct === 'number' && pct > 1) pct = pct / 100;
 
         return {
           title: ad.title,
-          percentage: value?.percentage || 0,
+          percentage: pct,
           amount: value?.amount ? parseFloat(value.amount.amount) : null,
           currencyCode: value?.amount?.currencyCode || null,
           eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
