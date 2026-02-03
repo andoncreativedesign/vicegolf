@@ -108,7 +108,7 @@ export default function OrderRoute() {
     const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
       return f.status !== 'CANCELLED'
     });
-    
+
     if (hasActiveFulfillment) {
       return false;
     }
@@ -118,6 +118,9 @@ export default function OrderRoute() {
   }
 
   function isOrderReturnable(order: OrderQuery['order']): boolean {
+    console.log('isOrderReturnable', JSON.stringify(order))
+    console.log('isOrderReturnable', order)
+
     if (!order) return false;
 
     // Use the same checks as isOrderCancelable for financial status
@@ -137,6 +140,12 @@ export default function OrderRoute() {
     });
 
     if (!hasFulfilledLineItems) {
+      return false;
+    }
+
+    // Check if a return has already been requested or is in progress
+    const hasActiveReturn = order.returns?.nodes.some((r) => r.status !== 'CANCELLED');
+    if (hasActiveReturn) {
       return false;
     }
 
