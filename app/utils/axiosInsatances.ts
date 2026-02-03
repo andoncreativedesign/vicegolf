@@ -26,13 +26,13 @@ const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL
  * filtered out in older API versions. See:
  * https://shopify.dev/changelog/discount-eligibility-management
  */
-const ADMIN_API_URL_2025_10 = ADMIN_API_URL?.replace(
-  /\/admin\/api\/\d{4}-\d{2}(\/|$)/,
-  '/admin/api/2025-10$1'
-) || ADMIN_API_URL;
+// const ADMIN_API_URL_2025_10 = ADMIN_API_URL?.replace(
+//   /\/admin\/api\/\d{4}-\d{2}(\/|$)/,
+//   '/admin/api/2025-10$1'
+// ) || ADMIN_API_URL;
 
 export const axiosShopifyAdmin = axios.create({
-  baseURL: (ADMIN_API_URL_2025_10 || ADMIN_API_URL) + '/graphql.json',
+  baseURL: ADMIN_API_URL + '/graphql.json',
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
