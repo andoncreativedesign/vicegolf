@@ -1,56 +1,14 @@
-// Types for GET_AUTOMATIC_DISCOUNT_QUERY
-
-export type AutomaticDiscountQueryVariables = {
-  query: string;
-  first: number;
-};
-
-export type AutomaticDiscountQueryResponse = {
-  automaticDiscountNodes: {
-    nodes: Array<{
-      automaticDiscount:
-        | {
-            __typename?: 'DiscountAutomaticBasic';
-            title: string;
-            customerGets: {
-              value:
-                | {
-                    __typename?: 'DiscountPercentage';
-                    percentage: number;
-                  }
-                | {
-                    __typename?: 'DiscountAmount';
-                    amount: {
-                      amount: string;
-                      currencyCode: string;
-                    };
-                  };
-              items: {
-                products?: {
-                  nodes: Array<{ id: string }>;
-                };
-                collections?: {
-                  nodes: Array<{ id: string }>;
-                };
-              } | any;
-            };
-          }
-        | null;
-    }>;
-  };
-};
-
-
-
-
-// Query for fetching automatic discount details from Shopify Admin API
+// Query for fetching automatic discounts (for segment-based discounts)
 export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
-  query getPlusDiscount($query: String!, $first: Int!) {
+  query getAutomaticDiscounts($first: Int!, $query: String) {
     automaticDiscountNodes(first: $first, query: $query) {
       nodes {
+        id
         automaticDiscount {
           ... on DiscountAutomaticBasic {
             title
+            status
+            summary
             customerGets {
               value {
                 ... on DiscountPercentage {
@@ -64,6 +22,9 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                 }
               }
               items {
+                ... on AllDiscountItems {
+                  allPurchases
+                }
                 ... on DiscountProducts {
                   products(first: 100) {
                     nodes {
@@ -98,44 +59,6 @@ export const GET_CODE_DISCOUNT_QUERY = `#graphql
             title
             status
             summary
-            codes(first: 1) {
-              nodes {
-                code
-              }
-            }
-            customerGets {
-              value {
-                ... on DiscountPercentage {
-                  percentage
-                }
-                ... on DiscountAmount {
-                  amount {
-                    amount
-                    currencyCode
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-// Query for fetching customer tags and discount info together
-export const GET_CUSTOMER_AND_DISCOUNT_QUERY = `#graphql
-  query getAccountInfo($id: ID!, $discountQuery: String!) {
-    customer(id: $id) {
-      tags
-    }
-    codeDiscountNodes(first: 1, query: $discountQuery) {
-      nodes {
-        id
-        codeDiscount {
-          ... on DiscountCodeBasic {
-            title
-            status
             codes(first: 1) {
               nodes {
                 code

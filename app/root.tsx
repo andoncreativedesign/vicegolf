@@ -12,8 +12,8 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
-import { GET_AUTOMATIC_DISCOUNT_QUERY, type AutomaticDiscountQueryResponse } from '~/graphql/admin/DiscountQuery';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 export type RootLoader = typeof loader;
 
@@ -67,20 +67,33 @@ export async function loader(args: Route.LoaderArgs) {
 
   const { storefront, env } = args.context;
 
-  // Resolve critical deferred data so it's available immediately for pricing logic
-  const [customer, plusDiscount, automaticDiscounts] = await Promise.all([
+  // Resolve critical deferred data
+  const [customer, automaticDiscounts] = await Promise.all([
     deferredData.customer,
-    deferredData.plusDiscount,
     deferredData.automaticDiscounts,
   ]);
 
-  console.log('Loader returning Plus Discount:', plusDiscount);
+  // Calculate the best membership discount based on customer segments
+  const customerTags = customer?.tags?.map((t: string) => t.toLowerCase()) || [];
+  const segments = ['vice_crew', 'vice_squad', 'vice_legends'];
+  const userSegment = segments.find(s => customerTags.includes(s));
+
+  let membershipDiscount = { percentage: 0, amount: null, currencyCode: null, title: '' };
+
+  if (userSegment && automaticDiscounts?.length) {
+    // Find discounts that might be related to these segments. 
+    // Usually, automatic discounts tied to segments will have the segment name in the title or we just take the best one.
+    const eligibleDiscounts = automaticDiscounts.sort((a: any, b: any) => (b.percentage || 0) - (a.percentage || 0));
+    if (eligibleDiscounts.length > 0) {
+      membershipDiscount = eligibleDiscounts[0];
+    }
+  }
 
   return {
     ...deferredData,
     customer,
-    plusDiscount,
     automaticDiscounts,
+    membershipDiscount,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -175,7 +188,6 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
   });
 
   const automaticDiscounts = (async () => {
-
     try {
       const response = await axiosShopifyAdmin.post("", {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
@@ -194,8 +206,9 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
         const value = ad.customerGets?.value;
         const items = ad.customerGets?.items;
-        // Shopify returns percentage as 0.1 for 10% (decimal); some APIs use 10 (whole). Normalize to 0–1.
+
         let pct = value?.percentage ?? 0;
+        // Shopify returns percentage as 0.1 for 10% (decimal); some APIs use 10 (whole). Normalize to 0–1.
         if (typeof pct === 'number' && pct > 1) pct = pct / 100;
 
         return {
@@ -205,7 +218,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
           currencyCode: value?.amount?.currencyCode || null,
           eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
           eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
-          appliesToAll: !items || (!items.products && !items.collections)
+          appliesToAll: ad.customerGets?.items?.allPurchases ?? false
         };
       }).filter(Boolean);
     } catch (e) {
@@ -214,44 +227,10 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     }
   })();
 
-  const plusDiscount = (async () => {
-    const allDiscounts = await automaticDiscounts;
-    const customerData = await customer;
-    const tags = customerData?.tags || [];
-    const isPlusMember = tags.some((tag: string) =>
-      tag.toLowerCase() === 'plus_member' || tag.toLowerCase() === 'plus member'
-    );
-
-    const plusMemberDiscountTitle = 'Plus Member Discount';
-
-    // Sort and filter discounts for the global/fallback discount
-    const availableGlobalDiscounts = allDiscounts
-      .filter((d: any) => {
-        // Only include Plus Member discount if user is a member
-        if (d.title === plusMemberDiscountTitle) {
-          return isPlusMember;
-        }
-        // Black Friday discount is usually product-specific, but if it's global, we can include it
-        return d.appliesToAll;
-      })
-      .sort((a: any, b: any) => (b.percentage || 0) - (a.percentage || 0));
-
-    let targetDiscount = availableGlobalDiscounts[0];
-
-    // If it's a plus member, prioritize the "Plus Member Discount" title if it exists
-    if (isPlusMember) {
-      const plusDiscount = allDiscounts.find((d: any) => d.title === plusMemberDiscountTitle);
-      if (plusDiscount) targetDiscount = plusDiscount;
-    }
-
-    return targetDiscount || { percentage: 0, amount: null, currencyCode: null, title: '' };
-  })();
-
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
-    plusDiscount,
     automaticDiscounts,
     footer,
   };

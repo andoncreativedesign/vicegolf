@@ -2,7 +2,7 @@ import { Image, Money } from "@shopify/hydrogen";
 import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import { AedIcon } from '../ui/AedIcon';
-import { usePlusMember } from "~/hooks/usePlusMember";
+import { useMembership } from "~/hooks/useMembership";
 
 type ColorOption = {
   id: string;
@@ -170,7 +170,6 @@ export function VariantProductCard({ product }: ProductCardProps) {
     }
   }, [product]);
 
-  // Add this effect to clean up the timeout when the component unmounts
   useEffect(() => {
     return () => {
       if (hoverDelayTimeout) {
@@ -179,11 +178,12 @@ export function VariantProductCard({ product }: ProductCardProps) {
     };
   }, [hoverDelayTimeout]);
 
-  const { isPlusMember, discountPercentage, discountAmount, getBestDiscountForProduct } = usePlusMember();
+  const { getBestDiscountForProduct } = useMembership();
 
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
   const basePrice = parseFloat(firstVariant?.price?.amount || '0');
   const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+
 
   return (
     <div className="group relative flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -237,9 +237,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
                       </span>
                     )}
 
-                    {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.map((tag: string) => {
+                    {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || []).map((tag: string) => {
                       const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
-                      if (tagText?.toLowerCase() === 'plus member') return null;
                       const normalizedTag = tagText?.toLowerCase();
                       let customStyles = {};
                       try {
@@ -426,15 +425,13 @@ export function VariantProductCard({ product }: ProductCardProps) {
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
                     {(() => {
-                      const basePrice = parseFloat(firstVariant.price?.amount || '0');
-                      // Apply discount if available (for both Plus Members and regular users)
+                      const basePriceValue = parseFloat(firstVariant.price?.amount || '0');
                       if (productAmount > 0) {
-                        return Math.max(0, basePrice - productAmount).toFixed(2);
+                        return Math.max(0, basePriceValue - productAmount).toFixed(2);
                       } else if (productPercentage > 0) {
-                        const discounted = basePrice * (1 - productPercentage);
-                        return Math.max(0, discounted).toFixed(2);
+                        return (basePriceValue * (1 - productPercentage)).toFixed(2);
                       }
-                      return basePrice.toFixed(2);
+                      return basePriceValue.toFixed(2);
                     })()}
                   </span>
                 </div>

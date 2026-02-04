@@ -4,9 +4,8 @@ import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
-
-import { usePlusMember } from '~/hooks/usePlusMember';
 import { AedIcon } from './ui/AedIcon';
+import { useMembership } from '~/hooks/useMembership';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -14,7 +13,7 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
-  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
+  const { isMember, discountPercentage, discountAmount } = useMembership();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
@@ -51,6 +50,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
               <span>Automatic</span>
             </div>
           )}
+
 
           {total && (
             <div className="border-t border-gray-200 pt-3 mt-3">
