@@ -157,8 +157,8 @@ export default function MembershipTab() {
                                                 type="submit"
                                                 disabled={isSubmitting || !!currentSegment}
                                                 className={`w-full py-3 rounded-full text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${!!currentSegment
-                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                        : 'bg-gray-900 text-white hover:bg-black active:scale-[0.98]'
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-gray-900 text-white hover:bg-black active:scale-[0.98]'
                                                     }`}
                                             >
                                                 {isSubmitting && fetcher.formData?.get('segment') === segment.id ? (

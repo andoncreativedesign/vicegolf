@@ -23,7 +23,7 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
               }
               items {
                 ... on AllDiscountItems {
-                  allPurchases
+                  __typename
                 }
                 ... on DiscountProducts {
                   products(first: 100) {
@@ -41,6 +41,11 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                 }
               }
             }
+          }
+          ... on DiscountAutomaticBxgy {
+            title
+            status
+            summary
           }
         }
       }

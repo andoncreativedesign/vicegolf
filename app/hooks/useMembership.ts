@@ -21,8 +21,29 @@ export function useMembership() {
     const userSegment = segments.find(s => customerTags.includes(s));
     const isMember = !!userSegment;
 
-    const discountPercentage = membershipDiscount?.percentage || 0;
-    const discountAmount = membershipDiscount?.amount || 0;
+    // Calculate the best TRUE GLOBAL discount available from the filtered list (applies to everything)
+    let bestGlobalPct = 0;
+    let bestGlobalAmt = 0;
+    let bestGlobalCurrency = null;
+
+    automaticDiscounts.forEach((d: any) => {
+        // ONLY consider it 'Global' for the total display if it applies to everything
+        if (d.appliesToAll) {
+            if (d.percentage > bestGlobalPct) {
+                bestGlobalPct = d.percentage;
+            }
+            if (d.amount > bestGlobalAmt) {
+                bestGlobalAmt = d.amount;
+                bestGlobalCurrency = d.currencyCode;
+            }
+        }
+    });
+
+    // If the membership tier discount itself is in the filtered list and matches appliesToAll, 
+    // it will be caught above. 
+
+    const discountPercentage = bestGlobalPct;
+    const discountAmount = bestGlobalAmt;
 
     /**
      * Determine the best discount for a specific product
@@ -35,36 +56,27 @@ export function useMembership() {
         let bestPercentage = 0;
         let bestAmount = 0;
 
-        // 1. Check membership-specific discount first (this is already the "best" global one we found in root)
-        if (isMember) {
-            // If it's a global discount or the product/collection is eligible
-            const isEligible =
-                membershipDiscount.appliesToAll ||
-                membershipDiscount.eligibleProducts?.includes(productId) ||
-                collectionIds.some(id => membershipDiscount.eligibleCollections?.includes(id));
-
-            if (isEligible) {
-                bestPercentage = membershipDiscount.percentage || 0;
-                bestAmount = membershipDiscount.amount || 0;
-            }
-        }
-
-        // 2. Compare with other automatic discounts that might apply to everyone
+        // Check all automatic discounts (which root.tsx already filtered to be Member-Tiers + Global)
         automaticDiscounts.forEach((discount: any) => {
-            // Skip if this is the one we already checked
-            if (discount.title === membershipDiscount.title) return;
-
             const isEligible =
                 discount.appliesToAll ||
                 discount.eligibleProducts?.includes(productId) ||
                 collectionIds.some(id => discount.eligibleCollections?.includes(id));
 
             if (isEligible) {
-                if (discount.percentage > bestPercentage) {
-                    bestPercentage = discount.percentage;
-                    bestAmount = 0; // Prioritize percentage if higher
-                } else if (discount.amount > bestAmount && bestPercentage === 0) {
-                    bestAmount = discount.amount;
+                const savingsFromPct = (discount.percentage || 0) * basePrice;
+                const savingsFromAmt = discount.amount || 0;
+                const currentBestSavings = (bestPercentage * basePrice) || bestAmount;
+
+                // Compare which one provides more actual savings
+                if (savingsFromPct > currentBestSavings || savingsFromAmt > currentBestSavings) {
+                    if (savingsFromPct >= savingsFromAmt) {
+                        bestPercentage = discount.percentage;
+                        bestAmount = 0;
+                    } else {
+                        bestAmount = discount.amount;
+                        bestPercentage = 0;
+                    }
                 }
             }
         });
