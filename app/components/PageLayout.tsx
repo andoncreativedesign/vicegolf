@@ -1,5 +1,6 @@
-import { Await, Link, useFetcher, useLoaderData, useNavigate } from 'react-router';
+import { Await, Link, useFetcher, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
 import { Suspense, useId, useState, useEffect, useRef } from 'react';
+import type { RootLoader } from '~/root';
 import { Search } from 'lucide-react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AedIcon } from './ui/AedIcon';
@@ -345,7 +346,8 @@ function MobileMenuAside({
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
 }) {
-  const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
+  const rootData = useRouteLoaderData<RootLoader>('root');
+  const productsForNav = rootData?.productsForNav;
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
 
