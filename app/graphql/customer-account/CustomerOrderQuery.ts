@@ -117,6 +117,18 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
     variantTitle
   }
 
+  fragment DiscountApplication on DiscountApplication {
+    value {
+      __typename
+      ... on MoneyV2 {
+        ...Money
+      }
+      ... on PricingPercentageValue {
+        percentage
+      }
+    }
+  }
+
   query Order($orderId: ID!, $language: LanguageCode)
     @inContext(language: $language) {
     order(id: $orderId) {
@@ -164,6 +176,12 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
           }
         }
 
+        discountApplications(first: 100) {
+          nodes {
+            ...DiscountApplication
+          }
+        }
+          
       }
     }
   }

@@ -7,11 +7,11 @@ import type {
   OrderQuery,
 } from 'customer-accountapi.generated';
 import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CancelOrderModal } from '~/components/Profile/CancelOrderModal';
 import { ReturnOrderModal } from '~/components/Profile/ReturnOrderModal';
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }: any) => {
   return [{ title: `Order ${data?.order?.name}` }];
 };
 
@@ -90,7 +90,7 @@ export default function OrderRoute() {
   const [fulfillmentStatus] = useState(() => {
     const activeReturn = order.returns?.nodes.find((r) => r.status !== 'CANCELLED');
     if (activeReturn) {
-      if(activeReturn.status === 'OPEN')  return 'RETURN_REQUESTED'
+      if (activeReturn.status === 'OPEN') return 'RETURN_REQUESTED'
       if (activeReturn.status === 'CLOSED') return 'RETURNED'
       return activeReturn.status
     }
@@ -347,7 +347,10 @@ function OrderLineRow({ lineItem }: { lineItem: OrderLineItemFullFragment }) {
       </td>
       <td className="py-4 px-4 text-right align-top">
         <div className="font-medium text-gray-900">
-          <Money data={lineItem.totalDiscount!} />
+          <Money data={{
+            amount: (parseFloat(lineItem.price!.amount) * lineItem.quantity).toString(),
+            currencyCode: lineItem.price!.currencyCode,
+          }} />
         </div>
       </td>
     </tr>
