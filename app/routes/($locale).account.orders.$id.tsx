@@ -37,16 +37,16 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   const { order } = data;
 
   // Extract line items directly from nodes array
-  const lineItems = order.lineItems.nodes;
+  const lineItems = order?.lineItems?.nodes;
 
   // Extract discount applications directly from nodes array
-  const discountApplications = order.discountApplications.nodes;
+  const discountApplications = order?.discountApplications?.nodes;
 
   // Get fulfillment status from first fulfillment node
-  const fulfillmentStatus = order.fulfillments.nodes[0]?.status ?? 'N/A';
+  const fulfillmentStatus = order?.fulfillments?.nodes[0]?.status ?? 'N/A';
 
   // Get first discount value with proper type checking
-  const firstDiscount = discountApplications[0]?.value;
+  const firstDiscount = discountApplications?.[0]?.value;
 
   // Type guard for MoneyV2 discount
   const discountValue =
@@ -95,7 +95,7 @@ export default function OrderRoute() {
       return activeReturn.status
     }
 
-    let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
+    let status = order?.fulfillments?.nodes.find((f) => f.status !== 'CANCELLED')
     return status?.status || (order?.financialStatus as string | undefined);
   })
 
@@ -112,7 +112,7 @@ export default function OrderRoute() {
       return false;
     }
 
-    const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
+    const hasActiveFulfillment = order?.fulfillments?.nodes.some((f) => {
       return f.status !== 'CANCELLED'
     });
 
@@ -139,7 +139,7 @@ export default function OrderRoute() {
     }
 
     // Check for at least one fulfilled line item that hasn't been refunded
-    const hasFulfilledLineItems = order.fulfillments.nodes.some((f) => {
+    const hasFulfilledLineItems = order?.fulfillments?.nodes.some((f) => {
       return f.status === 'FULFILLED' || f.status === 'SUCCESS';
     });
 
@@ -148,7 +148,7 @@ export default function OrderRoute() {
     }
 
     // Check if a return has already been requested or is in progress
-    const hasActiveReturn = order.returns?.nodes.some((r) => r.status !== 'CANCELLED');
+    const hasActiveReturn = order?.returns?.nodes.some((r) => r.status !== 'CANCELLED');
     if (hasActiveReturn) {
       return false;
     }
@@ -301,11 +301,11 @@ export default function OrderRoute() {
       />
 
       <ReturnOrderModal
-        orderId={order.id}
+        orderId={order?.id}
         isOpen={isReturnModalOpen}
         onClose={() => setIsReturnModalOpen(false)}
-        lineItems={order.lineItems.nodes}
-        fulfillments={order.fulfillments.nodes}
+        lineItems={order?.lineItems?.nodes}
+        fulfillments={order?.fulfillments?.nodes}
       />
     </div>
   );
