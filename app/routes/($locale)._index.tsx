@@ -142,7 +142,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         type: node.family.type,
         value: node.family.value
       } : null,
-      badge_colors: node?.badge_colors?.value || null
+      badge_colors: node?.badge_colors?.value || null,
+      collections: {
+        nodes: node.collections?.edges?.map(({ node: col }: any) => ({ id: col.id })) || []
+      }
     }));
 
     familyGroups[fam.value] = products;

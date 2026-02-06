@@ -4,9 +4,8 @@ import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
-
-import { usePlusMember } from '~/hooks/usePlusMember';
 import { AedIcon } from './ui/AedIcon';
+import { useMembership } from '~/hooks/useMembership';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -14,12 +13,25 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
-  const { isPlusMember, discountPercentage, discountAmount } = usePlusMember();
+  const { isMember, discountPercentage, discountAmount } = useMembership();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
 
-  const displayPercentage = (discountPercentage * 100).toFixed(0);
+  // Calculate actual applied values for display to avoid mismatches
+  let actualPercentage = 0;
+  let actualAmount = 0;
+
+  if (subtotal?.amount && total?.amount) {
+    const subVal = parseFloat(subtotal.amount.replace(/,/g, ''));
+    const totVal = parseFloat(total.amount.replace(/,/g, ''));
+    if (subVal > 0) {
+      actualPercentage = Math.round((1 - (totVal / subVal)) * 100) / 100;
+      actualAmount = Math.max(0, subVal - totVal);
+    }
+  }
+
+  const displayPercentage = (actualPercentage * 100).toFixed(0);
 
   return (
     <div
@@ -38,19 +50,20 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </span>
           </div>
 
-          {(discountPercentage > 0 || discountAmount > 0) && (
+          {(actualPercentage > 0 || actualAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
               <span className="flex items-center">
-                Membership {discountAmount > 0 ? (
+                Membership {actualAmount > 0 ? (
                   <span className="flex items-center mx-1">
                     <AedIcon className="w-3 h-3 mx-0.5" />
-                    {discountAmount.toFixed(2)}
+                    {actualAmount.toFixed(2)}
                   </span>
                 ) : `${displayPercentage}%`} discount applied
               </span>
               <span>Automatic</span>
             </div>
           )}
+
 
           {total && (
             <div className="border-t border-gray-200 pt-3 mt-3">

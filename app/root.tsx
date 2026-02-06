@@ -12,8 +12,8 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
-import { GET_AUTOMATIC_DISCOUNT_QUERY, type AutomaticDiscountQueryResponse } from '~/graphql/admin/DiscountQuery';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 export type RootLoader = typeof loader;
 
@@ -67,20 +67,72 @@ export async function loader(args: Route.LoaderArgs) {
 
   const { storefront, env } = args.context;
 
-  // Resolve critical deferred data so it's available immediately for pricing logic
-  const [customer, plusDiscount, automaticDiscounts] = await Promise.all([
+  // Resolve critical deferred data
+  const [customer, automaticDiscounts] = await Promise.all([
     deferredData.customer,
-    deferredData.plusDiscount,
     deferredData.automaticDiscounts,
   ]);
 
-  console.log('Loader returning Plus Discount:', plusDiscount);
+  console.log('DEBUG: Customer data resolved:', !!customer);
+  console.log('DEBUG: Automatic discounts resolved:', automaticDiscounts?.length);
+
+  // Calculate the best membership discount based on customer segments
+  const customerTags = (customer?.tags || []).map((t: string) => t.toLowerCase().replace(/\s+/g, '_'));
+  const segments = ['vice_crew', 'vice_squad', 'vice_legends', 'vice_legend'];
+  const userSegment = segments.find(s => customerTags.includes(s));
+
+  // Helper to identify a discount's tier based on its title
+  const getTierFromTitle = (title: string = '') => {
+    // We check for the exact titles you provided
+    if (title === 'Vice Legend' || title === 'Vice Legends') return 'legend';
+    if (title === 'Vice Squad') return 'squad';
+    if (title === 'Vice Crew') return 'crew';
+    return null;
+  };
+
+  const userTier = userSegment ? getTierFromTitle(userSegment.replace('vice_', 'Vice ').replace('crew', 'Crew').replace('squad', 'Squad').replace('legend', 'Legend').replace('legends', 'Legends')) : null;
+
+  // Manual matching for the userTier variable since userSegment is lowercase
+  let mappedUserTier = null;
+  if (userSegment?.includes('legend')) mappedUserTier = 'legend';
+  if (userSegment?.includes('squad')) mappedUserTier = 'squad';
+  if (userSegment?.includes('crew')) mappedUserTier = 'crew';
+
+  // Filter automatic discounts to strictly follow tier rules:
+  // 1. If a discount is named exactly 'Vice Legend', 'Vice Squad', or 'Vice Crew', only show it to users in THAT tier.
+  // 2. All other automatic discounts (global ones) are shown to everyone.
+  const eligibleDiscounts = (automaticDiscounts || []).filter((d: any) => {
+    const discountTier = getTierFromTitle(d.title);
+    if (!discountTier) return true; // Global discount (any other name)
+    return discountTier === mappedUserTier; // Only matches the user's specific tier
+  });
+
+  let membershipDiscount = { percentage: 0, amount: null, currencyCode: null, title: '', appliesToAll: false, eligibleProducts: [], eligibleCollections: [] };
+
+  if (userSegment && eligibleDiscounts.length) {
+    // Find the best discount among the ones specifically for this tier
+    const bestTierDiscount = [...eligibleDiscounts]
+      .filter(d => getTierFromTitle(d.title) !== null)
+      .sort((a: any, b: any) => {
+        // Prioritize amount if percentage is 0, else prioritize percentage
+        const aVal = a.percentage || 0;
+        const bVal = b.percentage || 0;
+        return bVal - aVal;
+      })[0];
+
+    if (bestTierDiscount) {
+      membershipDiscount = bestTierDiscount;
+    }
+  }
+
+  // Final check: if no specific membership discount was found but there are global ones, 
+  // they will be handled by useMembership hook using the 'eligibleDiscounts' list.
 
   return {
     ...deferredData,
     customer,
-    plusDiscount,
-    automaticDiscounts,
+    automaticDiscounts: eligibleDiscounts,
+    membershipDiscount,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -175,8 +227,8 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
   });
 
   const automaticDiscounts = (async () => {
-
     try {
+      console.log('Fetching automatic discounts via Admin API...');
       const response = await axiosShopifyAdmin.post("", {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
         variables: {
@@ -186,72 +238,59 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       });
 
       const json = response.data;
-      const nodes = json.data?.automaticDiscountNodes?.nodes || [];
+      if (json.errors) {
+        console.error('Admin API GraphQL Errors:', JSON.stringify(json.errors, null, 2));
+        return [];
+      }
 
-      return nodes.map((node: any) => {
+      const nodes = json.data?.automaticDiscountNodes?.nodes || [];
+      console.log('DEBUG: RAW DISCOUNT NODES:', JSON.stringify(nodes, null, 2));
+
+      const mappedDiscounts = nodes.map((node: any) => {
         const ad = node.automaticDiscount;
         if (!ad) return null;
 
-        const value = ad.customerGets?.value;
-        const items = ad.customerGets?.items;
-        // Shopify returns percentage as 0.1 for 10% (decimal); some APIs use 10 (whole). Normalize to 0–1.
-        let pct = value?.percentage ?? 0;
-        if (typeof pct === 'number' && pct > 1) pct = pct / 100;
+        console.log(`DEBUG: Mapping discount: ${ad.title}`, ad.customerGets?.value);
 
+        // Basic discounts have customerGets
+        if (ad.customerGets) {
+          const value = ad.customerGets.value;
+          const items = ad.customerGets.items;
+
+          let pct = value?.percentage ?? 0;
+          if (typeof pct === 'number' && pct > 1) pct = pct / 100;
+
+          return {
+            title: ad.title,
+            percentage: pct,
+            amount: value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null,
+            currencyCode: value?.amount?.currencyCode || null,
+            eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
+            eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
+            appliesToAll: items?.__typename === 'AllDiscountItems'
+          };
+        }
+
+        // BXGY or other types
         return {
           title: ad.title,
-          percentage: pct,
-          amount: value?.amount ? parseFloat(value.amount.amount) : null,
-          currencyCode: value?.amount?.currencyCode || null,
-          eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
-          eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
-          appliesToAll: !items || (!items.products && !items.collections)
+          percentage: 0,
+          amount: null,
         };
       }).filter(Boolean);
+
+      console.log('Mapped Discounts (Titles):', mappedDiscounts.map((d: any) => d.title));
+      return mappedDiscounts;
     } catch (e) {
       console.error('Error fetching automatic discounts:', e);
       return [];
     }
   })();
 
-  const plusDiscount = (async () => {
-    const allDiscounts = await automaticDiscounts;
-    const customerData = await customer;
-    const tags = customerData?.tags || [];
-    const isPlusMember = tags.some((tag: string) =>
-      tag.toLowerCase() === 'plus_member' || tag.toLowerCase() === 'plus member'
-    );
-
-    const plusMemberDiscountTitle = 'Plus Member Discount';
-
-    // Sort and filter discounts for the global/fallback discount
-    const availableGlobalDiscounts = allDiscounts
-      .filter((d: any) => {
-        // Only include Plus Member discount if user is a member
-        if (d.title === plusMemberDiscountTitle) {
-          return isPlusMember;
-        }
-        // Black Friday discount is usually product-specific, but if it's global, we can include it
-        return d.appliesToAll;
-      })
-      .sort((a: any, b: any) => (b.percentage || 0) - (a.percentage || 0));
-
-    let targetDiscount = availableGlobalDiscounts[0];
-
-    // If it's a plus member, prioritize the "Plus Member Discount" title if it exists
-    if (isPlusMember) {
-      const plusDiscount = allDiscounts.find((d: any) => d.title === plusMemberDiscountTitle);
-      if (plusDiscount) targetDiscount = plusDiscount;
-    }
-
-    return targetDiscount || { percentage: 0, amount: null, currencyCode: null, title: '' };
-  })();
-
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
-    plusDiscount,
     automaticDiscounts,
     footer,
   };

@@ -21,10 +21,7 @@ const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN
 const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL
 
 /**
- * Use API 2025-10+ for Admin requests. Required for automatic discounts with
- * customer-segment eligibility (e.g. "Plus Member Discount") - they are
- * filtered out in older API versions. See:
- * https://shopify.dev/changelog/discount-eligibility-management
+ * Use API 2024-10+ for Admin requests.
  */
 // const ADMIN_API_URL_2025_10 = ADMIN_API_URL?.replace(
 //   /\/admin\/api\/\d{4}-\d{2}(\/|$)/,
