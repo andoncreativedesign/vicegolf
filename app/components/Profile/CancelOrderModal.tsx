@@ -8,9 +8,10 @@ interface CancelOrderModalProps {
   orderId: string;
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalProps) {
+export function CancelOrderModal({ orderId, isOpen, onClose, onSuccess }: CancelOrderModalProps) {
   const [staffNote, setStaffNote] = useState('');
   const [refundMethod, setRefundMethod] = useState<'originalPaymentMethodsRefund' | 'giftCardRefund'>('originalPaymentMethodsRefund');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +57,8 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
     // ✅ Success
     showToast.success('Your order cancellation request has been submitted.');
     revalidator.revalidate();
-    onClose();
+    onSuccess()
+    // onClose();
   }, [fetcher.state, fetcher.data, revalidator, onClose]);
   
   
