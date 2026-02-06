@@ -28,16 +28,15 @@ export async function action({ request, context }: Route.ActionArgs) {
     }
 
     const formData = await request.formData();
-    const segment = formData.get('segment');
     const customerId = formData.get('customerId') as string;
 
-    if (!segment || !customerId) {
+    if (!customerId) {
         return remixData({ error: 'Missing information' }, { status: 400 });
     }
 
     try {
         const adminId = customerId.replace('CustomerAccountCustomer', 'Customer');
-        const tag = `request_${segment}`;
+        const tag = 'membership_requested';
 
         const tagsAddMutation = `#graphql
       mutation tagsAdd($id: ID!, $tags: [String!]!) {
@@ -71,7 +70,7 @@ export async function action({ request, context }: Route.ActionArgs) {
             return remixData({ error: responseJson.data.tagsAdd.userErrors[0].message }, { status: 400 });
         }
 
-        return remixData({ success: true, segment });
+        return remixData({ success: true });
     } catch (error) {
         console.error('Action error:', error);
         return remixData({ error: 'Internal server error' }, { status: 500 });
@@ -91,8 +90,7 @@ export default function MembershipTab() {
     ];
 
     const currentSegment = segments.find(s => customerTags.includes(s.id));
-    const pendingRequests = segments.filter(s => customerTags.includes(`request_${s.id}`));
-
+    const isRequested = customerTags.includes('membership_requested') || fetcher.data?.success;
     const isSubmitting = fetcher.state !== 'idle';
 
     return (
@@ -117,15 +115,13 @@ export default function MembershipTab() {
                 ) : (
                     <div className="bg-white p-8 rounded-2xl mb-8 border border-gray-100 shadow-sm text-center">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">No Active Membership</h3>
-                        <p className="text-gray-500 mb-0">Choose a tier below to request access and level up your experience.</p>
+                        <p className="text-gray-500 mb-0">Review the tiers below and request access to join.</p>
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {segments.map((segment) => {
                         const isCurrent = currentSegment?.id === segment.id;
-                        const isRequested = customerTags.includes(`request_${segment.id}`) || (fetcher.data?.success && fetcher.data?.segment === segment.id);
-                        const canRequest = !currentSegment && !isRequested;
 
                         return (
                             <div
@@ -139,44 +135,46 @@ export default function MembershipTab() {
                                 </div>
 
                                 <div className="mt-auto pt-4">
-                                    {isCurrent ? (
+                                    {isCurrent && (
                                         <div className="w-full bg-black text-white py-3 rounded-full text-center text-sm font-bold flex items-center justify-center gap-2">
                                             <CheckCircle2Icon className="w-4 h-4 text-[#d1fa5a]" />
                                             Active
                                         </div>
-                                    ) : isRequested ? (
-                                        <div className="w-full bg-green-50 text-green-700 py-3 rounded-full text-center text-sm font-bold flex items-center justify-center gap-2 border border-green-100">
-                                            <CheckCircle2Icon className="w-4 h-4" />
-                                            Requested
-                                        </div>
-                                    ) : (
-                                        <fetcher.Form method="post">
-                                            <input type="hidden" name="segment" value={segment.id} />
-                                            <input type="hidden" name="customerId" value={customer.id} />
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting || !!currentSegment}
-                                                className={`w-full py-3 rounded-full text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${!!currentSegment
-                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-gray-900 text-white hover:bg-black active:scale-[0.98]'
-                                                    }`}
-                                            >
-                                                {isSubmitting && fetcher.formData?.get('segment') === segment.id ? (
-                                                    <>
-                                                        <Loader2Icon className="w-4 h-4 animate-spin" />
-                                                        Requesting...
-                                                    </>
-                                                ) : (
-                                                    `Request ${segment.label}`
-                                                )}
-                                            </button>
-                                        </fetcher.Form>
                                     )}
                                 </div>
                             </div>
                         );
                     })}
                 </div>
+
+                {!currentSegment && (
+                    <div className="flex justify-center">
+                        {isRequested ? (
+                            <div className="w-full max-w-md bg-green-50 text-green-700 py-4 rounded-full text-center text-sm font-bold flex items-center justify-center gap-2 border border-green-100">
+                                <CheckCircle2Icon className="w-5 h-5" />
+                                Membership Requested
+                            </div>
+                        ) : (
+                            <fetcher.Form method="post" className="w-full max-w-md">
+                                <input type="hidden" name="customerId" value={customer.id} />
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full py-4 rounded-full text-base font-bold transition-all duration-300 flex items-center justify-center gap-2 bg-gray-900 text-white hover:bg-black active:scale-[0.98]"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2Icon className="w-5 h-5 animate-spin" />
+                                            Requesting...
+                                        </>
+                                    ) : (
+                                        'Request Membership'
+                                    )}
+                                </button>
+                            </fetcher.Form>
+                        )}
+                    </div>
+                )}
 
                 {currentSegment && (
                     <div className="mt-12 p-6 bg-gray-50 rounded-2xl border border-gray-100">
