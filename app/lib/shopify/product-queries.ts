@@ -48,7 +48,7 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
         }
       }
     }
-    collections(first: 5) {
+    collections(first: 20) {
       nodes {
         id
       }
@@ -127,7 +127,7 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
               }
             }
           }
-          collections(first: 5) {
+          collections(first: 20) {
             nodes {
               id
             }
@@ -413,7 +413,7 @@ fragment ProductItem on Product {
       }
     }
   }
-  collections(first: 5) {
+  collections(first: 20) {
     nodes {
       id
     }
@@ -640,7 +640,7 @@ fragment ProductCardFragment on Product {
         }
       }
     }
-    collections(first: 5) {
+    collections(first: 20) {
       nodes {
         id
       }
@@ -690,7 +690,7 @@ fragment ProductCardFragment on Product {
         }
       }
     }
-    collections(first: 5) {
+    collections(first: 20) {
       nodes {
         id
       }
@@ -760,7 +760,7 @@ fragment ColorVariantProduct on Product {
       }
     }
   }
-  collections(first: 5) {
+  collections(first: 20) {
     nodes {
       id
     }
@@ -995,6 +995,14 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
             key
             value
           }
+          
+          collections(first: 20) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
         }
       }
     }
@@ -1090,7 +1098,7 @@ const PRODUCT_FRAGMENT = `#graphql
       type
       value
     }
-    collections(first: 5) {
+    collections(first: 20) {
       nodes {
         id
       }
