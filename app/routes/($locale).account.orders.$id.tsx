@@ -87,7 +87,9 @@ export default function OrderRoute() {
   } = useLoaderData<typeof loader>();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
-  const [fulfillmentStatus] = useState(() => {
+  const [cancelModelStatus, setCancelModelStatus] = useState(false);
+
+  const [fulfillmentStatus, setFulfillmentStatus] = useState(() => {
     const activeReturn = order.returns?.nodes.find((r) => r.status !== 'CANCELLED');
     if (activeReturn) {
       if (activeReturn.status === 'OPEN') return 'RETURN_REQUESTED'
@@ -101,6 +103,7 @@ export default function OrderRoute() {
 
   function isOrderCancelable(order: OrderQuery['order']): boolean {
     if (!order) return false;
+    if (cancelModelStatus) return false;
 
     const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
     if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
@@ -155,6 +158,12 @@ export default function OrderRoute() {
 
     // Passed all checks - order is returnable
     return true;
+  }
+
+  const handleCacncelRequestSuccess = () => {
+    setFulfillmentStatus("REFUND PENDING")
+    setCancelModelStatus(true)
+    setIsCancelModalOpen(false)
   }
 
   return (
@@ -298,6 +307,7 @@ export default function OrderRoute() {
         orderId={order.id}
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
+        onSuccess={handleCacncelRequestSuccess}
       />
 
       <ReturnOrderModal
