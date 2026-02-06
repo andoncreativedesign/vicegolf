@@ -3,6 +3,8 @@ import type { CustomerFragment } from 'storefrontapi.generated';
 import { TicketPercentIcon, CheckCircle2Icon, Loader2Icon } from 'lucide-react';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import type { Route } from './+types/account.membership';
+import { useState } from 'react';
+import { MembershipRequestModal } from '~/components/MembershipRequestModal';
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: 'Vice Status' }];
@@ -38,6 +40,53 @@ export async function action({ request, context }: Route.ActionArgs) {
         const adminId = customerId.replace('CustomerAccountCustomer', 'Customer');
         const tag = 'membership_requested';
 
+        // Extract Questionnaire Data
+        const firstName = formData.get('firstName');
+        const lastName = formData.get('lastName');
+        const email = formData.get('email');
+        const phone = formData.get('phone');
+        const birthday = formData.get('birthday');
+        const golfSociety = formData.get('golfSociety');
+        const golfSocietyName = formData.get('golfSocietyName');
+        const frequency = formData.get('frequency');
+        const handedness = formData.get('handedness');
+        const currentBall = formData.get('currentBall');
+
+        // Construct Note
+        const note = `MEMBERSHIP APPLICATION DETAILS:
+- Name: ${firstName} ${lastName}
+- Email: ${email}
+- Phone: ${phone || 'N/A'}
+- Birthday: ${birthday || 'N/A'}
+- Golf Society: ${golfSociety === 'yes' ? `Yes (${golfSocietyName})` : 'No'}
+- Play Frequency: ${frequency}
+- Handedness: ${handedness}
+- Current Ball: ${currentBall || 'N/A'}
+`;
+
+        // 1. Update Customer Note
+        const noteUpdateMutation = `#graphql
+            mutation customerUpdate($input: CustomerInput!) {
+                customerUpdate(input: $input) {
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        await axiosShopifyAdmin.post("", {
+            query: noteUpdateMutation,
+            variables: {
+                input: {
+                    id: adminId,
+                    note: note
+                }
+            }
+        });
+
+        // 2. Add Tag
         const tagsAddMutation = `#graphql
       mutation tagsAdd($id: ID!, $tags: [String!]!) {
         tagsAdd(id: $id, tags: $tags) {
@@ -80,6 +129,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 export default function MembershipTab() {
     const { customer } = useOutletContext<{ customer: CustomerFragment }>();
     const fetcher = useFetcher();
+    const [isModalOpen, setModalOpen] = useState(false);
 
     const customerTags = customer?.tags || [];
 
@@ -155,23 +205,14 @@ export default function MembershipTab() {
                                 Membership Requested
                             </div>
                         ) : (
-                            <fetcher.Form method="post" className="w-full max-w-md">
-                                <input type="hidden" name="customerId" value={customer.id} />
+                            <div className="w-full max-w-md">
                                 <button
-                                    type="submit"
-                                    disabled={isSubmitting}
+                                    onClick={() => setModalOpen(true)}
                                     className="w-full py-4 rounded-full text-base font-bold transition-all duration-300 flex items-center justify-center gap-2 bg-gray-900 text-white hover:bg-black active:scale-[0.98]"
                                 >
-                                    {isSubmitting ? (
-                                        <>
-                                            <Loader2Icon className="w-5 h-5 animate-spin" />
-                                            Requesting...
-                                        </>
-                                    ) : (
-                                        'Request Membership'
-                                    )}
+                                    Request Membership
                                 </button>
-                            </fetcher.Form>
+                            </div>
                         )}
                     </div>
                 )}
@@ -184,6 +225,12 @@ export default function MembershipTab() {
                         </p>
                     </div>
                 )}
+
+                <MembershipRequestModal
+                    isOpen={isModalOpen}
+                    onClose={() => setModalOpen(false)}
+                    customer={customer}
+                />
             </div>
         </div>
     );
