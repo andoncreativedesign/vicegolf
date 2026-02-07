@@ -96,10 +96,10 @@ export default function AccountLayout() {
 
 function AccountMenu() {
   const menuItems = [
+    { to: '/account/membership', label: 'Vice Status', icon: <TicketPercentIcon className="w-5 h-5" /> },
     { to: '/account/orders', label: 'My orders', icon: <Package2Icon className="w-5 h-5" /> },
     { to: '/account/profile', label: 'My details', icon: <SquareUserIcon className="w-5 h-5" /> },
     { to: '/account/addresses', label: 'My addresses', icon: <HomeIcon className="w-5 h-5" /> },
-    { to: '/account/membership', label: 'Vice Status', icon: <TicketPercentIcon className="w-5 h-5" /> },
   ];
 
   return (
