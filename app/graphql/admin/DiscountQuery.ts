@@ -19,6 +19,7 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                     amount
                     currencyCode
                   }
+                  appliesOnEachItem
                 }
               }
               items {

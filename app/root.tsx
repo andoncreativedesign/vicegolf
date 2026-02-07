@@ -267,7 +267,8 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
             currencyCode: value?.amount?.currencyCode || null,
             eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
             eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
-            appliesToAll: items?.__typename === 'AllDiscountItems'
+            appliesToAll: items?.__typename === 'AllDiscountItems',
+            appliesOnEachItem: value?.percentage ? true : (value?.appliesOnEachItem ?? false)
           };
         }
 
