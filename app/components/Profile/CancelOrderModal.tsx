@@ -106,7 +106,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose, onSuccess }: Cancel
 
           <div>
             <label htmlFor="staffNote" className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Cancellation
+              Reason for Cancellation<span className="text-red-500">*</span>
             </label>
             <textarea
               id="staffNote"
@@ -130,7 +130,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose, onSuccess }: Cancel
             </button>
             <button
               type="submit"
-              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
+              className={`inline-block p-2 rounded-xs text-white ${isSubmitting || !staffNote.trim() ? "bg-gray-600 cursor-not-allowed" : "bg-black cursor-pointer"}`}
               disabled={isSubmitting || !staffNote.trim()}
             >
               {isSubmitting ? 'Processing...' : 'Confirm Cancellation'}
