@@ -10,11 +10,12 @@ interface ReturnOrderModalProps {
   orderId: string;
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
   lineItems: OrderLineItemFullFragment[];
   fulfillments: Array<Pick<CustomerAccountAPI.Fulfillment, 'status'>>;
 }
 
-export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillments }:  ReturnOrderModalProps) {
+export function ReturnOrderModal({ orderId, isOpen, onClose, onSuccess,  lineItems, fulfillments }:  ReturnOrderModalProps) {
   const [staffNote, setStaffNote] = useState('');
   const [refundMethod, setRefundMethod] = useState<'originalPaymentMethodsRefund' | 'giftCardRefund'>('originalPaymentMethodsRefund');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,7 +76,8 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
     // ✅ Success
     showToast.success('Your order return request has been submitted.');
     revalidator.revalidate();
-    onClose();
+    onSuccess();
+    // onClose();
   }, [fetcher.state, fetcher.data, revalidator, onClose]);
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,7 +119,7 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Refund Method<span className="text-red-500">*</span>
+              Refund Method
             </label>
             <div className="space-y-2">
               <label className="flex items-center">
@@ -136,7 +138,7 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
 
           <div>
             <label htmlFor="returnReason" className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Return
+              Reason for Return<span className="text-red-500">*</span>
             </label>
             <select
               id="returnReason"

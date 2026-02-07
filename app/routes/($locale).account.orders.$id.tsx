@@ -161,9 +161,14 @@ export default function OrderRoute() {
   }
 
   const handleCacncelRequestSuccess = () => {
-    setFulfillmentStatus("REFUND PENDING")
+    setFulfillmentStatus("REFUND_PENDING")
     setCancelModelStatus(true)
     setIsCancelModalOpen(false)
+  }
+
+  const handleReturnRequestSuccess = () => {
+    setFulfillmentStatus("RETURN_REQUESTED")
+    setIsReturnModalOpen(false)
   }
 
   return (
@@ -314,6 +319,7 @@ export default function OrderRoute() {
         orderId={order?.id}
         isOpen={isReturnModalOpen}
         onClose={() => setIsReturnModalOpen(false)}
+        onSuccess={handleReturnRequestSuccess}
         lineItems={order?.lineItems?.nodes}
         fulfillments={order?.fulfillments?.nodes}
       />
