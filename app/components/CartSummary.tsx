@@ -13,7 +13,7 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
-  const { isMember, discountPercentage, discountAmount } = useMembership();
+  const { isMember, discountPercentage, discountAmount, membershipDiscount } = useMembership();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
@@ -22,13 +22,47 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   let actualPercentage = 0;
   let actualAmount = 0;
 
-  if (subtotal?.amount && total?.amount) {
-    const subVal = parseFloat(subtotal.amount.replace(/,/g, ''));
-    const totVal = parseFloat(total.amount.replace(/,/g, ''));
-    if (subVal > 0) {
-      actualPercentage = Math.round((1 - (totVal / subVal)) * 100) / 100;
-      actualAmount = Math.max(0, subVal - totVal);
+  // Calculate line-level original sum to detect discounts already applied to lines
+  const lineOriginalSum = cart?.lines?.nodes?.reduce((acc: number, line: any) => {
+    const discountSum = line?.discountAllocations?.reduce((sum: number, d: any) => sum + parseFloat(d.discountedAmount.amount), 0) || 0;
+
+    const cost = line?.cost;
+    const merchandise = line?.merchandise;
+
+    if (!cost || !merchandise) return acc;
+
+    const compareAt = cost.compareAtAmountPerQuantity || merchandise.compareAtPrice || (
+      (merchandise.price && parseFloat(merchandise.price.amount) > parseFloat(cost.amountPerQuantity.amount))
+        ? merchandise.price
+        : null
+    );
+
+    let lineOriginal = 0;
+    if (discountSum > 0 && cost.totalAmount) {
+      lineOriginal = parseFloat(cost.totalAmount.amount) + discountSum;
+    } else if (compareAt) {
+      lineOriginal = parseFloat(compareAt.amount) * line.quantity;
+    } else if (cost.amountPerQuantity) {
+      lineOriginal = parseFloat(cost.amountPerQuantity.amount) * line.quantity;
     }
+
+    return acc + lineOriginal;
+  }, 0) || 0;
+
+  const currentSubtotalVal = subtotal?.amount ? parseFloat(subtotal.amount.replace(/,/g, '')) : 0;
+  const totVal = total?.amount ? parseFloat(total.amount.replace(/,/g, '')) : 0;
+
+  // Base value for discount calculation is the maximum of Shopify's subtotal or our calculated original sum
+  let baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
+
+  // Fallback: If no discount detected yet but user is member, they might have a hidden tier discount
+  if (baseVal <= totVal && isMember && (membershipDiscount?.percentage || 0) > 0) {
+    baseVal = totVal / (1 - membershipDiscount.percentage);
+  }
+
+  if (baseVal > totVal) {
+    actualPercentage = Math.round((1 - (totVal / baseVal)) * 100) / 100;
+    actualAmount = Math.max(0, baseVal - totVal);
   }
 
   const displayPercentage = (actualPercentage * 100).toFixed(0);
@@ -45,15 +79,22 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium text-gray-900">
-              {subtotal?.amount ? <Money data={subtotal} /> : '-'}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="font-medium text-gray-900">
+                {subtotal?.amount ? <Money data={subtotal} /> : '-'}
+              </span>
+              {baseVal > currentSubtotalVal && (
+                <span className="text-xs text-gray-400 line-through">
+                  <Money data={{ amount: baseVal.toFixed(2), currencyCode: subtotal!.currencyCode }} />
+                </span>
+              )}
+            </div>
           </div>
 
           {(actualPercentage > 0 || actualAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
               <span className="flex items-center">
-                Membership {actualAmount > 0 ? (
+                {isMember ? 'Membership' : 'Savings'} {actualAmount > 0 ? (
                   <span className="flex items-center mx-1">
                     <AedIcon className="w-3 h-3 mx-0.5" />
                     {actualAmount.toFixed(2)}

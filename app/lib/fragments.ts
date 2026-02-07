@@ -54,6 +54,11 @@ export const CART_QUERY_FRAGMENT = `#graphql
         }
       }
     }
+    discountAllocations {
+      discountedAmount {
+        ...Money
+      }
+    }
   }
   fragment CartLineComponent on ComponentizableCartLine {
     id
@@ -102,6 +107,11 @@ export const CART_QUERY_FRAGMENT = `#graphql
           name
           value
         }
+      }
+    }
+    discountAllocations {
+      discountedAmount {
+        ...Money
       }
     }
   }
