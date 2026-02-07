@@ -1,10 +1,13 @@
-import { data as remixData, useLoaderData, useFetcher, useOutletContext } from 'react-router';
-import type { CustomerFragment } from 'storefrontapi.generated';
-import { TicketPercentIcon, CheckCircle2Icon, Loader2Icon } from 'lucide-react';
+import { data as remixData, useLoaderData, useFetcher, useOutletContext, useNavigate, Link } from 'react-router';
+import type { CustomerFragment } from 'customer-accountapi.generated';
+import { TicketPercentIcon, CheckCircle2Icon, Loader2Icon, CheckIcon } from 'lucide-react';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import type { Route } from './+types/account.membership';
 import { useState } from 'react';
-import { MembershipRequestModal } from '~/components/MembershipRequestModal';
+
+type TaggedCustomer = CustomerFragment & {
+    tags?: string[];
+};
 
 export const meta: Route.MetaFunction = () => {
     return [{ title: 'Vice Status' }];
@@ -127,111 +130,103 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export default function MembershipTab() {
-    const { customer } = useOutletContext<{ customer: CustomerFragment }>();
+    const { customer } = useOutletContext<{ customer: TaggedCustomer }>();
+    const navigate = useNavigate();
     const fetcher = useFetcher();
-    const [isModalOpen, setModalOpen] = useState(false);
 
     const customerTags = customer?.tags || [];
 
     const segments = [
-        { id: 'vice_crew', label: 'Vice Crew', description: 'Join our exclusive crew for basic perks and community access.' },
-        { id: 'vice_squad', label: 'Vice Squad', description: 'Level up to the squad for early access and special discounts.' },
-        { id: 'vice_legends', label: 'Vice Legends', description: 'The ultimate status. Premium rewards, invitations, and more.' },
+        {
+            id: 'vice_crew',
+            label: 'VICE CREW',
+            subtitle: "Welcome to the club. Let's get you rolling.",
+            benefits: ['5% off all purchases']
+        },
+        {
+            id: 'vice_squad',
+            label: 'VICE SQUAD',
+            subtitle: "You're a regular. Perks unlocked.",
+            benefits: [
+                '10% off all purchases',
+                'Early access to selected launches',
+                'Priority restock alerts'
+            ]
+        },
+        {
+            id: 'vice_legends',
+            label: 'VICE LEGENDS',
+            subtitle: "Welcome to the club. Let's get you rolling.",
+            benefits: [
+                '15% off all purchases',
+                'Early access to all launches',
+                'Exclusive events invitation',
+                'Personalized customer support'
+            ]
+        },
     ];
 
     const currentSegment = segments.find(s => customerTags.includes(s.id));
     const isRequested = customerTags.includes('membership_requested') || fetcher.data?.success;
-    const isSubmitting = fetcher.state !== 'idle';
 
+    // 1. Accepted State UI
+    if (currentSegment) {
+        return (
+            <div className="account-membership w-full">
+                <div className="bg-[#F5F5F5] p-12 w-full min-h-[400px] flex flex-col items-start justify-center">
+                    <div className="mb-8">
+                        {/* Logo representation matching the design */}
+                        <div className="mb-6">
+                            <img src="/vice_logo.svg" alt="Vice Golf" className="h-14 w-auto mb-3" />
+                            <div className="text-3xl font-bold tracking-[0.2em] uppercase italic">{currentSegment.label.split(' ')[1]}</div>
+                        </div>
+                        <h3 className="text-xl font-medium text-gray-900 mb-6">{currentSegment.subtitle}</h3>
+                        <ul className="space-y-4">
+                            {currentSegment.benefits.map((benefit, idx) => (
+                                <li key={idx} className="flex items-center gap-3 text-gray-700">
+                                    <div className="w-1.5 h-1.5 bg-black rounded-full" />
+                                    <span className="font-medium">{benefit}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // 2. Not Applied / Pending State UI
     return (
         <div className="account-membership w-full">
-            <div className="bg-[#F5F5F5] p-10 w-full mb-8">
-                <div className="flex items-center gap-3 mb-6">
-                    <TicketPercentIcon className="w-8 h-8 text-gray-900" />
-                    <h2 className="text-2xl font-bold text-gray-900">Vice Status</h2>
-                </div>
-
-                {currentSegment ? (
-                    <div className="bg-black text-white p-8 rounded-2xl mb-8 flex items-center justify-between">
-                        <div>
-                            <p className="text-[#d1fa5a] font-bold uppercase tracking-widest text-sm mb-2">Current Status</p>
-                            <h3 className="text-4xl font-bold mb-2">{currentSegment.label}</h3>
-                            <p className="text-gray-400 max-w-md">{currentSegment.description}</p>
+            <div className="bg-[#F5F5F5] p-16 w-full min-h-[450px] flex flex-col items-start">
+                {isRequested ? (
+                    <div className="space-y-6 mt-10">
+                        <div className="flex items-center gap-3">
+                            <CheckCircle2Icon className="w-10 h-10 text-black" />
+                            <h2 className="text-3xl font-bold uppercase tracking-tighter">Application Pending</h2>
                         </div>
-                        <div className="hidden md:block">
-                            <CheckCircle2Icon className="w-20 h-20 text-[#d1fa5a]" />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="bg-white p-8 rounded-2xl mb-8 border border-gray-100 shadow-sm text-center">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">No Active Membership</h3>
-                        <p className="text-gray-500 mb-0">Review the tiers below and request access to join.</p>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {segments.map((segment) => {
-                        const isCurrent = currentSegment?.id === segment.id;
-
-                        return (
-                            <div
-                                key={segment.id}
-                                className={`bg-white p-6 rounded-2xl border transition-all duration-300 flex flex-col h-full ${isCurrent ? 'border-gray-900 shadow-md ring-1 ring-gray-900' : 'border-gray-100 hover:border-gray-300'
-                                    }`}
-                            >
-                                <div className="mb-4">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-2">{segment.label}</h4>
-                                    <p className="text-sm text-gray-500 line-clamp-3">{segment.description}</p>
-                                </div>
-
-                                <div className="mt-auto pt-4">
-                                    {isCurrent && (
-                                        <div className="w-full bg-black text-white py-3 rounded-full text-center text-sm font-bold flex items-center justify-center gap-2">
-                                            <CheckCircle2Icon className="w-4 h-4 text-[#d1fa5a]" />
-                                            Active
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {!currentSegment && (
-                    <div className="flex justify-center">
-                        {isRequested ? (
-                            <div className="w-full max-w-md bg-green-50 text-green-700 py-4 rounded-full text-center text-sm font-bold flex items-center justify-center gap-2 border border-green-100">
-                                <CheckCircle2Icon className="w-5 h-5" />
-                                Membership Requested
-                            </div>
-                        ) : (
-                            <div className="w-full max-w-md">
-                                <button
-                                    onClick={() => setModalOpen(true)}
-                                    className="w-full py-4 rounded-full text-base font-bold transition-all duration-300 flex items-center justify-center gap-2 bg-gray-900 text-white hover:bg-black active:scale-[0.98]"
-                                >
-                                    Request Membership
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {currentSegment && (
-                    <div className="mt-12 p-6 bg-gray-50 rounded-2xl border border-gray-100">
-                        <h4 className="font-bold text-gray-900 mb-2">Want to change your status?</h4>
-                        <p className="text-sm text-gray-600 mb-0">
-                            Please contact our support team if you would like to upgrade or change your current membership tier.
+                        <p className="text-gray-600 text-lg max-w-md italic">
+                            We've received your application. Our team is currently reviewing it. We'll update your status once you're accepted into a tier.
                         </p>
                     </div>
-                )}
+                ) : (
+                    <div className="space-y-12 mt-10">
+                        <div className="space-y-4">
+                            <h2 className="text-4xl font-bold text-gray-900 tracking-tighter leading-tight">Apply for Vice status</h2>
+                            <p className="text-gray-600 text-xl font-medium">Embrace your Vice and earn rewards</p>
+                        </div>
 
-                <MembershipRequestModal
-                    isOpen={isModalOpen}
-                    onClose={() => setModalOpen(false)}
-                    customer={customer}
-                />
+                        <Link
+                            to="/membership"
+                            className="inline-block bg-black px-12 py-5 font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline min-w-[200px] text-center"
+                            style={{ color: 'white', textDecoration: 'none' }}
+                        >
+                            Apply
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
+

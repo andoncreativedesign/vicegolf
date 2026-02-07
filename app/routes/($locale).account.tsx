@@ -9,7 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 import type { Route } from './+types/account';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
-import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon } from 'lucide-react'
+import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon, CheckCircle2Icon } from 'lucide-react'
 
 
 export function shouldRevalidate() {
@@ -71,14 +71,12 @@ export default function AccountLayout() {
         {/* Sidebar */}
         <div className="w-full lg:w-[35%] flex-shrink-0">
           {/* User Info Box */}
-          <div className="bg-[#F5F5F5] p-6 flex items-center gap-5 mb-8">
-            <div className="h-16 w-16 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white text-xl font-medium tracking-wider">
+          <div className="bg-[#F5F5F5] p-8 flex items-center gap-6 mb-8">
+            <div className="h-16 w-16 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white text-xl font-bold">
               {initials}
             </div>
-            <div className="overflow-hidden">
-              <p className="font-semibold text-gray-900 leading-tight mb-1" style={{ fontSize: '1.5rem' }}>Hello</p>
-              <p className="font-semibold text-gray-900 leading-tight truncate mb-1" style={{ fontSize: '1.5rem' }}>{fullName}</p>
-              <p className="text-gray-500 truncate" style={{ fontSize: '0.9375rem' }}>{email}</p>
+            <div>
+              <p className="font-bold text-gray-900 leading-tight" style={{ fontSize: '2rem' }}>Hello</p>
             </div>
           </div>
 
@@ -96,7 +94,7 @@ export default function AccountLayout() {
 
 function AccountMenu() {
   const menuItems = [
-    { to: '/account/membership', label: 'Vice Status', icon: <TicketPercentIcon className="w-5 h-5" /> },
+    { to: '/account/membership', label: 'My Vice Status', icon: <CheckCircle2Icon className="w-5 h-5" /> },
     { to: '/account/orders', label: 'My orders', icon: <Package2Icon className="w-5 h-5" /> },
     { to: '/account/profile', label: 'My details', icon: <SquareUserIcon className="w-5 h-5" /> },
     { to: '/account/addresses', label: 'My addresses', icon: <HomeIcon className="w-5 h-5" /> },
