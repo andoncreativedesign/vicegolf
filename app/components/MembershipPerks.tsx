@@ -15,6 +15,8 @@ const PERKS_DATA = [
     {
         tier: 'CREW',
         color: '#D4E913',
+        logo: '/crew-main-green.png',
+        tierImages: ['/C.png', '/R.png', '/E.png', '/W.png'],
         subtitle: 'Welcome to the club.\nLet’s get you rolling.',
         rewards: ['5% off all purchases'],
         footer: 'Activates on 3rd purchase\nTo retain, spend AED 1000 within 3 months',
@@ -22,6 +24,8 @@ const PERKS_DATA = [
     {
         tier: 'SQUAD',
         color: '#FF9E16',
+        logo: '/crew-main-orange.png',
+        tierImages: ['/S.png', '/Q.png', '/U.png', '/A.png', '/D.png'],
         subtitle: 'You’re a regular.\nPerks unlocked.',
         rewards: [
             '10% off all purchases',
@@ -34,6 +38,8 @@ const PERKS_DATA = [
     {
         tier: 'LEGENDS',
         color: '#FF3333',
+        logo: '/crew-main-red.png',
+        tierImages: ['/L-L.png', '/L-E.png', '/L-G.png', '/L-E.png', '/L-N.png', '/L-D.png', '/L-S.png'],
         subtitle: 'Top tier.\nTop treatment.',
         rewards: [
             '15% off all purchases',
@@ -52,7 +58,7 @@ export function MembershipPerks() {
             <div className="mx-auto max-w-[1300px] px-6">
                 <h2
                     className="mb-20 text-center font-extrabold uppercase tracking-tight leading-none"
-                    style={{ fontSize: '50px' }}
+                    style={{ fontSize: '40px' }}
                 >
                     Our Membership Perks
                 </h2>
@@ -64,14 +70,27 @@ export function MembershipPerks() {
                             className="relative h-[780px] border border-[#E5E5E5] bg-white px-10 pt-12"
                         >
                             {/* Logo */}
-                            <div className="flex flex-col items-center border-b border-[#BFBFBF] pb-8">
-                                <ViceLogo className="w-[190px]" color={perk.color} />
-                                <span
-                                    className="mt-2 text-[12px] font-bold uppercase tracking-[0.25em]"
-                                    style={{ color: perk.color }}
-                                >
-                                    {perk.tier}
-                                </span>
+                            <div className="flex flex-col items-center border-b border-[#BFBFBF] pb-8 h-[120px] justify-center">
+                                {perk.logo ? (
+                                    <img src={perk.logo} alt={perk.tier} className="w-[190px] h-auto object-contain" />
+                                ) : (
+                                    <ViceLogo className="w-[190px]" color={perk.color} />
+                                )}
+
+                                <div className="mt-2 flex items-center justify-center gap-1 min-h-[18px]">
+                                    {(perk as any).tierImages ? (
+                                        (perk as any).tierImages.map((img: string, idx: number) => (
+                                            <img key={idx} src={img} alt="" className="h-3 w-auto object-contain" />
+                                        ))
+                                    ) : (
+                                        <span
+                                            className="text-[12px] font-bold uppercase tracking-[0.25em]"
+                                            style={{ color: perk.color }}
+                                        >
+                                            {perk.tier}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Main content */}
