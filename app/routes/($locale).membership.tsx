@@ -3,6 +3,7 @@ import type { Route } from './+types/membership';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 import type { CustomerFragment } from 'customer-accountapi.generated';
 import { CheckCircle2Icon } from 'lucide-react';
+import { MembershipPerks } from '~/components/MembershipPerks';
 
 type MembershipCustomer = CustomerFragment & {
     emailAddress?: {
@@ -34,35 +35,7 @@ export default function MembershipPage() {
     const isSubmitting = fetcher.state !== 'idle';
     const isSuccess = fetcher.data?.success;
 
-    const perks = [
-        {
-            title: 'VICE CREW',
-            image: 'https://cdn.shopify.com/s/files/1/0852/4351/1097/files/crew_logo.png?v=1738920000', // Placeholder or use dynamic ones
-            subtitle: "Welcome to the club. Let's get you rolling.",
-            benefits: ['5% off all purchases'],
-        },
-        {
-            title: 'VICE SQUAD',
-            image: 'https://cdn.shopify.com/s/files/1/0852/4351/1097/files/squad_logo.png?v=1738920000',
-            subtitle: "You're a regular. Perks unlocked.",
-            benefits: [
-                '10% off all purchases',
-                'Early access to selected launches',
-                'Priority restock alerts',
-            ],
-        },
-        {
-            title: 'VICE LEGENDS',
-            image: 'https://cdn.shopify.com/s/files/1/0852/4351/1097/files/legend_logo.png?v=1738920000',
-            subtitle: 'The ultimate status for dedicated golfers.',
-            benefits: [
-                '15% off all purchases',
-                'Early access to all launches',
-                'Exclusive events invitation',
-                'Personalized customer support',
-            ],
-        },
-    ];
+
 
     if (isSuccess) {
         return (
@@ -102,49 +75,10 @@ export default function MembershipPage() {
                 </div>
             </section>
 
-            {/* Intro Text */}
-            <section className="py-20 px-4 max-w-4xl mx-auto text-center space-y-8">
-                <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                    The more you play, the more you shop, the more you save. Your membership status is based on your purchase frequency and total spend, which gets you closer to the elite tiers as you go. Just remember to shop every year to maintain your status.
-                </p>
-                <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter italic">
-                    Earn it. Own it. Embrace your Vice.
-                </h2>
-            </section>
 
-            {/* Perks Section */}
-            <section className="py-24 bg-white px-4 border-y border-gray-100">
-                <div className="max-w-7xl mx-auto">
-                    <h3 className="text-3xl font-extrabold uppercase tracking-widest text-center mb-16">
-                        Our Membership Perks
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
-                        {perks.map((perk) => (
-                            <div key={perk.title} className="flex flex-col items-center text-center group">
-                                <div className="h-24 flex items-center justify-center mb-8 grayscale group-hover:grayscale-0 transition-all duration-500">
-                                    {/* Logo Placeholder */}
-                                    <div className="flex flex-col items-center">
-                                        <img src="/vice_logo.svg" alt="Vice Golf" className="h-10 w-auto mb-2" />
-                                        <span className="text-xl font-bold tracking-[0.2em] italic uppercase">{perk.title.split(' ')[1]}</span>
-                                    </div>
-                                </div>
-                                <h4 className="font-bold text-lg mb-6 max-w-[250px]">{perk.subtitle}</h4>
-                                <div className="space-y-3">
-                                    <p className="text-sm font-bold uppercase tracking-widest mb-4">Benefits</p>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {perk.benefits.map((benefit, idx) => (
-                                            <li key={idx} className="flex items-center justify-center gap-2">
-                                                <span className="w-1.5 h-1.5 bg-black rounded-full" />
-                                                {benefit}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+
+            {/* Membership Perks Section */}
+            <MembershipPerks />
 
             {/* Form Section */}
             <section id="apply-form" className="py-24 px-4 bg-[#F9F9F9]">
