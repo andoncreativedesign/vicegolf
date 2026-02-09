@@ -48,13 +48,16 @@ const PERKS_DATA = [
 
 export function MembershipPerks() {
     return (
-        <section className="bg-white py-24">
-            <div className="mx-auto max-w-[1200px] px-6">
-                <h2 className="mb-20 text-center text-[40px] font-extrabold uppercase tracking-tight">
+        <section className=" py-24">
+            <div className="mx-auto max-w-[1300px] px-6">
+                <h2
+                    className="mb-20 text-center font-extrabold uppercase tracking-tight leading-none"
+                    style={{ fontSize: '50px' }}
+                >
                     Our Membership Perks
                 </h2>
 
-                <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     {PERKS_DATA.map((perk) => (
                         <div
                             key={perk.tier}
@@ -73,7 +76,10 @@ export function MembershipPerks() {
 
                             {/* Main content */}
                             <div className="mt-10">
-                                <p className="whitespace-pre-line text-left text-[34px] font-bold leading-[44px]">
+                                <p
+                                    className="whitespace-pre-line text-left leading-[36px] font-bold "
+                                    style={{ fontSize: '20px' }}
+                                >
                                     {perk.subtitle}
                                 </p>
 
@@ -97,8 +103,8 @@ export function MembershipPerks() {
                             <div className="absolute left-10 right-10 bottom-[120px] border-t border-[#E5E5E5]" />
 
                             {/* Footer – TOP-ALIGNED to divider */}
-                            <div className="absolute left-10 right-10 bottom-[40px]">
-                                <p className="whitespace-pre-line text-[21px] font-light leading-[40px]">
+                            <div className="absolute left-10 right-10 top-[675px]">
+                                <p className="whitespace-pre-line text-left text-[21px] font-light leading-[32px]">
                                     {perk.footer}
                                 </p>
                             </div>
