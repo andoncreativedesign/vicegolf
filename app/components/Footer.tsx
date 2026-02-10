@@ -244,13 +244,13 @@ function FooterContent({
                 className="h-8 w-auto"
                 loading="lazy"
               />
-              <img
+              {/* <img
                 // src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/american_express.svg?v=1743711767&width=60&height=60&crop=center"
                 src="https://cdn.shopify.com/s/files/1/0835/8445/0850/files/amex-card.svg?v=1715242244&width=50&crop=center"
                 alt="American Express"
                 className="h-8 w-10 object-cover"
                 loading="lazy"
-              />
+              /> */}
             </div>
           </div>
 
