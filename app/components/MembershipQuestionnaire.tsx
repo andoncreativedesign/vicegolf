@@ -12,7 +12,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
     const isSubmitting = fetcher.state !== 'idle';
 
     return (
-        <section id="apply-form" className="py-24 bg-yellow-400">
+        <section id="apply-form" className="py-24 bg-white">
             <div className="mx-auto max-w-[1300px] px-6">
                 <div className="mb-20 text-center">
                     <h2
@@ -21,7 +21,6 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                     >
                         Join Us
                     </h2>
-                    <p className="text-[16px] text-gray-600">To apply for your status, please complete the form below:</p>
                 </div>
 
                 {!isLoggedIn ? (
@@ -35,14 +34,21 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                         </button>
                     </div>
                 ) : (
-                    <div className="bg-white border border-[#E5E5E5] p-10 md:p-16 w-full">
-                        <fetcher.Form method="post" action="/account/membership" className="w-full space-y-12">
+                    <div className="w-full">
+                        <fetcher.Form
+                            method="post"
+                            action="/account/membership"
+                            className="w-full space-y-12"
+                            style={{ maxWidth: 'none' }}
+                        >
                             <input type="hidden" name="customerId" value={customer?.id} />
+
+                            <p className="text-[16px] leading-[28px] text-gray-600" style={{ marginBottom: '2.5rem' }}>To apply for your status, please complete the form below:</p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 w-full">
                                 {/* Row 1 */}
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="firstName" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">First name</label>
+                                    <label htmlFor="firstName" className="text-[16px] leading-[28px] text-gray-600">First name</label>
                                     <input
                                         type="text"
                                         name="firstName"
@@ -50,11 +56,11 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         defaultValue={customer?.firstName || ''}
                                         required
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="lastName" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">Second name</label>
+                                    <label htmlFor="lastName" className="text-[16px] leading-[28px] text-gray-600">Second name</label>
                                     <input
                                         type="text"
                                         name="lastName"
@@ -62,23 +68,23 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         defaultValue={customer?.lastName || ''}
                                         required
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
 
                                 {/* Row 2 */}
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="phone" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">Phone No</label>
+                                    <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
                                     <input
                                         type="tel"
                                         name="phone"
                                         id="phone"
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="email" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">Email</label>
+                                    <label htmlFor="email" className="text-[16px] leading-[28px] text-gray-600">Email</label>
                                     <input
                                         type="email"
                                         name="email"
@@ -86,23 +92,23 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         defaultValue={customer?.emailAddress?.emailAddress || ''}
                                         required
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
 
                                 {/* Row 3 */}
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="birthday" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">Birthday</label>
+                                    <label htmlFor="birthday" className="text-[16px] leading-[28px] text-gray-600">Birthday</label>
                                     <input
                                         type="date"
                                         name="birthday"
                                         id="birthday"
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="golfSocietyName" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">
+                                    <label htmlFor="golfSocietyName" className="text-[16px] leading-[28px] text-gray-600">
                                         Are you part of a golfing society? If yes, please specify
                                     </label>
                                     <input
@@ -110,27 +116,27 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         name="golfSocietyName"
                                         id="golfSocietyName"
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
 
                                 {/* Row 4 */}
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="handedness" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">
+                                    <label htmlFor="handedness" className="text-[16px] leading-[28px] text-gray-600">
                                         Are you left handed or right handed?
                                     </label>
                                     <select
                                         name="handedness"
                                         id="handedness"
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     >
                                         <option value="Right Handed">Right Handed</option>
                                         <option value="Left Handed">Left Handed</option>
                                     </select>
                                 </div>
                                 <div className="flex flex-col gap-3 w-full">
-                                    <label htmlFor="currentBall" className="text-[14px] font-bold text-gray-600 uppercase tracking-wider">
+                                    <label htmlFor="currentBall" className="text-[16px] leading-[28px] text-gray-600">
                                         What ball do you currently use?
                                     </label>
                                     <input
@@ -138,7 +144,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         name="currentBall"
                                         id="currentBall"
                                         className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
                             </div>

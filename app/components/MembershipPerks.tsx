@@ -54,7 +54,7 @@ const PERKS_DATA = [
 
 export function MembershipPerks() {
     return (
-        <section className=" py-24 bg-red-600">
+        <section className=" py-24 bg-white">
             <div className="mx-auto max-w-[1300px] px-6">
                 <h2
                     className="mb-20 text-center font-extrabold uppercase tracking-tight leading-none"
@@ -123,7 +123,7 @@ export function MembershipPerks() {
 
                             {/* Footer – TOP-ALIGNED to divider */}
                             <div className="absolute left-10 right-10 top-[675px]">
-                                <p className="whitespace-pre-line text-left text-[21px] font-light leading-[32px]">
+                                <p className="whitespace-pre-line text-left text-[16px] leading-[28px]">
                                     {perk.footer}
                                 </p>
                             </div>
