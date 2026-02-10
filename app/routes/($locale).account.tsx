@@ -76,7 +76,8 @@ export default function AccountLayout() {
               {initials}
             </div>
             <div>
-              <p className="font-bold text-gray-900 leading-tight" style={{ fontSize: '2rem' }}>Hello</p>
+              <p className="font-bold text-gray-900 leading-tight" style={{ fontSize: '2rem' }}>Hello {firstName}</p>
+              <p className="text-gray-500 text-base mt-1">{email}</p>
             </div>
           </div>
 
