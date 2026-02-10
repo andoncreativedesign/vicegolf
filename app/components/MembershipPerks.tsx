@@ -54,7 +54,7 @@ const PERKS_DATA = [
 
 export function MembershipPerks() {
     return (
-        <section className=" py-24">
+        <section className=" py-24 bg-red-600">
             <div className="mx-auto max-w-[1300px] px-6">
                 <h2
                     className="mb-20 text-center font-extrabold uppercase tracking-tight leading-none"
