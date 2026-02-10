@@ -12,11 +12,11 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
     const isSubmitting = fetcher.state !== 'idle';
 
     return (
-        <section id="apply-form" className="py-24 bg-white">
+        <section id="apply-form" className="py-24 bg-[#f5f5f5]">
             <div className="mx-auto max-w-[1300px] px-6">
                 <div className="mb-20 text-center">
                     <h2
-                        className="text-center font-extrabold uppercase tracking-tight leading-none mb-4"
+                        className="text-center font-extrabold tracking-tight leading-none mb-4"
                         style={{ fontSize: '40px' }}
                     >
                         Join Us
@@ -55,7 +55,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         id="firstName"
                                         defaultValue={customer?.firstName || ''}
                                         required
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                         style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
@@ -67,7 +67,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         id="lastName"
                                         defaultValue={customer?.lastName || ''}
                                         required
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                         style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
@@ -79,7 +79,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         type="tel"
                                         name="phone"
                                         id="phone"
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                         style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
@@ -91,7 +91,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         id="email"
                                         defaultValue={customer?.emailAddress?.emailAddress || ''}
                                         required
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                         style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
@@ -103,7 +103,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         type="date"
                                         name="birthday"
                                         id="birthday"
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                         style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
@@ -115,7 +115,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         type="text"
                                         name="golfSocietyName"
                                         id="golfSocietyName"
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                         style={{ width: '100%', border: 'none' }}
                                     />
                                 </div>
@@ -128,7 +128,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                     <select
                                         name="handedness"
                                         id="handedness"
-                                        className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
+                                        className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
                                         style={{ width: '100%', border: 'none' }}
                                     >
                                         <option value="Right Handed">Right Handed</option>

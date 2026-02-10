@@ -54,7 +54,7 @@ const PERKS_DATA = [
 
 export function MembershipPerks() {
     return (
-        <section className=" py-24 bg-white">
+        <section className=" py-24 bg-[#f5f5f5]">
             <div className="mx-auto max-w-[1300px] px-6">
                 <h2
                     className="mb-20 text-center font-extrabold uppercase tracking-tight leading-none"
@@ -67,7 +67,7 @@ export function MembershipPerks() {
                     {PERKS_DATA.map((perk) => (
                         <div
                             key={perk.tier}
-                            className="relative h-[780px] border border-[#E5E5E5] bg-white px-10 pt-12"
+                            className="relative h-[780px] border border-[#E5E5E5] bg-[#fafafa] px-10 pt-12"
                         >
                             {/* Logo */}
                             <div className="flex flex-col items-center border-b border-[#BFBFBF] pb-8 h-[120px] justify-center">
