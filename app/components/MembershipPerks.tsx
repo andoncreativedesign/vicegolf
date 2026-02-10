@@ -58,12 +58,12 @@ export function MembershipPerks() {
             <div className="mx-auto max-w-[1300px] px-6">
                 <h2
                     className="mb-20 text-center font-extrabold uppercase tracking-tight leading-none"
-                    style={{ fontSize: '40px' }}
+                    style={{ fontSize: '30px' }}
                 >
                     Our Membership Perks
                 </h2>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
                     {PERKS_DATA.map((perk) => (
                         <div
                             key={perk.tier}

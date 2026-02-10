@@ -169,21 +169,53 @@ export default function MembershipTab() {
 
     // 1. Accepted State UI
     if (currentSegment) {
+        // Determine which logo to use based on segment
+        const getLogoForSegment = () => {
+            switch (currentSegment.id) {
+                case 'vice_crew':
+                    return '/crew-main-green.png';
+                case 'vice_squad':
+                    return '/crew-main-orange.png';
+                case 'vice_legends':
+                    return '/crew-main-red.png';
+                default:
+                    return '/vice_logo.svg';
+            }
+        };
+
+        // Get letter images for each segment
+        const getLetterImagesForSegment = () => {
+            switch (currentSegment.id) {
+                case 'vice_crew':
+                    return ['/C.png', '/R.png', '/E.png', '/W.png'];
+                case 'vice_squad':
+                    return ['/S.png', '/Q.png', '/U.png', '/A.png', '/D.png'];
+                case 'vice_legends':
+                    return ['/L-L.png', '/L-E.png', '/L-G.png', '/L-E.png', '/L-N.png', '/L-D.png', '/L-S.png'];
+                default:
+                    return [];
+            }
+        };
+
         return (
             <div className="account-membership w-full">
                 <div className="bg-[#F5F5F5] p-12 w-full min-h-[400px] flex flex-col items-start justify-center">
                     <div className="mb-8">
                         {/* Logo representation matching the design */}
                         <div className="mb-6">
-                            <img src="/vice_logo.svg" alt="Vice Golf" className="h-14 w-auto mb-3" />
-                            <div className="text-3xl font-bold tracking-[0.2em] uppercase italic">{currentSegment.label.split(' ')[1]}</div>
+                            <img src={getLogoForSegment()} alt="Vice Golf" className="w-auto h-30 mb-3" />
+                            <div className="flex items-center gap-1">
+                                {getLetterImagesForSegment().map((letterImg, idx) => (
+                                    <img key={idx} src={letterImg} alt="" className=" h-3 w-auto " />
+                                ))}
+                            </div>
                         </div>
                         <h3 className="text-xl font-medium text-gray-900 mb-6">{currentSegment.subtitle}</h3>
                         <ul className="space-y-4">
                             {currentSegment.benefits.map((benefit, idx) => (
                                 <li key={idx} className="flex items-center gap-3 text-gray-700">
                                     <div className="w-1.5 h-1.5 bg-black rounded-full" />
-                                    <span className="font-medium">{benefit}</span>
+                                    <span>{benefit}</span>
                                 </li>
                             ))}
                         </ul>
@@ -196,7 +228,7 @@ export default function MembershipTab() {
     // 2. Not Applied / Pending State UI
     return (
         <div className="account-membership w-full">
-            <div className="bg-[#F5F5F5] p-16 w-full min-h-[450px] flex flex-col items-start">
+            <div className="bg-[#F5F5F5] p-16 w-full min-h-[400px] flex flex-col items-start">
                 {isRequested ? (
                     <div className="space-y-6 mt-10">
                         <div className="flex items-center gap-3">
@@ -206,21 +238,28 @@ export default function MembershipTab() {
                         <p className="text-gray-600 text-lg max-w-md italic">
                             We've received your application. Our team is currently reviewing it. We'll update your status once you're accepted into a tier.
                         </p>
+                        <button
+                            onClick={() => window.location.href = '/membership'}
+                            className="inline-block mt-35 bg-black  font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline text-center"
+                            style={{ color: 'white', textDecoration: 'none', width: '200px', height: '50px' }}
+                        >
+                            View Membership
+                        </button>
                     </div>
                 ) : (
-                    <div className="space-y-12 mt-10">
+                    <div className="space-y-12">
                         <div className="space-y-4">
-                            <h2 className="text-4xl font-bold text-gray-900 tracking-tighter leading-tight">Apply for Vice status</h2>
+                            <h2 className="text-5xl font-bold text-gray-900 tracking-tighter leading-tight">Apply for Vice status</h2>
                             <p className="text-gray-600 text-xl font-medium">Embrace your Vice and earn rewards</p>
                         </div>
 
-                        <Link
-                            to="/membership"
-                            className="inline-block bg-black px-12 py-5 font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline min-w-[200px] text-center"
-                            style={{ color: 'white', textDecoration: 'none' }}
+                        <button
+                            onClick={() => window.location.href = '/membership'}
+                            className="inline-block mt-35 bg-black  font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline text-center"
+                            style={{ color: 'white', textDecoration: 'none', width: '150px', height: '50px' }}
                         >
                             Apply
-                        </Link>
+                        </button>
                     </div>
                 )}
             </div>
