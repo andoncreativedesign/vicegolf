@@ -44,14 +44,13 @@ export async function action({ request, context }: Route.ActionArgs) {
         const tag = 'membership_requested';
 
         // Extract Questionnaire Data
+        // Extract Questionnaire Data
         const firstName = formData.get('firstName');
         const lastName = formData.get('lastName');
         const email = formData.get('email');
         const phone = formData.get('phone');
         const birthday = formData.get('birthday');
-        const golfSociety = formData.get('golfSociety');
         const golfSocietyName = formData.get('golfSocietyName');
-        const frequency = formData.get('frequency');
         const handedness = formData.get('handedness');
         const currentBall = formData.get('currentBall');
 
@@ -61,8 +60,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 - Email: ${email}
 - Phone: ${phone || 'N/A'}
 - Birthday: ${birthday || 'N/A'}
-- Golf Society: ${golfSociety === 'yes' ? `Yes (${golfSocietyName})` : 'No'}
-- Play Frequency: ${frequency}
+- Golf Society: ${golfSocietyName || 'No'}
 - Handedness: ${handedness}
 - Current Ball: ${currentBall || 'N/A'}
 `;
