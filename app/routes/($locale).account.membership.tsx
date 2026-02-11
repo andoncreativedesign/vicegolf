@@ -203,10 +203,10 @@ export default function MembershipTab() {
                     <div className="mb-8">
                         {/* Logo representation matching the design */}
                         <div className="mb-6">
-                            <img src={getLogoForSegment()} alt="Vice Golf" className="w-auto h-30 mb-3" />
-                            <div className="flex items-center gap-1">
+                            <img src={getLogoForSegment()} alt="Vice Golf" className="w-auto h-30 mb-3 mx-auto" />
+                            <div className="flex items-center gap-1 justify-center">
                                 {getLetterImagesForSegment().map((letterImg, idx) => (
-                                    <img key={idx} src={letterImg} alt="" className=" h-3 w-auto " />
+                                    <img key={idx} src={letterImg} alt="" className="h-4 w-auto" />
                                 ))}
                             </div>
                         </div>
