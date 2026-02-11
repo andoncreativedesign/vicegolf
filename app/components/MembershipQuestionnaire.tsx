@@ -20,7 +20,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
         <section id="apply-form" className="py-24 bg-[#f5f5f5]">
             <div className="mx-auto max-w-[1300px] px-6 text-center">
                 {hasRequested ? (
-                    <div className="bg-white border border-[#E5E5E5] max-w-2xl mx-auto p-12 flex flex-col items-center">
+                    <div className="bg-[#fafafa] border border-[#E5E5E5] max-w-7xl p-12 flex flex-col items-center">
                         <CheckCircle2Icon className="w-16 h-16 text-black mb-6" />
                         <h2 className="text-3xl font-bold uppercase tracking-tighter mb-4">Application Received</h2>
                         <p className="text-gray-600 text-lg">
@@ -60,7 +60,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
 
                                     <p className="text-[16px] leading-[28px] text-gray-600 text-left" style={{ marginBottom: '2.5rem' }}>To apply for your status, please complete the form below:</p>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 w-full text-left">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-10 w-full text-left">
                                         {/* Row 1 */}
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="firstName" className="text-[16px] leading-[28px] text-gray-600">First name</label>
@@ -71,7 +71,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 defaultValue={customer?.firstName || ''}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none' }}
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
@@ -83,18 +83,21 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 defaultValue={customer?.lastName || ''}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none' }}
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                         </div>
 
                                         {/* Row 2 */}
                                         <div className="flex flex-col gap-3 w-full">
+                                            <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
                                             <PhoneInputField
-                                                label="Phone No"
+                                                label=""
                                                 containerClassName="w-full"
                                                 value={phone}
                                                 onChange={(value) => setPhone(value || '')}
                                                 placeholder="Enter phone number"
+                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                             <input type="hidden" name="phone" value={phone} />
                                         </div>
@@ -107,7 +110,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 defaultValue={customer?.emailAddress?.emailAddress || ''}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none' }}
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                         </div>
 
@@ -119,7 +122,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="birthday"
                                                 id="birthday"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none' }}
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
@@ -131,7 +134,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="golfSocietyName"
                                                 id="golfSocietyName"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none' }}
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                         </div>
 
@@ -144,7 +147,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="handedness"
                                                 id="handedness"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
-                                                style={{ width: '100%', border: 'none' }}
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             >
                                                 <option value="Right Handed">Right Handed</option>
                                                 <option value="Left Handed">Left Handed</option>
@@ -158,8 +161,8 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 type="text"
                                                 name="currentBall"
                                                 id="currentBall"
-                                                className="w-full block bg-[#F7F7F7] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none' }}
+                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                                style={{ width: '100%', border: 'none', height: '50px' }}
                                             />
                                         </div>
                                     </div>
