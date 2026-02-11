@@ -5,11 +5,13 @@ import {
   Outlet,
   useLoaderData,
   useFetcher,
+  useLocation,
+  Link,
 } from 'react-router';
 import { useState, useEffect } from 'react';
 import type { Route } from './+types/account';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
-import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon, CheckCircle2Icon } from 'lucide-react'
+import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon, CheckCircle2Icon, ChevronLeftIcon } from 'lucide-react'
 
 
 export function shouldRevalidate() {
@@ -44,6 +46,8 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 export default function AccountLayout() {
   const { customer } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const isRoot = location.pathname.endsWith('/account') || location.pathname.endsWith('/account/');
 
   const heading = 'My Vice Golf Account';
 
@@ -69,7 +73,7 @@ export default function AccountLayout() {
       </div>
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-6">
         {/* Sidebar */}
-        <div className="w-full lg:w-[35%] flex-shrink-0">
+        <div className={`w-full lg:w-[35%] flex-shrink-0 ${!isRoot ? 'hidden lg:block' : ''}`}>
           {/* User Info Box */}
           <div className="bg-[#F5F5F5] p-8 flex items-center gap-6 mb-8">
             <div className="h-16 w-16 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white text-xl font-bold">
@@ -86,7 +90,15 @@ export default function AccountLayout() {
         </div>
 
         {/* Main Content */}
-        <div className="w-full lg:w-[65%]">
+        <div className={`w-full lg:w-[65%] ${isRoot ? 'hidden lg:block' : ''}`}>
+          {!isRoot && (
+            <div className="lg:hidden mb-6">
+              <Link to="/account" className="flex items-center gap-2 text-gray-900 font-bold no-underline">
+                <ChevronLeftIcon className="w-5 h-5" />
+                My Account
+              </Link>
+            </div>
+          )}
           <Outlet context={{ customer }} />
         </div>
       </div>
