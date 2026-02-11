@@ -14,6 +14,7 @@ type PhoneInputFieldProps = {
     value: string;
     onChange: (value: string | undefined) => void;
     availableCountries?: Country[];
+    hasBorder?: boolean;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
 
 const CustomCountrySelect = ({ value, onChange, labels, availableCountries }: any) => {
@@ -88,6 +89,7 @@ export function PhoneInputField({
     value,
     onChange,
     availableCountries,
+    hasBorder = true,
     ...inputProps
 }: PhoneInputFieldProps) {
     const generatedId = useId();
@@ -99,10 +101,12 @@ export function PhoneInputField({
 
     return (
         <div className={`flex flex-col space-y-3 ${containerClassName ?? ''}`}>
-            <label htmlFor={inputId} className="text-[13px] font-semibold text-[#1f2937]">
-                {label}
-                {required && <span className="text-red-500"> *</span>}
-            </label>
+            {label && (
+                <label htmlFor={inputId} className="text-[13px] font-semibold text-[#1f2937]">
+                    {label}
+                    {required && <span className="text-red-500"> *</span>}
+                </label>
+            )}
 
             {supportingText && (
                 <p className="text-[13px] text-[#6b7280]">{supportingText}</p>
@@ -124,7 +128,7 @@ export function PhoneInputField({
                     height: 48px !important;
                     min-width: 0 !important;
                     background: #FAFAFA !important;
-                    border: 1px solid #ddd !important;
+                    border: ${hasBorder ? '1px solid #ddd' : 'none'} !important;
                     border-radius: 6px !important;
                     padding: 0 16px !important;
                     font-size: 16px !important;
@@ -149,7 +153,7 @@ export function PhoneInputField({
                     width: 70px !important;
                     height: 48px !important;
                     background: #FAFAFA !important;
-                    border: 1px solid #ddd !important;
+                    border: ${hasBorder ? '1px solid #ddd' : 'none'} !important;
                     border-radius: 6px !important;
                     cursor: pointer !important;
                     padding: 0 !important;

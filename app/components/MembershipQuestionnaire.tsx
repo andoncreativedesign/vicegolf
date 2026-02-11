@@ -71,7 +71,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 defaultValue={customer?.firstName || ''}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
@@ -83,23 +83,91 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 defaultValue={customer?.lastName || ''}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
                                         </div>
 
                                         {/* Row 2 */}
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
-                                            <PhoneInputField
-                                                label=""
-                                                containerClassName="w-full"
-                                                value={phone}
-                                                onChange={(value) => setPhone(value || '')}
-                                                placeholder="Enter phone number"
-                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
-                                            />
-                                            <input type="hidden" name="phone" value={phone} />
+                                            <div className="membership-phone-wrapper">
+                                                <style dangerouslySetInnerHTML={{
+                                                    __html: `
+                                                    .membership-phone-wrapper > div {
+                                                        margin-top: 0 !important;
+                                                        padding: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .flex.flex-col {
+                                                        gap: 0 !important;
+                                                        margin: 0 !important;
+                                                        padding: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .flex.flex-col > * + * {
+                                                        margin-top: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper label {
+                                                        display: none !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputCustom {
+                                                        gap: 8px !important;
+                                                        height: 50px !important;
+                                                        align-items: stretch !important;
+                                                        border-radius: 0 !important;
+                                                        background: transparent !important;
+                                                        display: flex !important;
+                                                    }
+                                                    .membership-phone-wrapper .country-dropdown-container {
+                                                        height: 50px !important;
+                                                        display: flex !important;
+                                                        flex-shrink: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .country-dropdown-button {
+                                                        height: 50px !important;
+                                                        min-height: 50px !important;
+                                                        background: #fafafa !important;
+                                                        border-radius: 6px !important;
+                                                        width: 80px !important;
+                                                        display: flex !important;
+                                                        align-items: center !important;
+                                                        justify-content: center !important;
+                                                        padding: 0 !important;
+                                                        border: none !important;
+                                                        outline: none !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputInput {
+                                                        height: 50px !important;
+                                                        min-height: 50px !important;
+                                                        background: #fafafa !important;
+                                                        border-radius: 6px !important;
+                                                        padding: 0 1.25rem !important;
+                                                        font-size: 16px !important;
+                                                        line-height: 50px !important;
+                                                        flex: 1 !important;
+                                                        color: black !important;
+                                                        border: none !important;
+                                                        outline: none !important;
+                                                        display: block !important;
+                                                        margin: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputInput::placeholder {
+                                                        color: #6b7280 !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputInput:focus {
+                                                        box-shadow: 0 0 0 1px black !important;
+                                                        background: #fafafa !important;
+                                                        border: none !important;
+                                                        outline: none !important;
+                                                    }
+                                                `}} />
+                                                <PhoneInputField
+                                                    label=""
+                                                    value={phone}
+                                                    onChange={(val) => setPhone(val || '')}
+                                                    placeholder="Enter phone number"
+                                                    hasBorder={false}
+                                                />
+                                                <input type="hidden" name="phone" value={phone} />
+                                            </div>
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="email" className="text-[16px] leading-[28px] text-gray-600">Email</label>
@@ -109,8 +177,8 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 id="email"
                                                 defaultValue={customer?.emailAddress?.emailAddress || ''}
                                                 required
-                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                className="w-full block py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
+                                                style={{ width: '100%', border: 'none', height: '50px', background: '#fafafa', color: 'black', borderRadius: '6px' }}
                                             />
                                         </div>
 
@@ -122,7 +190,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="birthday"
                                                 id="birthday"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
@@ -134,7 +202,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="golfSocietyName"
                                                 id="golfSocietyName"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
                                         </div>
 
@@ -147,7 +215,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="handedness"
                                                 id="handedness"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             >
                                                 <option value="Right Handed">Right Handed</option>
                                                 <option value="Left Handed">Left Handed</option>
@@ -162,7 +230,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 name="currentBall"
                                                 id="currentBall"
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
                                         </div>
                                     </div>
