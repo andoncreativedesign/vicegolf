@@ -4,6 +4,7 @@ import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
+import AedIcon from './ui/AedIcon';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -14,6 +15,47 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
+
+  let actualPercentage = 0;
+  let actualAmount = 0;
+
+  // Calculate line-level original sum to detect discounts already applied to lines
+  const lineOriginalSum = cart?.lines?.nodes?.reduce((acc: number, line: any) => {
+    const discountSum = line?.discountAllocations?.reduce((sum: number, d: any) => sum + parseFloat(d.discountedAmount.amount), 0) || 0;
+
+    const cost = line?.cost;
+    const merchandise = line?.merchandise;
+
+    if (!cost || !merchandise) return acc;
+
+    const compareAt = cost.compareAtAmountPerQuantity || merchandise.compareAtPrice || (
+      (merchandise.price && parseFloat(merchandise.price.amount) > parseFloat(cost.amountPerQuantity.amount))
+        ? merchandise.price
+        : null
+    );
+
+    let lineOriginal = 0;
+    if (discountSum > 0 && cost.totalAmount) {
+      lineOriginal = parseFloat(cost.totalAmount.amount) + discountSum;
+    } else if (compareAt) {
+      lineOriginal = parseFloat(compareAt.amount) * line.quantity;
+    } else if (cost.amountPerQuantity) {
+      lineOriginal = parseFloat(cost.amountPerQuantity.amount) * line.quantity;
+    }
+
+    return acc + lineOriginal;
+  }, 0) || 0;
+
+  const currentSubtotalVal = subtotal?.amount ? parseFloat(subtotal.amount.replace(/,/g, '')) : 0;
+  const totVal = total?.amount ? parseFloat(total.amount.replace(/,/g, '')) : 0;
+
+  // Base value for discount calculation is the maximum of Shopify's subtotal or our calculated original sum
+  const baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
+
+  if (baseVal > totVal) {
+    actualPercentage = Math.round((1 - (totVal / baseVal)) * 100);
+    actualAmount = Math.max(0, baseVal - totVal);
+  }
 
   return (
     <div
@@ -32,14 +74,27 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </span>
           </div>
 
+          {(actualPercentage > 0 || actualAmount > 0) && (
+            <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
+              <span className="flex items-center">
+                {'Savings'} {actualAmount > 0 ? (
+                  <span className="flex items-center mx-1">
+                    <AedIcon className="w-3 h-3 mx-0.5" />
+                    {actualAmount.toFixed(2)}
+                  </span>
+                ) : `${actualPercentage}%`} discount applied
+              </span>
+            </div>
+          )}
+
           {total && (
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-900 font-medium">
                   Total{' '}
                   <span className="text-gray-600 font-normal">
-                    {subtotal?.amount === total.amount 
-                      ? '(Incl. taxes and excl. shipping)' 
+                    {subtotal?.amount === total.amount
+                      ? '(Incl. taxes and excl. shipping)'
                       : '(Incl. taxes and shipping)'}
                   </span>
                 </span>
