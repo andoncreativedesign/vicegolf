@@ -112,15 +112,11 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                         gap: 8px !important;
                                                         height: 50px !important;
                                                         align-items: stretch !important;
-                                                        border: none !important;
-                                                        box-shadow: none !important;
+                                                        border-radius: 0 !important;
                                                     }
                                                     .membership-phone-wrapper .country-dropdown-button {
                                                         height: 50px !important;
                                                         background: #fafafa !important;
-                                                        border: none !important;
-                                                        outline: none !important;
-                                                        box-shadow: none !important;
                                                         border-radius: 0 !important;
                                                         width: 80px !important;
                                                         display: flex !important;
@@ -131,9 +127,6 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                     .membership-phone-wrapper .PhoneInputInput {
                                                         height: 50px !important;
                                                         background: #fafafa !important;
-                                                        border: none !important;
-                                                        outline: none !important;
-                                                        box-shadow: none !important;
                                                         border-radius: 0 !important;
                                                         padding: 1rem 1.25rem !important;
                                                         font-size: 16px !important;
@@ -143,13 +136,6 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                     .membership-phone-wrapper .PhoneInputInput:focus {
                                                         box-shadow: 0 0 0 1px black !important;
                                                         background: #fafafa !important;
-                                                        border: none !important;
-                                                        outline: none !important;
-                                                    }
-                                                    .membership-phone-wrapper .phone-input-root {
-                                                        border: none !important;
-                                                        box-shadow: none !important;
-                                                        outline: none !important;
                                                     }
                                                 `}} />
                                                 <PhoneInputField
@@ -157,6 +143,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                     value={phone}
                                                     onChange={(val) => setPhone(val || '')}
                                                     placeholder="Enter phone number"
+                                                    hasBorder={false}
                                                 />
                                                 <input type="hidden" name="phone" value={phone} />
                                             </div>
