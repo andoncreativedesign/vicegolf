@@ -75,9 +75,10 @@ export default function AccountLayout() {
             <div className="h-16 w-16 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white text-xl font-bold">
               {initials}
             </div>
-            <div>
-              <p className="font-bold text-gray-900 leading-tight" style={{ fontSize: '2rem' }}>Hello {firstName}</p>
-              <p className="text-gray-500 text-base mt-1">{email}</p>
+            <div className="flex flex-col">
+              <span className="text-lg text-gray-900">Hello</span>
+              <p className="font-bold text-gray-900 text-2xl leading-tight">{firstName}</p>
+              <p className="text-gray-500 text-sm mt-1">{email}</p>
             </div>
           </div>
 
