@@ -173,27 +173,13 @@ export default function MembershipTab() {
         const getLogoForSegment = () => {
             switch (currentSegment.id) {
                 case 'vice_crew':
-                    return '/crew-main-green.png';
+                    return '/crew.svg';
                 case 'vice_squad':
-                    return '/crew-main-orange.png';
+                    return '/squad.svg';
                 case 'vice_legends':
-                    return '/crew-main-red.png';
+                    return '/legend.svg';
                 default:
                     return '/vice_logo.svg';
-            }
-        };
-
-        // Get letter images for each segment
-        const getLetterImagesForSegment = () => {
-            switch (currentSegment.id) {
-                case 'vice_crew':
-                    return ['/C.png', '/R.png', '/E.png', '/W.png'];
-                case 'vice_squad':
-                    return ['/S.png', '/Q.png', '/U.png', '/A.png', '/D.png'];
-                case 'vice_legends':
-                    return ['/L-L.png', '/L-E.png', '/L-G.png', '/L-E.png', '/L-N.png', '/L-D.png', '/L-S.png'];
-                default:
-                    return [];
             }
         };
 
@@ -202,15 +188,10 @@ export default function MembershipTab() {
                 <div className="bg-[#F5F5F5] p-12 w-full min-h-[400px] flex flex-col items-start justify-center">
                     <div className="mb-8">
                         {/* Logo representation matching the design */}
-                        <div className="mb-6">
-                            <img src={getLogoForSegment()} alt="Vice Golf" className="w-auto h-30 mb-3 mx-auto" />
-                            <div className="flex items-center gap-1 justify-center">
-                                {getLetterImagesForSegment().map((letterImg, idx) => (
-                                    <img key={idx} src={letterImg} alt="" className="h-4 w-auto" />
-                                ))}
-                            </div>
+                        <div className="mb-10">
+                            <img src={getLogoForSegment()} alt="Vice Golf" className="w-auto h-40 mb-16" />
                         </div>
-                        <h3 className="text-xl font-medium text-gray-900 mb-6">{currentSegment.subtitle}</h3>
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">{currentSegment.subtitle}</h3>
                         <ul className="space-y-4">
                             {currentSegment.benefits.map((benefit, idx) => (
                                 <li key={idx} className="flex items-center gap-3 text-gray-700">

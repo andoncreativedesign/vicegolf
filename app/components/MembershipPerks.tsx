@@ -13,19 +13,15 @@ const ViceLogo = ({ className, color }: { className?: string; color: string }) =
 
 const PERKS_DATA = [
     {
-        tier: 'CREW',
         color: '#D4E913',
-        logo: '/crew-main-green.png',
-        tierImages: ['/C.png', '/R.png', '/E.png', '/W.png'],
+        logo: '/crew.svg',
         subtitle: 'Welcome to the club.\nLet’s get you rolling.',
         rewards: ['5% off all purchases'],
         footer: 'Activates on 3rd purchase\nTo retain, spend AED 1000 within 3 months',
     },
     {
-        tier: 'SQUAD',
         color: '#FF9E16',
-        logo: '/crew-main-orange.png',
-        tierImages: ['/S.png', '/Q.png', '/U.png', '/A.png', '/D.png'],
+        logo: '/squad.svg',
         subtitle: 'You’re a regular.\nPerks unlocked.',
         rewards: [
             '10% off all purchases',
@@ -36,10 +32,8 @@ const PERKS_DATA = [
             'Activates when you spend AED 10,000 within a rolling 12 months or make 25+ purchases within 12 months',
     },
     {
-        tier: 'LEGENDS',
         color: '#FF3333',
-        logo: '/crew-main-red.png',
-        tierImages: ['/L-L.png', '/L-E.png', '/L-G.png', '/L-E.png', '/L-N.png', '/L-D.png', '/L-S.png'],
+        logo: '/legend.svg',
         subtitle: 'Top tier.\nTop treatment.',
         rewards: [
             '15% off all purchases',
@@ -63,33 +57,21 @@ export function MembershipPerks() {
                     Our Membership Perks
                 </h2>
 
-                <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {PERKS_DATA.map((perk) => (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {PERKS_DATA.map((perk, index) => (
                         <div
-                            key={perk.tier}
+                            key={index}
                             className="relative h-[780px] border border-[#E5E5E5] bg-[#fafafa] px-10 pt-12"
                         >
                             {/* Logo */}
-                            <div className="flex flex-col items-center border-b border-[#BFBFBF] pb-8 h-[120px] justify-center">
+                            <div className="flex flex-col items-center border-b border-[#BFBFBF] pb-3 h-[140px] justify-center">
                                 {perk.logo ? (
-                                    <img src={perk.logo} alt={perk.tier} className="w-[190px] h-auto object-contain" />
+                                    <img src={perk.logo} alt="" className="w-[190px] h-auto object-contain" />
                                 ) : (
                                     <ViceLogo className="w-[190px]" color={perk.color} />
                                 )}
 
                                 <div className="mt-2 flex items-center justify-center gap-1 min-h-[18px]">
-                                    {(perk as any).tierImages ? (
-                                        (perk as any).tierImages.map((img: string, idx: number) => (
-                                            <img key={idx} src={img} alt="" className="h-3 w-auto object-contain" />
-                                        ))
-                                    ) : (
-                                        <span
-                                            className="text-[12px] font-bold uppercase tracking-[0.25em]"
-                                            style={{ color: perk.color }}
-                                        >
-                                            {perk.tier}
-                                        </span>
-                                    )}
                                 </div>
                             </div>
 
@@ -108,7 +90,7 @@ export function MembershipPerks() {
                                         {perk.rewards.map((reward, i) => (
                                             <li
                                                 key={i}
-                                                className="flex items-start text-[16px] leading-[28px]"
+                                                className="flex items-start text-[16px] leading-[28px] text-gray-700"
                                             >
                                                 <span className="mr-3 mt-[10px] h-[5px] w-[5px] rounded-full bg-black" />
                                                 {reward}
@@ -119,10 +101,10 @@ export function MembershipPerks() {
                             </div>
 
                             {/* Divider – fixed position */}
-                            <div className="absolute left-10 right-10 bottom-[120px] border-t border-[#E5E5E5]" />
+                            <div className="absolute left-10 right-10 bottom-[140px] border-t border-[#E5E5E5]" />
 
                             {/* Footer – TOP-ALIGNED to divider */}
-                            <div className="absolute left-10 right-10 top-[675px]">
+                            <div className="absolute left-10 right-10 top-[655px] text-gray-700">
                                 <p className="whitespace-pre-line text-left text-[16px] leading-[28px]">
                                     {perk.footer}
                                 </p>
