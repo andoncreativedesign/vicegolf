@@ -90,16 +90,76 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         {/* Row 2 */}
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
-                                            <PhoneInputField
-                                                label=""
-                                                containerClassName="w-full"
-                                                value={phone}
-                                                onChange={(value) => setPhone(value || '')}
-                                                placeholder="Enter phone number"
-                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px' }}
-                                            />
-                                            <input type="hidden" name="phone" value={phone} />
+                                            <div className="membership-phone-wrapper">
+                                                <style dangerouslySetInnerHTML={{
+                                                    __html: `
+                                                    .membership-phone-wrapper > div {
+                                                        margin-top: 0 !important;
+                                                        padding: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .flex.flex-col {
+                                                        gap: 0 !important;
+                                                        margin: 0 !important;
+                                                        padding: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .flex.flex-col > * + * {
+                                                        margin-top: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper label {
+                                                        display: none !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputCustom {
+                                                        gap: 8px !important;
+                                                        height: 50px !important;
+                                                        align-items: stretch !important;
+                                                        border: none !important;
+                                                        box-shadow: none !important;
+                                                    }
+                                                    .membership-phone-wrapper .country-dropdown-button {
+                                                        height: 50px !important;
+                                                        background: #fafafa !important;
+                                                        border: none !important;
+                                                        outline: none !important;
+                                                        box-shadow: none !important;
+                                                        border-radius: 0 !important;
+                                                        width: 80px !important;
+                                                        display: flex !important;
+                                                        align-items: center !important;
+                                                        justify-content: center !important;
+                                                        padding: 0 !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputInput {
+                                                        height: 50px !important;
+                                                        background: #fafafa !important;
+                                                        border: none !important;
+                                                        outline: none !important;
+                                                        box-shadow: none !important;
+                                                        border-radius: 0 !important;
+                                                        padding: 1rem 1.25rem !important;
+                                                        font-size: 16px !important;
+                                                        line-height: normal !important;
+                                                        flex: 1 !important;
+                                                    }
+                                                    .membership-phone-wrapper .PhoneInputInput:focus {
+                                                        box-shadow: 0 0 0 1px black !important;
+                                                        background: #fafafa !important;
+                                                        border: none !important;
+                                                        outline: none !important;
+                                                    }
+                                                    .membership-phone-wrapper .phone-input-root {
+                                                        border: none !important;
+                                                        box-shadow: none !important;
+                                                        outline: none !important;
+                                                    }
+                                                `}} />
+                                                <PhoneInputField
+                                                    label=""
+                                                    value={phone}
+                                                    onChange={(val) => setPhone(val || '')}
+                                                    placeholder="Enter phone number"
+                                                />
+                                                <input type="hidden" name="phone" value={phone} />
+                                            </div>
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="email" className="text-[16px] leading-[28px] text-gray-600">Email</label>
