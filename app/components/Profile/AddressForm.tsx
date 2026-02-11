@@ -139,6 +139,7 @@ export function AddressForm({
           onChange={(val) => setPhone(val || '')}
           placeholder="Enter phone number"
           autoComplete="tel"
+          availableCountries={['AE']}
         />
         <input type="hidden" name="phoneNumber" value={phone} />
         <div>

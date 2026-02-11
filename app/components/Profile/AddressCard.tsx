@@ -46,39 +46,55 @@ export function AddressCard({
     zoneCode,
     zip,
     territoryCode,
+    phoneNumber,
   } = address;
 
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
   const cityLine = [zip, city, zoneCode].filter(Boolean).join(' ');
 
   const addressLines = [
-    fullName || undefined,
     company || undefined,
     address1 || undefined,
     address2 || undefined,
     cityLine || undefined,
     territoryCode || undefined,
+    phoneNumber || undefined,
   ].filter(Boolean) as string[];
 
   return (
     <article className={className ? `${baseCardClasses} ${className}` : baseCardClasses}>
       <div className="flex items-start justify-between gap-4">
-        {isDefault && (
-          <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-            Default
-          </span>
-        )}
+        {/* Left Side: Badge + Address Details */}
+        <div className="flex flex-col gap-3">
+          {isDefault && (
+            <span className="self-start inline-flex items-center rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+              Default
+            </span>
+          )}
 
-        <div className="ml-auto flex items-center gap-3 font-medium text-gray-700">
+          <div className="text-gray-900">
+            {fullName && (
+              <p className="font-bold text-base mb-1">{fullName}</p>
+            )}
+            <div className="text-sm leading-relaxed text-gray-800 font-medium">
+              {addressLines.map((line, index) => (
+                <p key={`${address.id}-${index}`}>{line}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Actions Stacked */}
+        <div className="flex flex-col gap-3 mt-1">
           {onEdit && (
             <button
               type="button"
               onClick={onEdit}
               disabled={isEditing}
-              className="inline-flex items-center gap-1 text-gray-700 transition hover:text-black cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-end gap-2 text-sm text-gray-600 transition hover:text-black cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               <PencilIcon className="h-4 w-4" />
-              {isEditing ? 'Editing…' : 'Edit'}
+              <span className="font-medium">{isEditing ? 'Editing…' : 'Edit'}</span>
             </button>
           )}
           {onRemove && (
@@ -86,24 +102,13 @@ export function AddressCard({
               type="button"
               onClick={onRemove}
               disabled={isRemoving}
-              className="inline-flex items-center gap-1 text-gray-700 transition hover:text-black cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-end gap-2 text-sm text-gray-600 transition hover:text-black cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               <TrashIcon className="h-4 w-4" />
-              {isRemoving ? 'Removing…' : 'Remove'}
+              <span className="font-medium">{isRemoving ? 'Removing…' : 'Remove'}</span>
             </button>
           )}
         </div>
-      </div>
-
-      <div className="mt-4 text-gray-800 leading-relaxed font-semibold">
-        {addressLines.map((line, index) => (
-          <p
-            style={{ marginBottom: index === addressLines.length - 1 ? '0' : '0.5rem' }}
-            key={`${address.id}-${index}`}
-          >
-            {line}
-          </p>
-        ))}
       </div>
     </article>
   );
