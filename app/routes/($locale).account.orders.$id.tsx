@@ -260,7 +260,7 @@ export default function OrderRoute() {
         >
           View Order Status →
         </a> */}
-        {isOrderCancelable(order) &&
+        {/* {isOrderCancelable(order) &&
           <button
             className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
             onClick={(e) => {
@@ -281,7 +281,7 @@ export default function OrderRoute() {
           >
             Return Order
           </button>
-        }
+        } */}
       </div>
 
       <CancelOrderModal
