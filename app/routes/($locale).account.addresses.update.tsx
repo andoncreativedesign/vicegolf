@@ -400,6 +400,7 @@ export default function AddressEditor() {
           onChange={(val) => setPhone(val || '')}
           placeholder="Enter phone number"
           autoComplete="tel"
+          availableCountries={['AE']}
         />
         <input type="hidden" name="phoneNumber" value={phone} />
         <div className="flex items-center">

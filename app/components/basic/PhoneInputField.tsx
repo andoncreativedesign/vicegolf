@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from 'react';
-import { useId, useState, useRef, useEffect } from 'react';
-import PhoneInput, { getCountries } from 'react-phone-number-input';
+import { useId, useState, useRef, useEffect, useCallback } from 'react';
+import PhoneInput, { getCountries, type Country } from 'react-phone-number-input';
 import flags from 'react-phone-number-input/flags';
 import en from 'react-phone-number-input/locale/en';
 import 'react-phone-number-input/style.css';
@@ -13,9 +13,10 @@ type PhoneInputFieldProps = {
     containerClassName?: string;
     value: string;
     onChange: (value: string | undefined) => void;
+    availableCountries?: Country[];
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
 
-const CustomCountrySelect = ({ value, onChange, labels }: any) => {
+const CustomCountrySelect = ({ value, onChange, labels, availableCountries }: any) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +50,7 @@ const CustomCountrySelect = ({ value, onChange, labels }: any) => {
 
             {isOpen && (
                 <ul className="country-dropdown-list" role="listbox">
-                    {getCountries().map((country) => {
+                    {(availableCountries || getCountries()).map((country: Country) => {
                         const CountryFlag = flags[country as keyof typeof flags];
                         const label = en[country as keyof typeof en];
                         return (
@@ -64,7 +65,7 @@ const CustomCountrySelect = ({ value, onChange, labels }: any) => {
                                 aria-selected={selectedCountry === country}
                             >
                                 <div className="PhoneInputCountryIcon">
-                                    <CountryFlag title={country} />
+                                    {CountryFlag && <CountryFlag title={country} />}
                                 </div>
                                 <span className="country-dropdown-label">{label}</span>
                             </li>
@@ -86,10 +87,15 @@ export function PhoneInputField({
     id,
     value,
     onChange,
+    availableCountries,
     ...inputProps
 }: PhoneInputFieldProps) {
     const generatedId = useId();
     const inputId = id ?? inputProps.name ?? generatedId;
+
+    const CountrySelectComponent = useCallback((props: any) => (
+        <CustomCountrySelect {...props} availableCountries={availableCountries} />
+    ), [availableCountries]);
 
     return (
         <div className={`flex flex-col space-y-3 ${containerClassName ?? ''}`}>
@@ -231,7 +237,8 @@ export function PhoneInputField({
                     required={required}
                     className="PhoneInputCustom"
                     inputComponent={"input"}
-                    countrySelectComponent={CustomCountrySelect}
+                    countrySelectComponent={CountrySelectComponent}
+                    countries={availableCountries}
                     {...inputProps}
                 />
             </div>
