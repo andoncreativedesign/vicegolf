@@ -46,6 +46,7 @@ export function AddressCard({
     zoneCode,
     zip,
     territoryCode,
+    phoneNumber,
   } = address;
 
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
@@ -58,6 +59,7 @@ export function AddressCard({
     address2 || undefined,
     cityLine || undefined,
     territoryCode || undefined,
+    phoneNumber || undefined,
   ].filter(Boolean) as string[];
 
   return (
