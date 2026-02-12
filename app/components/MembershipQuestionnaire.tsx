@@ -77,6 +77,71 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                             </div>
                         ) : (
                             <div className="w-full">
+                                <style dangerouslySetInnerHTML={{
+                                    __html: `
+                                            /* Fix vertical alignment with email field */
+                                            .membership-phone-wrapper {
+                                                padding-top: 6px !important;
+                                            }
+                                            .membership-phone-wrapper > div {
+                                                margin-top: 0 !important;
+                                                padding: 0 !important;
+                                            }
+                                            .membership-phone-wrapper .PhoneInputCustom,
+                                            .membership-phone-wrapper .PhoneInputCustom *,
+                                            .membership-phone-wrapper .PhoneInputInput,
+                                            .membership-phone-wrapper .country-dropdown-button,
+                                            .membership-phone-wrapper input {
+                                                border: none !important;
+                                                outline: none !important;
+                                                box-shadow: none !important;
+                                                border-width: 0 !important;
+                                            }
+                                            .membership-phone-wrapper .PhoneInputCustom {
+                                                gap: 8px !important;
+                                                height: 50px !important;
+                                                align-items: center !important;
+                                                background: transparent !important;
+                                                display: flex !important;
+                                            }
+                                            .membership-phone-wrapper .country-dropdown-container {
+                                                height: 50px !important;
+                                                display: flex !important;
+                                                flex-shrink: 0 !important;
+                                            }
+                                            .membership-phone-wrapper .country-dropdown-button {
+                                                height: 50px !important;
+                                                min-height: 50px !important;
+                                                background: #fafafa !important;
+                                                border-radius: 6px !important;
+                                                width: 80px !important;
+                                                display: flex !important;
+                                                align-items: center !important;
+                                                justify-content: center !important;
+                                                padding: 0 !important;
+                                            }
+                                            .membership-phone-wrapper .PhoneInputInput {
+                                                height: 50px !important;
+                                                min-height: 50px !important;
+                                                background: #dcfce7 !important; /* Keeping Premium Green for now */
+                                                border-radius: 6px !important;
+                                                padding: 0 1.25rem !important;
+                                                font-size: 16px !important;
+                                                line-height: 50px !important;
+                                                flex: 1 !important;
+                                                color: black !important;
+                                                display: block !important;
+                                                margin: 0 !important;
+                                            }
+                                            .membership-phone-wrapper .PhoneInputInput::placeholder {
+                                                color: #6b7280 !important;
+                                            }
+                                            .membership-phone-wrapper .PhoneInputInput:focus,
+                                            .membership-phone-wrapper .country-dropdown-button:focus {
+                                                box-shadow: none !important;
+                                                background: #dcfce7 !important;
+                                            }
+                                        `}} />
                                 <fetcher.Form
                                     method="post"
                                     action="/account/membership"
@@ -118,74 +183,6 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
                                             <div className="membership-phone-wrapper">
-                                                <style dangerouslySetInnerHTML={{
-                                                    __html: `
-                                                    .membership-phone-wrapper > div {
-                                                        margin-top: 0 !important;
-                                                        padding: 0 !important;
-                                                    }
-                                                    .membership-phone-wrapper .flex.flex-col {
-                                                        gap: 0 !important;
-                                                        margin: 0 !important;
-                                                        padding: 0 !important;
-                                                    }
-                                                    .membership-phone-wrapper .flex.flex-col > * + * {
-                                                        margin-top: 0 !important;
-                                                    }
-                                                    .membership-phone-wrapper label {
-                                                        display: none !important;
-                                                    }
-                                                    .membership-phone-wrapper .PhoneInputCustom {
-                                                        gap: 8px !important;
-                                                        height: 50px !important;
-                                                        align-items: stretch !important;
-                                                        border-radius: 0 !important;
-                                                        background: transparent !important;
-                                                        display: flex !important;
-                                                    }
-                                                    .membership-phone-wrapper .country-dropdown-container {
-                                                        height: 50px !important;
-                                                        display: flex !important;
-                                                        flex-shrink: 0 !important;
-                                                    }
-                                                    .membership-phone-wrapper .country-dropdown-button {
-                                                        height: 50px !important;
-                                                        min-height: 50px !important;
-                                                        background: #fafafa !important;
-                                                        border-radius: 6px !important;
-                                                        width: 80px !important;
-                                                        display: flex !important;
-                                                        align-items: center !important;
-                                                        justify-content: center !important;
-                                                        padding: 0 !important;
-                                                        border: none !important;
-                                                        outline: none !important;
-                                                    }
-                                                    .membership-phone-wrapper .PhoneInputInput {
-                                                        height: 50px !important;
-                                                        min-height: 50px !important;
-                                                        background: #fafafa !important;
-                                                        border-radius: 6px !important;
-                                                        padding: 0 1.25rem !important;
-                                                        font-size: 16px !important;
-                                                        line-height: 50px !important;
-                                                        flex: 1 !important;
-                                                        color: black !important;
-                                                        border: none !important;
-                                                        outline: none !important;
-                                                        display: block !important;
-                                                        margin: 0 !important;
-                                                    }
-                                                    .membership-phone-wrapper .PhoneInputInput::placeholder {
-                                                        color: #6b7280 !important;
-                                                    }
-                                                    .membership-phone-wrapper .PhoneInputInput:focus {
-                                                        box-shadow: 0 0 0 1px black !important;
-                                                        background: #fafafa !important;
-                                                        border: none !important;
-                                                        outline: none !important;
-                                                    }
-                                                `}} />
                                                 <PhoneInputField
                                                     label=""
                                                     value={phone}

@@ -16,18 +16,21 @@ export function MembershipHero({
     description = 'Explore our range of precision-engineered golf gear.',
 }: MembershipHeroProps) {
     return (
-        <section className="relative h-[600px] w-full overflow-hidden">
-            <picture>
-                <source media="(max-width: 767px)" srcSet={mobileImage} />
-                <Image
-                    data={{
-                        url: desktopImage,
-                        altText: 'Vice Golf Membership',
-                    }}
-                    className="w-full h-full object-cover"
-                    sizes="100vw"
-                />
-            </picture>
+        <section className="relative w-full h-[74vh] min-h-[490px] max-h-[740px] mx-auto overflow-x-hidden">
+            <div className="absolute inset-0 z-0">
+                <picture>
+                    <source media="(max-width: 767px)" srcSet={mobileImage} />
+                    <Image
+                        data={{
+                            url: desktopImage,
+                            altText: 'Vice Golf Membership',
+                        }}
+                        className="absolute inset-0 w-full h-full object-cover object-center"
+                        sizes="100vw"
+                        loading="eager"
+                    />
+                </picture>
+            </div>
             <div className="absolute inset-0 z-20 flex px-[clamp(1rem,4vw,3rem)] text-white items-end justify-center md:justify-start pb-12 md:pb-6">
                 <div
                     className="max-w-2xl lg:max-w-4xl xl:max-w-5xl py-10 md:py-14 bg-transparent text-center md:text-left"
