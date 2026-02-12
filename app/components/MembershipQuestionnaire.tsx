@@ -44,9 +44,15 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                     <div className="bg-[#fafafa] border border-[#E5E5E5] max-w-7xl p-12 flex flex-col items-center">
                         <CheckCircle2Icon className="w-16 h-16 text-black mb-6" />
                         <h2 className="text-3xl font-bold uppercase tracking-tighter mb-4">Application Received</h2>
-                        <p className="text-gray-600 text-lg">
+                        <p className="text-gray-600 text-lg mb-12">
                             Thank you for applying. We've received your application and will be in touch shortly.
                         </p>
+                        <button
+                            onClick={() => navigate('/account')}
+                            className="mt-4 bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all min-w-[280px]"
+                        >
+                            Go to Profile
+                        </button>
                     </div>
                 ) : (
                     <>
