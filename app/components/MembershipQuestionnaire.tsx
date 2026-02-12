@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { CheckCircle2Icon } from 'lucide-react';
 import { PhoneInputField } from '~/components/basic/PhoneInputField';
+import { format, getDaysInMonth } from 'date-fns';
 
 interface MembershipQuestionnaireProps {
     customer: any;
@@ -14,6 +15,26 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
     const isSubmitting = fetcher.state !== 'idle';
     const [phone, setPhone] = useState(customer?.phoneNumber?.phoneNumber || '');
 
+    const [birthDay, setBirthDay] = useState('');
+    const [birthMonth, setBirthMonth] = useState('');
+    const [birthYear, setBirthYear] = useState('');
+
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+    const months = Array.from({ length: 12 }, (_, i) => ({
+        value: String(i + 1).padStart(2, '0'),
+        label: format(new Date(2024, i, 1), 'MMMM')
+    }));
+
+    const daysInMonth = (birthMonth && birthYear)
+        ? getDaysInMonth(new Date(parseInt(birthYear), parseInt(birthMonth) - 1))
+        : 31;
+    const days = Array.from({ length: daysInMonth }, (_, i) => String(i + 1).padStart(2, '0'));
+
+    const birthdayValue = (birthYear && birthMonth && birthDay)
+        ? `${birthYear}-${birthMonth}-${birthDay}`
+        : '';
+
     const hasRequested = customer?.tags?.includes('membership_requested') || fetcher.data?.success;
 
     return (
@@ -23,9 +44,15 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                     <div className="bg-[#fafafa] border border-[#E5E5E5] max-w-7xl p-12 flex flex-col items-center">
                         <CheckCircle2Icon className="w-16 h-16 text-black mb-6" />
                         <h2 className="text-3xl font-bold uppercase tracking-tighter mb-4">Application Received</h2>
-                        <p className="text-gray-600 text-lg">
+                        <p className="text-gray-600 text-lg mb-12">
                             Thank you for applying. We've received your application and will be in touch shortly.
                         </p>
+                        <button
+                            onClick={() => navigate('/account')}
+                            className="mt-4 bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all min-w-[280px]"
+                        >
+                            Go to Profile
+                        </button>
                     </div>
                 ) : (
                     <>
@@ -185,13 +212,45 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         {/* Row 3 */}
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="birthday" className="text-[16px] leading-[28px] text-gray-600">Birthday</label>
-                                            <input
-                                                type="date"
-                                                name="birthday"
-                                                id="birthday"
-                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
-                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
-                                            />
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <select
+                                                    value={birthMonth}
+                                                    onChange={(e) => setBirthMonth(e.target.value)}
+                                                    required
+                                                    className="w-full block bg-[#fafafa] border-none py-3 px-4 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
+                                                    style={{ border: 'none', height: '50px', borderRadius: '6px', cursor: 'pointer' }}
+                                                >
+                                                    <option value="">Month</option>
+                                                    {months.map((m) => (
+                                                        <option key={m.value} value={m.value}>{m.label}</option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    value={birthDay}
+                                                    onChange={(e) => setBirthDay(e.target.value)}
+                                                    required
+                                                    className="w-full block bg-[#fafafa] border-none py-3 px-4 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
+                                                    style={{ border: 'none', height: '50px', borderRadius: '6px', cursor: 'pointer' }}
+                                                >
+                                                    <option value="">Day</option>
+                                                    {days.map((d) => (
+                                                        <option key={d} value={d}>{d}</option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    value={birthYear}
+                                                    onChange={(e) => setBirthYear(e.target.value)}
+                                                    required
+                                                    className="w-full block bg-[#fafafa] border-none py-3 px-4 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
+                                                    style={{ border: 'none', height: '50px', borderRadius: '6px', cursor: 'pointer' }}
+                                                >
+                                                    <option value="">Year</option>
+                                                    {years.map((y) => (
+                                                        <option key={y} value={y}>{y}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <input type="hidden" name="birthday" value={birthdayValue} />
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="golfSocietyName" className="text-[16px] leading-[28px] text-gray-600">

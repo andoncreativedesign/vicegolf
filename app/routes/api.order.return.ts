@@ -47,6 +47,35 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
     const orderId = formData.get('orderId')?.toString();
+    const staffNote = formData.get('staffNote')?.toString() || 'OTHER';
+
+    // Map frontend reasons to Shopify ReturnReason enum
+    const REASON_MAP: Record<string, string> = {
+      'SIZE_TOO_SMALL': 'SIZE_TOO_SMALL',
+      'SIZE_TOO_LARGE': 'SIZE_TOO_LARGE',
+      'DEFECTIVE': 'DEFECTIVE',
+      'DAMAGED': 'DEFECTIVE',
+      'NOT_AS_DESCRIBED': 'NOT_AS_DESCRIBED',
+      'NO_LONGER_NEEDED': 'UNWANTED',
+      'WRONG_ITEM': 'WRONG_ITEM',
+      'BETTER_PRICE_AVAILABLE': 'OTHER', // Changed from UNWANTED to OTHER to allow specific note
+      'OTHER': 'OTHER'
+    };
+
+    const LABEL_MAP: Record<string, string> = {
+      'SIZE_TOO_SMALL': 'Size Too Small',
+      'SIZE_TOO_LARGE': 'Size Too Large',
+      'DEFECTIVE': 'Defective Product',
+      'DAMAGED': 'Damaged in Transit',
+      'NOT_AS_DESCRIBED': 'Not as Described',
+      'NO_LONGER_NEEDED': 'No Longer Needed',
+      'WRONG_ITEM': 'Wrong Item Received',
+      'BETTER_PRICE_AVAILABLE': 'Better Price Available',
+      'OTHER': 'Other'
+    };
+
+    const returnReason = REASON_MAP[staffNote] || 'OTHER';
+    const returnReasonNote = LABEL_MAP[staffNote] || staffNote;
 
     // Remove returnLineItems requirement
     if (!orderId) {
@@ -67,16 +96,10 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
 
-    // Add debug logging here
-    console.log('[API] Order ID:', orderId);
-    console.log('[API] Returnable response:', JSON.stringify(returnableResponse.data, null, 2));
-
     const returnableFulfillments = returnableResponse.data?.data?.returnableFulfillments?.edges || [];
     const returnableLineItems = returnableFulfillments.flatMap((edge: any) =>
       edge.node?.returnableFulfillmentLineItems?.edges || []
     );
-
-    console.log('[API] Parsed returnable items:', returnableLineItems.length);
 
     if (returnableLineItems.length === 0) {
       return new Response(
@@ -87,12 +110,11 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
-    // Map the returnable items to the format needed for returnCreate
     const returnLineItems = returnableLineItems.map((edge: any) => ({
       fulfillmentLineItemId: edge.node.fulfillmentLineItem.id,
       quantity: edge.node.quantity,
-      // returnReason: edge.node.returnReason || 'WRONG_SIZE',
-      returnReason: 'SIZE_TOO_SMALL',
+      returnReason: returnReason,
+      returnReasonNote: returnReasonNote,
     }));
 
     const returnResult = await createShopifyReturn({
