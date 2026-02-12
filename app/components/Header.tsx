@@ -133,7 +133,7 @@ export function Header({
             <img src="/vice_logo.svg" alt="Vice Logo" className="h-8 md:h-12 w-auto" />
           </NavLink> */}
           <button
-            className="flex items-center relative"
+            className="flex items-center relative cursor-pointer"
             onClick={handleMenuNavigation}
             disabled={isNavigating}
           >
@@ -172,7 +172,7 @@ function HeaderMenuMobileToggle() {
   const { open } = useAside();
   return (
     <button
-      className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+      className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 cursor-pointer"
       onClick={() => open('mobile')}
       aria-label="Open mobile menu"
     >
@@ -187,7 +187,7 @@ function SearchToggle() {
   const { open } = useAside();
   return (
     <button
-      className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+      className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 cursor-pointer"
       onClick={() => open('search')}
       aria-label="Search"
     >
@@ -204,7 +204,7 @@ function CartBadge({ count }: { count: number | null }) {
 
   return (
     <button
-      className="relative p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+      className="relative p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 cursor-pointer"
       onClick={(e) => {
         e.preventDefault();
         open('cart');
