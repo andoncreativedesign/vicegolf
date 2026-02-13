@@ -1,5 +1,5 @@
-import {redirect} from 'react-router';
+import MembershipTab from './($locale).account.membership';
 
-export async function loader() {
-  return redirect('/account/orders');
+export default function AccountIndex() {
+  return <MembershipTab />;
 }

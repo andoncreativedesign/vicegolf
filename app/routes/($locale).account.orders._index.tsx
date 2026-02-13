@@ -64,7 +64,6 @@ export default function Orders() {
   const { orders } = customer;
 
   useEffect(() => {
-    console.log("customer loaded", customer);
   }, [customer])
 
   return (

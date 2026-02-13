@@ -19,6 +19,7 @@ import { data, Form, useActionData, useNavigation, useOutletContext } from 'reac
 import type { Route } from './+types/account.profile';
 import { SquareUserRoundIcon } from 'lucide-react'
 import { CustomInputFiled } from '~/components/basic/CustomInputFiled';
+import { PhoneInputField } from '~/components/basic/PhoneInputField';
 import { axiosShopifyAdminCustomerApi } from '~/utils/axiosInsatances';
 
 export type ActionResponse = {
@@ -73,7 +74,6 @@ export async function action({ request, context }: Route.ActionArgs) {
       if (firstName !== undefined) customerUpdateInput.firstName = firstName;
       if (lastName !== undefined) customerUpdateInput.lastName = lastName;
 
-      console.log('Updating customer name with Customer Account API:', customerUpdateInput);
 
       try {
         const { data: nameUpdateData, errors: nameErrors } = await customerAccount.mutate(
@@ -97,7 +97,6 @@ export async function action({ request, context }: Route.ActionArgs) {
           throw new Error(error.message || 'Failed to update name');
         }
 
-        console.log('Successfully updated customer name');
       } catch (error: any) {
         console.error('Error updating customer name:', error);
         throw new Error(`Failed to update name: ${error.message}`);
@@ -108,14 +107,10 @@ export async function action({ request, context }: Route.ActionArgs) {
     if ((email || phone) && customerNumberId) {
       try {
         let formattedPhone = phone;
+        // The PhoneInputField already provides E.164 format (starting with +)
+        // If for some reason it doesn't have a +, we add it (though it should)
         if (phone && !phone.startsWith('+')) {
-          if (phone.startsWith('0')) {
-            // Convert UAE local 05x to +9715x
-            formattedPhone = '+971' + phone.slice(1);
-          } else {
-            // Prepend + to numbers like 971xxxxxxx
-            formattedPhone = '+' + phone;
-          }
+          formattedPhone = '+' + phone;
         }
 
         const customerData: {
@@ -149,12 +144,12 @@ export async function action({ request, context }: Route.ActionArgs) {
           }
         );
 
-        console.log('Admin API Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          data: response.data,
-          headers: response.headers
-        });
+        // console.log('Admin API Response:', {
+        //   status: response.status,
+        //   statusText: response.statusText,
+        //   data: response.data,
+        //   headers: response.headers
+        // });
 
         if (response.status >= 400) {
           // Extract and format a user-friendly error message
@@ -225,7 +220,6 @@ export async function action({ request, context }: Route.ActionArgs) {
       message: error.message,
       stack: error.stack,
     });
-
     return {
       error: error.message || 'An error occurred while updating your profile',
       customer: null,
@@ -253,11 +247,6 @@ export default function AccountProfile() {
 
   // Debug: Log the customer data to see its structure
   React.useEffect(() => {
-    console.log('Customer Data:', customer);
-    console.log('Email from customer:', customer?.emailAddress?.emailAddress);
-    console.log('First name from customer:', customer?.firstName);
-    console.log('Last name from customer:', customer?.lastName);
-
     // Update form data when customer data changes
     if (customer) {
       const email = customer?.emailAddress?.emailAddress || customer?.email || '';
@@ -268,9 +257,7 @@ export default function AccountProfile() {
         email: email,
         firstName: customer?.firstName || emailName,
         lastName: customer?.lastName || '',
-        phone: customer?.phoneNumber?.phoneNumber ?
-          customer.phoneNumber.phoneNumber.replace('+', '') :
-          prev.phone,
+        phone: customer?.phoneNumber?.phoneNumber || prev.phone,
       }));
     }
   }, [customer]);
@@ -281,7 +268,7 @@ export default function AccountProfile() {
 
   const [formData, setFormData] = React.useState({
     email: email,
-    phone: customer?.phoneNumber?.phoneNumber ? customer.phoneNumber.phoneNumber.replace('+', '') : '',
+    phone: customer?.phoneNumber?.phoneNumber || '',
     firstName: customer?.firstName || emailName,
     lastName: customer?.lastName || '',
   });
@@ -294,9 +281,16 @@ export default function AccountProfile() {
     }));
   };
 
+  const handlePhoneChange = (value: string | undefined) => {
+    setFormData(prev => ({
+      ...prev,
+      phone: value || ''
+    }));
+  };
+
   const isDirty = React.useMemo(() => {
     const originalEmail = customer?.emailAddress?.emailAddress || customer?.email || '';
-    const originalPhone = customer?.phoneNumber?.phoneNumber ? customer.phoneNumber.phoneNumber.replace('+', '') : '';
+    const originalPhone = customer?.phoneNumber?.phoneNumber || '';
     const originalFirstName = customer?.firstName || '';
     const originalLastName = customer?.lastName || '';
 
@@ -351,20 +345,17 @@ export default function AccountProfile() {
               required
             />
 
-            <CustomInputFiled
+            <PhoneInputField
               label="Phone Number"
               name="phone"
-              type="tel"
               value={formData.phone}
-              onChange={handleInputChange}
+              onChange={handlePhoneChange}
               autoComplete="tel"
-              placeholder="Phone number"
+              placeholder="Enter phone number"
               aria-label="Phone number"
-              pattern="[0-9]{10,15}"
-              title="Please enter a valid phone number (10-15 digits)"
               required
             />
-            <p className="text-xs text-gray-500 -mt-3 ml-1">Please enter your number as 971xxxxxxxxx or 050xxxxxxx (e.g. 0501234567)</p>
+            <p className="text-xs text-gray-500 -mt-3 ml-1">Use the country dropdown to select your country code.</p>
 
             <input type="hidden" name="customerId" value={customer?.id} />
           </fieldset>

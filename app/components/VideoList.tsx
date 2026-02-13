@@ -44,7 +44,6 @@ export function VideoList({ videos, title = 'Videos', className = '' }: VideoLis
             // Set muted and attempt autoplay
             video.muted = true;
             video.play().catch(error => {
-                console.log('Autoplay failed:', error);
                 setIsPlaying(false);
             });
         }

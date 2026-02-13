@@ -7,11 +7,11 @@ import type {
   OrderQuery,
 } from 'customer-accountapi.generated';
 import { CUSTOMER_ORDER_QUERY } from '~/graphql/customer-account/CustomerOrderQuery';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CancelOrderModal } from '~/components/Profile/CancelOrderModal';
 import { ReturnOrderModal } from '~/components/Profile/ReturnOrderModal';
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = ({ data }: any) => {
   return [{ title: `Order ${data?.order?.name}` }];
 };
 
@@ -37,16 +37,16 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   const { order } = data;
 
   // Extract line items directly from nodes array
-  const lineItems = order.lineItems.nodes;
+  const lineItems = order?.lineItems?.nodes;
 
   // Extract discount applications directly from nodes array
-  const discountApplications = order.discountApplications.nodes;
+  const discountApplications = order?.discountApplications?.nodes;
 
   // Get fulfillment status from first fulfillment node
-  const fulfillmentStatus = order.fulfillments.nodes[0]?.status ?? 'N/A';
+  const fulfillmentStatus = order?.fulfillments?.nodes[0]?.status ?? 'N/A';
 
   // Get first discount value with proper type checking
-  const firstDiscount = discountApplications[0]?.value;
+  const firstDiscount = discountApplications?.[0]?.value;
 
   // Type guard for MoneyV2 discount
   const discountValue =
@@ -87,14 +87,23 @@ export default function OrderRoute() {
   } = useLoaderData<typeof loader>();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
-  const [fulfillmentStatus] = useState(() => {
-    let status = order.fulfillments.nodes.find((f) => f.status !== 'CANCELLED')
+  const [cancelModelStatus, setCancelModelStatus] = useState(false);
+
+  const [fulfillmentStatus, setFulfillmentStatus] = useState(() => {
+    const activeReturn = order.returns?.nodes.find((r) => r.status !== 'CANCELLED');
+    if (activeReturn) {
+      if (activeReturn.status === 'OPEN') return 'RETURN_REQUESTED'
+      if (activeReturn.status === 'CLOSED') return 'RETURNED'
+      return activeReturn.status
+    }
+
+    let status = order?.fulfillments?.nodes.find((f) => f.status !== 'CANCELLED')
     return status?.status || (order?.financialStatus as string | undefined);
   })
 
   function isOrderCancelable(order: OrderQuery['order']): boolean {
     if (!order) return false;
-    console.log("Checking order eligibility:", order);
+    if (cancelModelStatus) return false;
 
     const canceledFinancialStatuses = ['REFUNDED', 'VOIDED'];
     if (order?.financialStatus && canceledFinancialStatuses.includes(order.financialStatus)) {
@@ -106,16 +115,15 @@ export default function OrderRoute() {
       return false;
     }
 
-    const hasActiveFulfillment = order.fulfillments.nodes.some((f) => {
+    const hasActiveFulfillment = order?.fulfillments?.nodes.some((f) => {
       return f.status !== 'CANCELLED'
     });
-    
+
     if (hasActiveFulfillment) {
       return false;
     }
 
     // Passed all rough checks
-    console.log("Order is eligible for cancellation:", order);
     return true;
   }
 
@@ -134,7 +142,7 @@ export default function OrderRoute() {
     }
 
     // Check for at least one fulfilled line item that hasn't been refunded
-    const hasFulfilledLineItems = order.fulfillments.nodes.some((f) => {
+    const hasFulfilledLineItems = order?.fulfillments?.nodes.some((f) => {
       return f.status === 'FULFILLED' || f.status === 'SUCCESS';
     });
 
@@ -142,9 +150,25 @@ export default function OrderRoute() {
       return false;
     }
 
+    // Check if a return has already been requested or is in progress
+    const hasActiveReturn = order?.returns?.nodes.some((r) => r.status !== 'CANCELLED');
+    if (hasActiveReturn) {
+      return false;
+    }
+
     // Passed all checks - order is returnable
-    console.log("Order is eligible for return:", order);
     return true;
+  }
+
+  const handleCacncelRequestSuccess = () => {
+    setFulfillmentStatus("REFUND_PENDING")
+    setCancelModelStatus(true)
+    setIsCancelModalOpen(false)
+  }
+
+  const handleReturnRequestSuccess = () => {
+    setFulfillmentStatus("RETURN_REQUESTED")
+    setIsReturnModalOpen(false)
   }
 
   return (
@@ -270,8 +294,8 @@ export default function OrderRoute() {
           >
             Cancel Order
           </button>
-        }
-        {isOrderReturnable(order) &&
+        } */}
+        {/* {isOrderReturnable(order) &&
           <button
             className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
             onClick={(e) => {
@@ -288,14 +312,16 @@ export default function OrderRoute() {
         orderId={order.id}
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
+        onSuccess={handleCacncelRequestSuccess}
       />
 
       <ReturnOrderModal
-        orderId={order.id}
+        orderId={order?.id}
         isOpen={isReturnModalOpen}
         onClose={() => setIsReturnModalOpen(false)}
-        lineItems={order.lineItems.nodes}
-        fulfillments={order.fulfillments.nodes}
+        onSuccess={handleReturnRequestSuccess}
+        lineItems={order?.lineItems?.nodes}
+        fulfillments={order?.fulfillments?.nodes}
       />
     </div>
   );
@@ -337,7 +363,10 @@ function OrderLineRow({ lineItem }: { lineItem: OrderLineItemFullFragment }) {
       </td>
       <td className="py-4 px-4 text-right align-top">
         <div className="font-medium text-gray-900">
-          <Money data={lineItem.totalDiscount!} />
+          <Money data={{
+            amount: (parseFloat(lineItem.price!.amount) * lineItem.quantity).toString(),
+            currencyCode: lineItem.price!.currencyCode,
+          }} />
         </div>
       </td>
     </tr>

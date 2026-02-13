@@ -1,13 +1,16 @@
 import type { CustomerAddressInput } from '@shopify/hydrogen/customer-account-api-types';
 import type { AddressFragment } from 'customer-accountapi.generated';
-import { data, Form, useActionData, useNavigation, useLocation, useNavigate } from 'react-router';
+import { data, Form, useActionData, useNavigation, useLocation, useNavigate, useLoaderData } from 'react-router';
 import { CustomInputFiled } from '~/components/basic/CustomInputFiled';
+import { PhoneInputField } from '~/components/basic/PhoneInputField';
+import { CountrySelector } from '~/components/basic/CountrySelector';
 import type { Route } from './+types/account.addresses';
 import {
   UPDATE_ADDRESS_MUTATION,
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
-import { useEffect, useState } from 'react';
+import { COUNTRIES_QUERY } from '~/graphql/CountriesQuery';
+import { useEffect, useState, useMemo } from 'react';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -24,7 +27,15 @@ export const meta: Route.MetaFunction = () => {
 export async function loader({ context }: Route.LoaderArgs) {
   context.customerAccount.handleAuthStatus();
 
-  return {};
+  try {
+    const data = await context.storefront.query(COUNTRIES_QUERY);
+    return {
+      countries: data?.localization?.availableCountries || [],
+    };
+  } catch (error) {
+    console.error('Failed to load countries:', error);
+    return { countries: [] };
+  }
 }
 
 export async function action({ request, context }: Route.ActionArgs) {
@@ -190,7 +201,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 type LocationState = {
-  address?: AddressFragment | (CustomerAddressInput & { id?: AddressFragment['id'] | null });
+  address?: (AddressFragment | (CustomerAddressInput & { id?: AddressFragment['id'] | null })) & { defaultAddress?: boolean };
 } | null;
 
 export default function AddressEditor() {
@@ -199,21 +210,18 @@ export default function AddressEditor() {
   const location = useLocation();
   const locationState = (location.state ?? null) as LocationState;
   const addressFromState = locationState?.address ?? null;
+  const { countries } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
 
   // Store address data in state to preserve it during errors
-  const [preservedAddress, setPreservedAddress] = useState<Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } | null>(null);
+  const [preservedAddress, setPreservedAddress] = useState<(Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } & { defaultAddress?: boolean }) | null>(null);
+  const [phone, setPhone] = useState('');
 
   useEffect(() => {
-    console.log('AddressEditor mounted', {
-      pathname: location.pathname,
-      state: location.state,
-    });
-
     if (addressFromState) {
-      console.log('Loaded address from navigation state', addressFromState);
       // Store the address data when it's available from navigation state
       setPreservedAddress(addressFromState);
+      setPhone(addressFromState.phoneNumber ?? '');
     } else if (preservedAddress) {
       console.log('Using preserved address data', preservedAddress);
     } else {
@@ -228,7 +236,7 @@ export default function AddressEditor() {
   }, [action?.createdAddress, action?.updatedAddress, action?.error, navigate]);
 
   const isEditMode = Boolean(addressFromState?.id || preservedAddress?.id);
-  const derivedAddress: Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } =
+  const derivedAddress: Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } & { defaultAddress?: boolean } =
     addressFromState ?? preservedAddress ?? {
       address1: '',
       address2: '',
@@ -242,6 +250,13 @@ export default function AddressEditor() {
       zoneCode: '',
       zip: '',
     };
+
+  const [selectedCountryCode, setSelectedCountryCode] = useState(derivedAddress.territoryCode || 'AE');
+
+  const availableProvinces = useMemo(() => {
+    const country = countries.find((c: any) => c.isoCode === selectedCountryCode);
+    return country?.availableProvinces || [];
+  }, [countries, selectedCountryCode]);
 
   const addressId = derivedAddress.id ?? 'NEW_ADDRESS_ID';
   const submitMethod = isEditMode ? 'PUT' : 'POST';
@@ -319,17 +334,46 @@ export default function AddressEditor() {
           required
           type="text"
         />
-        <CustomInputFiled
-          label="State / Province"
-          aria-label="State/Province"
-          autoComplete="address-level1"
-          defaultValue={derivedAddress.zoneCode ?? ''}
-          id="zoneCode"
-          name="zoneCode"
-          placeholder="State / Province"
-          required
-          type="text"
-        />
+        {availableProvinces.length > 0 ? (
+          <div className="w-full">
+            <label htmlFor="zoneCode" className="block text-sm font-medium text-gray-700 mb-1">
+              State / Province *
+            </label>
+            <div className="relative">
+              <select
+                id="zoneCode"
+                name="zoneCode"
+                defaultValue={derivedAddress.zoneCode ?? ''}
+                required
+                className="w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent bg-white text-gray-900 appearance-none"
+              >
+                <option value="" disabled>Select region</option>
+                {availableProvinces.map((province: any) => (
+                  <option key={province.code} value={province.code}>
+                    {province.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <CustomInputFiled
+            label="State / Province"
+            aria-label="State/Province"
+            autoComplete="address-level1"
+            defaultValue={derivedAddress.zoneCode ?? ''}
+            id="zoneCode"
+            name="zoneCode"
+            placeholder="State / Province"
+            required
+            type="text"
+          />
+        )}
         <CustomInputFiled
           label="Zip / Postal Code"
           aria-label="Zip"
@@ -341,38 +385,31 @@ export default function AddressEditor() {
           required
           type="text"
         />
-        <CustomInputFiled
-          label="Country Code"
-          aria-label="territoryCode"
-          autoComplete="country"
-          defaultValue="AE"
+        <CountrySelector
+          label="Country"
           id="territoryCode"
           name="territoryCode"
-          placeholder="Country"
+          defaultValue={selectedCountryCode}
+          onChange={(e) => setSelectedCountryCode(e.target.value)}
           required
-          type="text"
-          maxLength={2}
-          readOnly
-          containerClassName="hidden"
         />
-        <CustomInputFiled
+        <PhoneInputField
           label="Phone"
-          aria-label="Phone Number"
+          id="phoneNumber-input"
+          value={phone}
+          onChange={(val) => setPhone(val || '')}
+          placeholder="Enter phone number"
           autoComplete="tel"
-          defaultValue={derivedAddress.phoneNumber ?? ''}
-          id="phoneNumber"
-          name="phoneNumber"
-          placeholder="+16135551111"
-          pattern="^\+?[1-9]\d{3,14}$"
-          type="tel"
+          availableCountries={['AE']}
         />
+        <input type="hidden" name="phoneNumber" value={phone} />
         <div className="flex items-center">
           <input
             defaultChecked={Boolean(derivedAddress.defaultAddress)}
             id="defaultAddress"
             name="defaultAddress"
             type="checkbox"
-            className="h-4 w-4 text-gray-800 border-gray-300 rounded"
+            className="h-4 w-4 text-gray-800 border-gray-300 rounded cursor-pointer"
           />
           <label htmlFor="defaultAddress" className="ml-2 text-sm text-gray-700">
             Set as default address
@@ -389,7 +426,7 @@ export default function AddressEditor() {
           type="submit"
           formMethod={submitMethod}
           disabled={isSubmitting}
-          className="w-full bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed"
+          className="w-full bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 cursor-pointer"
         >
           {isSubmitting
             ? isEditMode

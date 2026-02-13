@@ -8,9 +8,10 @@ interface CancelOrderModalProps {
   orderId: string;
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalProps) {
+export function CancelOrderModal({ orderId, isOpen, onClose, onSuccess }: CancelOrderModalProps) {
   const [staffNote, setStaffNote] = useState('');
   const [refundMethod, setRefundMethod] = useState<'originalPaymentMethodsRefund' | 'giftCardRefund'>('originalPaymentMethodsRefund');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +57,8 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
     // ✅ Success
     showToast.success('Your order cancellation request has been submitted.');
     revalidator.revalidate();
-    onClose();
+    onSuccess()
+    // onClose();
   }, [fetcher.state, fetcher.data, revalidator, onClose]);
   
   
@@ -104,7 +106,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
 
           <div>
             <label htmlFor="staffNote" className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Cancellation
+              Reason for Cancellation<span className="text-red-500">*</span>
             </label>
             <textarea
               id="staffNote"
@@ -128,7 +130,7 @@ export function CancelOrderModal({ orderId, isOpen, onClose }: CancelOrderModalP
             </button>
             <button
               type="submit"
-              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
+              className={`inline-block p-2 rounded-xs text-white ${isSubmitting || !staffNote.trim() ? "bg-gray-600 cursor-not-allowed" : "bg-black cursor-pointer"}`}
               disabled={isSubmitting || !staffNote.trim()}
             >
               {isSubmitting ? 'Processing...' : 'Confirm Cancellation'}

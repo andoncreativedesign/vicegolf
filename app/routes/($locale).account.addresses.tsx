@@ -285,13 +285,13 @@ export default function Addresses() {
   // Otherwise, show the addresses list with the option to add a new one
   return (
     <div className="account-addresses">
-      <div className='bg-[#F5F5F5] p-8 flex justify-between items-center mb-6'>
+      <div className='bg-[#F5F5F5] p-8 flex flex-col lg:flex-row lg:justify-between items-start lg:items-center gap-4 lg:gap-0 mb-6'>
         <h2 className="text-xl font-bold text-gray-900">
           My addresses ({addresses.nodes.length})
         </h2>
         <NavLink
           to="update"
-          className="inline-block bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition-colors duration-200 text-sm font-bold tracking-wide no-underline"
+          className="block w-full lg:inline-block lg:w-auto text-center bg-black text-white px-6 py-3 lg:py-2 rounded-full hover:bg-gray-800 transition-colors duration-200 text-sm font-bold tracking-wide no-underline"
           style={{ textDecoration: 'none', color: 'white' }}
         >
           Add new one
@@ -331,7 +331,12 @@ function ExistingAddresses({
 
   const handleEdit = (address: AddressFragment) => {
     navigate('update', {
-      state: { address },
+      state: {
+        address: {
+          ...address,
+          defaultAddress: defaultAddress?.id === address.id,
+        },
+      },
     });
   };
 

@@ -70,17 +70,50 @@ export function CartLineItem({
 
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900">
-                <ProductPrice price={line?.cost?.totalAmount} />
+                <ProductPrice
+                  price={line?.cost?.totalAmount}
+                  compareAtPrice={(() => {
+                    const cost = line?.cost;
+                    if (!cost) return null;
+
+                    const discountAllocations = (line as any).discountAllocations;
+                    const discountSum = discountAllocations?.reduce((acc: number, discount: any) =>
+                      acc + parseFloat(discount.discountedAmount.amount), 0) || 0;
+
+                    if (cost.compareAtAmountPerQuantity?.amount &&
+                      cost.totalAmount.amount !== cost.compareAtAmountPerQuantity.amount) {
+                      return {
+                        amount: String(Number(cost.compareAtAmountPerQuantity.amount) * line.quantity),
+                        currencyCode: cost.compareAtAmountPerQuantity.currencyCode,
+                      };
+                    }
+
+                    if (discountSum > 0 && cost.totalAmount) {
+                      return {
+                        amount: String(parseFloat(cost.totalAmount.amount) + discountSum),
+                        currencyCode: cost.totalAmount.currencyCode,
+                      };
+                    }
+
+                    if (merchandise.compareAtPrice) {
+                      return {
+                        amount: String(Number(merchandise.compareAtPrice.amount) * line.quantity),
+                        currencyCode: merchandise.compareAtPrice.currencyCode,
+                      };
+                    }
+
+                    if (merchandise.price && cost.amountPerQuantity &&
+                      parseFloat(merchandise.price.amount) > parseFloat(cost.amountPerQuantity.amount)) {
+                      return {
+                        amount: String(Number(merchandise.price.amount) * line.quantity),
+                        currencyCode: merchandise.price.currencyCode,
+                      };
+                    }
+
+                    return null;
+                  })()}
+                />
               </div>
-              {line?.cost?.compareAtAmountPerQuantity?.amount &&
-                line.cost.totalAmount.amount !== line.cost.compareAtAmountPerQuantity.amount && (
-                  <div className="text-sm text-gray-500 line-through mt-1">
-                    <ProductPrice price={{
-                      amount: String(Number(line.cost.compareAtAmountPerQuantity.amount) * line.quantity),
-                      currencyCode: line.cost.compareAtAmountPerQuantity.currencyCode
-                    }} />
-                  </div>
-                )}
             </div>
           </div>
 
@@ -104,7 +137,7 @@ function CartLineQuantity({ line }: { line: CartLine }) {
     <div className="flex items-center gap-2">
       <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
-          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
           aria-label="Decrease quantity"
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
@@ -122,7 +155,7 @@ function CartLineQuantity({ line }: { line: CartLine }) {
 
       <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
-          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
@@ -152,7 +185,7 @@ function CartLineRemoveButton({
       inputs={{ lineIds }}
     >
       <button
-        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
+        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
         disabled={disabled}
         type="submit"
         aria-label="Remove item"

@@ -146,7 +146,7 @@ export function ProductGallery({
                 <button
                   key={image.id}
                   onClick={() => handleThumbnailClick(image)}
-                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 border-transparent"
+                  className="lg:w-[70px] lg:h-[70px] xl:w-[88px] xl:h-[88px] relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 border-transparent cursor-pointer"
                 >
                   <Image
                     data={image}
@@ -231,7 +231,7 @@ export function ProductGallery({
                       e.stopPropagation();
                       handleDotClick(index);
                     }}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${index === currentIndex
                       ? 'bg-black w-3'
                       : 'bg-black/20 hover:bg-black/40'
                       }`}
@@ -247,7 +247,7 @@ export function ProductGallery({
                     e.stopPropagation();
                     handleNavigate('prev');
                   }}
-                  className="bg-white/90 p-3 rounded-full shadow-sm hover:bg-white transition-all opacity-90 hover:opacity-100"
+                  className="bg-white/90 p-3 rounded-full shadow-sm hover:bg-white transition-all opacity-90 hover:opacity-100 cursor-pointer"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-5 h-5 text-gray-700" />
@@ -257,7 +257,7 @@ export function ProductGallery({
                     e.stopPropagation();
                     handleNavigate('next');
                   }}
-                  className="bg-white/90 p-3 rounded-full shadow-sm hover:bg-white transition-all opacity-90 hover:opacity-100"
+                  className="bg-white/90 p-3 rounded-full shadow-sm hover:bg-white transition-all opacity-90 hover:opacity-100 cursor-pointer"
                   aria-label="Next image"
                 >
                   <ChevronRight className="w-5 h-5 text-gray-700" />

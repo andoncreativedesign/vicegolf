@@ -12,6 +12,8 @@ import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
+import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 export type RootLoader = typeof loader;
 
@@ -57,7 +59,7 @@ export function links() {
 }
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
+  // Start fetching non-critical data
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
@@ -65,8 +67,72 @@ export async function loader(args: Route.LoaderArgs) {
 
   const { storefront, env } = args.context;
 
+  // Resolve critical deferred data
+  const [customer, automaticDiscounts] = await Promise.all([
+    deferredData.customer,
+    deferredData.automaticDiscounts,
+  ]);
+
+  console.log('DEBUG: Customer data resolved:', !!customer);
+  console.log('DEBUG: Automatic discounts resolved:', automaticDiscounts?.length);
+
+  // Calculate the best membership discount based on customer segments
+  const customerTags = (customer?.tags || []).map((t: string) => t.toLowerCase().replace(/\s+/g, '_'));
+  const segments = ['vice_crew', 'vice_squad', 'vice_legends', 'vice_legend'];
+  const userSegment = segments.find(s => customerTags.includes(s));
+
+  // Helper to identify a discount's tier based on its title
+  const getTierFromTitle = (title: string = '') => {
+    // We check for the exact titles you provided
+    if (title === 'Vice Legend' || title === 'Vice Legends') return 'legend';
+    if (title === 'Vice Squad') return 'squad';
+    if (title === 'Vice Crew') return 'crew';
+    return null;
+  };
+
+  const userTier = userSegment ? getTierFromTitle(userSegment.replace('vice_', 'Vice ').replace('crew', 'Crew').replace('squad', 'Squad').replace('legend', 'Legend').replace('legends', 'Legends')) : null;
+
+  // Manual matching for the userTier variable since userSegment is lowercase
+  let mappedUserTier = null;
+  if (userSegment?.includes('legend')) mappedUserTier = 'legend';
+  if (userSegment?.includes('squad')) mappedUserTier = 'squad';
+  if (userSegment?.includes('crew')) mappedUserTier = 'crew';
+
+  // Filter automatic discounts to strictly follow tier rules:
+  // 1. If a discount is named exactly 'Vice Legend', 'Vice Squad', or 'Vice Crew', only show it to users in THAT tier.
+  // 2. All other automatic discounts (global ones) are shown to everyone.
+  const eligibleDiscounts = (automaticDiscounts || []).filter((d: any) => {
+    const discountTier = getTierFromTitle(d.title);
+    if (!discountTier) return true; // Global discount (any other name)
+    return discountTier === mappedUserTier; // Only matches the user's specific tier
+  });
+
+  let membershipDiscount = { percentage: 0, amount: null, currencyCode: null, title: '', appliesToAll: false, eligibleProducts: [], eligibleCollections: [] };
+
+  if (userSegment && eligibleDiscounts.length) {
+    // Find the best discount among the ones specifically for this tier
+    const bestTierDiscount = [...eligibleDiscounts]
+      .filter(d => getTierFromTitle(d.title) !== null)
+      .sort((a: any, b: any) => {
+        // Prioritize amount if percentage is 0, else prioritize percentage
+        const aVal = a.percentage || 0;
+        const bVal = b.percentage || 0;
+        return bVal - aVal;
+      })[0];
+
+    if (bestTierDiscount) {
+      membershipDiscount = bestTierDiscount;
+    }
+  }
+
+  // Final check: if no specific membership discount was found but there are global ones, 
+  // they will be handled by useMembership hook using the 'eligibleDiscounts' list.
+
   return {
     ...deferredData,
+    customer,
+    automaticDiscounts: eligibleDiscounts,
+    membershipDiscount,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -98,8 +164,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  console.log('Fetching critical data...');
-
   const [header, productsForNav, homePageData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
@@ -115,7 +179,6 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }),
     // Fetch home page data including banner
     getHomePageData().then(data => {
-      console.log('Home page data from Sanity:', data);
       return data;
     }).catch(error => {
       console.error('Error fetching home page data:', error);
@@ -125,10 +188,10 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
 
   const bannerData = homePageData?.banner;
 
-  console.log('Returning banner data from loader:', bannerData);
-
   return { header, productsForNav, banner: bannerData };
 }
+
+import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -150,9 +213,86 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       return null;
     });
 
+  const customer = customerAccount.isLoggedIn().then(async (isLoggedIn) => {
+    if (isLoggedIn) {
+      try {
+        const { data } = await customerAccount.query(CUSTOMER_DETAILS_QUERY);
+        return data?.customer;
+      } catch (error) {
+        console.error('Error fetching customer details in root:', error);
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const automaticDiscounts = (async () => {
+    try {
+      console.log('Fetching automatic discounts via Admin API...');
+      const response = await axiosShopifyAdmin.post("", {
+        query: GET_AUTOMATIC_DISCOUNT_QUERY,
+        variables: {
+          first: 50,
+          query: `status:active`
+        }
+      });
+
+      const json = response.data;
+      if (json.errors) {
+        console.error('Admin API GraphQL Errors:', JSON.stringify(json.errors, null, 2));
+        return [];
+      }
+
+      const nodes = json.data?.automaticDiscountNodes?.nodes || [];
+      console.log('DEBUG: RAW DISCOUNT NODES:', JSON.stringify(nodes, null, 2));
+
+      const mappedDiscounts = nodes.map((node: any) => {
+        const ad = node.automaticDiscount;
+        if (!ad) return null;
+
+        console.log(`DEBUG: Mapping discount: ${ad.title}`, ad.customerGets?.value);
+
+        // Basic discounts have customerGets
+        if (ad.customerGets) {
+          const value = ad.customerGets.value;
+          const items = ad.customerGets.items;
+
+          let pct = value?.percentage ?? 0;
+          if (typeof pct === 'number' && pct > 1) pct = pct / 100;
+
+          return {
+            title: ad.title,
+            percentage: pct,
+            amount: value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null,
+            currencyCode: value?.amount?.currencyCode || null,
+            eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
+            eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
+            appliesToAll: items?.__typename === 'AllDiscountItems',
+            appliesOnEachItem: value?.percentage ? true : (value?.appliesOnEachItem ?? false)
+          };
+        }
+
+        // BXGY or other types
+        return {
+          title: ad.title,
+          percentage: 0,
+          amount: null,
+        };
+      }).filter(Boolean);
+
+      console.log('Mapped Discounts (Titles):', mappedDiscounts.map((d: any) => d.title));
+      return mappedDiscounts;
+    } catch (e) {
+      console.error('Error fetching automatic discounts:', e);
+      return [];
+    }
+  })();
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
+    customer,
+    automaticDiscounts,
     footer,
   };
 }

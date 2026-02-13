@@ -20,8 +20,6 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
     )
   );
 
-  console.log("orientationOptions", orientationOptions)
-
   // If no specific orientations found, use left/right
   if (orientationOptions.length === 0) {
     return (
@@ -39,14 +37,14 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
               <Link
                 key={variant.node.id}
                 to={`/products/${variant.node.handle}`}
-                className={`px-4 py-2 border rounded-md text-center ${isCurrent
-                    ? 'border-black'
-                    : 'border-gray-300 hover:bg-gray-50'
+                className={`px-4 py-2 border rounded-md text-center cursor-pointer ${isCurrent
+                  ? 'border-black'
+                  : 'border-gray-300 hover:bg-gray-50'
                   }`}
               >
-                {orientation} 
+                {orientation}
               </Link>
-              
+
             );
           })}
         </div>
@@ -64,12 +62,10 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
 
 
   useEffect(() => {
-    console.log("variantsByOrientation ", variantsByOrientation)
     variantsByOrientation.map(({ orientation, variants }) => {
       const currentVariant = variants.find(v => v.node.id === currentProductId);
-      console.log('variant product id  - ', currentVariant)
     })
-  },[])
+  }, [])
 
 
   return (
@@ -87,9 +83,9 @@ const HandOrientation = ({ clubVariants, currentProductId }: HandOrientationProp
             <Link
               key={orientation}
               to={`/products/${encodeURIComponent(variantHandle)}`}
-              className={`product-options-item relative rounded-xs overflow-hidden transition-all duration-300 
+              className={`product-options-item relative rounded-xs overflow-hidden transition-all duration-300 cursor-pointer 
                 ${isCurrent ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'}`}
-              style={{textDecoration:'none'}}
+              style={{ textDecoration: 'none' }}
             >
               {orientation}
             </Link>

@@ -4,10 +4,15 @@ import {
   NavLink,
   Outlet,
   useLoaderData,
+  useFetcher,
+  useLocation,
+  Link,
 } from 'react-router';
+import { useState, useEffect } from 'react';
 import type { Route } from './+types/account';
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
-import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon } from 'lucide-react'
+import { SquareUserIcon, HouseIcon, Package2Icon, HomeIcon, LogOutIcon, TicketPercentIcon, CheckCircle2Icon, ChevronLeftIcon } from 'lucide-react'
+
 
 export function shouldRevalidate() {
   return true;
@@ -35,8 +40,14 @@ export async function loader({ context }: Route.LoaderArgs) {
   );
 }
 
+export async function action({ request, context }: Route.ActionArgs) {
+  return remixData({ error: 'Method not allowed' }, { status: 405 });
+}
+
 export default function AccountLayout() {
   const { customer } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const isRoot = location.pathname.endsWith('/account') || location.pathname.endsWith('/account/');
 
   const heading = 'My Vice Golf Account';
 
@@ -57,19 +68,21 @@ export default function AccountLayout() {
 
   return (
     <div className="account w-full px-4 sm:px-6 lg:px-8 py-12 max-w-[1440px] mx-auto">
-      <h1 className="font-bold text-gray-900 mb-12 text-center w-full tracking-tight" style={{ fontSize: '48px' }}>{heading}</h1>
+      <div className="flex justify-center items-center mb-12 gap-4">
+        <h1 className="font-bold text-gray-900 tracking-tight" style={{ fontSize: '48px' }}>{heading}</h1>
+      </div>
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-6">
         {/* Sidebar */}
-        <div className="w-full lg:w-[35%] flex-shrink-0">
+        <div className={`w-full lg:w-[35%] flex-shrink-0 ${!isRoot ? 'hidden lg:block' : ''}`}>
           {/* User Info Box */}
-          <div className="bg-[#F5F5F5] p-6 flex items-center gap-5 mb-8">
-            <div className="h-16 w-16 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white text-xl font-medium tracking-wider">
+          <div className="bg-[#F5F5F5] p-8 flex items-center gap-6 mb-8">
+            <div className="h-16 w-16 bg-black rounded-full flex items-center justify-center flex-shrink-0 text-white text-xl font-bold">
               {initials}
             </div>
-            <div className="overflow-hidden">
-              <p className="font-semibold text-gray-900 leading-tight mb-1" style={{ fontSize: '1.5rem' }}>Hello</p>
-              <p className="font-semibold text-gray-900 leading-tight truncate mb-1" style={{ fontSize: '1.5rem' }}>{fullName}</p>
-              <p className="text-gray-500 truncate" style={{ fontSize: '0.9375rem' }}>{email}</p>
+            <div className="flex flex-col">
+              <span className="text-lg text-gray-900">Hello</span>
+              <p className="font-bold text-gray-900 text-2xl leading-tight">{firstName}</p>
+              <p className="text-gray-500 text-sm mt-1">{email}</p>
             </div>
           </div>
 
@@ -77,7 +90,15 @@ export default function AccountLayout() {
         </div>
 
         {/* Main Content */}
-        <div className="w-full lg:w-[65%]">
+        <div className={`w-full lg:w-[65%] ${isRoot ? 'hidden lg:block' : ''}`}>
+          {!isRoot && (
+            <div className="lg:hidden mb-6">
+              <Link to="/account" className="flex items-center gap-2 text-gray-900 font-bold no-underline">
+                <ChevronLeftIcon className="w-5 h-5" />
+                My Account
+              </Link>
+            </div>
+          )}
           <Outlet context={{ customer }} />
         </div>
       </div>
@@ -87,6 +108,7 @@ export default function AccountLayout() {
 
 function AccountMenu() {
   const menuItems = [
+    { to: '/account/membership', label: 'My Vice Status', icon: <CheckCircle2Icon className="w-5 h-5" /> },
     { to: '/account/orders', label: 'My orders', icon: <Package2Icon className="w-5 h-5" /> },
     { to: '/account/profile', label: 'My details', icon: <SquareUserIcon className="w-5 h-5" /> },
     { to: '/account/addresses', label: 'My addresses', icon: <HomeIcon className="w-5 h-5" /> },
@@ -123,10 +145,18 @@ function Logout() {
       action="/account/logout"
       className="contents"
     >
-      <button type="submit" className="flex w-full items-center gap-4 px-6 py-10 text-gray-600 hover:text-gray-900 bg-[#F5F5F5] border-l-[3px] border-transparent text-left text-base transition-colors duration-200 no-underline hover:no-underline">
+      <button type="submit" className="flex w-full items-center gap-4 px-6 py-10 text-gray-600 hover:text-gray-900 bg-[#F5F5F5] border-l-[3px] border-transparent text-left text-base transition-colors duration-200 no-underline hover:no-underline cursor-pointer">
         <LogOutIcon className="w-5 h-5" />
         Sign out
       </button>
     </Form>
   );
 }
+
+
+
+
+
+
+
+

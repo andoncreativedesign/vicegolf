@@ -1,20 +1,25 @@
-import { Image, Money } from "@shopify/hydrogen";
-import { useEffect } from "react";
+import { Image } from "@shopify/hydrogen";
 import { Link } from "react-router";
-import type { ProductFragment } from "storefrontapi.generated";
 import { AedIcon } from "./ui/AedIcon";
+import type { ProductFragment } from "storefrontapi.generated";
+import { useMembership } from "~/hooks/useMembership";
 
 interface ProductCardProps {
   product: ProductFragment;
 }
 
 export function ProductCard({ product: _product }: ProductCardProps) {
+  const { getBestDiscountForProduct } = useMembership();
   const product = _product as any;
-  const firstVariant = product.variants?.nodes[0];
+  const variant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
 
-  const rating = 4.5 + Math.random() * 0.5;
-  const reviewCount = Math.floor(Math.random() * 50) + 10;
+  const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+  const basePrice = parseFloat(variant?.price?.amount || '0');
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+
+  const price = variant?.price;
+  const compareAtPrice = variant?.compareAtPrice;
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
@@ -48,6 +53,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
+
                 {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                   const normalizedTag = tagText?.toLowerCase();
@@ -92,6 +98,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                     Sold out
                   </span>
                 )}
+
                 {product?.availableForSale && (product?.tags || [])?.map((tag: string) => {
                   const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                   const normalizedTag = tagText?.toLowerCase();
@@ -146,19 +153,27 @@ export function ProductCard({ product: _product }: ProductCardProps) {
         <div className="mt-auto pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {product.variants?.nodes[0]?.compareAtPrice && (
+              {(compareAtPrice || (productPercentage > 0 || productAmount > 0)) && (
                 <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
                   <AedIcon className="mr-0.5" />
                   <span>
-                    {parseFloat(product.variants.nodes[0].compareAtPrice.amount).toFixed(2)}
+                    {parseFloat(compareAtPrice?.amount || price.amount).toFixed(2)}
                   </span>
                 </div>
               )}
-              {product.variants?.nodes[0]?.price && (
-                <div className="flex items-center">
+              {price && (
+                <div className="flex items-center text-gray-900">
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
-                    {parseFloat(product.variants.nodes[0].price.amount).toFixed(2)}
+                    {(() => {
+                      const basePriceValue = parseFloat(price.amount || '0');
+                      if (productAmount > 0) {
+                        return Math.max(0, basePriceValue - productAmount).toFixed(2);
+                      } else if (productPercentage > 0) {
+                        return (basePriceValue * (1 - productPercentage)).toFixed(2);
+                      }
+                      return basePriceValue.toFixed(2);
+                    })()}
                   </span>
                 </div>
               )}
@@ -169,4 +184,3 @@ export function ProductCard({ product: _product }: ProductCardProps) {
     </div>
   );
 }
-

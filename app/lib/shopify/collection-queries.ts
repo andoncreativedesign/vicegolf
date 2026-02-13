@@ -209,6 +209,12 @@ fragment ProductCard on Product {
     type
     value
   }
+
+  collections(first: 20) {
+    nodes {
+      id
+    }
+  }
 }
 
 query MultipleProductGroups(

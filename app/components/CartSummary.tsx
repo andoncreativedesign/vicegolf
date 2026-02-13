@@ -4,7 +4,8 @@ import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
-import AedIcon from './ui/AedIcon';
+import { AedIcon } from './ui/AedIcon';
+import { useMembership } from '~/hooks/useMembership';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -12,10 +13,12 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
+  const { isMember, discountPercentage, discountAmount, membershipDiscount } = useMembership();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const total = cart?.cost?.totalAmount;
 
+  // Calculate actual applied values for display to avoid mismatches
   let actualPercentage = 0;
   let actualAmount = 0;
 
@@ -50,12 +53,19 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   const totVal = total?.amount ? parseFloat(total.amount.replace(/,/g, '')) : 0;
 
   // Base value for discount calculation is the maximum of Shopify's subtotal or our calculated original sum
-  const baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
+  let baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
+
+  // Fallback: If no discount detected yet but user is member, they might have a hidden tier discount
+  if (baseVal <= totVal && isMember && (membershipDiscount?.percentage || 0) > 0) {
+    baseVal = totVal / (1 - membershipDiscount.percentage);
+  }
 
   if (baseVal > totVal) {
-    actualPercentage = Math.round((1 - (totVal / baseVal)) * 100);
+    actualPercentage = Math.round((1 - (totVal / baseVal)) * 100) / 100;
     actualAmount = Math.max(0, baseVal - totVal);
   }
+
+  const displayPercentage = (actualPercentage * 100).toFixed(0);
 
   return (
     <div
@@ -69,23 +79,32 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium text-gray-900">
-              {subtotal?.amount ? <Money data={subtotal} /> : '-'}
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="font-medium text-gray-900">
+                {subtotal?.amount ? <Money data={subtotal} /> : '-'}
+              </span>
+              {baseVal > currentSubtotalVal && (
+                <span className="text-xs text-gray-400 line-through">
+                  <Money data={{ amount: baseVal.toFixed(2), currencyCode: subtotal!.currencyCode }} />
+                </span>
+              )}
+            </div>
           </div>
 
           {(actualPercentage > 0 || actualAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
               <span className="flex items-center">
-                {'Savings'} {actualAmount > 0 ? (
+                {isMember ? 'Membership' : 'Savings'} {actualAmount > 0 ? (
                   <span className="flex items-center mx-1">
                     <AedIcon className="w-3 h-3 mx-0.5" />
                     {actualAmount.toFixed(2)}
                   </span>
-                ) : `${actualPercentage}%`} discount applied
+                ) : `${displayPercentage}%`} discount applied
               </span>
+              <span>Automatic</span>
             </div>
           )}
+
 
           {total && (
             <div className="border-t border-gray-200 pt-3 mt-3">
@@ -133,7 +152,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
       <a
         href={checkoutUrl}
         target="_self"
-        className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3"
+        className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
         style={{ textDecoration: 'none' }}
       >
         Checkout securely
@@ -213,6 +232,15 @@ function CartDiscounts({
   const [showInput, setShowInput] = useState(true);
   const codes: string[] = discountCodes?.filter((discount) => discount.applicable)?.map(({ code }) => code) || [];
 
+  const applyFetcher = useFetcher({ key: 'discount-apply' });
+  const isApplying = applyFetcher.state !== 'idle';
+
+  useEffect(() => {
+    if (applyFetcher.state === 'idle' && applyFetcher.data && !applyFetcher.data.errors) {
+      setShowInput(false);
+    }
+  }, [applyFetcher.state, applyFetcher.data]);
+
   return (
     <div className="discount-section">
       {/* Display existing discounts */}
@@ -223,7 +251,7 @@ function CartDiscounts({
             <UpdateDiscountForm>
               <button
                 type="submit"
-                className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+                className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200 cursor-pointer"
               >
                 Remove
               </button>
@@ -244,12 +272,15 @@ function CartDiscounts({
         {!showInput && !codes.length ? (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2 cursor-pointer"
           >
             + Add discount code
           </button>
         ) : (
-          <UpdateDiscountForm discountCodes={codes} onSuccess={() => setShowInput(false)}>
+          <UpdateDiscountForm
+            fetcherKey="discount-apply"
+            discountCodes={codes}
+          >
             <div className="w-full">
               <div className="flex w-full gap-2 items-center">
                 <input
@@ -260,9 +291,17 @@ function CartDiscounts({
                 />
                 <button
                   type="submit"
-                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center"
+                  disabled={isApplying}
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[80px]"
                 >
-                  Apply
+                  {isApplying ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      <span>Applying...</span>
+                    </div>
+                  ) : (
+                    'Apply'
+                  )}
                 </button>
               </div>
             </div>
@@ -277,19 +316,21 @@ function UpdateDiscountForm({
   discountCodes,
   children,
   onSuccess,
+  fetcherKey,
 }: {
   discountCodes?: string[];
   children: React.ReactNode;
   onSuccess?: () => void;
+  fetcherKey?: string;
 }) {
   return (
     <CartForm
+      fetcherKey={fetcherKey}
       route="/cart"
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
         discountCodes: discountCodes || [],
       }}
-      onSuccess={onSuccess}
     >
       {children}
     </CartForm>
@@ -340,7 +381,7 @@ function CartGiftCard({
                   </div>
                   <button
                     type="submit"
-                    className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200"
+                    className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200 cursor-pointer"
                   >
                     Remove
                   </button>
@@ -356,7 +397,7 @@ function CartGiftCard({
         {!showInput ? (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2 cursor-pointer"
           >
             + Add gift card
           </button>
@@ -378,7 +419,7 @@ function CartGiftCard({
                 <button
                   type="submit"
                   disabled={giftCardAddFetcher.state !== 'idle'}
-                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 flex items-center justify-center cursor-pointer"
                 >
                   Apply
                 </button>

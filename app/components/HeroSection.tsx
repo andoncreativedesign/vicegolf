@@ -122,7 +122,7 @@ export function HeroSection({
   const current = slides[currentSlide];
 
   return (
-<section className="relative w-full h-[74vh] min-h-[490px] max-h-[740px] mx-auto overflow-x-hidden">
+    <section className="relative w-full h-[74vh] min-h-[490px] max-h-[740px] mx-auto overflow-x-hidden">
       <div className="absolute inset-0 z-0">
         {slides.map((slide, index) => (
           <div
@@ -178,7 +178,7 @@ export function HeroSection({
           {current.buttonText && (
             <button
               onClick={() => handleCTA(current.handle)}
-              className="!text-sm md:!text-base px-6 py-2.5 md:px-8 md:py-3 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-6"
+              className="!text-sm md:!text-base px-6 py-2.5 md:px-8 md:py-3 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-6 cursor-pointer"
               style={{ backgroundColor: current.buttonBgColor, color: current.buttonTextColor }}
             >
               {current.buttonText}
@@ -192,14 +192,14 @@ export function HeroSection({
         <>
           <button
             onClick={() => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors cursor-pointer"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
           </button>
 
           <button
             onClick={() => setCurrentSlide(prev => (prev + 1) % slides.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors cursor-pointer"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
           </button>
@@ -208,7 +208,7 @@ export function HeroSection({
           <div className="absolute bottom-4 right-4 md:right-8 lg:right-16 z-30">
             <button
               onClick={() => setIsPaused(!isPaused)}
-              className="relative w-9 h-9 flex items-center justify-center bg-transparent hover:bg-white/20 rounded-full transition-all"
+              className="relative w-9 h-9 flex items-center justify-center bg-transparent hover:bg-white/20 rounded-full transition-all cursor-pointer"
             >
               <svg className="absolute top-0 left-0 w-full h-full -rotate-90 overflow-visible" viewBox="0 0 40 40">
                 <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255, 255, 255, 0.3)" strokeWidth="2" />
@@ -236,7 +236,7 @@ export function HeroSection({
               <button
                 key={i}
                 onClick={() => setCurrentSlide(i)}
-                className={`w-2 h-2 rounded-full transition-colors ${i === currentSlide ? 'bg-white' : 'bg-white/50'}`}
+                className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${i === currentSlide ? 'bg-white' : 'bg-white/50'}`}
               />
             ))}
           </div>

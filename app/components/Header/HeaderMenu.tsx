@@ -127,7 +127,6 @@ const HeaderMenu = ({
         };
       } else if (item.type === 'PAGE') {
         const reconstructed = reconstructMenuObject(item.resource?.metafield?.value);
-        console.log("reconstructed ", reconstructed)
 
         updatedItem = {
           ...item,
@@ -166,7 +165,6 @@ const HeaderMenu = ({
   useEffect(() => {
     if (menuItems.length === 0) return;
     const updatedMenu = updateMenuItems(menuItems);
-    console.log('updated menuitems reconstructed  - ', updatedMenu)
     setMenu(updatedMenu);
   }, [menuItems]);
 
@@ -191,7 +189,6 @@ const HeaderMenu = ({
       && fetcher.data?.collection?.title
     ) {
       const { id, title } = fetcher.data.collection
-      console.log("fetcher.data ", id, title)
       close(); // Ensure menu is closed before navigation
       navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
     }
@@ -205,7 +202,7 @@ const HeaderMenu = ({
             <div>
               <button
                 onClick={handleBackToMain}
-                className="font-semibold text-main-900 flex items-center text-copy mb-4"
+                className="font-semibold text-main-900 flex items-center text-copy mb-4 cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="transparent" stroke="currentColor" className="w-5 h-5 transition rotate-90 w-8 h-8 -ml-2.5"><title>Caret</title><path d="M14 8L10 12L6 8" strokeWidth="1.25"></path></svg>Back
               </button>
@@ -247,7 +244,7 @@ const HeaderMenu = ({
                   {item.items?.length > 0 ? (
                     <button
                       onClick={(e) => handleSubmenuOpen(item, e)}
-                      className="text-left text-xl font-semibold w-full flex justify-between items-center py-1.5 px-2 text-gray-700 hover:bg-gray-50"
+                      className="text-left text-xl font-semibold w-full flex justify-between items-center py-1.5 px-2 text-gray-700 hover:bg-gray-50 cursor-pointer"
                     >
                       <span className="uppercase">{item.title}</span>
                       <CaretIcon className="text-black" />

@@ -78,7 +78,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const bundleBtnHandle = product?.metafields?.find((item: any) => item?.key === "bundle_btn_handle")
   const bundleBtnText = product?.metafields?.find((item: any) => item?.key === "bundle_btn_text")
   const bundleBtn = bundleBtnHandle && bundleBtnText ? { handle: bundleBtnHandle?.value, text: bundleBtnText?.value } : null
-           
+
   const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
   const family = product?.metafields?.find((item: any) => item?.key === "family")
   let colorVariants: UIColorVariant[] = [];
@@ -98,9 +98,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         throw new Error(JSON.stringify(response?.data?.errors))
       }
       const colorVariantsRes = response.data.data.products.edges
-      console.log('\n\ncolor variants')
-      console.log(JSON.stringify(colorVariantsRes))
-      console.log('\n\ncolor variants end')
       function mapColorVariants(edges: any[]): UIColorVariant[] {
         return edges.map((edge) => {
           const node = edge.node;
@@ -131,9 +128,9 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       // The current product will be identified by matching the handle
     } catch (error) {
       console.error('Error fetching color variants:', error);
+      // console.log("clubFamily", clubFamily)
     }
   }
-  console.log("clubFamily", clubFamily)
   let clubVariants = [] as ClubVariant[]
   if (clubFamily?.value) {
     try {
@@ -145,9 +142,6 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         },
       });
       clubVariants = response?.data?.data?.products?.edges || []
-      console.log('\n\clubVariantsRes start')
-      console.log(JSON.stringify(clubVariants))
-      console.log('\n\clubVariantsRes end')
       if (response.data.errors) {
         throw new Error(JSON.stringify(response?.data?.errors))
       }
@@ -209,16 +203,13 @@ export default function Product() {
   // console.log("data.homePageData ", data.homePageData)
   // },[data])
   useEffect(() => {
-    console.log('product details from shopify', product)
-    console.log('product metafields:', product.metafields)
-    console.log('product clubVariantsRes:', clubVariants)
+
     // console.log('color variants from shopify', colorVariants)
     // Debug metafields for Tracer product
     const isTracer = product.metafields?.some(
       (field: { key?: string; value?: string }) =>
         field?.key === 'category_variant' && field?.value === 'tracer'
     );
-    console.log('Is Tracer product:', isTracer);
   }, [colorVariants, product])
   // const { product, recommendedProducts } = useLoaderData<typeof loader>();
   const selectedVariant = useOptimisticVariant(
@@ -260,7 +251,6 @@ export default function Product() {
     const fetchProductDetails = async () => {
       const productDetails = await getProductDetails(product.id);
       setProductDetails(productDetails);
-      console.log('productDetails ', productDetails);
       // Reset selected image when product changes
       if (product.images?.nodes?.[0]) {
         setSelectedImage(product.images.nodes[0] as ProductImageType);
@@ -365,6 +355,7 @@ export default function Product() {
             colorVariants={colorVariants}
             shippingDetails={shippingDetails}
             currentProductId={product.id}
+            collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
             clubVariants={clubVariants}
             bundleBtn={bundleBtn}
           />

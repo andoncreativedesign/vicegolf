@@ -17,12 +17,19 @@ export const axiosSanity = axios.create({
   },
 });
 
+const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN
+const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL
 
-const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN;
-const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL;
+/**
+ * Use API 2024-10+ for Admin requests.
+ */
+// const ADMIN_API_URL_2025_10 = ADMIN_API_URL?.replace(
+//   /\/admin\/api\/\d{4}-\d{2}(\/|$)/,
+//   '/admin/api/2025-10$1'
+// ) || ADMIN_API_URL;
 
 export const axiosShopifyAdmin = axios.create({
-  baseURL: `${ADMIN_API_URL}/graphql.json`,
+  baseURL: ADMIN_API_URL + '/graphql.json',
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

@@ -1,5 +1,6 @@
-import { Await, Link, useFetcher, useLoaderData, useNavigate } from 'react-router';
+import { Await, Link, useFetcher, useLoaderData, useNavigate, useRouteLoaderData } from 'react-router';
 import { Suspense, useId, useState, useEffect, useRef } from 'react';
+import type { RootLoader } from '~/root';
 import { Search } from 'lucide-react';
 import { Image, Money } from '@shopify/hydrogen';
 import { AedIcon } from './ui/AedIcon';
@@ -175,7 +176,7 @@ function SearchAside() {
             <div className="md:col-span-1 flex justify-end flex-shrink-0">
               <button
                 onClick={close}
-                className="text-gray-900 font-medium hover:text-gray-600 transition-colors px-2 whitespace-nowrap"
+                className="text-gray-900 font-medium hover:text-gray-600 transition-colors px-2 whitespace-nowrap cursor-pointer"
               >
                 Close
               </button>
@@ -190,8 +191,6 @@ function SearchAside() {
             const { products, queries, collections } = items;
             const isLoading = state === 'loading' && term.current;
             const hasTerm = !!term.current;
-
-            console.log('search collections - ', collections)
 
             if (isLoading) {
               return (
@@ -347,7 +346,8 @@ function MobileMenuAside({
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
 }) {
-  const { productsForNav } = useLoaderData<{ productsForNav: MenuData }>();
+  const rootData = useRouteLoaderData<RootLoader>('root');
+  const productsForNav = rootData?.productsForNav;
   // Get menu items from the productsForNav data
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
 

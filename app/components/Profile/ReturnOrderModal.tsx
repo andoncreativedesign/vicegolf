@@ -10,11 +10,12 @@ interface ReturnOrderModalProps {
   orderId: string;
   isOpen: boolean;
   onClose: () => void;
+  onSuccess: () => void;
   lineItems: OrderLineItemFullFragment[];
   fulfillments: Array<Pick<CustomerAccountAPI.Fulfillment, 'status'>>;
 }
 
-export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillments }:  ReturnOrderModalProps) {
+export function ReturnOrderModal({ orderId, isOpen, onClose, onSuccess,  lineItems, fulfillments }:  ReturnOrderModalProps) {
   const [staffNote, setStaffNote] = useState('');
   const [refundMethod, setRefundMethod] = useState<'originalPaymentMethodsRefund' | 'giftCardRefund'>('originalPaymentMethodsRefund');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,7 +76,8 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
     // ✅ Success
     showToast.success('Your order return request has been submitted.');
     revalidator.revalidate();
-    onClose();
+    onSuccess();
+    // onClose();
   }, [fetcher.state, fetcher.data, revalidator, onClose]);
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -114,60 +116,6 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
       <div className="bg-white rounded-xs p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Return Order</h2>
 
-        {/* <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Refund Method
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="refundMethod"
-                  value="originalPaymentMethodsRefund"
-                  checked={refundMethod === 'originalPaymentMethodsRefund'}
-                  onChange={() => setRefundMethod('originalPaymentMethodsRefund')}
-                  className="mr-2"
-                />
-                Original Payment Method
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="staffNote" className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Return
-            </label>
-            <textarea
-              id="staffNote"
-              value={staffNote}
-              onChange={(e) => setStaffNote(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2"
-              rows={3}
-              required
-              placeholder="Please provide a reason for return..."
-            />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
-              disabled={isSubmitting || !staffNote.trim()}
-            >
-              {isSubmitting ? 'Processing...' : 'Confirm Return'}
-            </button>
-          </div>
-        </form> */}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -190,7 +138,7 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
 
           <div>
             <label htmlFor="returnReason" className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Return
+              Reason for Return<span className="text-red-500">*</span>
             </label>
             <select
               id="returnReason"
@@ -227,7 +175,7 @@ export function ReturnOrderModal({ orderId, isOpen, onClose, lineItems, fulfillm
             </button>
             <button
               type="submit"
-              className="inline-block bg-black p-2 rounded-xs text-white cursor-pointer"
+              className={`inline-block p-2 rounded-xs text-white ${isSubmitting || !staffNote.trim() ? "bg-gray-600 cursor-not-allowed" : "bg-black cursor-pointer"}`}
               disabled={isSubmitting || !staffNote.trim()}
             >
               {isSubmitting ? 'Processing...' : 'Confirm Return'}

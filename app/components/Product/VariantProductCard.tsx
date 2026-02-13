@@ -2,6 +2,7 @@ import { Image, Money } from "@shopify/hydrogen";
 import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import { AedIcon } from '../ui/AedIcon';
+import { useMembership } from "~/hooks/useMembership";
 
 type ColorOption = {
   id: string;
@@ -20,6 +21,7 @@ type FamilyMetaField = {
 
 type ProductCardProps = {
   product: {
+    id: string;
     handle: string;
     title: string;
     featuredImage?: {
@@ -47,6 +49,9 @@ type ProductCardProps = {
     tags?: string[];
     badge_colors?: string;
     family: FamilyMetaField;
+    collections?: {
+      nodes: Array<{ id: string }>;
+    };
     variantFamilyProducts: Omit<
       ProductCardProps['product'],
       'variants' |
@@ -69,8 +74,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
 
   const allVariants = useMemo(() => {
     // Create a Set to track unique variant handles
-    if (product.title === "Vice Pro Plus")
-      console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
+    if (product.title === "Vice Pro Plus") {
+      // console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
+    }
 
     const seenHandles = new Set();
     const variants = [];
@@ -159,12 +165,11 @@ export function VariantProductCard({ product }: ProductCardProps) {
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   useEffect(() => {
-    // if (product.productType === 'Golf Balls' && product.variantFamilyProducts)
-    if (product.variantFamilyProducts?.length > 0)
-      console.log('product card golf balls', product)
-  }, [product])
+    if (product.variantFamilyProducts?.length > 0) {
+      // Add your effect logic here
+    }
+  }, [product]);
 
-  // Add this effect to clean up the timeout when the component unmounts
   useEffect(() => {
     return () => {
       if (hoverDelayTimeout) {
@@ -173,11 +178,16 @@ export function VariantProductCard({ product }: ProductCardProps) {
     };
   }, [hoverDelayTimeout]);
 
+  const { getBestDiscountForProduct } = useMembership();
+
+  const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+  const basePrice = parseFloat(firstVariant?.price?.amount || '0');
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+
 
   return (
     <div className="group relative flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       <div className="relative w-full overflow-hidden">
-
         <div
           className="relative w-full bg-[#f6f6f6] overflow-hidden aspect-square"
           onMouseEnter={() => {
@@ -202,8 +212,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
           <Link
             to={`/products/${selectedVariantHandle}`}
             style={{ textDecoration: 'none' }}
+            className="cursor-pointer"
           >
-            <div className="w-full h-full">
+            <div className="w-full h-full cursor-pointer">
               {image && (
                 <div className="relative w-full h-full bg-[#f6f6f6] overflow-hidden">
                   <Image
@@ -226,7 +237,8 @@ export function VariantProductCard({ product }: ProductCardProps) {
                         Sold out
                       </span>
                     )}
-                    {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || [])?.map((tag: string) => {
+
+                    {allVariants[selectedVariant]?.availableForSale && (allVariants[selectedVariant]?.tags || []).map((tag: string) => {
                       const tagText = tag?.trim()?.replace(/^badge:/i, '')?.trim();
                       const normalizedTag = tagText?.toLowerCase();
                       let customStyles = {};
@@ -281,7 +293,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 ?.map((variant, index) => (
                   <button
                     key={variant.id}
-                    className={`aspect-square rounded-lg transition-opacity duration-200 ${selectedVariant === index
+                    className={`aspect-square rounded-lg transition-opacity duration-200 cursor-pointer ${selectedVariant === index
                       ? '' : ''
                       } ${!variant.availableForSale ? 'opacity-40' : ''}`}
                     onClick={(e) => handleVariantSelect(e, variant, index)}
@@ -372,7 +384,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                             setCurrentImage(variant.image.url);
                           }
                         }}
-                        className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
+                        className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 cursor-pointer ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
                           } ${!variant.availableForSale ? 'opacity-40' : ''}`}
                         title={`${variant.title}${!variant.availableForSale ? ' (Sold Out)' : ''}`}
                       >
@@ -404,16 +416,24 @@ export function VariantProductCard({ product }: ProductCardProps) {
           {firstVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
-                {firstVariant.compareAtPrice && (
+                {(firstVariant.compareAtPrice || (productPercentage > 0 || productAmount > 0)) && (
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium">
                     <AedIcon className="mr-0.5" />
-                    {parseFloat(firstVariant.compareAtPrice.amount).toFixed(2)}
+                    {parseFloat(firstVariant.compareAtPrice?.amount || firstVariant.price.amount).toFixed(2)}
                   </div>
                 )}
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
-                    {parseFloat(firstVariant.price.amount).toFixed(2)}
+                    {(() => {
+                      const basePriceValue = parseFloat(firstVariant.price?.amount || '0');
+                      if (productAmount > 0) {
+                        return Math.max(0, basePriceValue - productAmount).toFixed(2);
+                      } else if (productPercentage > 0) {
+                        return (basePriceValue * (1 - productPercentage)).toFixed(2);
+                      }
+                      return basePriceValue.toFixed(2);
+                    })()}
                   </span>
                 </div>
               </div>

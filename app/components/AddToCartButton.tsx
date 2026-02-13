@@ -27,7 +27,7 @@ export function AddToCartButton({
             type="submit"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
-            className={`w-full ${disabled ? 'bg-[#e2e2e2] text-[#a1a1a1]' : 'bg-black text-white'} py-4 px-6 rounded-full font-medium text-base transition-all duration-300`}
+            className={`w-full ${disabled ? 'bg-[#e2e2e2] text-[#a1a1a1] cursor-not-allowed' : 'bg-black text-white cursor-pointer'} py-4 px-6 rounded-full font-medium text-base transition-all duration-300`}
           >
             {children}
           </button>
