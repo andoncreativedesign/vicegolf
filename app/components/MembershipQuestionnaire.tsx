@@ -81,7 +81,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                     __html: `
                                             /* Fix vertical alignment with email field */
                                             .membership-phone-wrapper {
-                                                padding-top: 6px !important;
+                                                padding-top: 4px !important;
                                             }
                                             .membership-phone-wrapper > div {
                                                 margin-top: 0 !important;
@@ -209,7 +209,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         {/* Row 3 */}
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="birthday" className="text-[16px] leading-[28px] text-gray-600">Birthday</label>
-                                            <div className="grid grid-cols-3 gap-3">
+                                            <div className="grid grid-cols-3 gap-3 pt-[4px]">
                                                 <select
                                                     value={birthMonth}
                                                     onChange={(e) => setBirthMonth(e.target.value)}
@@ -270,7 +270,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                             <select
                                                 name="handedness"
                                                 id="handedness"
-                                                className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
+                                                className="w-full block bg-[#fafafa] border-none mt-[4px] px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
                                                 style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             >
                                                 <option value="Right Handed">Right Handed</option>
