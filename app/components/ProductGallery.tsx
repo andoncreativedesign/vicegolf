@@ -231,7 +231,7 @@ export function ProductGallery({
                       e.stopPropagation();
                       handleDotClick(index);
                     }}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${index === currentIndex
                       ? 'bg-black w-3'
                       : 'bg-black/20 hover:bg-black/40'
                       }`}

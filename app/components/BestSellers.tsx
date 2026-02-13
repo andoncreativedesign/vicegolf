@@ -50,14 +50,14 @@ export function BestSellers({
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={() => scroll('left')}
-                        className="bg-white rounded-full p-2 border border-gray-200 hover:bg-gray-50 transition-colors"
+                        className="bg-white rounded-full p-2 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Scroll left"
                     >
                         <ChevronLeft className="w-5 h-5 text-gray-700" />
                     </button>
                     <button
                         onClick={() => scroll('right')}
-                        className="bg-white rounded-full p-2 border border-gray-200 hover:bg-gray-50 transition-colors"
+                        className="bg-white rounded-full p-2 border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
                         aria-label="Scroll right"
                     >
                         <ChevronRight className="w-5 h-5 text-gray-700" />
