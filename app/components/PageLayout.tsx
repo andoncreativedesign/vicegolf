@@ -176,7 +176,7 @@ function SearchAside() {
             <div className="md:col-span-1 flex justify-end flex-shrink-0">
               <button
                 onClick={close}
-                className="text-gray-900 font-medium hover:text-gray-600 transition-colors px-2 whitespace-nowrap"
+                className="text-gray-900 font-medium hover:text-gray-600 transition-colors px-2 whitespace-nowrap cursor-pointer"
               >
                 Close
               </button>

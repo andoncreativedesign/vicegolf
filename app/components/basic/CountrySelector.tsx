@@ -16,7 +16,7 @@ export function CountrySelector({
     id,
     ...selectProps
 }: CountrySelectorProps) {
-    const inputClasses = "w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent bg-white text-gray-900";
+    const inputClasses = "w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent bg-white text-gray-900 cursor-pointer";
     const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
     // Sort countries by name

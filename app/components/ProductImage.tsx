@@ -1,5 +1,5 @@
 
-;import { useState } from 'react';
+; import { useState } from 'react';
 import { Image } from '@shopify/hydrogen';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { ProductVariantFragment } from 'storefrontapi.generated';
@@ -45,13 +45,13 @@ export function ProductImage({ image, galleryImages = [], onImageChange }: Produ
         <>
           <button
             onClick={() => handleNavigate('prev')}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
           <button
             onClick={() => handleNavigate('next')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
           >
             <ArrowRight className="w-5 h-5 text-gray-700" />
           </button>

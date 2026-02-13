@@ -221,7 +221,7 @@ export default function MembershipTab() {
                         </p>
                         <button
                             onClick={() => window.location.href = '/membership'}
-                            className="inline-block mt-35 bg-black  font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline text-center"
+                            className="inline-block mt-35 bg-black  font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline text-center cursor-pointer"
                             style={{ color: 'white', textDecoration: 'none', width: '200px', height: '50px' }}
                         >
                             View Membership
@@ -236,7 +236,7 @@ export default function MembershipTab() {
 
                         <button
                             onClick={() => window.location.href = '/membership'}
-                            className="inline-block mt-35 bg-black  font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline text-center"
+                            className="inline-block mt-35 bg-black  font-bold tracking-widest hover:bg-gray-800 transition-all transform active:scale-95 no-underline text-center cursor-pointer"
                             style={{ color: 'white', textDecoration: 'none', width: '150px', height: '50px' }}
                         >
                             Apply
