@@ -232,6 +232,15 @@ function CartDiscounts({
   const [showInput, setShowInput] = useState(true);
   const codes: string[] = discountCodes?.filter((discount) => discount.applicable)?.map(({ code }) => code) || [];
 
+  const applyFetcher = useFetcher({ key: 'discount-apply' });
+  const isApplying = applyFetcher.state !== 'idle';
+
+  useEffect(() => {
+    if (applyFetcher.state === 'idle' && applyFetcher.data && !applyFetcher.data.errors) {
+      setShowInput(false);
+    }
+  }, [applyFetcher.state, applyFetcher.data]);
+
   return (
     <div className="discount-section">
       {/* Display existing discounts */}
@@ -268,7 +277,10 @@ function CartDiscounts({
             + Add discount code
           </button>
         ) : (
-          <UpdateDiscountForm discountCodes={codes} onSuccess={() => setShowInput(false)}>
+          <UpdateDiscountForm
+            fetcherKey="discount-apply"
+            discountCodes={codes}
+          >
             <div className="w-full">
               <div className="flex w-full gap-2 items-center">
                 <input
@@ -279,9 +291,17 @@ function CartDiscounts({
                 />
                 <button
                   type="submit"
-                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center cursor-pointer"
+                  disabled={isApplying}
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-[80px]"
                 >
-                  Apply
+                  {isApplying ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      <span>Applying...</span>
+                    </div>
+                  ) : (
+                    'Apply'
+                  )}
                 </button>
               </div>
             </div>
@@ -296,13 +316,16 @@ function UpdateDiscountForm({
   discountCodes,
   children,
   onSuccess,
+  fetcherKey,
 }: {
   discountCodes?: string[];
   children: React.ReactNode;
   onSuccess?: () => void;
+  fetcherKey?: string;
 }) {
   return (
     <CartForm
+      fetcherKey={fetcherKey}
       route="/cart"
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
