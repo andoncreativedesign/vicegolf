@@ -98,7 +98,7 @@ export function CookiePreferencesModal() {
                   type="checkbox"
                   checked={true}
                   disabled
-                  className="h-4 w-4 rounded text-black border-gray-300 focus:ring-black-500"
+                  className="h-4 w-4 rounded text-black border-gray-300 focus:ring-black-500 cursor-pointer"
                 />
               </div>
               <div className="ml-3 text-sm">
@@ -119,7 +119,7 @@ export function CookiePreferencesModal() {
                   type="checkbox"
                   checked={localConsent.personalization}
                   onChange={(e) => setLocalConsent({ ...localConsent, personalization: e.target.checked })}
-                  className="h-4 w-4 rounded text-black border-gray-300 focus:ring-black-500"
+                  className="h-4 w-4 rounded text-black border-gray-300 focus:ring-black-500 cursor-pointer"
                 />
               </div>
               <div className="ml-3 text-sm">
@@ -140,7 +140,7 @@ export function CookiePreferencesModal() {
                   type="checkbox"
                   checked={localConsent.marketing}
                   onChange={(e) => setLocalConsent({ ...localConsent, marketing: e.target.checked })}
-                  className="h-4 w-4 rounded text-black border-gray-300 focus:ring-black-500"
+                  className="h-4 w-4 rounded text-black border-gray-300 focus:ring-black-500 cursor-pointer"
                 />
               </div>
               <div className="ml-3 text-sm">
@@ -161,7 +161,7 @@ export function CookiePreferencesModal() {
                   type="checkbox"
                   checked={localConsent.analytics}
                   onChange={(e) => setLocalConsent({ ...localConsent, analytics: e.target.checked })}
-                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black-500"
+                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black-500 cursor-pointer"
                 />
               </div>
               <div className="ml-3 text-sm">

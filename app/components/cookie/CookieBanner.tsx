@@ -23,7 +23,7 @@ export function CookieBanner() {
               marketing: true,
               analytics: true
             })}
-            className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800"
+            className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 cursor-pointer"
           >
             Accept All
           </button>
@@ -33,13 +33,13 @@ export function CookieBanner() {
               marketing: false,
               analytics: false
             })}
-            className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 cursor-pointer"
           >
             Decline
           </button>
           <button
             onClick={() => setShowPreferences(true)}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 cursor-pointer"
           >
             Preferences
           </button>
