@@ -7,3 +7,4 @@ node_modules
 .shopify
 .react-router
 .env
+.github
