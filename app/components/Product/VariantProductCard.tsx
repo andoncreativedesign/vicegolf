@@ -212,8 +212,9 @@ export function VariantProductCard({ product }: ProductCardProps) {
           <Link
             to={`/products/${selectedVariantHandle}`}
             style={{ textDecoration: 'none' }}
+            className="cursor-pointer"
           >
-            <div className="w-full h-full">
+            <div className="w-full h-full cursor-pointer">
               {image && (
                 <div className="relative w-full h-full bg-[#f6f6f6] overflow-hidden">
                   <Image
@@ -292,7 +293,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                 ?.map((variant, index) => (
                   <button
                     key={variant.id}
-                    className={`aspect-square rounded-lg transition-opacity duration-200 ${selectedVariant === index
+                    className={`aspect-square rounded-lg transition-opacity duration-200 cursor-pointer ${selectedVariant === index
                       ? '' : ''
                       } ${!variant.availableForSale ? 'opacity-40' : ''}`}
                     onClick={(e) => handleVariantSelect(e, variant, index)}
@@ -383,7 +384,7 @@ export function VariantProductCard({ product }: ProductCardProps) {
                             setCurrentImage(variant.image.url);
                           }
                         }}
-                        className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
+                        className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 cursor-pointer ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
                           } ${!variant.availableForSale ? 'opacity-40' : ''}`}
                         title={`${variant.title}${!variant.availableForSale ? ' (Sold Out)' : ''}`}
                       >
