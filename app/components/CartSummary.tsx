@@ -279,7 +279,7 @@ function CartDiscounts({
                 />
                 <button
                   type="submit"
-                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center"
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap flex items-center justify-center cursor-pointer"
                 >
                   Apply
                 </button>

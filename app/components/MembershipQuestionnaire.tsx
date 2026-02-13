@@ -295,7 +295,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                         <button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[280px]"
+                                            className="bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 cursor-pointer min-w-[280px]"
                                         >
                                             {isSubmitting ? 'Processing...' : 'Apply'}
                                         </button>

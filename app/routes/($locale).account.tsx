@@ -145,7 +145,7 @@ function Logout() {
       action="/account/logout"
       className="contents"
     >
-      <button type="submit" className="flex w-full items-center gap-4 px-6 py-10 text-gray-600 hover:text-gray-900 bg-[#F5F5F5] border-l-[3px] border-transparent text-left text-base transition-colors duration-200 no-underline hover:no-underline">
+      <button type="submit" className="flex w-full items-center gap-4 px-6 py-10 text-gray-600 hover:text-gray-900 bg-[#F5F5F5] border-l-[3px] border-transparent text-left text-base transition-colors duration-200 no-underline hover:no-underline cursor-pointer">
         <LogOutIcon className="w-5 h-5" />
         Sign out
       </button>

@@ -409,7 +409,7 @@ export default function AddressEditor() {
             id="defaultAddress"
             name="defaultAddress"
             type="checkbox"
-            className="h-4 w-4 text-gray-800 border-gray-300 rounded"
+            className="h-4 w-4 text-gray-800 border-gray-300 rounded cursor-pointer"
           />
           <label htmlFor="defaultAddress" className="ml-2 text-sm text-gray-700">
             Set as default address
@@ -426,7 +426,7 @@ export default function AddressEditor() {
           type="submit"
           formMethod={submitMethod}
           disabled={isSubmitting}
-          className="w-full bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed"
+          className="w-full bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:text-gray-500 cursor-pointer"
         >
           {isSubmitting
             ? isEditMode
