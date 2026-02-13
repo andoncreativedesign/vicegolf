@@ -84,7 +84,7 @@ const ProductCustomization = ({
         <div className="relative ">
           <button
             type="button"
-            className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-full shadow-sm text-left bg-[#fafafa]"
+            className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-full shadow-sm text-left bg-[#fafafa] cursor-pointer"
             onClick={() => toggleDropdown(option.name)}
           >
             <span>{selectedValue}</span>
@@ -100,7 +100,7 @@ const ProductCustomization = ({
                 <button
                   key={value.name}
                   type="button"
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-[#2563eb] hover:text-white ${value.selected ? 'font-medium' : ''}`}
+                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-[#2563eb] hover:text-white cursor-pointer ${value.selected ? 'font-medium' : ''}`}
                   onClick={() => {
                     if (value.variantUriQuery) {
                       void navigate(`?${value.variantUriQuery}`, {
@@ -148,7 +148,7 @@ const ProductCustomization = ({
             if (isDifferentProduct) {
               return (
                 <Link
-                  className={`product-options-item relative rounded-xs overflow-hidden transition-all duration-300 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
+                  className={`product-options-item relative rounded-xs overflow-hidden transition-all duration-300 cursor-pointer ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
                     } ${!available ? 'opacity-40 grayscale' : ''}`}
                   key={`${option.name}-${name}`}
                   prefetch="intent"
@@ -164,7 +164,7 @@ const ProductCustomization = ({
             return (
               <button
                 type="button"
-                className={`product-options-item relative rounded-xs overflow-hidden transition-all duration-300 ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
+                className={`product-options-item relative rounded-xs overflow-hidden transition-all duration-300 cursor-pointer ${selected ? 'ring-2 ring-black ring-offset-2' : 'ring-1 ring-gray-200'
                   } ${!exists ? 'opacity-40 cursor-not-allowed' : ''
                   } ${!available ? 'grayscale' : ''
                   }`}
@@ -190,34 +190,34 @@ const ProductCustomization = ({
 
   if (styling === 'drivers') {
     return (
-  <div className="space-y-4">
-    {/* Hand Orientation (if any) */}
-    {clubVariants?.length > 0 && (
-      <div className={styleConfig.club.container(true, borderType)}>
-        <HandOrientation
-          clubVariants={clubVariants}
-          currentProductId={currentProductId}
-        />
-      </div>
-    )}
-    {/* Loft Option in its own container */}
-    {loftOption && (
-      <div className={styleConfig.club.container(true, borderType)}>
-        {renderOption(loftOption, -1, true)}
-      </div>
-    )}
-    {/* All other options */}
-    {otherOptions.length > 0 && (
-      <div className={styleConfig.club.container(true, borderType)}>
-        {otherOptions.map((option, index) => (
-          <div key={option.name || index} className="mb-6 last:mb-0">
-            {renderOption(option, index, false)}
+      <div className="space-y-4">
+        {/* Hand Orientation (if any) */}
+        {clubVariants?.length > 0 && (
+          <div className={styleConfig.club.container(true, borderType)}>
+            <HandOrientation
+              clubVariants={clubVariants}
+              currentProductId={currentProductId}
+            />
           </div>
-        ))}
+        )}
+        {/* Loft Option in its own container */}
+        {loftOption && (
+          <div className={styleConfig.club.container(true, borderType)}>
+            {renderOption(loftOption, -1, true)}
+          </div>
+        )}
+        {/* All other options */}
+        {otherOptions.length > 0 && (
+          <div className={styleConfig.club.container(true, borderType)}>
+            {otherOptions.map((option, index) => (
+              <div key={option.name || index} className="mb-6 last:mb-0">
+                {renderOption(option, index, false)}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    )}
-  </div>
-);
+    );
   }
 
 
@@ -260,7 +260,7 @@ const ProductCustomization = ({
         // Original layout for non-club products
         <>
           {/* Hand Orientation (if any) */}
-            {clubVariants && clubVariants?.length > 0 && (
+          {clubVariants && clubVariants?.length > 0 && (
             <div className={styling === 'club' ? styleConfig.club.container(true, borderType) : ''}>
               <HandOrientation
                 clubVariants={clubVariants}
