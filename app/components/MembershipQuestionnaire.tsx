@@ -49,7 +49,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                         </p>
                         <button
                             onClick={() => navigate('/account')}
-                            className="mt-4 bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all min-w-[280px]"
+                            className="mt-4 bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all min-w-[280px] cursor-pointer"
                         >
                             Go to Profile
                         </button>
@@ -70,7 +70,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                 <p className="mb-8 text-[18px] font-medium text-gray-700">Please sign in to your account to apply for membership status.</p>
                                 <button
                                     onClick={() => navigate('/account/login')}
-                                    className="bg-black text-white px-12 py-4 font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                                    className="bg-black text-white px-12 py-4 font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors cursor-pointer"
                                 >
                                     Sign In
                                 </button>
@@ -270,8 +270,8 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                             <select
                                                 name="handedness"
                                                 id="handedness"
-                                                className="w-full block bg-[#fafafa] border-none mt-[4px] px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none"
-                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
+                                                className="w-full block bg-[#fafafa] border-none mt-[4px] px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all appearance-none cursor-pointer"
+                                                style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px', cursor: 'pointer' }}
                                             >
                                                 <option value="Right Handed">Right Handed</option>
                                                 <option value="Left Handed">Left Handed</option>
