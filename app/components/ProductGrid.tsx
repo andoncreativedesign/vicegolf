@@ -93,7 +93,7 @@ export function ProductGrid({
               onClick={scrollLeft}
               disabled={!canScrollLeft}
               className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200 ${canScrollLeft
-                ? 'border-gray-200 hover:border-black text-gray-800'
+                ? 'border-gray-200 hover:border-black text-gray-800 cursor-pointer'
                 : 'border-gray-100 text-gray-300 cursor-not-allowed opacity-50'
                 }`}
               aria-label="Scroll left"
@@ -106,7 +106,7 @@ export function ProductGrid({
               onClick={scrollRight}
               disabled={!canScrollRight}
               className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200 ${canScrollRight
-                ? 'border-gray-200 hover:border-black text-gray-800'
+                ? 'border-gray-200 hover:border-black text-gray-800 cursor-pointer'
                 : 'border-gray-100 text-gray-300 cursor-not-allowed opacity-50'
                 }`}
               aria-label="Scroll right"
