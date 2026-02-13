@@ -137,7 +137,7 @@ function CartLineQuantity({ line }: { line: CartLine }) {
     <div className="flex items-center gap-2">
       <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
-          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
           aria-label="Decrease quantity"
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
@@ -155,7 +155,7 @@ function CartLineQuantity({ line }: { line: CartLine }) {
 
       <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
-          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
@@ -185,7 +185,7 @@ function CartLineRemoveButton({
       inputs={{ lineIds }}
     >
       <button
-        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200"
+        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
         disabled={disabled}
         type="submit"
         aria-label="Remove item"

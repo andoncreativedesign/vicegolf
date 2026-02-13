@@ -152,7 +152,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
       <a
         href={checkoutUrl}
         target="_self"
-        className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3"
+        className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
         style={{ textDecoration: 'none' }}
       >
         Checkout securely
@@ -251,7 +251,7 @@ function CartDiscounts({
             <UpdateDiscountForm>
               <button
                 type="submit"
-                className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200"
+                className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200 cursor-pointer"
               >
                 Remove
               </button>
@@ -272,7 +272,7 @@ function CartDiscounts({
         {!showInput && !codes.length ? (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2 cursor-pointer"
           >
             + Add discount code
           </button>
@@ -381,7 +381,7 @@ function CartGiftCard({
                   </div>
                   <button
                     type="submit"
-                    className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200"
+                    className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors duration-200 cursor-pointer"
                   >
                     Remove
                   </button>
@@ -397,7 +397,7 @@ function CartGiftCard({
         {!showInput ? (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium transition-colors duration-200 w-full text-left py-2 cursor-pointer"
           >
             + Add gift card
           </button>
@@ -419,7 +419,7 @@ function CartGiftCard({
                 <button
                   type="submit"
                   disabled={giftCardAddFetcher.state !== 'idle'}
-                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 flex items-center justify-center"
+                  className="px-4 h-10 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 flex items-center justify-center cursor-pointer"
                 >
                   Apply
                 </button>
