@@ -99,6 +99,14 @@ export function PhoneInputField({
         <CustomCountrySelect {...props} availableCountries={availableCountries} />
     ), [availableCountries]);
 
+    const handlePhoneChange = (newValue: string | undefined) => {
+        // Enforce a maximum length to prevent unlimited input
+        // Increased to 20 to accommodate longer international numbers (standard is 15 digits + prefix)
+        const max = (inputProps as any).maxLength || 20;
+        if (newValue && newValue.length > max) return;
+        onChange(newValue);
+    };
+
     return (
         <div className={`flex flex-col space-y-3 ${containerClassName ?? ''}`}>
             {label && (
@@ -237,12 +245,13 @@ export function PhoneInputField({
                     defaultCountry="AE"
                     value={value}
                     flags={flags}
-                    onChange={onChange}
+                    onChange={handlePhoneChange}
                     required={required}
                     className="PhoneInputCustom"
                     inputComponent={"input"}
                     countrySelectComponent={CountrySelectComponent}
                     countries={availableCountries}
+                    maxLength={20}
                     {...inputProps}
                 />
             </div>
