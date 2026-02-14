@@ -48,14 +48,14 @@ npm run deploy
 
 ## Production deployment (must choose the production environment in the shopify cli)
 
-### 1. make sure the build works before deployment with production .env file
+### 1. Make sure the build works before deployment with production .env file
 
 ```bash
 npm run build
 npm run preview
 ```
 
-### 2. login to shopify cli and hydrogen cli
+### 2. Login to shopify cli and hydrogen cli
 
 - use [faris@theandongroup.com] this email address
 ```bash
@@ -63,17 +63,21 @@ shopify auth login
 shopify hydrogen login
 ```
 
-### 3. deploy from main branch 
+### 3. Deploy from main branch 
 
 ```bash
 npm run deploy
 ```
 - select the production environment  - main branch
 
-### 4. check the url
+### 4. Check the url
 
-```markdown
 [https://vicegolf.ae/](https://vicegolf.ae/)
+
+### 5. Logut from shopify cli
+```bash
+shopify auth logout
+shopify hydrogen logout
 ```
 
 ## Setup for using Customer Account API (`/account` section)
