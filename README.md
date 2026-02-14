@@ -46,12 +46,42 @@ npm run dev
 npm run deploy
 ```
 
+## Production deployment (must choose the production environment in the shopify cli)
+
+### 1. make sure the build works before deployment with production .env file
+
+```bash
+npm run build
+npm run preview
+```
+
+### 2. login to shopify cli and hydrogen cli
+
+- use [faris@theandongroup.com] this email address
+```bash
+shopify auth login
+shopify hydrogen login
+```
+
+### 3. deploy from main branch 
+
+```bash
+npm run deploy
+```
+- select the production environment  - main branch
+
+### 4. check the url
+
+```markdown
+[https://vicegolf.ae/](https://vicegolf.ae/)
+```
+
 ## Setup for using Customer Account API (`/account` section)
 
 Follow step 1 and 2 of <https://shopify.dev/docs/custom-storefronts/building-with-the-customer-account-api/hydrogen#step-1-set-up-a-public-domain-for-local-development>
 
 ## Branches
-- `main` - production with cicd pipeline
+- `main` - production with cicd pipeline - broken
 - `dev` - development `npm run deploy` for deployment deployment (must choose the dev environment in the shopify cli)
 - `versions prefix` - versions prefix for version control
 
