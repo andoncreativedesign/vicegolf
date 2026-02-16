@@ -181,7 +181,9 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
 
                                         {/* Row 2 */}
                                         <div className="flex flex-col gap-3 w-full">
-                                            <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
+                                            <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">
+                                                Phone No <span className="text-red-500">*</span>
+                                            </label>
                                             <div className="membership-phone-wrapper">
                                                 <PhoneInputField
                                                     label=""
@@ -189,6 +191,9 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                     onChange={(val) => setPhone(val || '')}
                                                     placeholder="Enter phone number"
                                                     hasBorder={false}
+                                                    required
+                                                    minLength={10}
+                                                    error={phone && phone.replace(/\D/g, '').length < 10 ? 'Phone number must be at least 10 digits' : ''}
                                                 />
                                                 <input type="hidden" name="phone" value={phone} />
                                             </div>
@@ -294,7 +299,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                     <div className="pt-12 flex justify-center w-full">
                                         <button
                                             type="submit"
-                                            disabled={isSubmitting}
+                                            disabled={isSubmitting || (phone.length > 0 && phone.replace(/\D/g, '').length < 10)}
                                             className="bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 cursor-pointer min-w-[280px]"
                                         >
                                             {isSubmitting ? 'Processing...' : 'Apply'}
