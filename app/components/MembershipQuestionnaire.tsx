@@ -18,6 +18,13 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
     const [birthDay, setBirthDay] = useState('');
     const [birthMonth, setBirthMonth] = useState('');
     const [birthYear, setBirthYear] = useState('');
+    const [firstName, setFirstName] = useState(customer?.firstName || '');
+    const [lastName, setLastName] = useState(customer?.lastName || '');
+    const [email, setEmail] = useState(customer?.emailAddress?.emailAddress || '');
+
+    const firstNameError = /\d/.test(firstName) ? 'First name cannot contain numbers' : '';
+    const lastNameError = /\d/.test(lastName) ? 'Second name cannot contain numbers' : '';
+    const emailError = email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'Please enter a valid email address' : '';
 
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
@@ -160,11 +167,13 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 type="text"
                                                 name="firstName"
                                                 id="firstName"
-                                                defaultValue={customer?.firstName || ''}
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                                 style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
+                                            {firstNameError && <p className="text-xs text-red-600">{firstNameError}</p>}
                                         </div>
                                         <div className="flex flex-col gap-3 w-full">
                                             <label htmlFor="lastName" className="text-[16px] leading-[28px] text-gray-600">Second name</label>
@@ -172,16 +181,20 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 type="text"
                                                 name="lastName"
                                                 id="lastName"
-                                                defaultValue={customer?.lastName || ''}
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
                                                 required
                                                 className="w-full block bg-[#fafafa] border-none py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                                 style={{ width: '100%', border: 'none', height: '50px', borderRadius: '6px' }}
                                             />
+                                            {lastNameError && <p className="text-xs text-red-600">{lastNameError}</p>}
                                         </div>
 
                                         {/* Row 2 */}
                                         <div className="flex flex-col gap-3 w-full">
-                                            <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">Phone No</label>
+                                            <label htmlFor="phone" className="text-[16px] leading-[28px] text-gray-600">
+                                                Phone No <span className="text-red-500">*</span>
+                                            </label>
                                             <div className="membership-phone-wrapper">
                                                 <PhoneInputField
                                                     label=""
@@ -189,6 +202,9 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                     onChange={(val) => setPhone(val || '')}
                                                     placeholder="Enter phone number"
                                                     hasBorder={false}
+                                                    required
+                                                    minLength={10}
+                                                    error={phone && phone.replace(/\D/g, '').length < 10 ? 'Phone number must be at least 10 digits' : ''}
                                                 />
                                                 <input type="hidden" name="phone" value={phone} />
                                             </div>
@@ -199,11 +215,13 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                 type="email"
                                                 name="email"
                                                 id="email"
-                                                defaultValue={customer?.emailAddress?.emailAddress || ''}
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
                                                 required
                                                 className="w-full block py-4 px-5 focus:outline-none focus:ring-1 focus:ring-black transition-all"
                                                 style={{ width: '100%', border: 'none', height: '50px', background: '#fafafa', color: 'black', borderRadius: '6px' }}
                                             />
+                                            {emailError && <p className="text-xs text-red-600">{emailError}</p>}
                                         </div>
 
                                         {/* Row 3 */}
@@ -294,7 +312,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                     <div className="pt-12 flex justify-center w-full">
                                         <button
                                             type="submit"
-                                            disabled={isSubmitting}
+                                            disabled={isSubmitting || (phone.length > 0 && phone.replace(/\D/g, '').length < 10) || !!firstNameError || !!lastNameError || !!emailError}
                                             className="bg-black text-white px-24 py-5 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 cursor-pointer min-w-[280px]"
                                         >
                                             {isSubmitting ? 'Processing...' : 'Apply'}
