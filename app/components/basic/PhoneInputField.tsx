@@ -100,10 +100,20 @@ export function PhoneInputField({
     ), [availableCountries]);
 
     const handlePhoneChange = (newValue: string | undefined) => {
-        // Enforce a maximum length to prevent unlimited input
-        // Increased to 20 to accommodate longer international numbers (standard is 15 digits + prefix)
-        const max = (inputProps as any).maxLength || 20;
-        if (newValue && newValue.length > max) return;
+        if (!newValue) {
+            onChange(undefined);
+            return;
+        }
+
+        // strictly enforce E.164: + and max 15 digits
+        // newValue from library is usually +[country][number] (no spaces)
+        if (newValue.length > 16) {
+            // Truncate to the first 16 characters (+ plus 15 digits)
+            // This forces the parent state to fail updating the extra character,
+            // or updates it to the truncated version, causing the input to snap back.
+            onChange(newValue.slice(0, 16));
+            return;
+        }
         onChange(newValue);
     };
 
@@ -251,7 +261,7 @@ export function PhoneInputField({
                     inputComponent={"input"}
                     countrySelectComponent={CountrySelectComponent}
                     countries={availableCountries}
-                    maxLength={20}
+                    maxLength={18}
                     {...inputProps}
                 />
             </div>
