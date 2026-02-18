@@ -89,11 +89,9 @@ function SearchAside() {
   // ];
 
   const trendingSearches: Pick<Collection, "handle" | "id" | "title" | "trackingParameters">[] = [
-    { id: 'gid://shopify/Collection/1', handle: 'golf-balls', title: 'Vice Pro Plus', trackingParameters: null },
-    { id: 'gid://shopify/Collection/2', handle: 'golf-balls', title: 'Vice Pro', trackingParameters: null },
-    { id: 'gid://shopify/Collection/3', handle: 'golf-balls', title: 'Vice Golf Pure 2024', trackingParameters: null },
-    { id: 'gid://shopify/Collection/4', handle: 'golf-balls', title: 'Vice Drive', trackingParameters: null },
-    { id: 'gid://shopify/Collection/5', handle: 'golf-balls', title: 'Vice Tour', trackingParameters: null }
+    { id: 'gid://shopify/Collection/1', handle: 'golf-balls', title: 'Golf Balls', trackingParameters: null },
+    { id: 'gid://shopify/Collection/2', handle: 'golf-clubs', title: 'Golf Clubs', trackingParameters: null },
+    { id: 'gid://shopify/Collection/5', handle: 'bundle-offers', title: 'Bundle offers', trackingParameters: null }
   ];
 
   const handleCollectionNavigate = (
