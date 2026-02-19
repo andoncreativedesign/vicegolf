@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { PortableText } from '@portabletext/react';
 import type { PortableTextBlock } from '@portabletext/types';
 
@@ -59,6 +60,8 @@ export default function Banner({ banner }: BannerProps) {
     </div>
   );
 
+  const [isPaused, setIsPaused] = useState(false);
+
   return (
     <div
       className="w-screen overflow-hidden h-10 flex items-center relative"
@@ -68,13 +71,16 @@ export default function Banner({ banner }: BannerProps) {
         marginLeft: 'calc(50% - 50vw)',
         marginRight: 'calc(50% - 50vw)'
       }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       <div className="absolute inset-0 flex items-center overflow-hidden">
         <div
-          className="flex whitespace-nowrap hover:[animation-play-state:paused] cursor-default"
+          className="flex whitespace-nowrap cursor-default"
           style={{
             width: 'max-content',
             animation: 'marquee 60s linear infinite',
+            animationPlayState: isPaused ? 'paused' : 'running'
           }}
         >
           {tickerContent}
