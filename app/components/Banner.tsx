@@ -55,9 +55,8 @@ export default function Banner({ banner }: BannerProps) {
       <div className="flex items-center flex-shrink-0">
         {/* Massive repetition (40x) to handle even the widest possible screens (8K monitors) */}
         {Array(40).fill(0).map((_, i) => (
-          <span key={i} className="inline-flex items-center px-10 text-[11px] md:text-sm font-semibold tracking-wide whitespace-nowrap">
+          <span key={i} className="inline-flex items-center pr-20 text-[11px] md:text-sm font-semibold tracking-wide whitespace-nowrap">
             <BannerText value={banner.content} />
-            <span className="mx-10 opacity-30 select-none text-[8px]">•</span>
           </span>
         ))}
       </div>
@@ -137,12 +136,13 @@ export default function Banner({ banner }: BannerProps) {
         </div>
       </div>
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes marquee {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-50%, 0, 0); }
         }
-      `}</style>
+      ` }} />
 
       <div className="sr-only">
         <BannerText value={banner.content} />
