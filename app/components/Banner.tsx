@@ -24,7 +24,7 @@ const BannerText = ({ value }: { value: PortableTextBlock[] }) => {
       underline: ({ children }: { children: React.ReactNode }) => (
         <u className="underline">{children}</u>
       ),
-      link: ({ value, children }: { value: any, children: React.ReactNode }) => {
+      link: ({ value, children }: { value?: any, children: React.ReactNode }) => {
         const target = (value?.href || '').startsWith('http') ? '_blank' : undefined;
         return (
           <a
@@ -79,7 +79,7 @@ export default function Banner({ banner }: BannerProps) {
           className="flex whitespace-nowrap cursor-default"
           style={{
             width: 'max-content',
-            animation: 'marquee 60s linear infinite',
+            animation: 'marquee 100s linear infinite',
             animationPlayState: isPaused ? 'paused' : 'running'
           }}
         >
