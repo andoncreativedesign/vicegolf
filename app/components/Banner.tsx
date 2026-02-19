@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { PortableText } from '@portabletext/react';
 import type { PortableTextBlock } from '@portabletext/types';
 
@@ -11,7 +11,6 @@ interface BannerProps {
   };
 }
 
-// Custom component for rendering rich text
 const BannerText = ({ value }: { value: PortableTextBlock[] }) => {
   const components = {
     marks: {
@@ -24,7 +23,7 @@ const BannerText = ({ value }: { value: PortableTextBlock[] }) => {
       underline: ({ children }: { children: React.ReactNode }) => (
         <u className="underline">{children}</u>
       ),
-      link: ({ value, children }: { value: any, children: React.ReactNode }) => {
+      link: ({ value, children }: { value?: any, children: React.ReactNode }) => {
         const target = (value?.href || '').startsWith('http') ? '_blank' : undefined;
         return (
           <a
@@ -45,75 +44,106 @@ const BannerText = ({ value }: { value: PortableTextBlock[] }) => {
 };
 
 export default function Banner({ banner }: BannerProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [duration, setDuration] = useState<number | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // Debug log
-  // console.log('Banner component - banner prop:', banner);
+  // Memoize the content block for performance
+  const memoizedContent = useMemo(() => {
+    if (!banner?.content) return null;
+    return (
+      <div className="flex items-center flex-shrink-0">
+        {/* Massive repetition (40x) to handle even the widest possible screens (8K monitors) */}
+        {Array(40).fill(0).map((_, i) => (
+          <span key={i} className="inline-flex items-center pr-20 text-[11px] md:text-sm font-semibold tracking-wide whitespace-nowrap">
+            <BannerText value={banner.content} />
+          </span>
+        ))}
+      </div>
+    );
+  }, [banner?.content]);
 
   useEffect(() => {
-    // console.log('Banner mounted with banner:', banner);
-    const track = trackRef.current;
-    if (!track) return;
+    if (!banner?.content?.length) return;
 
-    // Duplicate content for seamless infinite scroll
-    const content = track.innerHTML;
-    track.innerHTML = content + content;
-  }, [banner]);
+    const calculate = () => {
+      if (contentRef.current) {
+        const width = contentRef.current.offsetWidth;
+        if (width > 0) {
+          const pixelsPerSecond = 50; // Optimized constant speed
+          const nextDuration = width / pixelsPerSecond;
 
-  // If banner is not enabled or not provided, don't render anything
+          // Stability Filter: Only update if the change is more than 0.2s 
+          // to prevent microscopic jitter from sub-pixel rounding
+          setDuration(prev => {
+            if (prev === null) return nextDuration;
+            return Math.abs(prev - nextDuration) > 0.2 ? nextDuration : prev;
+          });
+        }
+      }
+    };
+
+    const observer = new ResizeObserver(() => calculate());
+    if (contentRef.current) observer.observe(contentRef.current);
+
+    calculate();
+    // Safety fallback for slow font loading
+    const timer = setTimeout(calculate, 1000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
+  }, [banner?.content]);
+
   if (!banner?.enabled || !banner?.content?.length) {
-    // console.log('Banner not rendered - banner is disabled or has no content');
     return null;
   }
 
   return (
     <div
-      className="w-screen overflow-hidden h-10 flex items-center relative"
+      className="w-full h-8 md:h-9 flex items-center relative group select-none cursor-default border-b border-white/10 overflow-hidden"
       style={{
         backgroundColor: banner.backgroundColor,
         color: banner.textColor,
+        margin: '0 auto',
+        // Force full viewport breakthrough
+        width: '100vw',
         marginLeft: 'calc(50% - 50vw)',
-        marginRight: 'calc(50% - 50vw)'
+        opacity: duration ? 1 : 0,
+        transition: 'opacity 0.6s ease-in-out',
       }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="absolute inset-0 flex items-center overflow-hidden">
+      <div className="flex items-center whitespace-nowrap h-full">
         <div
-          ref={trackRef}
-          className="whitespace-nowrap"
+          className="flex whitespace-nowrap"
           style={{
-            display: 'inline-flex',
-            animation: 'marquee 120s linear infinite',
-            paddingLeft: '100%', // Start off-screen
-            animationPlayState: 'running'
-          }}
-          onMouseEnter={() => {
-            if (trackRef.current) {
-              trackRef.current.style.animationPlayState = 'paused';
-            }
-          }}
-          onMouseLeave={() => {
-            if (trackRef.current) {
-              trackRef.current.style.animationPlayState = 'running';
-            }
+            animation: duration ? `marquee ${duration}s linear infinite` : 'none',
+            animationPlayState: isPaused ? 'paused' : 'running',
+            willChange: 'transform',
           }}
         >
-          {Array(4).fill(0).map((_, i) => (
-            <span key={i} className="inline-flex items-center mx-10 text-xs font-semibold tracking-wider">
-              <BannerText value={banner.content} />
-              {i < 3 && <span className="mx-2"></span>}
-            </span>
-          ))}
+          {/* Measured content container */}
+          <div ref={contentRef} className="flex whitespace-nowrap flex-shrink-0">
+            {memoizedContent}
+          </div>
+          {/* Duplicated for seamless reset */}
+          <div className="flex whitespace-nowrap flex-shrink-0">
+            {memoizedContent}
+          </div>
         </div>
       </div>
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-100%); }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
-      `}</style>
+      ` }} />
 
-      {/* Hidden portable text for SEO and accessibility */}
       <div className="sr-only">
         <BannerText value={banner.content} />
       </div>
