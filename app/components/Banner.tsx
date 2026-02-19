@@ -1,4 +1,3 @@
-import { useRef, useEffect } from 'react';
 import { PortableText } from '@portabletext/react';
 import type { PortableTextBlock } from '@portabletext/types';
 
@@ -45,26 +44,20 @@ const BannerText = ({ value }: { value: PortableTextBlock[] }) => {
 };
 
 export default function Banner({ banner }: BannerProps) {
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  // Debug log
-  // console.log('Banner component - banner prop:', banner);
-
-  useEffect(() => {
-    // console.log('Banner mounted with banner:', banner);
-    const track = trackRef.current;
-    if (!track) return;
-
-    // Duplicate content for seamless infinite scroll
-    const content = track.innerHTML;
-    track.innerHTML = content + content;
-  }, [banner]);
-
   // If banner is not enabled or not provided, don't render anything
   if (!banner?.enabled || !banner?.content?.length) {
-    // console.log('Banner not rendered - banner is disabled or has no content');
     return null;
   }
+
+  const tickerContent = (
+    <div className="flex items-center">
+      {Array(10).fill(0).map((_, i) => (
+        <span key={i} className="inline-flex items-center mx-10 text-xs font-semibold tracking-wider whitespace-nowrap">
+          <BannerText value={banner.content} />
+        </span>
+      ))}
+    </div>
+  );
 
   return (
     <div
@@ -78,38 +71,21 @@ export default function Banner({ banner }: BannerProps) {
     >
       <div className="absolute inset-0 flex items-center overflow-hidden">
         <div
-          ref={trackRef}
-          className="whitespace-nowrap"
+          className="flex whitespace-nowrap hover:[animation-play-state:paused] cursor-default"
           style={{
-            display: 'inline-flex',
-            animation: 'marquee 120s linear infinite',
-            paddingLeft: '100%', // Start off-screen
-            animationPlayState: 'running'
-          }}
-          onMouseEnter={() => {
-            if (trackRef.current) {
-              trackRef.current.style.animationPlayState = 'paused';
-            }
-          }}
-          onMouseLeave={() => {
-            if (trackRef.current) {
-              trackRef.current.style.animationPlayState = 'running';
-            }
+            width: 'max-content',
+            animation: 'marquee 60s linear infinite',
           }}
         >
-          {Array(4).fill(0).map((_, i) => (
-            <span key={i} className="inline-flex items-center mx-10 text-xs font-semibold tracking-wider">
-              <BannerText value={banner.content} />
-              {i < 3 && <span className="mx-2"></span>}
-            </span>
-          ))}
+          {tickerContent}
+          {tickerContent}
         </div>
       </div>
 
       <style jsx>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-100%); }
+          100% { transform: translateX(-50%); }
         }
       `}</style>
 
