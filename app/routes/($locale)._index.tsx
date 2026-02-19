@@ -436,7 +436,7 @@ export default function Homepage() {
       ...item,
       url: item.resourceId
         ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${encodeURIComponent(item.title)}`
-        : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items))}/${encodeURIComponent(item.title)}`,
+        : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item?.items || []))}/${encodeURIComponent(item.title)}`,
       items: item.items?.length ? updateMenuItems(item.items) : [],
     }));
   };
