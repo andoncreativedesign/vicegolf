@@ -43,7 +43,7 @@ export function PageLayout({
       {header && (
         <Header header={header} cart={cart} isLoggedIn={isLoggedIn} publicStoreDomain={publicStoreDomain} banner={banner} />
       )}
-      <main className={`bg-[#fafafa] ${banner?.enabled ? 'pt-[160px] md:pt-[180px]' : 'pt-[120px] md:pt-[140px]'}`}>
+      <main className={`bg-[#fafafa] ${banner?.enabled ? 'pt-[90px] md:pt-[110px] lg:pt-[180px]' : 'pt-[60px] md:pt-[80px] lg:pt-[140px]'}`}>
         <div className="w-full max-w-[2560px] mx-auto">
           <div className="w-full max-w-[1920px] mx-auto ">
             {children}
