@@ -87,10 +87,9 @@ export function ChatbotPopup({ isOpen, onClose }: ChatbotPopupProps) {
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.searchQuery || 'Here are some results for your search:',
+        text: data.recommendation || 'Here are some results for your search:',
         sender: 'bot',
         timestamp: new Date(),
-        recommendation: data.recommendation,
         products: data.products,
       };
 
@@ -152,12 +151,7 @@ export function ChatbotPopup({ isOpen, onClose }: ChatbotPopupProps) {
                 {message.sender === 'bot' && <Bot size={16} className="mt-1 flex-shrink-0" />}
                 {message.sender === 'user' && <User size={16} className="mt-1 flex-shrink-0" />}
                 <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium">{message.text}</p>
-                  {message.recommendation && (
-                    <div className="text-xs italic bg-blue-50/50 p-2 rounded border-l-2 border-blue-400">
-                      {message.recommendation}
-                    </div>
-                  )}
+                  <p className="text-sm">{message.text}</p>
                   {message.products && message.products.length > 0 && (
                     <div className="grid grid-cols-1 gap-2 mt-2">
                       {message.products.map((product) => (
