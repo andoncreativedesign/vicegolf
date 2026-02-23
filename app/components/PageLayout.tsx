@@ -12,6 +12,7 @@ import HeaderMenu from './Header/HeaderMenu';
 import { CartMain } from '~/components/CartMain';
 import { SEARCH_ENDPOINT, SearchFormPredictive, } from '~/components/SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
+import { ChatbotButton, ChatbotPopup } from './Chatbot/ChatbotButton';
 import type { MenuData } from '~/lib/shopify/product-queries';
 import type { Collection } from '@shopify/hydrogen/storefront-api-types';
 import type { BannerData } from '~/lib/sanity/home';
@@ -35,6 +36,8 @@ export function PageLayout({
   publicStoreDomain,
   banner,
 }: PageLayoutProps) {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
@@ -51,6 +54,8 @@ export function PageLayout({
         </div>
       </main>
       <Footer footer={footer} header={header} publicStoreDomain={publicStoreDomain} />
+      <ChatbotButton isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />
+      <ChatbotPopup isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </Aside.Provider>
   );
 }
