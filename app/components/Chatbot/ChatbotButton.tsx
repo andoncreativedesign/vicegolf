@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import axios from 'axios';
 
 interface Message {
   id: string;
@@ -79,19 +80,10 @@ export function ChatbotPopup({ isOpen, onClose }: ChatbotPopupProps) {
     setIsTyping(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: userMessage.text }),
+      // Use axios instead of fetch — consistent with axiosInsatances.ts pattern
+      const { data } = await axios.post<ChatResponse>('/api/chat', {
+        query: userMessage.text,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to get response from AI');
-      }
-
-      const data = (await response.json()) as ChatResponse;
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -99,17 +91,17 @@ export function ChatbotPopup({ isOpen, onClose }: ChatbotPopupProps) {
         sender: 'bot',
         timestamp: new Date(),
         recommendation: data.recommendation,
-        products: data.products
+        products: data.products,
       };
 
       setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error('Chat error:', error);
+    } catch (error: any) {
+      console.error('Chat error:', error.response?.data || error.message);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: 'Sorry, I\'m having trouble connecting right now. Please try again later.',
         sender: 'bot',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
