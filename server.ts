@@ -33,11 +33,14 @@ export default {
       const response = await handleRequest(request);
 
       if (hydrogenContext.session.isPending) {
-        response.headers.set(
+        response.headers.append(
           'Set-Cookie',
           await hydrogenContext.session.commit(),
         );
       }
+      
+      const cookies = response.headers.getSetCookie ? response.headers.getSetCookie() : response.headers.get('Set-Cookie');
+      console.log('--- DEBUG COOKIES at end of server.ts ---', cookies);
 
       if (response.status === 404) {
         /**
