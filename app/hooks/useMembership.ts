@@ -16,9 +16,8 @@ export function useMembership() {
     };
     const automaticDiscounts = data?.automaticDiscounts || [];
 
-    const customerTags = customer?.tags?.map((t: string) => t.toLowerCase()) || [];
-    const segments = ['vice_crew', 'vice_squad', 'vice_legends'];
-    const userSegment = segments.find(s => customerTags.includes(s));
+    const customerTags = customer?.tags?.map((t: string) => t.toLowerCase().replace(/\s+/g, '_')) || [];
+    const userSegment = customerTags.find((tag: string) => tag.startsWith('vice_'));
     const isMember = !!userSegment;
 
     // Calculate the best TRUE GLOBAL discount available from the filtered list (applies to everything)
