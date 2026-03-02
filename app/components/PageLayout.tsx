@@ -12,6 +12,7 @@ import HeaderMenu from './Header/HeaderMenu';
 import { CartMain } from '~/components/CartMain';
 import { SEARCH_ENDPOINT, SearchFormPredictive, } from '~/components/SearchFormPredictive';
 import { SearchResultsPredictive } from '~/components/SearchResultsPredictive';
+// import { ChatbotButton, ChatbotPopup } from './Chatbot/ChatbotButton';
 import type { MenuData } from '~/lib/shopify/product-queries';
 import type { Collection } from '@shopify/hydrogen/storefront-api-types';
 import type { BannerData } from '~/lib/sanity/home';
@@ -35,6 +36,8 @@ export function PageLayout({
   publicStoreDomain,
   banner,
 }: PageLayoutProps) {
+  // const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
@@ -43,7 +46,7 @@ export function PageLayout({
       {header && (
         <Header header={header} cart={cart} isLoggedIn={isLoggedIn} publicStoreDomain={publicStoreDomain} banner={banner} />
       )}
-      <main className={`bg-[#fafafa] ${banner?.enabled ? 'pt-[160px] md:pt-[180px]' : 'pt-[120px] md:pt-[140px]'}`}>
+      <main className={`bg-[#fafafa] ${banner?.enabled ? 'pt-[90px] md:pt-[110px] lg:pt-[180px]' : 'pt-[60px] md:pt-[80px] lg:pt-[140px]'}`}>
         <div className="w-full max-w-[2560px] mx-auto">
           <div className="w-full max-w-[1920px] mx-auto ">
             {children}
@@ -51,6 +54,8 @@ export function PageLayout({
         </div>
       </main>
       <Footer footer={footer} header={header} publicStoreDomain={publicStoreDomain} />
+      {/* <ChatbotButton isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} /> */}
+      {/* <ChatbotPopup isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} /> */}
     </Aside.Provider>
   );
 }

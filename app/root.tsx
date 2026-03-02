@@ -76,43 +76,39 @@ export async function loader(args: Route.LoaderArgs) {
   console.log('DEBUG: Customer data resolved:', !!customer);
   console.log('DEBUG: Automatic discounts resolved:', automaticDiscounts?.length);
 
-  // Calculate the best membership discount based on customer segments
+  // Dynamically calculate the best membership discount based on customer segments
   const customerTags = (customer?.tags || []).map((t: string) => t.toLowerCase().replace(/\s+/g, '_'));
-  const segments = ['vice_crew', 'vice_squad', 'vice_legends', 'vice_legend'];
-  const userSegment = segments.find(s => customerTags.includes(s));
+  // Find any tag starting with 'vice_' which represents the user's tier
+  const userSegment = customerTags.find((s: string) => s.startsWith('vice_'));
 
-  // Helper to identify a discount's tier based on its title
-  const getTierFromTitle = (title: string = '') => {
-    // We check for the exact titles you provided
-    if (title === 'Vice Legend' || title === 'Vice Legends') return 'legend';
-    if (title === 'Vice Squad') return 'squad';
-    if (title === 'Vice Crew') return 'crew';
-    return null;
+  // Normalize names to match tags and titles reliably (e.g. 'Vice Staff' -> 'vice_staff')
+  const normalizeTierName = (name: string) => {
+    let normalized = name.toLowerCase().replace(/\s+/g, '_');
+    // Maintain backwards compatibility for legend vs legends mismatch
+    if (normalized === 'vice_legends') return 'vice_legend';
+    return normalized;
   };
 
-  const userTier = userSegment ? getTierFromTitle(userSegment.replace('vice_', 'Vice ').replace('crew', 'Crew').replace('squad', 'Squad').replace('legend', 'Legend').replace('legends', 'Legends')) : null;
+  const normalizedUserSegment = userSegment ? normalizeTierName(userSegment) : null;
 
-  // Manual matching for the userTier variable since userSegment is lowercase
-  let mappedUserTier = null;
-  if (userSegment?.includes('legend')) mappedUserTier = 'legend';
-  if (userSegment?.includes('squad')) mappedUserTier = 'squad';
-  if (userSegment?.includes('crew')) mappedUserTier = 'crew';
-
-  // Filter automatic discounts to strictly follow tier rules:
-  // 1. If a discount is named exactly 'Vice Legend', 'Vice Squad', or 'Vice Crew', only show it to users in THAT tier.
+  // Filter automatic discounts to strictly follow tier rules based on naming convention
+  // 1. If a discount starts with 'Vice ', assume it is a tier discount.
   // 2. All other automatic discounts (global ones) are shown to everyone.
   const eligibleDiscounts = (automaticDiscounts || []).filter((d: any) => {
-    const discountTier = getTierFromTitle(d.title);
-    if (!discountTier) return true; // Global discount (any other name)
-    return discountTier === mappedUserTier; // Only matches the user's specific tier
+    const isTierDiscount = d.title && d.title.toLowerCase().startsWith('vice');
+
+    if (!isTierDiscount) return true; // Global discount
+
+    // It's a tier discount, check if it matches the current user's normalized tier
+    return normalizeTierName(d.title) === normalizedUserSegment;
   });
 
   let membershipDiscount = { percentage: 0, amount: null, currencyCode: null, title: '', appliesToAll: false, eligibleProducts: [], eligibleCollections: [] };
 
-  if (userSegment && eligibleDiscounts.length) {
+  if (normalizedUserSegment && eligibleDiscounts.length) {
     // Find the best discount among the ones specifically for this tier
     const bestTierDiscount = [...eligibleDiscounts]
-      .filter(d => getTierFromTitle(d.title) !== null)
+      .filter(d => d.title && d.title.toLowerCase().startsWith('vice'))
       .sort((a: any, b: any) => {
         // Prioritize amount if percentage is 0, else prioritize percentage
         const aVal = a.percentage || 0;

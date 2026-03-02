@@ -159,7 +159,7 @@ export function Header({
       </div>
 
       {/* Navigation Menu - Visible only on desktop */}
-      <nav className="hidden md:block w-full py-3">
+      <nav className="hidden lg:block w-full py-3">
         <div className="w-full px-2">
           {menuItems && <HeaderMenu viewport="desktop" menuItems={menuItems} />}
         </div>

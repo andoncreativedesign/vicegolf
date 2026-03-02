@@ -13,52 +13,66 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
-  const { isMember, discountPercentage, discountAmount, membershipDiscount } = useMembership();
+  const { isMember, discountPercentage, discountAmount, membershipDiscount, getBestDiscountForProduct } = useMembership();
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
-  const total = cart?.cost?.totalAmount;
+  const originalTotal = cart?.cost?.totalAmount;
 
-  // Calculate actual applied values for display to avoid mismatches
-  let actualPercentage = 0;
-  let actualAmount = 0;
+  // Calculate line-level original sum and expected discounted sum
+  let lineOriginalSum = 0;
+  let lineExpectedDiscountedSum = 0;
 
-  // Calculate line-level original sum to detect discounts already applied to lines
-  const lineOriginalSum = cart?.lines?.nodes?.reduce((acc: number, line: any) => {
-    const discountSum = line?.discountAllocations?.reduce((sum: number, d: any) => sum + parseFloat(d.discountedAmount.amount), 0) || 0;
-
+  cart?.lines?.nodes?.forEach((line: any) => {
     const cost = line?.cost;
     const merchandise = line?.merchandise;
+    if (!cost || !merchandise) return;
 
-    if (!cost || !merchandise) return acc;
+    const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise.price?.amount || '0');
+    const quantity = line.quantity || 1;
+    const lineBaseTotal = basePrice * quantity;
 
-    const compareAt = cost.compareAtAmountPerQuantity || merchandise.compareAtPrice || (
-      (merchandise.price && parseFloat(merchandise.price.amount) > parseFloat(cost.amountPerQuantity.amount))
-        ? merchandise.price
-        : null
-    );
+    const productCollections = merchandise.product?.collections?.nodes?.map((c: any) => c.id) || [];
+    const { percentage, amount } = getBestDiscountForProduct(merchandise.product.id, productCollections, basePrice);
 
-    let lineOriginal = 0;
-    if (discountSum > 0 && cost.totalAmount) {
-      lineOriginal = parseFloat(cost.totalAmount.amount) + discountSum;
-    } else if (compareAt) {
-      lineOriginal = parseFloat(compareAt.amount) * line.quantity;
-    } else if (cost.amountPerQuantity) {
-      lineOriginal = parseFloat(cost.amountPerQuantity.amount) * line.quantity;
+    let lineExpectedTotal = lineBaseTotal;
+
+    const discountSum = line?.discountAllocations?.reduce((sum: number, d: any) => sum + parseFloat(d.discountedAmount.amount), 0) || 0;
+    const shopifyLineTotal = parseFloat(cost.totalAmount?.amount || '0');
+
+    if (shopifyLineTotal < lineBaseTotal) {
+      // Shopify has already applied a discount to this line
+      lineExpectedTotal = shopifyLineTotal;
+    } else {
+      // Apply our local frontend discount
+      if (amount > 0) {
+        lineExpectedTotal = Math.max(0, (basePrice - amount) * quantity);
+      } else if (percentage > 0) {
+        lineExpectedTotal = basePrice * (1 - percentage) * quantity;
+      }
     }
 
-    return acc + lineOriginal;
-  }, 0) || 0;
+    lineOriginalSum += lineBaseTotal;
+    lineExpectedDiscountedSum += lineExpectedTotal;
+  });
 
-  const currentSubtotalVal = subtotal?.amount ? parseFloat(subtotal.amount.replace(/,/g, '')) : 0;
-  const totVal = total?.amount ? parseFloat(total.amount.replace(/,/g, '')) : 0;
+  const shopifySubtotalVal = subtotal?.amount ? parseFloat(subtotal.amount.replace(/,/g, '')) : 0;
+  const shopifyTotalVal = originalTotal?.amount ? parseFloat(originalTotal.amount.replace(/,/g, '')) : 0;
 
-  // Base value for discount calculation is the maximum of Shopify's subtotal or our calculated original sum
+  // Our accurate total takes the lowest of Shopify's total OR our manually calculated discounted sum
+  // This shields us from Shopify Cart API delays
+  let currentSubtotalVal = Math.min(shopifySubtotalVal, lineExpectedDiscountedSum);
+  let totVal = Math.min(shopifyTotalVal, lineExpectedDiscountedSum + (shopifyTotalVal - shopifySubtotalVal)); // maintain any taxes/shipping added in total
+
+  // Base value for display
   let baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
 
-  // Fallback: If no discount detected yet but user is member, they might have a hidden tier discount
+  // Fallback: If no discount detected yet but user is member, they might have a hidden tier discount (legacy fallback)
   if (baseVal <= totVal && isMember && (membershipDiscount?.percentage || 0) > 0) {
     baseVal = totVal / (1 - membershipDiscount.percentage);
   }
+
+  let actualPercentage = 0;
+  let actualAmount = 0;
 
   if (baseVal > totVal) {
     actualPercentage = Math.round((1 - (totVal / baseVal)) * 100) / 100;
@@ -66,6 +80,10 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   }
 
   const displayPercentage = (actualPercentage * 100).toFixed(0);
+
+  // Create overridden subtotal/total objects for Money component
+  const displaySubtotal = subtotal ? { ...subtotal, amount: String(currentSubtotalVal) } : undefined;
+  const displayTotal = originalTotal ? { ...originalTotal, amount: String(totVal) } : undefined;
 
   return (
     <div
@@ -81,7 +99,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             <span className="text-gray-600">Subtotal</span>
             <div className="flex flex-col items-end">
               <span className="font-medium text-gray-900">
-                {subtotal?.amount ? <Money data={subtotal} /> : '-'}
+                {displaySubtotal?.amount ? <Money data={displaySubtotal} /> : '-'}
               </span>
               {baseVal > currentSubtotalVal && (
                 <span className="text-xs text-gray-400 line-through">
@@ -106,19 +124,19 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
           )}
 
 
-          {total && (
+          {displayTotal && (
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-900 font-medium">
                   Total{' '}
                   <span className="text-gray-600 font-normal">
-                    {subtotal?.amount === total.amount
+                    {subtotal?.amount === displayTotal.amount
                       ? '(Incl. taxes and excl. shipping)'
                       : '(Incl. taxes and shipping)'}
                   </span>
                 </span>
                 <span className="font-medium text-gray-900">
-                  <Money data={total} />
+                  <Money data={displayTotal} />
                 </span>
               </div>
             </div>

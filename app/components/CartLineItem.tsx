@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 import { ProductPrice } from './ProductPrice';
 import { useAside } from './Aside';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import { useMembership } from '~/hooks/useMembership';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -20,6 +21,7 @@ export function CartLineItem({
   const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   const { close } = useAside();
+  const { getBestDiscountForProduct } = useMembership();
 
   return (
     <li key={id} className="cart-line group flex gap-4 py-6 transition-colors duration-200 px-4 rounded-lg">
@@ -71,7 +73,30 @@ export function CartLineItem({
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900">
                 <ProductPrice
-                  price={line?.cost?.totalAmount}
+                  price={(() => {
+                    const cost = line?.cost;
+                    if (!cost) return undefined;
+
+                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || '0');
+                    const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+                    const { percentage, amount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+
+                    // If Shopify Backend already applied a discount, use it natively
+                    if (parseFloat(cost.totalAmount.amount) < basePrice * line.quantity) {
+                      return cost.totalAmount;
+                    }
+
+                    // Otherwise, manually apply our frontend member discount to the price
+                    if (amount > 0) {
+                      const newTotal = Math.max(0, (basePrice - amount) * line.quantity);
+                      return { amount: String(newTotal), currencyCode: cost.totalAmount.currencyCode };
+                    } else if (percentage > 0) {
+                      const newTotal = basePrice * (1 - percentage) * line.quantity;
+                      return { amount: String(newTotal), currencyCode: cost.totalAmount.currencyCode };
+                    }
+
+                    return cost.totalAmount;
+                  })()}
                   compareAtPrice={(() => {
                     const cost = line?.cost;
                     if (!cost) return null;
@@ -79,6 +104,10 @@ export function CartLineItem({
                     const discountAllocations = (line as any).discountAllocations;
                     const discountSum = discountAllocations?.reduce((acc: number, discount: any) =>
                       acc + parseFloat(discount.discountedAmount.amount), 0) || 0;
+
+                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || '0');
+                    const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+                    const { percentage, amount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
 
                     if (cost.compareAtAmountPerQuantity?.amount &&
                       cost.totalAmount.amount !== cost.compareAtAmountPerQuantity.amount) {
@@ -92,6 +121,14 @@ export function CartLineItem({
                       return {
                         amount: String(parseFloat(cost.totalAmount.amount) + discountSum),
                         currencyCode: cost.totalAmount.currencyCode,
+                      };
+                    }
+
+                    // If frontend member discount is active, use amountPerQuantity as compareAt
+                    if ((amount > 0 || percentage > 0) && parseFloat(cost.totalAmount.amount) >= basePrice * line.quantity) {
+                      return {
+                        amount: String(basePrice * line.quantity),
+                        currencyCode: cost.amountPerQuantity.currencyCode
                       };
                     }
 
