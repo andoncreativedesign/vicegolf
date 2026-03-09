@@ -45,19 +45,64 @@ type ProductImageType = {
   width?: number | null;
   height?: number | null;
 };
-export const meta: Route.MetaFunction = ({ data }) => {
-  return [
-    { title: `Vice Golf | ${data?.product.title ?? ''}` },
+export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
+  if (!data?.product) {
+    return [{ title: 'Vice Golf' }];
+  }
+
+  const { product, url } = data;
+  const title = product.seo?.title ?? product.title;
+  const description = product.seo?.description ?? '';
+
+  const metaTags = [
+    { title: `Vice Golf | ${title}` },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:type', content: 'product' },
+    { property: 'og:url', content: url },
     {
       rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
+      href: `/products/${product.handle}`,
     },
   ];
+
+  const imageObj = product.featuredImage || product.images?.nodes?.[0] || product.selectedOrFirstAvailableVariant?.image;
+  if (imageObj?.url) {
+    let imageUrl = imageObj.url;
+    if (imageUrl.startsWith('//')) {
+      imageUrl = `https:${imageUrl}`;
+    }
+
+    metaTags.push({ property: 'og:image', content: imageUrl });
+    metaTags.push({ property: 'og:image:secure_url', content: imageUrl });
+
+    if (imageObj.width) {
+      metaTags.push({ property: 'og:image:width', content: String(imageObj.width) });
+    }
+    if (imageObj.height) {
+      metaTags.push({ property: 'og:image:height', content: String(imageObj.height) });
+    }
+    if (imageObj.altText) {
+      metaTags.push({ property: 'og:image:alt', content: imageObj.altText });
+    }
+
+    // Add twitter specific tags
+    metaTags.push({ property: 'twitter:card', content: 'summary_large_image' });
+    metaTags.push({ property: 'twitter:image', content: imageUrl });
+    if (imageObj.altText) {
+      metaTags.push({ property: 'twitter:image:alt', content: imageObj.altText });
+    }
+  }
+
+  console.log(`Product Meta Tags for ${product.title}:`, JSON.stringify(metaTags, null, 2));
+
+  return metaTags;
 };
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
   const deferredData = await loadDeferredData({ ...args, product: criticalData.product });
-  return { ...deferredData, ...criticalData };
+  return { ...deferredData, ...criticalData, url: args.request.url };
 }
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
   const { handle } = params;

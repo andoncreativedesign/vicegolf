@@ -17,8 +17,63 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 import { ChevronRight } from 'lucide-react';
 
-export const meta: Route.MetaFunction = ({ data }) => {
-    return [{ title: `Vice Golf | ${data?.collection?.title ?? ''} Collection` }];
+export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
+    if (!data?.collection) {
+        return [{ title: 'Vice Golf | Collection' }];
+    }
+
+    const { collection, url, handle } = data;
+    const title = collection.seo?.title ?? `${collection.title || handle} Collection`;
+    const description = collection.seo?.description ?? collection.description ?? '';
+
+    const metaTags = [
+        { title: `Vice Golf | ${title}` },
+        { name: 'description', content: description },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: url },
+        {
+            rel: 'canonical',
+            href: url,
+        },
+    ];
+
+    const collectionImage = collection.image;
+    const firstProduct = collection.products?.edges?.[0]?.node;
+    const firstProductImage = firstProduct?.featuredImage || firstProduct?.images?.nodes?.[0];
+
+    const imageObj = collectionImage || firstProductImage;
+    let finalImageUrl = imageObj?.url;
+
+    if (finalImageUrl) {
+        if (finalImageUrl.startsWith('//')) {
+            finalImageUrl = `https:${finalImageUrl}`;
+        }
+        metaTags.push({ property: 'og:image', content: finalImageUrl });
+        metaTags.push({ property: 'og:image:secure_url', content: finalImageUrl });
+
+        if (imageObj?.width) {
+            metaTags.push({ property: 'og:image:width', content: String(imageObj.width) });
+        }
+        if (imageObj?.height) {
+            metaTags.push({ property: 'og:image:height', content: String(imageObj.height) });
+        }
+        if (imageObj?.altText) {
+            metaTags.push({ property: 'og:image:alt', content: imageObj.altText });
+        }
+
+        metaTags.push({ property: 'twitter:card', content: 'summary_large_image' });
+        metaTags.push({ property: 'twitter:image', content: finalImageUrl });
+
+        if (imageObj?.altText) {
+            metaTags.push({ property: 'twitter:image:alt', content: imageObj.altText });
+        }
+    }
+
+    console.log(`Collection Meta Tags for ${title}:`, JSON.stringify(metaTags, null, 2));
+
+    return metaTags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -28,7 +83,7 @@ export async function loader(args: Route.LoaderArgs) {
     // Await the critical data required to render initial state of the page
     const criticalData = await loadCriticalData(args);
 
-    return { ...deferredData, ...criticalData };
+    return { ...deferredData, ...criticalData, url: args.request.url };
 }
 
 /**
@@ -182,7 +237,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     const decodedIds = JSON.parse(decodeURIComponent(ids));
     const decodedHandle = decodeURIComponent(handle); // Keep for UI/display (e.g., breadcrumbs)
 
-    
+
 
     // OLD: Convert space-separated handle to Shopify format (golf-balls)
     // const shopifyHandle = decodedHandle.toLowerCase().replace(/\s+/g, '-');

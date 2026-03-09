@@ -435,6 +435,15 @@ fragment ProductItem on Product {
     width
     height
   }
+    images(first: 1) {
+    nodes {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
     priceRange {
         minVariantPrice {
             ...MoneyProductItem
@@ -1113,7 +1122,14 @@ const PRODUCT_FRAGMENT = `#graphql
     collections(first: 20) {
       nodes {
         id
+        handle
       }
+    }
+    featuredImage {
+      url
+      altText
+      width
+      height
     }
     images(first: 10) {
       nodes {
