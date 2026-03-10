@@ -16,7 +16,7 @@ const server = spawn('npm', ['run', 'dev:server'], {
 });
 
 // Run initial type generation with --watch flag to avoid WebSocket conflicts
-console.log('🔄 Generating React Router types...');
+// console.log('🔄 Generating React Router types...');
 const initialTypegen = spawn('npx', ['react-router', 'typegen'], {
   stdio: ['inherit', 'inherit', 'pipe'], // Pipe stderr to suppress WebSocket warnings
   shell: true,
@@ -32,26 +32,26 @@ initialTypegen.stderr?.on('data', (data) => {
 });
 
 initialTypegen.on('close', () => {
-  console.log('✅ Initial types generated');
+  // console.log('✅ Initial types generated');
   
   // Show dev server URL
   const port = process.env.PORT || 3000;
-  console.log('\n🚀 Express server ready!\n');
-  console.log(`  ➜  Local:   http://localhost:${port}`);
-  console.log(`  ➜  Network: use --host to expose\n`);
+  // console.log('\n🚀 Express server ready!\n');
+  // console.log(`  ➜  Local:   http://localhost:${port}`);
+  // console.log(`  ➜  Network: use --host to expose\n`);
 });
 
 // Watch for route changes
 const routesDir = join(rootDir, 'app', 'routes');
 const routesFile = join(rootDir, 'app', 'routes.ts');
 
-console.log('👀 Watching for route changes...');
+// console.log('👀 Watching for route changes...');
 
 let typegenTimeout;
 const runTypegen = () => {
   clearTimeout(typegenTimeout);
   typegenTimeout = setTimeout(() => {
-    console.log('🔄 Route change detected, regenerating types...');
+    // console.log('🔄 Route change detected, regenerating types...');
     const typegen = spawn('npx', ['react-router', 'typegen'], {
       stdio: ['inherit', 'inherit', 'pipe'],
       shell: true,
@@ -68,7 +68,7 @@ const runTypegen = () => {
     
     typegen.on('close', (code) => {
       if (code === 0) {
-        console.log('✅ Types regenerated');
+        // console.log('✅ Types regenerated');
       } else {
         console.error('❌ Type generation failed');
       }
@@ -90,7 +90,7 @@ watch(routesFile, () => {
 
 // Handle cleanup
 process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down...');
+  // console.log('\n🛑 Shutting down...');
   server.kill();
   process.exit(0);
 });

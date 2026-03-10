@@ -200,8 +200,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         }),
     ]);
 
-    console.log('\n\ngolf collection ');
-    console.log(JSON.stringify(collection?.nodes[0]?.products?.edges));
+    // console.log('\n\ngolf collection ');
+    // console.log(JSON.stringify(collection?.nodes[0]?.products?.edges));
 
     if (!collection || !collection.nodes?.length) {
         throw new Response(`Collection ${decodedHandle} not found`, {
@@ -212,7 +212,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     // NEW: Extract the true collection handle from Shopify's response
     // This is the full, canonical handle (e.g., "junior-towels")—use it for Sanity lookup
     const trueCollectionHandle = collection.nodes[0]?.handle; // Assumes first node is primary; adjust if multi-node logic changes
-    console.log('🔍 Debug: True collection handle from Shopify:', trueCollectionHandle);
+    // console.log('🔍 Debug: True collection handle from Shopify:', trueCollectionHandle);
 
     if (!trueCollectionHandle) {
         console.warn('⚠️ No collection handle found in response—falling back to URL-derived');
@@ -296,8 +296,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     // NEW: Use trueCollectionHandle for Sanity query
     const listingData = await getListingByCollectionHandle(trueCollectionHandle || decodedHandle.toLowerCase().replace(/\s+/g, '-'));
 
-    console.log("\n\nupdatedCollection data 213123");
-    console.log(JSON.stringify(updatedCollection?.products?.edges?.[0]));
+    // console.log("\n\nupdatedCollection data 213123");
+    // console.log(JSON.stringify(updatedCollection?.products?.edges?.[0]));
 
     // ... (your existing family extraction, queries, and attachment logic remains unchanged)
     const families = [
@@ -422,8 +422,8 @@ export default function Collection() {
     const { collection, handle, listing } = useLoaderData<typeof loader>();
 
     useEffect(() => {
-        console.log("collections data get by ids", collection)
-        console.log("listing data from sanity", listing)
+        // console.log("collections data get by ids", collection)
+        // console.log("listing data from sanity", listing)
     }, [collection, listing])
 
     const hasProducts = Boolean(

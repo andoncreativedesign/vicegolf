@@ -5,25 +5,25 @@ import type {MenuFragment} from 'storefrontapi.generated';
  */
 export function debugMenuItems(menu: MenuFragment | null | undefined, menuName = 'Menu') {
   if (!menu?.items) {
-    console.log(`🔍 ${menuName}: No menu items found`);
+    // console.log(`🔍 ${menuName}: No menu items found`);
     return;
   }
 
-  console.log(`🔍 ${menuName} Items (${menu.items.length} total):`);
+  // console.log(`🔍 ${menuName} Items (${menu.items.length} total):`);
   
   menu.items.forEach((item, index) => {
-    console.log(`  ${index + 1}. ${item.title}`);
-    console.log(`     URL: ${item.url}`);
-    console.log(`     Type: ${item.type}`);
-    console.log(`     ID: ${item.id}`);
+    // console.log(`  ${index + 1}. ${item.title}`);
+    // console.log(`     URL: ${item.url}`);
+    // console.log(`     Type: ${item.type}`);
+    // console.log(`     ID: ${item.id}`);
     
     if (item.items && item.items.length > 0) {
-      console.log(`     Sub-items (${item.items.length}):`);
+      // console.log(`     Sub-items (${item.items.length}):`);
       item.items.forEach((subItem, subIndex) => {
-        console.log(`       ${index + 1}.${subIndex + 1}. ${subItem.title} -> ${subItem.url}`);
+        // console.log(`       ${index + 1}.${subIndex + 1}. ${subItem.title} -> ${subItem.url}`);
       });
     }
-    console.log('');
+    // console.log('');
   });
 }
 
