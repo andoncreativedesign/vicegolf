@@ -508,6 +508,7 @@ query GetProductsByCollectionIds(
   $country: CountryCode
   $language: LanguageCode
   $first: Int
+  $last: Int
   $startCursor: String
   $endCursor: String
 ) @inContext(country: $country, language: $language) {
@@ -523,6 +524,7 @@ query GetProductsByCollectionIds(
       }
       products(
         first: $first
+        last: $last
         before: $startCursor
         after: $endCursor
       ) {
