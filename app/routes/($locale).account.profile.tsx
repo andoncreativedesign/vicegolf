@@ -130,11 +130,11 @@ export async function action({ request, context }: Route.ActionArgs) {
         };
 
         // Log the request payload for debugging
-        console.log('Updating customer contact info with Admin API:', {
-          customerId: customerNumberId,
-          data: customerData,
-          url: `/customers/${customerNumberId}.json`
-        });
+        // console.log('Updating customer contact info with Admin API:', {
+        //   customerId: customerNumberId,
+        //   data: customerData,
+        //   url: `/customers/${customerNumberId}.json`
+        // });
 
         const response = await axiosShopifyAdminCustomerApi.put(
           `/customers/${customerNumberId}.json`,

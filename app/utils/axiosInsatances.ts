@@ -7,7 +7,7 @@ export const SANITY_CONFIG = {
   token: import.meta.env.VITE_SANITY_API_TOKEN,
 };
 
-console.log("\n\nSANITY_CONFIG ", SANITY_CONFIG, "\n")
+// console.log("\n\nSANITY_CONFIG ", SANITY_CONFIG, "\n")
 
 export const axiosSanity = axios.create({
   baseURL: `https://${SANITY_CONFIG?.projectId}.api.sanity.io/${SANITY_CONFIG?.apiVersion}/data/query/${SANITY_CONFIG?.dataset}`,

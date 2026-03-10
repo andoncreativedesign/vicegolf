@@ -73,8 +73,8 @@ export async function loader(args: Route.LoaderArgs) {
     deferredData.automaticDiscounts,
   ]);
 
-  console.log('DEBUG: Customer data resolved:', !!customer);
-  console.log('DEBUG: Automatic discounts resolved:', automaticDiscounts?.length);
+  // console.log('DEBUG: Customer data resolved:', !!customer);
+  // console.log('DEBUG: Automatic discounts resolved:', automaticDiscounts?.length);
 
   // Dynamically calculate the best membership discount based on customer segments
   const customerTags = (customer?.tags || []).map((t: string) => t.toLowerCase().replace(/\s+/g, '_'));
@@ -224,7 +224,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
   const automaticDiscounts = (async () => {
     try {
-      console.log('Fetching automatic discounts via Admin API...');
+      // console.log('Fetching automatic discounts via Admin API...');
       const response = await axiosShopifyAdmin.post("", {
         query: GET_AUTOMATIC_DISCOUNT_QUERY,
         variables: {
@@ -246,7 +246,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         const ad = node.automaticDiscount;
         if (!ad) return null;
 
-        console.log(`DEBUG: Mapping discount: ${ad.title}`, ad.customerGets?.value);
+        // console.log(`DEBUG: Mapping discount: ${ad.title}`, ad.customerGets?.value);
 
         // Basic discounts have customerGets
         if (ad.customerGets) {
@@ -276,7 +276,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         };
       }).filter(Boolean);
 
-      console.log('Mapped Discounts (Titles):', mappedDiscounts.map((d: any) => d.title));
+      // console.log('Mapped Discounts (Titles):', mappedDiscounts.map((d: any) => d.title));
       return mappedDiscounts;
     } catch (e) {
       console.error('Error fetching automatic discounts:', e);
