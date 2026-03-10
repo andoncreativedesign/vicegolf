@@ -40,7 +40,7 @@ export default {
       }
       
       const cookies = response.headers.getSetCookie ? response.headers.getSetCookie() : response.headers.get('Set-Cookie');
-      console.log('--- DEBUG COOKIES at end of server.ts ---', cookies);
+      // console.log('--- DEBUG COOKIES at end of server.ts ---', cookies);
 
       if (response.status === 404) {
         /**
