@@ -263,16 +263,21 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 }
             });
 
+            const hasNextPage = validCollections.some(c => c.products.pageInfo.hasNextPage);
+            const hasPreviousPage = validCollections.some(c => c.products.pageInfo.hasPreviousPage);
+            const startCursor = validCollections.find(c => c.products.pageInfo.startCursor)?.products.pageInfo.startCursor || null;
+            const endCursor = validCollections.find(c => c.products.pageInfo.endCursor)?.products.pageInfo.endCursor || null;
+
             return {
                 ...baseCollection,
                 products: {
                     ...baseCollection.products,
                     edges: Array.from(uniqueProducts.values()),
                     pageInfo: {
-                        hasNextPage: false,
-                        hasPreviousPage: false,
-                        startCursor: null,
-                        endCursor: null
+                        hasNextPage,
+                        hasPreviousPage,
+                        startCursor,
+                        endCursor
                     }
                 }
             };
