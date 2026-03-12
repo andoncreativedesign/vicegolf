@@ -28,6 +28,7 @@ export default async function handleRequest(
       'https://i.ytimg.com',
       'https://img.youtube.com',
       'https://www.googletagmanager.com',
+      'https://*.clarity.ms',
       'data:',
     ],
 
@@ -40,6 +41,7 @@ export default async function handleRequest(
       'https://*.google-analytics.com',
       'https://*.analytics.google.com',
       'https://*.googletagmanager.com',
+      'https://*.clarity.ms',
     ],
 
     mediaSrc: [
@@ -65,6 +67,7 @@ export default async function handleRequest(
       "'self'",
       'https://cdn.shopify.com',
       'https://www.googletagmanager.com',
+      'https://*.clarity.ms',
     ],
 
     defaultSrc: [
