@@ -20,17 +20,25 @@ export const meta: Route.MetaFunction = () => {
 export async function loader({request, context}: Route.LoaderArgs) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
-  const searchPromise: Promise<PredictiveSearchReturn | RegularSearchReturn> =
-    isPredictive
-      ? predictiveSearch({request, context})
-      : regularSearch({request, context});
-
-  searchPromise.catch((error: Error) => {
-    console.error(error);
-    return {term: '', result: null, error: error.message};
-  });
-
-  return await searchPromise;
+  
+  try {
+    const searchPromise = isPredictive
+      ? predictiveSearch({ request, context })
+      : regularSearch({ request, context });
+      
+    const result = await searchPromise;
+    return { ...result, url: request.url };
+  } catch (error: any) {
+    // Add debugging for internal server error
+    console.error('Search loader error:', error);
+    return {
+      type: isPredictive ? 'predictive' : 'regular',
+      term: String(url.searchParams.get('q') || ''),
+      result: isPredictive ? getEmptyPredictiveSearchResult() : null,
+      error: error?.message || String(error),
+      url: request.url
+    };
+  }
 }
 
 /**
@@ -243,8 +251,16 @@ async function regularSearch({
 >): Promise<RegularSearchReturn> {
   const {storefront} = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, {pageBy: 8});
-  const term = String(url.searchParams.get('q') || '');
+  const variables = getPaginationVariables(request, { pageBy: 8 });
+  const term = String(url.searchParams.get('q') || '').trim();
+
+  if (!term) {
+    return {
+      type: 'regular',
+      term: '',
+      result: { total: 0, items: { articles: { nodes: [] }, pages: { nodes: [] }, products: { nodes: [], pageInfo: {} } } },
+    } as any;
+  }
 
   // Search articles, pages, and products for the `q` term
   const {
@@ -260,7 +276,7 @@ async function regularSearch({
   }
 
   const total = Object.values(items).reduce(
-    (acc: number, {nodes}: {nodes: Array<unknown>}) => acc + nodes.length,
+    (acc: number, item: any) => acc + (item?.nodes?.length || 0),
     0,
   );
 
@@ -403,7 +419,7 @@ async function predictiveSearch({
   request,
   context,
 }: Pick<
-  Route.ActionArgs,
+  Route.LoaderArgs,
   'request' | 'context'
 >): Promise<PredictiveSearchReturn> {
   const {storefront} = context;
@@ -441,7 +457,7 @@ async function predictiveSearch({
   }
 
   const total = Object.values(items).reduce(
-    (acc: number, item: Array<unknown>) => acc + item.length,
+    (acc: number, item: any) => acc + (Array.isArray(item) ? item.length : 0),
     0,
   );
 
