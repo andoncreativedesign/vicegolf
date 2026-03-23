@@ -33,7 +33,7 @@ export const meta: Route.MetaFunction = () => {
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = await loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  const homePageData = await getHomePageData();
+  const homePageData = getHomePageData();
   return { ...deferredData, ...criticalData, homePageData };
 }
 
@@ -449,10 +449,16 @@ export default function Homepage() {
 
   return (
     <div >
-      <HeroSection
-        heroData={data.homePageData?.heroes}
-        bgColor="bg-transparent"
-      />
+      <Suspense fallback={<div className="min-h-[50vh]"></div>}>
+        <Await resolve={data.homePageData}>
+          {(homePageData) => (
+            <HeroSection
+              heroData={homePageData?.heroes}
+              bgColor="bg-transparent"
+            />
+          )}
+        </Await>
+      </Suspense>
 
       <div className="home">
         <div className="py-8 space-y-12">
@@ -490,13 +496,21 @@ export default function Homepage() {
             />
           )}
         </div>
-        <ClientLogos brands={data.homePageData?.brand || []} />
-        {data?.homePageData?.homeCategories && (
-          <ShopByCategories
-            menuItems={menu.slice(0, 4)}
-            sanityHomeCategories={data?.homePageData?.homeCategories}
-          />
-        )}
+        <Suspense fallback={<div className="min-h-[20vh]"></div>}>
+          <Await resolve={data.homePageData}>
+            {(homePageData) => (
+              <>
+                <ClientLogos brands={homePageData?.brand || []} />
+                {homePageData?.homeCategories && (
+                  <ShopByCategories
+                    menuItems={menu.slice(0, 4)}
+                    sanityHomeCategories={homePageData?.homeCategories}
+                  />
+                )}
+              </>
+            )}
+          </Await>
+        </Suspense>
         {/* VICE APPAREL - Infinite Scroll */}
         {apparelProducts.length > 0 && (
           <ProductGrid
@@ -509,14 +523,20 @@ export default function Homepage() {
           />
         )}
       </div>
-      <HeroSection
-        heroData={data.homePageData?.secondaryHero || null}
-        textColor="text-black"
-        buttonBgColor="bg-black"
-        buttonTextColor="text-white"
-        bgColor="bg-transparent"
-        center={true}
-      />
+      <Suspense fallback={<div className="min-h-[50vh]"></div>}>
+        <Await resolve={data.homePageData}>
+          {(homePageData) => (
+            <HeroSection
+              heroData={homePageData?.secondaryHero || null}
+              textColor="text-black"
+              buttonBgColor="bg-black"
+              buttonTextColor="text-white"
+              bgColor="bg-transparent"
+              center={true}
+            />
+          )}
+        </Await>
+      </Suspense>
       {/* {recommendedProducts.length > 0 && (
         <ProductGrid
           products={recommendedProducts}
@@ -528,7 +548,13 @@ export default function Homepage() {
         />
       )} */}
       <div className='home'>
-        <ViceLookSection data={data.homePageData?.viceLook} />
+        <Suspense fallback={<div className="min-h-[50vh]"></div>}>
+          <Await resolve={data.homePageData}>
+            {(homePageData) => (
+              <ViceLookSection data={homePageData?.viceLook} />
+            )}
+          </Await>
+        </Suspense>
       </div>
     </div>
   );
