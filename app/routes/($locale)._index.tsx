@@ -31,7 +31,7 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = await loadDeferredData(args);
+  const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
   const homePageData = getHomePageData();
   return { ...deferredData, ...criticalData, homePageData };
