@@ -32,9 +32,86 @@ export const meta: Route.MetaFunction = () => {
 
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
-  const criticalData = await loadCriticalData(args);
+  const criticalDataWithFamilies = await loadCriticalData(args);
+  const { families, ...criticalData } = criticalDataWithFamilies;
+  const familyData = loadFamilyData(families);
   const homePageData = getHomePageData();
-  return { ...deferredData, ...criticalData, homePageData };
+  return { ...deferredData, ...criticalData, homePageData, familyData };
+}
+
+async function loadFamilyData(families: string[]) {
+  if (!families || families.length === 0) return {};
+
+  const familyQueries = families.map(fam => ({
+    value: fam,
+    query: `metafields.custom.family:"${fam}"`,
+  }));
+
+  const results = await Promise.all(familyQueries.map(async (fam) => {
+    try {
+      const response = await axiosShopifyAdmin.post("", {
+        query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
+        variables: {
+          searchQuery: fam.query,
+        },
+      });
+
+      if (response.data.errors) {
+        return { fam: fam.value, products: [] };
+      }
+
+      const colorVariantsRes = response.data?.data?.products?.edges || [];
+
+      // Transform the product data to match the expected format
+      const products = colorVariantsRes.map(({ node }: any) => ({
+        ...node,
+        id: node.id,
+        title: node.title,
+        productType: node.productType,
+        tags: node?.tags,
+        vendor: node?.vendor,
+        handle: node?.handle,
+        featuredImage: node?.featuredImage ? {
+          id: node.featuredImage.id,
+          url: node.featuredImage.url,
+          altText: node.featuredImage.altText,
+          width: node.featuredImage.width,
+          height: node.featuredImage.height
+        } : null,
+        variantImage: node?.variantImage?.reference?.image ? {
+          id: node.variantImage.reference.id,
+          url: node.variantImage.reference.image.url,
+          altText: node.variantImage.reference.image.altText,
+          width: node.variantImage.reference.image.width,
+          height: node.variantImage.reference.image.height
+        } : null,
+        availableForSale: (node?.availableForSale || 0) > 0,
+        family: node?.family ? {
+          id: node.family.id,
+          namespace: node.family.namespace,
+          key: node.family.key,
+          type: node.family.type,
+          value: node.family.value
+        } : null,
+        badge_colors: node?.badge_colors?.value || null,
+        collections: {
+          nodes: node.collections?.edges?.map(({ node: col }: any) => ({ id: col.id })) || []
+        }
+      }));
+
+      return { fam: fam.value, products };
+    } catch (e) {
+      console.error(`Error loading family ${fam.value}:`, e);
+      return { fam: fam.value, products: [] };
+    }
+  }));
+
+  const familyGroups: Record<string, any[]> = {};
+  results.forEach(({ fam, products }) => {
+    familyGroups[fam] = products;
+  });
+
+  return familyGroups;
 }
 
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
@@ -79,128 +156,23 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     ...new Set(allProducts.map(p => p.family?.value).filter(Boolean)),
   ];
 
-  // 4️⃣ Build Shopify search queries for each family
-  const familyQueries = families.map(fam => ({
-    value: fam,
-    query: `metafields.custom.family:"${fam}"`,
-  }));
-
-  // 5️⃣ Run a family group query for EACH family
-  const familyGroups: Record<string, any[]> = {};
-
-  for (const fam of familyQueries) {
-    const response = await axiosShopifyAdmin.post("", {
-      query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
-      variables: {
-        searchQuery: `metafields.custom.family:"${fam.value}"`,
-      },
-    });
-
-
-    if (response.data.errors) {
-      throw new Error(JSON.stringify(response?.data?.errors))
-    }
-
-    // console.log('\n\ncategoryProducts.golfBalls.nodes')
-    // response.data?.data?.products?.edges.forEach((item) => {
-    //   if(item.node.family){ 
-    //     console.log(item.node.family)
-    //     console.log('image = ', item.node.variantImage?.reference?.image)
-    //   }
-    // })
-
-    const colorVariantsRes = response.data?.data?.products?.edges || [];
-
-    // Transform the product data to match the expected format
-    const products = colorVariantsRes.map(({ node }) => ({
-      ...node,
-      id: node.id,
-      title: node.title,
-      productType: node.productType,
-      tags: node?.tags,
-      vendor: node?.vendor,
-      handle: node?.handle,
-      featuredImage: node?.featuredImage ? {
-        id: node.featuredImage.id,
-        url: node.featuredImage.url,
-        altText: node.featuredImage.altText,
-        width: node.featuredImage.width,
-        height: node.featuredImage.height
-      } : null,
-      variantImage: node?.variantImage?.reference?.image ? {
-        id: node.variantImage.reference.id,
-        url: node.variantImage.reference.image.url,
-        altText: node.variantImage.reference.image.altText,
-        width: node.variantImage.reference.image.width,
-        height: node.variantImage.reference.image.height
-      } : null,
-      availableForSale: (node?.availableForSale || 0) > 0,
-      family: node?.family ? {
-        id: node.family.id,
-        namespace: node.family.namespace,
-        key: node.family.key,
-        type: node.family.type,
-        value: node.family.value
-      } : null,
-      badge_colors: node?.badge_colors?.value || null,
-      collections: {
-        nodes: node.collections?.edges?.map(({ node: col }: any) => ({ id: col.id })) || []
-      }
-    }));
-
-    familyGroups[fam.value] = products;
-  }
-
-  // 6️⃣ Attach grouped variants to each product
-  function attachFamilyGroups(products) {
-
-    // console.log("\n\nobj assinged to family")
-    const updatedProduct = products?.map(p => {
-      const obj = {
-        ...p,
-        tags: p?.tags || [],
-        badge_colors: p?.badge_colors || null,
-        variantFamilyProducts: familyGroups[p?.family?.value] || [],
-      }
-      if (obj?.variantFamilyProducts?.length > 0) {
-        // console.log(obj)
-      }
-      return obj
-    });
-    // console.log("\n\nend obj assinged to family")
-    return updatedProduct
-  }
-
-  // console.log('\n\nfamilyGroups')
-  // console.log(familyGroups[familyQueries?.[0].value]?.[0])
-
   const updateNodes = (category: any) => {
     const products = category?.products?.nodes || [];
     const pageInfo = category?.products?.pageInfo;
     return {
       ...category,
-      nodes: attachFamilyGroups(products) || [],
+      nodes: products,
       pageInfo
     };
   };
 
   // Update each category with null checks
-  categoryProducts.golfBalls = updateNodes(categoryProducts.golfBalls || {});
-  categoryProducts.golfClubs = updateNodes(categoryProducts.golfClubs || {});
-  categoryProducts.apparel = updateNodes(categoryProducts.apparel || {});
-  categoryProducts.gear = updateNodes(categoryProducts.gear || {});
-
-  // console.log('\n\ncategoryProducts.golfBalls.nodes')
-  // categoryProducts.golfBalls.nodes.forEach((item) => {
-  //   // if (item.variantFamilyProducts.length > 0) {
-  //   if (item.family) {
-  //     console.log(JSON.stringify(item))
-  //   }
-  // })
-
-  // console.log('\n\ncategoryProducts.golfBalls.nodes')
-  // console.log(categoryProducts?.golfBalls?.products?.pageInfo)
-  // console.log('\n\ncategoryProducts.golfBalls.nodes end')
+  if (categoryProducts) {
+    categoryProducts.golfBalls = updateNodes(categoryProducts.golfBalls || {});
+    categoryProducts.golfClubs = updateNodes(categoryProducts.golfClubs || {});
+    categoryProducts.apparel = updateNodes(categoryProducts.apparel || {});
+    categoryProducts.gear = updateNodes(categoryProducts.gear || {});
+  }
 
   // 7️⃣ Return final combined output
   return {
@@ -215,6 +187,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     currentApparelCursor: apparelCursor,
     currentGearCursor: gearCursor,
     productsForNav: context.productsForNav,
+    families,
   };
 }
 
@@ -240,8 +213,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
   };
 }
 
-export default function Homepage() {
-  const data = useLoaderData<typeof loader>();
+export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
   const fetcher = useFetcher();
   const productsForNav = rootData?.productsForNav;
@@ -336,6 +308,31 @@ export default function Homepage() {
       setHasMoreRecommended(!!data.recommendedPageInfo?.hasNextPage);
     }
   }, [data.recommendedProducts, data.currentRecommendedCursor, data.recommendedPageInfo]);
+
+  // === Synchronize family variants when they load ===
+  useEffect(() => {
+    if (!data.familyData) return;
+
+    data.familyData.then((familyGroups: any) => {
+      const mergeFamilies = (prevProducts: any[]) => {
+        return prevProducts.map(p => {
+          const familyValue = p?.family?.value;
+          if (familyValue && familyGroups[familyValue]) {
+            return {
+              ...p,
+              variantFamilyProducts: familyGroups[familyValue]
+            };
+          }
+          return p;
+        });
+      };
+
+      setGolfBalls(prev => mergeFamilies(prev));
+      setGolfClubs(prev => mergeFamilies(prev));
+      setApparelProducts(prev => mergeFamilies(prev));
+      setGearProducts(prev => mergeFamilies(prev));
+    });
+  }, [data.familyData]);
 
   // === Handle fetcher for all sections ===
   useEffect(() => {
