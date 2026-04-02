@@ -120,16 +120,30 @@ const HeaderMenu = ({
         updatedItem = {
           ...item,
           resource: {
-            ...item.resource,
+            id: item?.resource?.id || '',
+            handle: item?.resource?.handle || '',
+            title: item?.resource?.title || '',
             image: item?.resource?.featuredImage
           },
           url: `/products/${encodeURIComponent(handle)}/`
         };
       } else if (item.type === 'PAGE') {
         const reconstructed = reconstructMenuObject(item.resource?.metafield?.value);
+        const pageLinkValue = item.resource?.page_link?.value;
+        // Use page_link metafield as the URL (extract pathname to keep routing internal)
+        let pageUrl = item.url;
+        console.log('\n\n page link url', pageLinkValue);
+        if (pageLinkValue) {
+          try {
+            pageUrl = new URL(pageLinkValue).pathname;
+          } catch {
+            pageUrl = pageLinkValue; // fallback: use as-is if not a valid absolute URL
+          }
+        }
 
         updatedItem = {
           ...item,
+          url: pageUrl,
           resource: {
             id: item.resource?.id || "",
             handle: item.resource?.handle || "",
@@ -137,9 +151,13 @@ const HeaderMenu = ({
             metafield: {
               key: item.resource?.metafield?.key || "",
               value: reconstructed
-            }
+            },
+            page_link: item.resource?.page_link ?? null
           }
         };
+
+        console.log("updatedItem")
+        console.log(updatedItem)
 
       } else {
         updatedItem = {

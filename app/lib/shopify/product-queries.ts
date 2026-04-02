@@ -164,7 +164,11 @@ export interface MenuItemResource {
   metafield?: {
     key: string,
     value: any
-  }
+  },
+  page_link?: {
+    key: string,
+    value: string
+  } | null;
 }
 
 export interface MenuItem {
@@ -195,7 +199,6 @@ export interface SecondaryMenu {
   section: string,
   items: SecondaryMenuItem[]
 }
-
 
 export const MULTIPLE_COLLECTIONS_QUERY_FOR_NAV = `#graphql
 query GetMenu($handle: String!) {
@@ -287,6 +290,10 @@ query GetMenu($handle: String!) {
               key
               value
             }
+            page_link: metafield(namespace: "custom", key: "page_link") {
+              key
+              value
+            }
           }
         }
 
@@ -331,6 +338,10 @@ query GetMenu($handle: String!) {
                 key
                 value
               }
+              page_link: metafield(namespace: "custom", key: "page_link") {
+                key
+                value
+              }
             }
 
           }
@@ -339,7 +350,6 @@ query GetMenu($handle: String!) {
     }
   }
 }
-
 `
 
 
