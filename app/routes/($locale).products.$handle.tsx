@@ -257,6 +257,18 @@ export default function Product() {
       }
     };
     fetchProductDetails();
+
+    window?.dataLayer?.push({
+      event: "view_content",
+      ecommerce: {
+        value: product?.selectedOrFirstAvailableVariant?.price?.amount, //replace with product price
+        currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode,
+        items: [{
+          item_name: product?.title, 
+          item_id: product?.id 
+        }]
+      }
+    });
   }, [product.id]);
   // Format product type for display and URL
   const formatProductType = (type: string) => {

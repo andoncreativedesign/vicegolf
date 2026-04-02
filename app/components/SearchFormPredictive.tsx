@@ -56,6 +56,12 @@ export function SearchFormPredictive({
       {q: event.target.value || '', limit: 5, predictive: true},
       {method: 'GET', action: SEARCH_ENDPOINT},
     );
+    if (event.target.value.length > 2) {
+      window?.dataLayer?.push({
+        event: "search",
+        search_term: event.target.value,
+      });
+    }
   }
 
   // ensure the passed input has a type of search, because SearchResults

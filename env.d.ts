@@ -26,6 +26,9 @@ declare global {
 
 // Add additional context properties if needed
 declare global {
+    interface Window {
+        dataLayer: any[];
+    }
     interface HydrogenAdditionalContext {
         // Add any custom context properties your app needs
         // For example:
