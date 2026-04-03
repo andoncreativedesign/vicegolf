@@ -30,6 +30,8 @@ export function DemoFitting({ data }: { data?: DemoFittingData | null }) {
   const bookingSubtitle = data?.booking?.subtitle || 'Select one of our authorized retail partners below to schedule your personalized session.';
   const stores = data?.booking?.stores || DEFAULT_STORES;
   const whatsappMessage = data?.booking?.whatsappMessage;
+  const emailSubject = data?.booking?.emailSubject;
+  const emailBody = data?.booking?.emailBody;
 
   const paragraphs = data?.descriptionSection?.paragraphs || [
     'Choosing new clubs should be easy.',
@@ -123,6 +125,8 @@ export function DemoFitting({ data }: { data?: DemoFittingData | null }) {
                 key={store.name || index}
                 {...store}
                 whatsappMessage={whatsappMessage}
+                emailSubject={emailSubject}
+                emailBody={emailBody}
               />
             ))}
           </div>
