@@ -1,4 +1,4 @@
-import type { Route } from './+types/($locale).demo-fitting';
+import type { Route } from './+types/($locale).clubs-demo-fitting';
 import { DemoFitting } from '~/components/DemoFitting/DemoFitting';
 import { getDemoFittingData } from '~/lib/sanity/demoFitting';
 

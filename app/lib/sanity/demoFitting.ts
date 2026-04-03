@@ -31,6 +31,8 @@ export const demoFittingQuery = `*[_type == "demoFitting"][0]{
     title,
     subtitle,
     whatsappMessage,
+    emailSubject,
+    emailBody,
     stores[] {
       name,
       phone,
@@ -67,6 +69,8 @@ export interface DemoFittingData {
       phone: string;
       email: string;
       whatsappNumber?: string;
+      emailSubject?: string;
+      emailBody?: string;
       buttonColor?: string;
       buttonTextColor?: string;
     }>;

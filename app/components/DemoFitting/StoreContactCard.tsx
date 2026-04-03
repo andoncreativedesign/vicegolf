@@ -7,6 +7,8 @@ interface StoreContactCardProps {
   email: string;
   whatsappNumber?: string;
   whatsappMessage?: string;
+  emailSubject?: string;
+  emailBody?: string;
   buttonColor?: string;
   buttonTextColor?: string;
 }
@@ -17,6 +19,8 @@ export function StoreContactCard({
   email,
   whatsappNumber,
   whatsappMessage,
+  emailSubject,
+  emailBody,
   buttonColor,
   buttonTextColor
 }: StoreContactCardProps) {
@@ -64,7 +68,7 @@ export function StoreContactCard({
           <div className="flex items-center text-gray-700 font-bold group transition-colors w-full">
             <Mail className="w-4 h-4 md:w-5 md:h-5 mr-3 text-black shrink-0" />
             <a
-              href={`mailto:${email}`}
+          href={`mailto:${email}?subject=${encodeURIComponent(emailSubject || 'Booking Inquiry')}&body=${encodeURIComponent(emailBody || 'Hello, I would like to book a session.')}`}
               className="text-sm sm:text-base md:text-lg lg:text-xl transition-colors hover:text-black whitespace-nowrap"
               style={{ textDecoration: 'none' }}
             >
