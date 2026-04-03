@@ -16,6 +16,8 @@ import { VideoList } from '~/components/VideoList';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 import { ChevronRight } from 'lucide-react';
+import { loadFamilyData } from '~/utils/loadFamilyData';
+
 
 export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
     if (!data?.collection) {
@@ -367,62 +369,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         ),
     ];
 
-    const familyQueries = families.map(fam => ({
-        value: fam,
-        query: `metafields.custom.family:"${fam}"`,
-    }));
-
-    const familyGroups: Record<string, any[]> = {};
-
-    for (const fam of familyQueries) {
-        const response = await axiosShopifyAdmin.post("", {
-            query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
-            variables: {
-                searchQuery: `metafields.custom.family:"${fam.value}"`,
-            },
-        });
-
-        if (response.data.errors) {
-            throw new Error(JSON.stringify(response?.data?.errors));
-        }
-
-        const colorVariantsRes = response.data?.data?.products?.edges || [];
-
-        const products = colorVariantsRes.map(({ node }) => ({
-            ...node,
-            id: node.id,
-            title: node.title,
-            productType: node.productType,
-            tags: node?.tags,
-            vendor: node?.vendor,
-            handle: node?.handle,
-            featuredImage: node?.featuredImage ? {
-                id: node.featuredImage.id,
-                url: node.featuredImage.url,
-                altText: node.featuredImage.altText,
-                width: node.featuredImage.width,
-                height: node.featuredImage.height
-            } : null,
-            variantImage: node?.variantImage?.reference?.image ? {
-                id: node.variantImage.reference.id,
-                url: node.variantImage.reference.image.url,
-                altText: node.variantImage.reference.image.altText,
-                width: node.variantImage.reference.image.width,
-                height: node.variantImage.reference.image.height
-            } : null,
-            availableForSale: (node?.availableForSale || 0) > 0,
-            family: node?.family ? {
-                id: node.family.id,
-                namespace: node.family.namespace,
-                key: node.family.key,
-                type: node.family.type,
-                value: node.family.value
-            } : null,
-            badge_colors: node?.badge_colors?.value || null
-        }));
-
-        familyGroups[fam.value] = products;
-    }
+    const familyGroups = await loadFamilyData(families as string[]);
 
     function attachFamilyGroups(products) {
         const updatedProduct = products?.map(p => ({
