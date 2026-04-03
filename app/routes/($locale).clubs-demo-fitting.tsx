@@ -1,4 +1,4 @@
-import type { Route } from './+types/($locale).demo-fitting';
+import type { Route } from './+types/($locale).clubs-demo-fitting';
 import { DemoFitting } from '~/components/DemoFitting/DemoFitting';
 import { getDemoFittingData } from '~/lib/sanity/demoFitting';
 
@@ -14,7 +14,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function DemoFittingRoute({ loaderData }: Route.ComponentProps) {
   const { demoFittingData } = loaderData;
   return (
-    <div className="demo-fitting-page">
+    <div className="clubs-demo-fitting-page">
       <DemoFitting data={demoFittingData} />
     </div>
   );
