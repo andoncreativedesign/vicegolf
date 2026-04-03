@@ -14,7 +14,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 export default function DemoFittingRoute({ loaderData }: Route.ComponentProps) {
   const { demoFittingData } = loaderData;
   return (
-    <div className="clubs-demo-fitting-page">
+    <div className="demo-fitting-page">
       <DemoFitting data={demoFittingData} />
     </div>
   );
