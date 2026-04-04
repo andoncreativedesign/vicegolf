@@ -1,5 +1,5 @@
-import { redirect, useLoaderData, Link, useNavigate, useFetcher } from 'react-router';
-import { useCallback, useEffect, useState } from 'react';
+import { redirect, useLoaderData, Link, useNavigate, useFetcher, Await } from 'react-router';
+import { useCallback, useEffect, useState, Suspense } from 'react';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -102,8 +102,15 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
 };
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
-  const deferredData = await loadDeferredData({ ...args, product: criticalData.product });
-  return { ...deferredData, ...criticalData, url: args.request.url };
+  const { product } = criticalData;
+  const productDetails = getProductDetails(product.id);
+
+  return {
+    ...await loadDeferredData({ ...args, product: criticalData.product }),
+    ...criticalData,
+    productDetails,
+    url: args.request.url,
+  };
 }
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
   const { handle } = params;
@@ -241,7 +248,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   return { recommendedProducts, shippingDetails, showBestSellers };
 }
 export default function Product() {
-  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   // useEffect(() => {
@@ -270,6 +277,16 @@ export default function Product() {
   const { title, descriptionHtml, images } = product;
   // Memoize the image selection to prevent unnecessary re-renders
   const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(null);
+  // Handle image selection with proper object reference
+  const handleImageSelect = useCallback((image: ProductImageType) => {
+    setSelectedImage(prev => {
+      // Only update if the image ID is different to prevent unnecessary re-renders
+      if (!prev || prev.id !== image.id) {
+        return { ...image }; // Return a new object to ensure state update
+      }
+      return prev;
+    });
+  }, []);
   // Initialize selected image when component mounts or variant changes
   useEffect(() => {
     const ogTagImage = product.og_tag_image?.reference?.image || (product.og_tag_image?.reference?.url ? { id: product.og_tag_image.reference.url, url: product.og_tag_image.reference.url, altText: product.og_tag_image.reference.altText } : null);
@@ -289,38 +306,23 @@ export default function Product() {
       }
       return prev;
     });
-  }, [selectedVariant, images, product.og_tag_image]);
-  const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
-  // Handle image selection with proper object reference
-  const handleImageSelect = useCallback((image: ProductImageType) => {
-    setSelectedImage(prev => {
-      // Only update if the image ID is different to prevent unnecessary re-renders
-      if (!prev || prev.id !== image.id) {
-        return { ...image }; // Return a new object to ensure state update
-      }
-      return prev;
-    });
-  }, []);
-  // Fetch product details when product changes
+  }, [selectedVariant, images]);
+
+  // Track page view event
   useEffect(() => {
-    const fetchProductDetails = async () => {
-      const productDetails = await getProductDetails(product.id);
-      setProductDetails(productDetails);
-      // Reset selected image when product changes
-      if (product.images?.nodes?.[0]) {
-        setSelectedImage(product.images.nodes[0] as ProductImageType);
-      }
-    };
-    fetchProductDetails();
+    // Reset selected image when product changes
+    if (product.images?.nodes?.[0]) {
+      setSelectedImage(product.images.nodes[0] as ProductImageType);
+    }
 
     window?.dataLayer?.push({
       event: "view_content",
       ecommerce: {
-        value: product?.selectedOrFirstAvailableVariant?.price?.amount, //replace with product price
+        value: product?.selectedOrFirstAvailableVariant?.price?.amount,
         currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode,
         items: [{
-          item_name: product?.title, 
-          item_id: product?.id 
+          item_name: product?.title,
+          item_id: product?.id
         }]
       }
     });
@@ -412,20 +414,32 @@ export default function Product() {
 
         {/* Form - Take remaining space */}
         <div className="flex flex-col items-start w-full md:w-[45%]">
-          <ProductForm
-            productOptions={productOptions}
-            selectedVariant={selectedVariant}
-            title={title}
-            description={descriptionHtml}
-            productType={product.productType}
-            productAccordions={productDetails?.accordionItems || []}
-            colorVariants={colorVariants}
-            shippingDetails={shippingDetails}
-            currentProductId={product.id}
-            collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
-            clubVariants={clubVariants}
-            bundleBtn={bundleBtn}
-          />
+          <Suspense fallback={
+            <div className="w-full flex flex-col gap-4 animate-pulse">
+              <div className="h-10 bg-gray-100 rounded"></div>
+              <div className="h-20 bg-gray-100 rounded"></div>
+              <div className="h-64 bg-gray-100 rounded"></div>
+            </div>
+          }>
+            <Await resolve={productDetails}>
+              {(resolvedProductDetails) => (
+                <ProductForm
+                  productOptions={productOptions}
+                  selectedVariant={selectedVariant}
+                  title={title}
+                  description={descriptionHtml}
+                  productType={product.productType}
+                  productAccordions={resolvedProductDetails?.accordionItems || []}
+                  colorVariants={colorVariants}
+                  shippingDetails={shippingDetails}
+                  currentProductId={product.id}
+                  collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
+                  clubVariants={clubVariants}
+                  bundleBtn={bundleBtn}
+                />
+              )}
+            </Await>
+          </Suspense>
         </div>
       </div>
 
@@ -434,256 +448,260 @@ export default function Product() {
       {/* Spacer */}
       <div className="h-8"></div>
       {/* Product-specific sections */}
-      {(() => {
-        const productType = product.productType?.toLowerCase();
-        // Check for Tracer product using metafield
-        const isTracerProduct = product.metafields?.some(
-          (field: { key?: string; value?: string }) =>
-            field?.key === 'category_variant' && field?.value === 'tracer'
-        );
-        // Check for Towel Junior product using metafield
-        const isTowelJuniorProduct = product.metafields?.some(
-          (field: { key?: string; value?: string }) =>
-            field?.key === 'category_variant' && field?.value === 'Towel Junior'
-        );
-        // Check for Divot Junior product using metafield
-        const isDivotJuniorProduct = product.metafields?.some(
-          (field: { key?: string; value?: string }) =>
-            field?.key === 'category_variant' && field?.value === 'Divot Junior'
-        );
-        // Check for Junior Golf Ball product using metafield
-        const isJuniorGolfBallProduct = product.metafields?.some(
-          (field: { key?: string; value?: string }) =>
-            field?.key === 'category_variant' && field?.value === 'Junior Ball'
-        );
-        const isJuniorCapProduct = product.metafields?.some(
-          (field: { key?: string; value?: string }) =>
-            field?.key === 'category_variant' && field?.value === 'Junior Cap'
-        );
-        const isBagProProduct = product.metafields?.some(
-          (field: { key?: string; value?: string }) =>
-            field?.key === 'category_variant' && field?.value === 'Bag Pro'
-        );
-        if (isTracerProduct) {
-          return (
-            <TracerProduct
-              product={product}
-              productDetails={productDetails}
-              initialRecommended={recommendedProducts}
-              showBestSellers={showBestSellers}
-            />
-          );
-        }
-        if (isTowelJuniorProduct) {
-          return (
-            <TowelJuniorProduct
-              product={product}
-              productDetails={productDetails}
-              initialRecommended={recommendedProducts}
-              showBestSellers={showBestSellers}
-            />
-          );
-        }
-        if (isDivotJuniorProduct) {
-          return (
-            <DivotJuniorProduct
-              product={product}
-              productDetails={productDetails}
-              initialRecommended={recommendedProducts}
-              showBestSellers={showBestSellers}
-            />
-          );
-        }
-        if (isJuniorGolfBallProduct) {
-          return (
-            <JuniorGolfBallProduct
-              product={product}
-              productDetails={productDetails}
-              initialRecommended={recommendedProducts}
-              showBestSellers={showBestSellers}
-            />
-          );
-        }
-        if (isJuniorCapProduct) {
-          return (
-            <JuniorCapProduct
-              product={product}
-              productDetails={productDetails}
-              initialRecommended={recommendedProducts}
-              showBestSellers={showBestSellers}
-            />
-          );
-        }
-        if (isBagProProduct) {
-          return (
-            <BagProProduct
-              product={product}
-              productDetails={productDetails}
-              initialRecommended={recommendedProducts}
-              showBestSellers={showBestSellers}
-            />
-          );
-        }
-        switch (productType) {
-          /** 👇 Clothing category */
-          case "polo":
-          case "polos":
-            return (
-              <PoloProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
+      <Suspense fallback={<div className="h-96 w-full animate-pulse bg-gray-50 flex items-center justify-center text-gray-400">Loading details...</div>}>
+        <Await resolve={productDetails}>
+          {(resolvedProductDetails) => {
+            const productType = product.productType?.toLowerCase();
+            // Check for Tracer product using metafield
+            const isTracerProduct = product.metafields?.some(
+              (field: { key?: string; value?: string }) =>
+                field?.key === 'category_variant' && field?.value === 'tracer'
             );
-          case "shoes":
-          case "headwear":
-          case "glove":
-          case "gloves":
-          case "gloves men":
-          case "gloves women":
-          case "longsleeve":
-            return (
-              <PoloProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
+            // Check for Towel Junior product using metafield
+            const isTowelJuniorProduct = product.metafields?.some(
+              (field: { key?: string; value?: string }) =>
+                field?.key === 'category_variant' && field?.value === 'Towel Junior'
             );
-          /** 👇 Golf club sets */
-          case "golf club set":
-          case "golf clubs":
-          case "wedge":
-          case "wedges":
-          case "iron":
-          case "irons":
-            return (
-              <GolfClubSetProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
+            // Check for Divot Junior product using metafield
+            const isDivotJuniorProduct = product.metafields?.some(
+              (field: { key?: string; value?: string }) =>
+                field?.key === 'category_variant' && field?.value === 'Divot Junior'
             );
-          /** 👇 Golf bags */
-          case "golf bag":
-          case "golf bags":
-            return (
-              <GolfBagProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
+            // Check for Junior Golf Ball product using metafield
+            const isJuniorGolfBallProduct = product.metafields?.some(
+              (field: { key?: string; value?: string }) =>
+                field?.key === 'category_variant' && field?.value === 'Junior Ball'
             );
-          /** 👇 Caps */
-          case "cap":
-          case "caps":
-            return (
-              <CapProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
+            const isJuniorCapProduct = product.metafields?.some(
+              (field: { key?: string; value?: string }) =>
+                field?.key === 'category_variant' && field?.value === 'Junior Cap'
             );
-          /** 👇 Tees */
-          case "tees":
-            return (
-              <TeeProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
+            const isBagProProduct = product.metafields?.some(
+              (field: { key?: string; value?: string }) =>
+                field?.key === 'category_variant' && field?.value === 'Bag Pro'
             );
-          /** 👇 Rangefinder */
-          case "rangefinder":
-            return (
-              <RangefinderProduct
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
-            );
-          /** 👇 Divot Tool */
-          case "divot tool":
-          case "divot tools":
-            return (
-              <DivotToolProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
-            );
-          /** 👇 Towels */
-          case "towel":
-          case "towels":
-            return (
-              <TowelProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
-            );
-          /** 👇 Golf balls (main category) */
-          case "golf balls":
-            return (
-              <GolfBallProduct
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-                isGolfBallProduct={true}
-              />
-            );
-          case "beanie":
-          case "beanies":
-            return (
-              <BeaniesProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
-            );
+            if (isTracerProduct) {
+              return (
+                <TracerProduct
+                  product={product}
+                  productDetails={resolvedProductDetails}
+                  initialRecommended={recommendedProducts}
+                  showBestSellers={showBestSellers}
+                />
+              );
+            }
+            if (isTowelJuniorProduct) {
+              return (
+                <TowelJuniorProduct
+                  product={product}
+                  productDetails={resolvedProductDetails}
+                  initialRecommended={recommendedProducts}
+                  showBestSellers={showBestSellers}
+                />
+              );
+            }
+            if (isDivotJuniorProduct) {
+              return (
+                <DivotJuniorProduct
+                  product={product}
+                  productDetails={resolvedProductDetails}
+                  initialRecommended={recommendedProducts}
+                  showBestSellers={showBestSellers}
+                />
+              );
+            }
+            if (isJuniorGolfBallProduct) {
+              return (
+                <JuniorGolfBallProduct
+                  product={product}
+                  productDetails={resolvedProductDetails}
+                  initialRecommended={recommendedProducts}
+                  showBestSellers={showBestSellers}
+                />
+              );
+            }
+            if (isJuniorCapProduct) {
+              return (
+                <JuniorCapProduct
+                  product={product}
+                  productDetails={resolvedProductDetails}
+                  initialRecommended={recommendedProducts}
+                  showBestSellers={showBestSellers}
+                />
+              );
+            }
+            if (isBagProProduct) {
+              return (
+                <BagProProduct
+                  product={product}
+                  productDetails={resolvedProductDetails}
+                  initialRecommended={recommendedProducts}
+                  showBestSellers={showBestSellers}
+                />
+              );
+            }
+            switch (productType) {
+              /** 👇 Clothing category */
+              case "polo":
+              case "polos":
+                return (
+                  <PoloProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              case "shoes":
+              case "headwear":
+              case "glove":
+              case "gloves":
+              case "gloves men":
+              case "gloves women":
+              case "longsleeve":
+                return (
+                  <PoloProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Golf club sets */
+              case "golf club set":
+              case "golf clubs":
+              case "wedge":
+              case "wedges":
+              case "iron":
+              case "irons":
+                return (
+                  <GolfClubSetProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Golf bags */
+              case "golf bag":
+              case "golf bags":
+                return (
+                  <GolfBagProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Caps */
+              case "cap":
+              case "caps":
+                return (
+                  <CapProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Tees */
+              case "tees":
+                return (
+                  <TeeProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Rangefinder */
+              case "rangefinder":
+                return (
+                  <RangefinderProduct
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Divot Tool */
+              case "divot tool":
+              case "divot tools":
+                return (
+                  <DivotToolProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Towels */
+              case "towel":
+              case "towels":
+                return (
+                  <TowelProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              /** 👇 Golf balls (main category) */
+              case "golf balls":
+                return (
+                  <GolfBallProduct
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                    isGolfBallProduct={true}
+                  />
+                );
+              case "beanie":
+              case "beanies":
+                return (
+                  <BeaniesProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
 
-          case "blade putter":
-          case "mallet putter":
-          case "center mallet putter":
-            return (
-              <PuttersProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
-            );
-          case "drivers":
-          case "hybrids":
-          case "fairway woods":
-            return (
-              <DriversProduct
-                product={product}
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={showBestSellers}
-              />
-            )
-          /** 👇 Default — fallback to golf balls layout */
-          default:
-            return (
-              <GolfBallProduct
-                productDetails={productDetails}
-                initialRecommended={recommendedProducts}
-                showBestSellers={false}
-                isGolfBallProduct={false}
-              />
-            );
-        }
-      })()}
+              case "blade putter":
+              case "mallet putter":
+              case "center mallet putter":
+                return (
+                  <PuttersProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                );
+              case "drivers":
+              case "hybrids":
+              case "fairway woods":
+                return (
+                  <DriversProduct
+                    product={product}
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={showBestSellers}
+                  />
+                )
+              /** 👇 Default — fallback to golf balls layout */
+              default:
+                return (
+                  <GolfBallProduct
+                    productDetails={resolvedProductDetails}
+                    initialRecommended={recommendedProducts}
+                    showBestSellers={false}
+                    isGolfBallProduct={false}
+                  />
+                );
+            }
+          }}
+        </Await>
+      </Suspense>
       {/* Customer Reviews Section (common for all products) */}
       {/* <CustomerReviews /> */}
       <Analytics.ProductView
