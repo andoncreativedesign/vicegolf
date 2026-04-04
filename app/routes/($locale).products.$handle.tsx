@@ -67,7 +67,8 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
     },
   ];
 
-  const imageObj = product.featuredImage || product.images?.nodes?.[0] || product.selectedOrFirstAvailableVariant?.image;
+  const ogTagImage = product.og_tag_image?.reference?.image || (product.og_tag_image?.reference?.url ? { id: product.og_tag_image.reference.url, url: product.og_tag_image.reference.url, altText: product.og_tag_image.reference.altText } : null);
+  const imageObj = ogTagImage || product.featuredImage || product.images?.nodes?.[0] || product.selectedOrFirstAvailableVariant?.image;
   if (imageObj?.url) {
     let imageUrl = imageObj.url;
     if (imageUrl.startsWith('//')) {
@@ -271,15 +272,24 @@ export default function Product() {
   const [selectedImage, setSelectedImage] = useState<ProductImageType | null>(null);
   // Initialize selected image when component mounts or variant changes
   useEffect(() => {
-    const newSelectedImage = selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
+    const ogTagImage = product.og_tag_image?.reference?.image || (product.og_tag_image?.reference?.url ? { id: product.og_tag_image.reference.url, url: product.og_tag_image.reference.url, altText: product.og_tag_image.reference.altText } : null);
+    const newSelectedImage = ogTagImage || selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
+    
+    console.log('DEBUG: Image selection in component:', {
+      ogTagImageExists: !!ogTagImage,
+      selectedVariantImageExists: !!selectedVariant?.image,
+      firstImageNodeExists: !!images?.nodes?.[0],
+      finalNewSelectedImage: newSelectedImage
+    });
+
     setSelectedImage(prev => {
       // Only update if the image ID is different to prevent unnecessary re-renders
-      if (!prev || !newSelectedImage || prev.id !== newSelectedImage.id) {
+      if (!prev || !newSelectedImage || (prev.id !== newSelectedImage.id && prev.url !== newSelectedImage.url)) {
         return newSelectedImage;
       }
       return prev;
     });
-  }, [selectedVariant, images]);
+  }, [selectedVariant, images, product.og_tag_image]);
   const [productDetails, setProductDetails] = useState<ProductDetails | null>(null);
   // Handle image selection with proper object reference
   const handleImageSelect = useCallback((image: ProductImageType) => {

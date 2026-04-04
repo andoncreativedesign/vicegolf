@@ -39,11 +39,12 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
         },
     ];
 
+    const ogTagImage = collection.og_tag_image?.reference?.image || (collection.og_tag_image?.reference?.url ? { id: collection.og_tag_image.reference.url, url: collection.og_tag_image.reference.url, altText: collection.og_tag_image.reference.altText } : null);
     const collectionImage = collection.image;
     const firstProduct = collection.products?.edges?.[0]?.node;
     const firstProductImage = firstProduct?.featuredImage || firstProduct?.images?.nodes?.[0];
 
-    const imageObj = collectionImage || firstProductImage;
+    const imageObj = ogTagImage || collectionImage || firstProductImage;
     let finalImageUrl = imageObj?.url;
 
     if (finalImageUrl) {
