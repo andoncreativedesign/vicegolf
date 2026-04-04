@@ -153,6 +153,7 @@ export function ProductGallery({
                     alt={image.altText || 'Thumbnail'}
                     className="w-full h-full bg-[#f6f6f6] object-cover"
                     loading="lazy"
+                    sizes="(max-width: 768px) 100vw, 100px"
                   />
                 </button>
               );

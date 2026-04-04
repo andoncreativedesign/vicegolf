@@ -25,17 +25,23 @@ import {
   MULTIPLE_COLLECTIONS_QUERY
 } from '~/lib/shopify/collection-queries';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { loadFamilyData } from '~/utils/loadFamilyData';
+
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: 'Vice Golf | Home' }];
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = await loadDeferredData(args);
-  const criticalData = await loadCriticalData(args);
-  const homePageData = await getHomePageData();
-  return { ...deferredData, ...criticalData, homePageData };
+  const deferredData = loadDeferredData(args);
+  const criticalDataWithFamilies = await loadCriticalData(args);
+  const { families, ...criticalData } = criticalDataWithFamilies;
+  const familyData = loadFamilyData(families);
+  const homePageData = getHomePageData();
+  return { ...deferredData, ...criticalData, homePageData, familyData };
 }
+
+
 
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -79,128 +85,23 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     ...new Set(allProducts.map(p => p.family?.value).filter(Boolean)),
   ];
 
-  // 4️⃣ Build Shopify search queries for each family
-  const familyQueries = families.map(fam => ({
-    value: fam,
-    query: `metafields.custom.family:"${fam}"`,
-  }));
-
-  // 5️⃣ Run a family group query for EACH family
-  const familyGroups: Record<string, any[]> = {};
-
-  for (const fam of familyQueries) {
-    const response = await axiosShopifyAdmin.post("", {
-      query: ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
-      variables: {
-        searchQuery: `metafields.custom.family:"${fam.value}"`,
-      },
-    });
-
-
-    if (response.data.errors) {
-      throw new Error(JSON.stringify(response?.data?.errors))
-    }
-
-    // console.log('\n\ncategoryProducts.golfBalls.nodes')
-    // response.data?.data?.products?.edges.forEach((item) => {
-    //   if(item.node.family){ 
-    //     console.log(item.node.family)
-    //     console.log('image = ', item.node.variantImage?.reference?.image)
-    //   }
-    // })
-
-    const colorVariantsRes = response.data?.data?.products?.edges || [];
-
-    // Transform the product data to match the expected format
-    const products = colorVariantsRes.map(({ node }) => ({
-      ...node,
-      id: node.id,
-      title: node.title,
-      productType: node.productType,
-      tags: node?.tags,
-      vendor: node?.vendor,
-      handle: node?.handle,
-      featuredImage: node?.featuredImage ? {
-        id: node.featuredImage.id,
-        url: node.featuredImage.url,
-        altText: node.featuredImage.altText,
-        width: node.featuredImage.width,
-        height: node.featuredImage.height
-      } : null,
-      variantImage: node?.variantImage?.reference?.image ? {
-        id: node.variantImage.reference.id,
-        url: node.variantImage.reference.image.url,
-        altText: node.variantImage.reference.image.altText,
-        width: node.variantImage.reference.image.width,
-        height: node.variantImage.reference.image.height
-      } : null,
-      availableForSale: (node?.availableForSale || 0) > 0,
-      family: node?.family ? {
-        id: node.family.id,
-        namespace: node.family.namespace,
-        key: node.family.key,
-        type: node.family.type,
-        value: node.family.value
-      } : null,
-      badge_colors: node?.badge_colors?.value || null,
-      collections: {
-        nodes: node.collections?.edges?.map(({ node: col }: any) => ({ id: col.id })) || []
-      }
-    }));
-
-    familyGroups[fam.value] = products;
-  }
-
-  // 6️⃣ Attach grouped variants to each product
-  function attachFamilyGroups(products) {
-
-    // console.log("\n\nobj assinged to family")
-    const updatedProduct = products?.map(p => {
-      const obj = {
-        ...p,
-        tags: p?.tags || [],
-        badge_colors: p?.badge_colors || null,
-        variantFamilyProducts: familyGroups[p?.family?.value] || [],
-      }
-      if (obj?.variantFamilyProducts?.length > 0) {
-        // console.log(obj)
-      }
-      return obj
-    });
-    // console.log("\n\nend obj assinged to family")
-    return updatedProduct
-  }
-
-  // console.log('\n\nfamilyGroups')
-  // console.log(familyGroups[familyQueries?.[0].value]?.[0])
-
   const updateNodes = (category: any) => {
     const products = category?.products?.nodes || [];
     const pageInfo = category?.products?.pageInfo;
     return {
       ...category,
-      nodes: attachFamilyGroups(products) || [],
+      nodes: products,
       pageInfo
     };
   };
 
   // Update each category with null checks
-  categoryProducts.golfBalls = updateNodes(categoryProducts.golfBalls || {});
-  categoryProducts.golfClubs = updateNodes(categoryProducts.golfClubs || {});
-  categoryProducts.apparel = updateNodes(categoryProducts.apparel || {});
-  categoryProducts.gear = updateNodes(categoryProducts.gear || {});
-
-  // console.log('\n\ncategoryProducts.golfBalls.nodes')
-  // categoryProducts.golfBalls.nodes.forEach((item) => {
-  //   // if (item.variantFamilyProducts.length > 0) {
-  //   if (item.family) {
-  //     console.log(JSON.stringify(item))
-  //   }
-  // })
-
-  // console.log('\n\ncategoryProducts.golfBalls.nodes')
-  // console.log(categoryProducts?.golfBalls?.products?.pageInfo)
-  // console.log('\n\ncategoryProducts.golfBalls.nodes end')
+  if (categoryProducts) {
+    categoryProducts.golfBalls = updateNodes(categoryProducts.golfBalls || {});
+    categoryProducts.golfClubs = updateNodes(categoryProducts.golfClubs || {});
+    categoryProducts.apparel = updateNodes(categoryProducts.apparel || {});
+    categoryProducts.gear = updateNodes(categoryProducts.gear || {});
+  }
 
   // 7️⃣ Return final combined output
   return {
@@ -215,6 +116,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     currentApparelCursor: apparelCursor,
     currentGearCursor: gearCursor,
     productsForNav: context.productsForNav,
+    families,
   };
 }
 
@@ -240,8 +142,7 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
   };
 }
 
-export default function Homepage() {
-  const data = useLoaderData<typeof loader>();
+export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
   const fetcher = useFetcher();
   const productsForNav = rootData?.productsForNav;
@@ -336,6 +237,31 @@ export default function Homepage() {
       setHasMoreRecommended(!!data.recommendedPageInfo?.hasNextPage);
     }
   }, [data.recommendedProducts, data.currentRecommendedCursor, data.recommendedPageInfo]);
+
+  // === Synchronize family variants when they load ===
+  useEffect(() => {
+    if (!data.familyData) return;
+
+    data.familyData.then((familyGroups: any) => {
+      const mergeFamilies = (prevProducts: any[]) => {
+        return prevProducts.map(p => {
+          const familyValue = p?.family?.value;
+          if (familyValue && familyGroups[familyValue]) {
+            return {
+              ...p,
+              variantFamilyProducts: familyGroups[familyValue]
+            };
+          }
+          return p;
+        });
+      };
+
+      setGolfBalls(prev => mergeFamilies(prev));
+      setGolfClubs(prev => mergeFamilies(prev));
+      setApparelProducts(prev => mergeFamilies(prev));
+      setGearProducts(prev => mergeFamilies(prev));
+    });
+  }, [data.familyData]);
 
   // === Handle fetcher for all sections ===
   useEffect(() => {
@@ -449,10 +375,16 @@ export default function Homepage() {
 
   return (
     <div >
-      <HeroSection
-        heroData={data.homePageData?.heroes}
-        bgColor="bg-transparent"
-      />
+      <Suspense fallback={<div className="min-h-[50vh]"></div>}>
+        <Await resolve={data.homePageData}>
+          {(homePageData) => (
+            <HeroSection
+              heroData={homePageData?.heroes}
+              bgColor="bg-transparent"
+            />
+          )}
+        </Await>
+      </Suspense>
 
       <div className="home">
         <div className="py-8 space-y-12">
@@ -490,13 +422,21 @@ export default function Homepage() {
             />
           )}
         </div>
-        <ClientLogos brands={data.homePageData?.brand || []} />
-        {data?.homePageData?.homeCategories && (
-          <ShopByCategories
-            menuItems={menu.slice(0, 4)}
-            sanityHomeCategories={data?.homePageData?.homeCategories}
-          />
-        )}
+        <Suspense fallback={<div className="min-h-[20vh]"></div>}>
+          <Await resolve={data.homePageData}>
+            {(homePageData) => (
+              <>
+                <ClientLogos brands={homePageData?.brand || []} />
+                {homePageData?.homeCategories && (
+                  <ShopByCategories
+                    menuItems={menu.slice(0, 4)}
+                    sanityHomeCategories={homePageData?.homeCategories}
+                  />
+                )}
+              </>
+            )}
+          </Await>
+        </Suspense>
         {/* VICE APPAREL - Infinite Scroll */}
         {apparelProducts.length > 0 && (
           <ProductGrid
@@ -509,14 +449,20 @@ export default function Homepage() {
           />
         )}
       </div>
-      <HeroSection
-        heroData={data.homePageData?.secondaryHero || null}
-        textColor="text-black"
-        buttonBgColor="bg-black"
-        buttonTextColor="text-white"
-        bgColor="bg-transparent"
-        center={true}
-      />
+      <Suspense fallback={<div className="min-h-[50vh]"></div>}>
+        <Await resolve={data.homePageData}>
+          {(homePageData) => (
+            <HeroSection
+              heroData={homePageData?.secondaryHero || null}
+              textColor="text-black"
+              buttonBgColor="bg-black"
+              buttonTextColor="text-white"
+              bgColor="bg-transparent"
+              center={true}
+            />
+          )}
+        </Await>
+      </Suspense>
       {/* {recommendedProducts.length > 0 && (
         <ProductGrid
           products={recommendedProducts}
@@ -528,7 +474,13 @@ export default function Homepage() {
         />
       )} */}
       <div className='home'>
-        <ViceLookSection data={data.homePageData?.viceLook} />
+        <Suspense fallback={<div className="min-h-[50vh]"></div>}>
+          <Await resolve={data.homePageData}>
+            {(homePageData) => (
+              <ViceLookSection data={homePageData?.viceLook} />
+            )}
+          </Await>
+        </Suspense>
       </div>
     </div>
   );

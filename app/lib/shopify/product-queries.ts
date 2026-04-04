@@ -435,6 +435,15 @@ fragment ProductItem on Product {
     width
     height
   }
+    images(first: 1) {
+    nodes {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
     priceRange {
         minVariantPrice {
             ...MoneyProductItem
@@ -528,6 +537,20 @@ query GetProductsByCollectionIds(
       handle
       title
       description
+      og_tag_image: metafield(namespace: "custom", key: "og_tag_image") {
+        reference {
+          ... on MediaImage {
+            id
+            image {
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
       image {
         url
         altText
@@ -1094,6 +1117,22 @@ const PRODUCT_FRAGMENT = `#graphql
       type
       value
     }
+    og_tag_image: metafield(namespace: "custom", key: "og_tag_image") {
+      id
+      type
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
     metafields(identifiers: [
       {namespace: "custom", key: "family"}
       {namespace: "custom", key: "category_variant"}
@@ -1103,6 +1142,7 @@ const PRODUCT_FRAGMENT = `#graphql
       {namespace: "custom", key: "badge_colors"}
       {namespace: "custom", key: "bundle_btn_text"}
       {namespace: "custom", key: "bundle_btn_handle"}
+      {namespace: "custom", key: "og_tag_image"}
     ]) {
       id
       namespace
@@ -1113,7 +1153,14 @@ const PRODUCT_FRAGMENT = `#graphql
     collections(first: 20) {
       nodes {
         id
+        handle
       }
+    }
+    featuredImage {
+      url
+      altText
+      width
+      height
     }
     images(first: 10) {
       nodes {
