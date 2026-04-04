@@ -537,6 +537,20 @@ query GetProductsByCollectionIds(
       handle
       title
       description
+      og_tag_image: metafield(namespace: "custom", key: "og_tag_image") {
+        reference {
+          ... on MediaImage {
+            id
+            image {
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
       image {
         url
         altText
