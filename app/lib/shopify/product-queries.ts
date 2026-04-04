@@ -1103,6 +1103,22 @@ const PRODUCT_FRAGMENT = `#graphql
       type
       value
     }
+    og_tag_image: metafield(namespace: "custom", key: "og_tag_image") {
+      id
+      type
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
     metafields(identifiers: [
       {namespace: "custom", key: "family"}
       {namespace: "custom", key: "category_variant"}
@@ -1112,6 +1128,7 @@ const PRODUCT_FRAGMENT = `#graphql
       {namespace: "custom", key: "badge_colors"}
       {namespace: "custom", key: "bundle_btn_text"}
       {namespace: "custom", key: "bundle_btn_handle"}
+      {namespace: "custom", key: "og_tag_image"}
     ]) {
       id
       namespace
