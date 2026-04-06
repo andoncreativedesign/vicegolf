@@ -313,6 +313,31 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           }}
         />
         {/* End Google Tag Manager */}
+        {/* Meta Pixel Base Code */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `console.log('Meta Pixel Base Loaded');
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}
+(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+fbq('init', '912923441144845', {
+  em: 'email@email.com', //Values will be hashed automatically by the pixel using SHA-256
+  ph: '1234567890',
+  fn: 'first_name',    
+  ln: 'last_name'  
+}); 
+fbq('track', 'PageView');`,
+          }}
+        />
+        {/* End Meta Pixel Base Code */}
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="stylesheet" href={tailwindCss}></link>
@@ -332,6 +357,17 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           ></iframe>
         </noscript>
         {/* End Google Tag Manager (noscript) */}
+        {/* Meta Pixel Base Code (noscript) */}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src="https://www.facebook.com/tr?id=912923441144845&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
+        {/* End Meta Pixel Base Code (noscript) */}
         <CookieConsentWrapper>
           {children}
         </CookieConsentWrapper>
