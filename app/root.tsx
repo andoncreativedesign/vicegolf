@@ -318,23 +318,23 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `console.log('Meta Pixel Base Loaded');
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}
-(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;
+            n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}
+            (window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
 
-fbq('init', '912923441144845', {
-  em: 'email@email.com', //Values will be hashed automatically by the pixel using SHA-256
-  ph: '1234567890',
-  fn: 'first_name',    
-  ln: 'last_name'  
-}); 
-fbq('track', 'PageView');`,
+            fbq('init', '912923441144845', {
+              em: 'email@email.com', //Values will be hashed automatically by the pixel using SHA-256
+              ph: '1234567890',
+              fn: 'first_name',    
+              ln: 'last_name'  
+            }); 
+            fbq('track', 'PageView');`,
           }}
         />
         {/* End Meta Pixel Base Code */}
