@@ -295,7 +295,7 @@ export default function Collection() {
 
             {!listing && (
                 <>
-                    <h1 className="text-5xl font-black mb-2" style={{ fontSize: '3rem', fontWeight: '900' }}>{handle}</h1>
+                    <h1 className="text-4xl font-extrabold mb-4">{collection?.title}</h1>
                     <p className="collection-description">{collection?.description}</p>
 
                     <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
@@ -305,7 +305,7 @@ export default function Collection() {
                                 <ChevronRight className="text-gray-600" size={20} />
                             </li>
                             <li>
-                                <span className="text-gray-900 font-semibold">{handle}</span>
+                                <span className="text-gray-900 font-semibold">{collection?.title}</span>
                             </li>
                         </ol>
                     </nav>
