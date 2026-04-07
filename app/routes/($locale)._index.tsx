@@ -7,7 +7,7 @@ import type { FeaturedCollectionFragment, RecommendedProductsQuery } from 'store
 import { ProductItem } from '~/components/ProductItem';
 import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
-import { getHomePageHeroData, getHomePageSectionData } from '~/lib/sanity/home';
+import { getHomePageHeroData, getHomePageSectionData, getHomePageViceLookData } from '~/lib/sanity/home';
 import {
   ADMIN_PRODUCTS_BY_FAMILY,
   ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
@@ -39,7 +39,8 @@ export async function loader(args: Route.LoaderArgs) {
   const familyData = loadFamilyData(families);
   const homePageHeroData = await getHomePageHeroData(args.context.env);
   const homePageSectionData = getHomePageSectionData(args.context.env);
-  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, familyData };
+  const homePageViceLookData = getHomePageViceLookData(args.context.env);
+  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData };
 }
 
 
@@ -476,9 +477,9 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
       )} */}
       <div className='home'>
         <Suspense fallback={<div className="min-h-[50vh]"></div>}>
-          <Await resolve={data.homePageSectionData}>
-            {(homePageSectionData) => (
-              <ViceLookSection data={homePageSectionData?.viceLook} />
+          <Await resolve={data.homePageViceLookData}>
+            {(homePageViceLookData) => (
+              <ViceLookSection data={homePageViceLookData?.viceLook} />
             )}
           </Await>
         </Suspense>

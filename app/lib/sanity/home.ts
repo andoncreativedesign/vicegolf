@@ -46,7 +46,7 @@ export const homePageHeroQuery = `*[_type == "home"][0]{
 }`;
 
 // GraphQL query for non-critical home page data (Lower sections)
-export const homePageSectionsQuery = `*[_type == "home"][0]{
+export const homePageLowerSectionsQuery = `*[_type == "home"][0]{
   secondaryHero[] {
     title,
     text2,
@@ -77,6 +77,9 @@ export const homePageSectionsQuery = `*[_type == "home"][0]{
       }
     },
   },
+}`;
+
+export const homePageViceLookQuery = `*[_type == "home"][0]{
   viceLook {
     title,
     items[] {
@@ -239,6 +242,9 @@ export interface HomePageHeroData {
 export interface HomePageSectionData {
   secondaryHero?: HeroItemTransformed[];
   homeCategories: HomeCategories[];
+}
+
+export interface HomePageViceLookData {
   viceLook?: ViceLookSectionData;
 }
 
@@ -283,7 +289,7 @@ export async function getHomePageHeroData(env?: any): Promise<HomePageHeroData |
 export async function getHomePageSectionData(env?: any): Promise<HomePageSectionData | null> {
   try {
     const axiosSanityInstance = createAxiosSanity(env);
-    const query = encodeURIComponent(homePageSectionsQuery);
+    const query = encodeURIComponent(homePageLowerSectionsQuery);
     const response = await axiosSanityInstance.get("/?query=" + query);
 
     if (response.status !== HttpStatusCode.Ok) {
@@ -307,6 +313,28 @@ export async function getHomePageSectionData(env?: any): Promise<HomePageSection
         image: category.image?.asset?.url as string,
         description: category?.description
       })),
+    };
+
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching home page section data:', error);
+    return null;
+  }
+}
+
+export async function getHomePageViceLookData(env?: any): Promise<HomePageViceLookData | null> {
+  try {
+    const axiosSanityInstance = createAxiosSanity(env);
+    const query = encodeURIComponent(homePageViceLookQuery);
+    const response = await axiosSanityInstance.get("/?query=" + query);
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = response.data.result;
+
+    const transformedData: HomePageViceLookData = {
       viceLook: result.viceLook ? {
         title: result.viceLook.title,
         items: result.viceLook.items?.map((item: any) => ({
@@ -335,7 +363,7 @@ export async function getHomePageSectionData(env?: any): Promise<HomePageSection
 
     return transformedData;
   } catch (error) {
-    console.error('Error fetching home page section data:', error);
+    console.error('Error fetching home page vice look data:', error);
     return null;
   }
 }
