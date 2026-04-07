@@ -33,6 +33,7 @@ export function createAxiosSanity(env?: any) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    timeout: 20000,
   });
 }
 

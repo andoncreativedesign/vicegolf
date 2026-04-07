@@ -324,6 +324,7 @@ export async function getHomePageSectionData(env?: any): Promise<HomePageSection
 
 export async function getHomePageViceLookData(env?: any): Promise<HomePageViceLookData | null> {
   try {
+    console.log("Fetching ViceLook...");
     const axiosSanityInstance = createAxiosSanity(env);
     const query = encodeURIComponent(homePageViceLookQuery);
     const response = await axiosSanityInstance.get("/?query=" + query);
@@ -361,6 +362,7 @@ export async function getHomePageViceLookData(env?: any): Promise<HomePageViceLo
       } : undefined,
     };
 
+    console.log("ViceLook success");
     return transformedData;
   } catch (error) {
     console.error('Error fetching home page vice look data:', error);
