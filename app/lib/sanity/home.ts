@@ -2,7 +2,8 @@ import { HttpStatusCode } from "axios";
 import { createAxiosSanity } from "~/utils/axiosInsatances";
 
 // GraphQL query for home page data
-export const homePageQuery = `*[_type == "home"][0]{
+// GraphQL query for critical home page data (Hero sections)
+export const homePageHeroQuery = `*[_type == "home"][0]{
   banner {
     enabled,
     backgroundColor,
@@ -32,6 +33,20 @@ export const homePageQuery = `*[_type == "home"][0]{
       }
     },
   },
+  brand[] {
+    name,
+    logo{
+      asset->{
+        _id,
+        url
+      }
+    },
+    url
+  }
+}`;
+
+// GraphQL query for non-critical home page data (Lower sections)
+export const homePageSectionsQuery = `*[_type == "home"][0]{
   secondaryHero[] {
     title,
     text2,
@@ -52,15 +67,15 @@ export const homePageQuery = `*[_type == "home"][0]{
       }
     }
   },
-  brand[] {
-    name,
-    logo{
+  homeCategories[] {
+    title,
+    description,
+    image{
       asset->{
         _id,
         url
       }
     },
-    url
   },
   viceLook {
     title,
@@ -90,31 +105,6 @@ export const homePageQuery = `*[_type == "home"][0]{
           }
         }
       }
-    }
-  },
-  homeCategories[] {
-    title,
-    description,
-    image{
-      asset->{
-        _id,
-        url
-      }
-    },
-  },
-  shippingDetails {
-    _id,
-    _type,
-    title,
-    contentType,
-    description,
-    points[] {
-      _key,
-      pointType,
-      simplePoint,
-      pointTitle,
-      pointDescription,
-      showBullet
     }
   }
 }`;
@@ -240,32 +230,34 @@ export interface BannerData {
   }>;
 }
 
-export interface HomePageDataTransformed {
+export interface HomePageHeroData {
   banner?: BannerData;
   heroes?: HeroItemTransformed[];
-  secondaryHero?: HeroItemTransformed[];
   brand?: BrandItemTransformed[];
+}
+
+export interface HomePageSectionData {
+  secondaryHero?: HeroItemTransformed[];
   homeCategories: HomeCategories[];
   viceLook?: ViceLookSectionData;
 }
 
 // Update the getHeroSectionData function to use the new query
-export async function getHomePageData(env?: any): Promise<HomePageDataTransformed | null> {
+export async function getHomePageHeroData(env?: any): Promise<HomePageHeroData | null> {
   try {
     const axiosSanityInstance = createAxiosSanity(env);
-    const query = encodeURIComponent(homePageQuery);
+    const query = encodeURIComponent(homePageHeroQuery);
     const response = await axiosSanityInstance.get("/?query=" + query);
 
     if (response.status !== HttpStatusCode.Ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const result = response.data;
+    const result = response.data.result;
 
-    // Transform the data to match our types
-    const transformedData: HomePageDataTransformed = {
-      banner: result.result.banner,
-      heroes: result.result.heroes?.map((hero: any) => ({
+    const transformedData: HomePageHeroData = {
+      banner: result.banner,
+      heroes: result.heroes?.map((hero: any) => ({
         title: hero.title,
         text2: hero.text2,
         description: hero.description,
@@ -274,7 +266,34 @@ export async function getHomePageData(env?: any): Promise<HomePageDataTransforme
         image: hero.content?.image?.asset?.url,
         mobileImage: hero.mobileContent?.image?.asset?.url
       })),
-      secondaryHero: result.result.secondaryHero?.map((hero: any) => ({
+      brand: result.brand?.map((brand: any) => ({
+        name: brand.name as string,
+        logo: brand.logo?.asset?.url as string,
+        url: brand.url
+      })),
+    };
+
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching home page hero data:', error);
+    return null;
+  }
+}
+
+export async function getHomePageSectionData(env?: any): Promise<HomePageSectionData | null> {
+  try {
+    const axiosSanityInstance = createAxiosSanity(env);
+    const query = encodeURIComponent(homePageSectionsQuery);
+    const response = await axiosSanityInstance.get("/?query=" + query);
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = response.data.result;
+
+    const transformedData: HomePageSectionData = {
+      secondaryHero: result.secondaryHero?.map((hero: any) => ({
         title: hero.title,
         text2: hero.text2,
         description: hero.description,
@@ -283,19 +302,14 @@ export async function getHomePageData(env?: any): Promise<HomePageDataTransforme
         image: hero.backgroundImage?.asset?.url,
         mobileImage: hero.mobileBackgroundImage?.asset?.url
       })),
-      brand: result.result.brand?.map((brand: any) => ({
-        name: brand.name as string,
-        logo: brand.logo?.asset?.url as string,
-        url: brand.url
-      })),
-      homeCategories: result.result.homeCategories?.map((category: any) => ({
+      homeCategories: result.homeCategories?.map((category: any) => ({
         title: category.title as string,
         image: category.image?.asset?.url as string,
         description: category?.description
       })),
-      viceLook: result.result.viceLook ? {
-        title: result.result.viceLook.title,
-        items: result.result.viceLook.items?.map((item: any) => ({
+      viceLook: result.viceLook ? {
+        title: result.viceLook.title,
+        items: result.viceLook.items?.map((item: any) => ({
           title: item.title,
           url: item.url,
           image: item.image?.asset?.url,
@@ -319,17 +333,9 @@ export async function getHomePageData(env?: any): Promise<HomePageDataTransforme
       } : undefined,
     };
 
-    // console.log("transformedData")
-    // console.log(JSON.stringify(transformedData?.homeCategories?.[0]))
-    // console.log('secondaryHero')
-    // console.log(JSON.stringify(transformedData?.secondaryHero?.length))
-    // console.log('brand')
-    // console.log(JSON.stringify(transformedData?.brand?.[0]))
-
     return transformedData;
-
   } catch (error) {
-    console.error('Error fetching home page data:', error);
+    console.error('Error fetching home page section data:', error);
     return null;
   }
 }
