@@ -37,7 +37,7 @@ export async function loader(args: Route.LoaderArgs) {
   const criticalDataWithFamilies = await loadCriticalData(args);
   const { families, ...criticalData } = criticalDataWithFamilies;
   const familyData = loadFamilyData(families);
-  const homePageData = getHomePageData();
+  const homePageData = getHomePageData(args.context.env);
   return { ...deferredData, ...criticalData, homePageData, familyData };
 }
 

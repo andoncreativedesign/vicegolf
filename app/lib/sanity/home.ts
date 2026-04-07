@@ -1,5 +1,5 @@
 import { HttpStatusCode } from "axios";
-import { axiosSanity } from "~/utils/axiosInsatances";
+import { createAxiosSanity } from "~/utils/axiosInsatances";
 
 // GraphQL query for home page data
 export const homePageQuery = `*[_type == "home"][0]{
@@ -250,10 +250,11 @@ export interface HomePageDataTransformed {
 }
 
 // Update the getHeroSectionData function to use the new query
-export async function getHomePageData(): Promise<HomePageDataTransformed | null> {
+export async function getHomePageData(env?: any): Promise<HomePageDataTransformed | null> {
   try {
+    const axiosSanityInstance = createAxiosSanity(env);
     const query = encodeURIComponent(homePageQuery);
-    const response = await axiosSanity.get("/?query=" + query);
+    const response = await axiosSanityInstance.get("/?query=" + query);
 
     if (response.status !== HttpStatusCode.Ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -351,10 +352,11 @@ export const shippingDetailsQuery = `*[_type == "home"][0]{
   }
 }`;
 
-export async function getShippingDetails(): Promise<ShippingDetails | null> {
+export async function getShippingDetails(env?: any): Promise<ShippingDetails | null> {
   try {
+    const axiosSanityInstance = createAxiosSanity(env);
     const query = encodeURIComponent(shippingDetailsQuery);
-    const response = await axiosSanity.get("/?query=" + query);
+    const response = await axiosSanityInstance.get("/?query=" + query);
 
     if (response.status !== HttpStatusCode.Ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
