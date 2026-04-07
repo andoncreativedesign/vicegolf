@@ -11,7 +11,7 @@ interface DropdownItemProps {
 
 const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
   const navigate = useNavigate()
-  const fetcher = useFetcher<{ collection?: { id: string } }>();
+  const fetcher = useFetcher<{ collection?: { id: string, title: string, handle: string } }>();
 
   useEffect(() => {
   }, [menuItem])
@@ -65,8 +65,12 @@ const NavDropdownItem = ({ menuItem, onClose }: DropdownItemProps) => {
       && fetcher.data?.collection?.id
       && fetcher.data?.collection?.title
     ) {
-      const { id, title } = fetcher.data.collection
-      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+      const { id, title, handle } = fetcher.data.collection
+      if (handle) {
+        navigate(`/collections/${handle}`);
+      } else {
+        navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+      }
     }
   }, [fetcher.state, fetcher.data, navigate]);
 

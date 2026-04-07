@@ -48,8 +48,12 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
             && fetcher.data?.collection?.id
             && fetcher.data?.collection?.title
         ) {
-            const { id, title } = fetcher.data.collection
-            navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+            const { id, title, handle } = fetcher.data.collection
+            if (handle) {
+                navigate(`/collections/${handle}`);
+            } else {
+                navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+            }
         }
     }, [fetcher.state, fetcher.data, navigate]);
 

@@ -108,11 +108,19 @@ export function HeroSection({
   }, [isPaused, slides.length]);
 
   useEffect(() => {
-    if (fetcher.data?.collection) {
-      const { id, title } = fetcher.data.collection;
-      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    if (
+        fetcher.state === "idle"
+        && fetcher.data?.collection?.id
+        && fetcher.data?.collection?.title
+    ) {
+        const { id, title, handle } = fetcher.data.collection
+        if (handle) {
+            navigate(`/collections/${handle}`);
+        } else {
+            navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+        }
     }
-  }, [fetcher.data, navigate]);
+  }, [fetcher.state, fetcher.data, navigate]);
 
   const handleCTA = (handle?: string) => {
     if (!handle) return;

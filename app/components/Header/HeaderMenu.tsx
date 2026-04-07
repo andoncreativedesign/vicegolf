@@ -160,11 +160,10 @@ const HeaderMenu = ({
         console.log(updatedItem)
 
       } else {
+        const itemHandle = handle || item.title.toLowerCase().replace(/\s+/g, '-');
         updatedItem = {
           ...item,
-          url: item.resourceId
-            ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${decodeURIComponent(item.title)}`
-            : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item.items || []))}/${decodeURIComponent(item.title)}`
+          url: `/collections/${itemHandle}`
         };
       }
 
@@ -206,9 +205,14 @@ const HeaderMenu = ({
       && fetcher.data?.collection?.id
       && fetcher.data?.collection?.title
     ) {
-      const { id, title } = fetcher.data.collection
+      const { id, title, handle } = fetcher.data.collection
       close(); // Ensure menu is closed before navigation
-      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+
+      if (handle) {
+         navigate(`/collections/${handle}`);
+      } else {
+         navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+      }
     }
   }, [fetcher.state, fetcher.data, navigate]);
 
