@@ -121,9 +121,13 @@ function SearchAside() {
       fetcher.data?.collection?.id &&
       fetcher.data?.collection?.title
     ) {
-      const { id, title } = fetcher.data.collection
+      const { id, title, handle } = fetcher.data.collection
       close()
-      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+      if (handle) {
+        navigate(`/collections/${handle}`);
+      } else {
+        navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+      }
     }
   }, [fetcher.state, fetcher.data, navigate]);
 
