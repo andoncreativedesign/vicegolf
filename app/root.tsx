@@ -4,7 +4,7 @@ import type { Route } from './+types/root';
 import favicon from '~/assets/vicefav.svg';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
 import { createCategoryQuery, MULTIPLE_COLLECTIONS_QUERY_FOR_NAV, type MenuData } from '~/lib/shopify/product-queries';
-import { getHomePageData } from '~/lib/sanity/home';
+import { getHomePageHeroData } from '~/lib/sanity/home';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
@@ -174,7 +174,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       }
     }),
     // Fetch home page data including banner
-    getHomePageData().then(data => {
+    getHomePageHeroData(context.env).then(data => {
       return data;
     }).catch(error => {
       console.error('Error fetching home page data:', error);

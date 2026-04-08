@@ -7,6 +7,7 @@ import {
 } from '@shopify/hydrogen';
 import type { EntryContext } from 'react-router';
 
+export const streamTimeout = 20_000;
 
 export default async function handleRequest(
   request: Request,
@@ -72,6 +73,8 @@ export default async function handleRequest(
       'https://www.googletagmanager.com',
       'https://*.clarity.ms',
       'https://connect.facebook.net',
+      "'sha256-s3SZTSyQxUKs/jb32OwDqhQD//UmajtRhqPKWi2BlbM='",
+      "'sha256-ZHvi1PGvqzZ4VRdQO7VkiV7s1Y65GtErug8DAAzcHNY='",
     ],
 
     defaultSrc: [

@@ -35,7 +35,7 @@ import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
-import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
+import { getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
 import { DriversProduct } from '~/components/Product/DriversProduct';
 type ProductImageType = {

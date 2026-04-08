@@ -17,6 +17,26 @@ export const axiosSanity = axios.create({
   },
 });
 
+/**
+ * Creates a Sanity axios instance using dynamic environment variables.
+ * Prioritizes `env` from loader context but falls back to static `import.meta.env`.
+ */
+export function createAxiosSanity(env?: any) {
+  const projectId = env?.VITE_SANITY_PROJECT_ID || SANITY_CONFIG.projectId;
+  const dataset = env?.VITE_SANITY_DATASET || SANITY_CONFIG.dataset;
+  const apiVersion = env?.VITE_SANITY_API_VERSION || SANITY_CONFIG.apiVersion;
+  const token = env?.VITE_SANITY_API_TOKEN || SANITY_CONFIG.token;
+
+  return axios.create({
+    baseURL: `https://${projectId}.api.sanity.io/${apiVersion}/data/query/${dataset}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    timeout: 20000,
+  });
+}
+
 const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_ADMIN_ACCESS_TOKEN
 const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL
 
