@@ -116,10 +116,27 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     //     currency: currencyCode
     //   }
     // });
+    // open('cart');
+   
     if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'AddToCart', {
+      console.log('FB Pixel fired', {
+        currency: currencyCode,
         value: totalPriceAmount,
-        currency: currencyCode
+        content_ids: [currentProductId],   // REQUIRED for proper tracking
+        content_name: title,
+        content_type: 'product'
+      });
+
+      // (window as any).fbq('track', 'AddToCart', {
+      //   value: totalPriceAmount,
+      //   currency: currencyCode
+      // });
+      (window as any).fbq('track', 'AddToCart', {
+        currency: currencyCode,
+        value: totalPriceAmount,
+        content_ids: [currentProductId],   // REQUIRED for proper tracking
+        content_name: title,
+        content_type: 'product'
       });
     }
     open('cart');
