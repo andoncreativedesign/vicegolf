@@ -38,8 +38,8 @@ export async function loader(args: Route.LoaderArgs) {
   const { families, ...criticalData } = criticalDataWithFamilies;
   const familyData = loadFamilyData(families);
   const homePageHeroData = await getHomePageHeroData(args.context.env);
-  const homePageSectionData = getHomePageSectionData(args.context.env);
-  const homePageViceLookData = getHomePageViceLookData(args.context.env);
+  const homePageSectionData = await getHomePageSectionData(args.context.env);
+  const homePageViceLookData = await getHomePageViceLookData(args.context.env);
   return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData };
 }
 
