@@ -356,15 +356,22 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
 
   // === Menu Transformation ===
   const updateMenuItems = (items: MenuItem[]): MenuItem[] => {
-    const getAllResourceIdsOfChild = (items: MenuItem[]) =>
-      JSON.stringify(items.map((i) => i.resourceId || ''));
-    return items.map((item) => ({
-      ...item,
-      url: item.resourceId
-        ? `/collections/${encodeURIComponent(JSON.stringify([item.resourceId]))}/${encodeURIComponent(item.title)}`
-        : `/collections/${encodeURIComponent(getAllResourceIdsOfChild(item?.items || []))}/${encodeURIComponent(item.title)}`,
-      items: item.items?.length ? updateMenuItems(item.items) : [],
-    }));
+    return items.map((item) => {
+      const handle = item.resource?.handle || item.title.toLowerCase().replace(/\s+/g, '-');
+      let url = `/collections/${handle}`;
+
+      if (item.type === 'PRODUCT') {
+        url = `/products/${handle}`;
+      } else if (item.type === 'PAGE') {
+        url = `/pages/${handle}`;
+      }
+
+      return {
+        ...item,
+        url,
+        items: item.items?.length ? updateMenuItems(item.items) : [],
+      };
+    });
   };
 
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
