@@ -109,13 +109,19 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     }
   };
   const handleAddToCart = () => {
-    window?.dataLayer?.push({
-      event: "add_to_cart",
-      ecommerce: {
+    // window?.dataLayer?.push({
+    //   event: "add_to_cart",
+    //   ecommerce: {
+    //     value: totalPriceAmount,
+    //     currency: currencyCode
+    //   }
+    // });
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'AddToCart', {
         value: totalPriceAmount,
         currency: currencyCode
-      }
-    });
+      });
+    }
     open('cart');
   };
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {
