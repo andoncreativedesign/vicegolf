@@ -200,19 +200,9 @@ const HeaderMenu = ({
   }
 
   useEffect(() => {
-    if (
-      fetcher.state === "idle"
-      && fetcher.data?.collection?.id
-      && fetcher.data?.collection?.title
-    ) {
-      const { id, title, handle } = fetcher.data.collection
-      close(); // Ensure menu is closed before navigation
-
-      if (handle) {
-         navigate(`/collections/${handle}`);
-      } else {
-         navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
-      }
+    if (fetcher.state === 'idle' && fetcher.data?.collection?.handle) {
+      close();
+      navigate(`/collections/${fetcher.data.collection.handle}`);
     }
   }, [fetcher.state, fetcher.data, navigate]);
 
