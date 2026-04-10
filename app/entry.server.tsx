@@ -75,6 +75,11 @@ export default async function handleRequest(
       'https://connect.facebook.net',
       "'sha256-s3SZTSyQxUKs/jb32OwDqhQD//UmajtRhqPKWi2BlbM='",
       "'sha256-ZHvi1PGvqzZ4VRdQO7VkiV7s1Y65GtErug8DAAzcHNY='",
+      "'sha256-5q0ADi4wbx+5wxfG5iGAyEw/5EuQBTuMZ+y+XszyL60='",
+      "'sha256-Gu6rs6nL+AhmxWqe1XDXeh23b4SlUAhBtx29TdXu49I='",
+      "'strict-dynamic'",
+      "https:",
+      "http:",
     ],
 
     defaultSrc: [
