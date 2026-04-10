@@ -35,7 +35,7 @@ import { DivotJuniorProduct } from '~/components/DivotJuniorProduct';
 import { JuniorGolfBallProduct } from '~/components/JuniorGolfBallProduct';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
-import { getHomePageData, getShippingDetails } from '~/lib/sanity/home';
+import { getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
 import { DriversProduct } from '~/components/Product/DriversProduct';
 type ProductImageType = {
@@ -291,7 +291,7 @@ export default function Product() {
   useEffect(() => {
     const ogTagImage = product.og_tag_image?.reference?.image || (product.og_tag_image?.reference?.url ? { id: product.og_tag_image.reference.url, url: product.og_tag_image.reference.url, altText: product.og_tag_image.reference.altText } : null);
     const newSelectedImage = ogTagImage || selectedVariant?.image || (images?.nodes?.[0] as ProductImageType) || null;
-    
+
     console.log('DEBUG: Image selection in component:', {
       ogTagImageExists: !!ogTagImage,
       selectedVariantImageExists: !!selectedVariant?.image,
@@ -315,17 +315,24 @@ export default function Product() {
       setSelectedImage(product.images.nodes[0] as ProductImageType);
     }
 
-    window?.dataLayer?.push({
-      event: "view_content",
-      ecommerce: {
-        value: product?.selectedOrFirstAvailableVariant?.price?.amount,
-        currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode,
-        items: [{
-          item_name: product?.title,
-          item_id: product?.id
-        }]
-      }
-    });
+    //   window?.dataLayer?.push({
+    //     event: "view_content",
+    //     ecommerce: {
+    //       value: product?.selectedOrFirstAvailableVariant?.price?.amount, //replace with product price
+    //       currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode,
+    //       items: [{
+    //         item_name: product?.title,
+    //         item_id: product?.id
+    //       }]
+    //     }
+    //   });
+    // }, [product.id]);
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'ViewContent', {
+        value: product?.selectedOrFirstAvailableVariant?.price?.amount, //replace with price
+        currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode //replace it with curency
+      });
+    }
   }, [product.id]);
   // Format product type for display and URL
   const formatProductType = (type: string) => {
