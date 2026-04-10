@@ -74,7 +74,7 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
         }
     }
 
-    console.log(`Collection Meta Tags for ${title}:`, JSON.stringify(metaTags, null, 2));
+    // console.log(`Collection Meta Tags for ${title}:`, JSON.stringify(metaTags, null, 2));
 
     return metaTags;
 };
