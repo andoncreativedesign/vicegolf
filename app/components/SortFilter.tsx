@@ -159,7 +159,6 @@ export function SortFilter({
                                 const newParams = new URLSearchParams(searchParams);
                                 newParams.delete(targetId);
                                 navigate(`${location.pathname}?${newParams.toString()}`, { replace: true, preventScrollReset: true });
-                                if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
                             className={`pb-4 text-[14px] font-bold transition-all relative ${!searchParams.get(targetId) ? 'text-black' : 'text-gray-400 hover:text-black'}`}
                         >
@@ -182,7 +181,6 @@ export function SortFilter({
                                         newParams.delete('cursor');
                                         newParams.delete('direction');
                                         navigate(`${location.pathname}?${newParams.toString()}`, { replace: true, preventScrollReset: true });
-                                        if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                     className={`pb-4 text-[14px] font-bold transition-all relative ${isChecked ? 'text-black' : 'text-gray-400 hover:text-black'}`}
                                 >
