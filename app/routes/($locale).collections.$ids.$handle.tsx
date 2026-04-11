@@ -17,6 +17,8 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 import { ChevronRight } from 'lucide-react';
 import { loadFamilyData } from '~/utils/loadFamilyData';
+import { SortFilter } from '~/components/SortFilter';
+
 
 
 export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
@@ -233,6 +235,47 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         pageBy: 8,
     });
 
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
+
+    // Parse filters
+    const filters: any[] = [];
+    for (const [key, value] of searchParams.entries()) {
+        if (key.startsWith('filter.')) {
+            try {
+                filters.push(JSON.parse(value));
+            } catch (e) {
+                // Ignore invalid filter values
+            }
+        }
+    }
+
+    // Parse sort
+    const sort = searchParams.get('sort');
+    let sortKey: string = 'COLLECTION_DEFAULT';
+    let reverse = false;
+
+    switch (sort) {
+        case 'price-low-high':
+            sortKey = 'PRICE';
+            reverse = false;
+            break;
+        case 'price-high-low':
+            sortKey = 'PRICE';
+            reverse = true;
+            break;
+        case 'newest':
+            sortKey = 'CREATED';
+            reverse = true;
+            break;
+        case 'featured':
+            sortKey = 'MANUAL';
+            reverse = false;
+            break;
+        default:
+            sortKey = 'COLLECTION_DEFAULT';
+    }
+
     if (!ids) {
         throw redirect('/collections');
     }
@@ -253,7 +296,10 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         storefront.query(GET_PRODUCTS_BY_COLLECTION, {
             variables: {
                 ids: decodedIds,
-                ...paginationVariables
+                ...paginationVariables,
+                filters,
+                sortKey,
+                reverse
             },
         }),
     ]);
@@ -326,10 +372,30 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             const startCursor = validCollections.find(c => c.products.pageInfo.startCursor)?.products.pageInfo.startCursor || null;
             const endCursor = validCollections.find(c => c.products.pageInfo.endCursor)?.products.pageInfo.endCursor || null;
 
+            // Merge filters from all collections
+            const allFilters = validCollections.flatMap(c => c.products.filters || []);
+            const uniqueFiltersMap = new Map();
+            allFilters.forEach(filter => {
+                if (!uniqueFiltersMap.has(filter.id)) {
+                    uniqueFiltersMap.set(filter.id, { ...filter, values: [...filter.values] });
+                } else {
+                    const existingFilter = uniqueFiltersMap.get(filter.id);
+                    filter.values.forEach(val => {
+                        const existingVal = existingFilter.values.find(v => v.input === val.input);
+                        if (existingVal) {
+                            existingVal.count += val.count;
+                        } else {
+                            existingFilter.values.push({ ...val });
+                        }
+                    });
+                }
+            });
+
             return {
                 ...baseCollection,
                 products: {
                     ...baseCollection.products,
+                    filters: Array.from(uniqueFiltersMap.values()),
                     edges: Array.from(uniqueProducts.values()),
                     pageInfo: {
                         hasNextPage,
@@ -480,7 +546,6 @@ export default function Collection() {
                         )}
                     </div>
 
-                    {/* Breadcrumb navigation */}
                     <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
                         <ol className="flex items-center space-x-2">
                             <li className='flex items-center'>
@@ -497,21 +562,23 @@ export default function Collection() {
                         </ol>
                     </nav>
 
-                    {/* Product Grid */}
-                    {collection?.products?.edges?.length > 0 && (
-                        <PaginatedResourceSection
-                            connection={collection?.products}
-                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                        >
-                            {({ node, index }) => (
-                                <VariantProductCard
-                                    key={node.id}
-                                    product={node}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                            )}
-                        </PaginatedResourceSection>
-                    )}
+                    <SortFilter filters={collection?.products?.filters || []}>
+                        {/* Product Grid */}
+                        {collection?.products?.edges?.length > 0 && (
+                            <PaginatedResourceSection
+                                connection={collection?.products}
+                                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                            >
+                                {({ node, index }) => (
+                                    <VariantProductCard
+                                        key={node.id}
+                                        product={node}
+                                        loading={index < 8 ? 'eager' : undefined}
+                                    />
+                                )}
+                            </PaginatedResourceSection>
+                        )}
+                    </SortFilter>
 
 
                     {/* Fallback to original collection header if no listing data */}
@@ -540,21 +607,23 @@ export default function Collection() {
                         </ol>
                     </nav>
 
-                    {/* Product Grid */}
-                    {collection?.products?.edges?.length > 0 && (
-                        <PaginatedResourceSection
-                            connection={collection?.products}
-                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                        >
-                            {({ node, index }) => (
-                                <VariantProductCard
-                                    key={node.id}
-                                    product={node}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                            )}
-                        </PaginatedResourceSection>
-                    )}
+                    <SortFilter filters={collection?.products?.filters || []}>
+                        {/* Product Grid */}
+                        {collection?.products?.edges?.length > 0 && (
+                            <PaginatedResourceSection
+                                connection={collection?.products}
+                                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                            >
+                                {({ node, index }) => (
+                                    <VariantProductCard
+                                        key={node.id}
+                                        product={node}
+                                        loading={index < 8 ? 'eager' : undefined}
+                                    />
+                                )}
+                            </PaginatedResourceSection>
+                        )}
+                    </SortFilter>
                 </>
             )}
 
