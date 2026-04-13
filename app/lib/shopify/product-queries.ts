@@ -517,7 +517,7 @@ export interface ShopifyPageInfo {
   endCursor?: string;
 }
 
-// ! collection query without sorting
+// ! collection query with sorting and filtering
 export const GET_PRODUCTS_BY_COLLECTION = `#graphql
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
