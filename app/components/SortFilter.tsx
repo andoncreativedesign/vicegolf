@@ -1,5 +1,5 @@
-import { useLocation, useNavigate, useSearchParams } from 'react-router';
-import { useState, ReactNode, useEffect } from 'react';
+import { useLocation, useNavigate, useSearchParams, useNavigation } from 'react-router';
+import { useState, ReactNode, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp, X, SlidersHorizontal } from 'lucide-react';
 
 interface FilterValue {
@@ -38,17 +38,29 @@ export function SortFilter({
     const [searchParams] = useSearchParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const navigation = useNavigation();
+
+    // Optimistic search params for immediate UI feedback during transitions
+    const optimisticSearchParams = useMemo(() => {
+        if (navigation.location) {
+            return new URLSearchParams(navigation.location.search);
+        }
+        return searchParams;
+    }, [navigation.location, searchParams]);
+
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [openFilters, setOpenFilters] = useState<string[]>(filters.map(f => f.id));
     const [persistentProductTypes, setPersistentProductTypes] = useState<FilterValue[]>([]);
     const [ptFilterId, setPtFilterId] = useState<string | null>(null);
 
-    const activeFilters = Array.from(searchParams.entries())
-        .filter(([key]) => key.startsWith('filter.'))
-        .map(([key, value]) => ({ key, value }));
+    const activeFilters = useMemo(() => {
+        return Array.from(optimisticSearchParams.entries())
+            .filter(([key]) => key.startsWith('filter.'))
+            .map(([key, value]) => ({ key, value }));
+    }, [optimisticSearchParams]);
 
-    const currentSort = searchParams.get('sort') || 'featured';
+    const currentSort = optimisticSearchParams.get('sort') || 'featured';
 
     const handleFilterChange = (key: string, value: string, checked: boolean) => {
         const newParams = new URLSearchParams(searchParams);
@@ -163,15 +175,15 @@ export function SortFilter({
                                 newParams.delete(targetId);
                                 navigate(`${location.pathname}?${newParams.toString()}`, { replace: true, preventScrollReset: true });
                             }}
-                            className={`pb-4 text-[14px] font-bold transition-all relative ${!searchParams.get(targetId) ? 'text-black' : 'text-gray-400 hover:text-black'}`}
+                            className={`pb-4 text-[14px] font-bold transition-all relative ${!optimisticSearchParams.get(targetId) ? 'text-black' : 'text-gray-400 hover:text-black'}`}
                         >
                             All
-                            {!searchParams.get(targetId) && (
+                            {!optimisticSearchParams.get(targetId) && (
                                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black animate-slideIn" />
                             )}
                         </button>
                         {displayPtValues.map((value) => {
-                            const isChecked = searchParams.getAll(targetId).includes(value.input);
+                            const isChecked = optimisticSearchParams.getAll(targetId).includes(value.input);
                             return (
                                 <button
                                     key={value.id}
@@ -351,7 +363,7 @@ export function SortFilter({
                                     {openFilters.includes(filter.id) && (
                                         <div className="space-y-3 animate-fadeIn">
                                             {filter.values.map((value) => {
-                                                const isChecked = searchParams.getAll(filter.id).includes(value.input);
+                                                const isChecked = optimisticSearchParams.getAll(filter.id).includes(value.input);
                                                 return (
                                                     <label 
                                                         key={value.id} 

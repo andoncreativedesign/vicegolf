@@ -1,4 +1,4 @@
-import { redirect, useLoaderData, Link, useNavigate, useSearchParams } from 'react-router';
+import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation } from 'react-router';
 import type { Route } from './+types/collections.$handle';
 import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
@@ -363,6 +363,8 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 function ProductGrid({ products }: { products: any }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const navigation = useNavigation();
+    const isPending = navigation.state !== 'idle' && navigation.location?.pathname === window.location.pathname;
 
     const clearFilters = () => {
         const newParams = new URLSearchParams(searchParams);
@@ -376,18 +378,20 @@ function ProductGrid({ products }: { products: any }) {
 
     if (products?.edges?.length > 0) {
         return (
-            <PaginatedResourceSection
-                connection={products}
-                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-            >
-                {({ node, index }) => (
-                    <VariantProductCard
-                        key={node.id}
-                        product={node}
-                        loading={index < 8 ? 'eager' : undefined}
-                    />
-                )}
-            </PaginatedResourceSection>
+            <div className={`transition-opacity duration-200 ${isPending ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                <PaginatedResourceSection
+                    connection={products}
+                    resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                >
+                    {({ node, index }) => (
+                        <VariantProductCard
+                            key={node.id}
+                            product={node}
+                            loading={index < 8 ? 'eager' : undefined}
+                        />
+                    )}
+                </PaginatedResourceSection>
+            </div>
         );
     }
 
