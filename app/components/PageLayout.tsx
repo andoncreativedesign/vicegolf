@@ -116,14 +116,9 @@ function SearchAside() {
   }
 
   useEffect(() => {
-    if (
-      fetcher.state === "idle" &&
-      fetcher.data?.collection?.id &&
-      fetcher.data?.collection?.title
-    ) {
-      const { id, title } = fetcher.data.collection
-      close()
-      navigate(`/collections/${encodeURIComponent(JSON.stringify([id]))}/${encodeURIComponent(title)}`);
+    if (fetcher.state === 'idle' && fetcher.data?.collection?.handle) {
+      close();
+      navigate(`/collections/${fetcher.data.collection.handle}`);
     }
   }, [fetcher.state, fetcher.data, navigate]);
 
