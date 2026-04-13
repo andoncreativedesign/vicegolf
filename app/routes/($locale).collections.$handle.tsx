@@ -1,5 +1,6 @@
 import { redirect, useLoaderData, Link } from 'react-router';
 import type { Route } from './+types/collections.$handle';
+import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { ProductCard } from '~/components/ProductCard';
@@ -85,6 +86,43 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         pageBy: 8,
     });
 
+    const searchParams = new URL(request.url).searchParams;
+    const filters: any[] = [];
+    for (const [key, value] of searchParams.entries()) {
+        if (key.startsWith('filter.')) {
+            try {
+                filters.push(JSON.parse(value));
+            } catch (e) {
+                // Ignore invalid filter values
+            }
+        }
+    }
+
+    const sort = searchParams.get('sort');
+    let sortKey: string = 'COLLECTION_DEFAULT';
+    let reverse = false;
+
+    switch (sort) {
+        case 'price-low-high':
+            sortKey = 'PRICE';
+            reverse = false;
+            break;
+        case 'price-high-low':
+            sortKey = 'PRICE';
+            reverse = true;
+            break;
+        case 'newest':
+            sortKey = 'CREATED';
+            reverse = true;
+            break;
+        case 'featured':
+            sortKey = 'MANUAL';
+            reverse = false;
+            break;
+        default:
+            sortKey = 'COLLECTION_DEFAULT';
+    }
+
     if (!handle) {
         throw redirect('/collections');
     }
@@ -148,7 +186,10 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         storefront.query(GET_PRODUCTS_BY_COLLECTION, {
             variables: {
                 ids: collectionIds,
-                ...paginationVariables
+                ...paginationVariables,
+                filters,
+                sortKey,
+                reverse
             },
         }),
     ]);
@@ -335,20 +376,22 @@ export default function Collection() {
                         </ol>
                     </nav>
 
-                    {collection?.products?.edges?.length > 0 && (
-                        <PaginatedResourceSection
-                            connection={collection?.products}
-                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                        >
-                            {({ node, index }) => (
-                                <VariantProductCard
-                                    key={node.id}
-                                    product={node}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                            )}
-                        </PaginatedResourceSection>
-                    )}
+                    <SortFilter filters={collection?.products?.filters || []}>
+                        {collection?.products?.edges?.length > 0 && (
+                            <PaginatedResourceSection
+                                connection={collection?.products}
+                                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                            >
+                                {({ node, index }) => (
+                                    <VariantProductCard
+                                        key={node.id}
+                                        product={node}
+                                        loading={index < 8 ? 'eager' : undefined}
+                                    />
+                                )}
+                            </PaginatedResourceSection>
+                        )}
+                    </SortFilter>
                 </div>
             )}
 
@@ -369,20 +412,22 @@ export default function Collection() {
                         </ol>
                     </nav>
 
-                    {collection?.products?.edges?.length > 0 && (
-                        <PaginatedResourceSection
-                            connection={collection?.products}
-                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                        >
-                            {({ node, index }) => (
-                                <VariantProductCard
-                                    key={node.id}
-                                    product={node}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                            )}
-                        </PaginatedResourceSection>
-                    )}
+                    <SortFilter filters={collection?.products?.filters || []}>
+                        {collection?.products?.edges?.length > 0 && (
+                            <PaginatedResourceSection
+                                connection={collection?.products}
+                                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                            >
+                                {({ node, index }) => (
+                                    <VariantProductCard
+                                        key={node.id}
+                                        product={node}
+                                        loading={index < 8 ? 'eager' : undefined}
+                                    />
+                                )}
+                            </PaginatedResourceSection>
+                        )}
+                    </SortFilter>
                 </>
             )}
 
