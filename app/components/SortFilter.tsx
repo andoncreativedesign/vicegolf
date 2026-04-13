@@ -133,25 +133,37 @@ export function SortFilter({
         }
     }, [filters, persistentProductTypes]);
 
-    // Sync open filters when filter set changes, but keep user choices
+    // Sync open filters when filter set changes and ensure active filters are open
     useEffect(() => {
         if (filters.length > 0) {
             setOpenFilters(prev => {
                 const currentIds = filters.map(f => f.id);
-                // If we haven't initialized or if new filters appeared, add them to open list
-                const hasNewFilters = currentIds.some(id => !prev.includes(id));
-                if (hasNewFilters) {
-                    return Array.from(new Set([...prev, ...currentIds]));
+                
+                // Identify filters that have active values in the URL
+                const activeFilterIds = filters
+                    .filter(f => optimisticSearchParams.has(f.id))
+                    .map(f => f.id);
+                
+                // Identify new filters that we haven't seen in this session yet
+                // (This helps open them all on initial load/refresh)
+                const isInitialLoad = prev.length === 0;
+                const newFilterIds = isInitialLoad 
+                    ? currentIds 
+                    : currentIds.filter(id => !prev.includes(id));
+
+                if (newFilterIds.length > 0 || activeFilterIds.some(id => !prev.includes(id))) {
+                    return Array.from(new Set([...prev, ...newFilterIds, ...activeFilterIds]));
                 }
                 return prev;
             });
         }
-    }, [filters]);
+    }, [filters, optimisticSearchParams]);
 
     useEffect(() => {
         setPersistentProductTypes([]);
         setPtFilterId(null);
-        setOpenFilters([]); // Reset open filters to re-initialize with new collection's filters
+        // We removed setOpenFilters([]) from here to prevent closing them on every navigation
+        // unless it's a completely different route structure
         setIsFilterVisible(false);
         setIsSortOpen(false);
     }, [location.pathname]);
