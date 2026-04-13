@@ -1,4 +1,4 @@
-import { redirect, useLoaderData, Link } from 'react-router';
+import { redirect, useLoaderData, Link, useNavigate, useSearchParams } from 'react-router';
 import type { Route } from './+types/collections.$handle';
 import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
@@ -11,7 +11,7 @@ import { getListingByCollectionHandle, getAllListings } from '~/lib/sanity/produ
 import { useEffect } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import { loadFamilyData } from '~/utils/loadFamilyData';
 import { HEADER_QUERY } from '~/lib/fragments';
 
@@ -194,7 +194,15 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         }),
     ]);
 
-    if (!collectionResponse || !collectionResponse.nodes?.length) {
+    if (!collectionResponse || !collectionResponse.nodes || collectionResponse.nodes.length === 0) {
+        throw new Response(`Collection products for ${decodedHandle} not found`, {
+            status: 404,
+        });
+    }
+
+    // Filter out null nodes (deleted or draft collections) early
+    const nonNullNodes = collectionResponse.nodes.filter((n: any) => n !== null);
+    if (nonNullNodes.length === 0) {
         throw new Response(`Collection products for ${decodedHandle} not found`, {
             status: 404,
         });
@@ -218,29 +226,51 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             );
 
             if (validCollections.length === 0) {
-                console.warn('No collections with products found');
+                const firstNonNull = collections.nodes.find((n: any) => n !== null);
+                if (!firstNonNull) return null;
+                
                 return {
-                    ...collections.nodes[0]!,
+                    ...firstNonNull,
                     products: {
+                        ...firstNonNull.products,
                         edges: [],
-                        pageInfo: { hasNextPage: false, hasPreviousPage: false }
+                        pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null }
                     }
                 };
             }
 
-            // If only one collection → return it directly
-            if (validCollections.length === 1) {
-                return validCollections[0]!;
-            }
-
-            // Multiple collections → merge products with deduplication
+            // Multiple collections → merge products and filters
             const baseCollection = { ...validCollections[0]! };
             const allEdges = validCollections.flatMap((c: any) => c.products.edges);
 
+            // Deduplicate products
             const uniqueProducts = new Map<string, any>();
             allEdges.forEach((edge: any) => {
                 if (edge?.node?.id) {
                     uniqueProducts.set(edge.node.id, edge);
+                }
+            });
+
+            // Merge and deduplicate filters
+            const allFilters = validCollections.flatMap((c: any) => c.products.filters || []);
+            const filterMap = new Map<string, any>();
+            
+            allFilters.forEach((filter: any) => {
+                if (!filterMap.has(filter.id)) {
+                    filterMap.set(filter.id, {
+                        ...filter,
+                        values: [...filter.values.map((v: any) => ({ ...v }))]
+                    });
+                } else {
+                    const existingFilter = filterMap.get(filter.id);
+                    filter.values.forEach((val: any) => {
+                        const existingValue = existingFilter.values.find((v: any) => v.id === val.id);
+                        if (existingValue) {
+                            existingValue.count += val.count;
+                        } else {
+                            existingFilter.values.push({ ...val });
+                        }
+                    });
                 }
             });
 
@@ -253,6 +283,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 ...baseCollection,
                 products: {
                     ...baseCollection.products,
+                    filters: Array.from(filterMap.values()),
                     edges: Array.from(uniqueProducts.values()),
                     pageInfo: {
                         hasNextPage,
@@ -326,17 +357,67 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     return {};
 }
 
+/**
+ * Sub-component for rendering the product grid or empty state
+ */
+function ProductGrid({ products }: { products: any }) {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const clearFilters = () => {
+        const newParams = new URLSearchParams(searchParams);
+        Array.from(newParams.keys()).forEach(key => {
+            if (key.startsWith('filter.')) newParams.delete(key);
+        });
+        newParams.delete('cursor');
+        newParams.delete('direction');
+        navigate(`${window.location.pathname}?${newParams.toString()}`, { replace: true, preventScrollReset: true });
+    };
+
+    if (products?.edges?.length > 0) {
+        return (
+            <PaginatedResourceSection
+                connection={products}
+                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+            >
+                {({ node, index }) => (
+                    <VariantProductCard
+                        key={node.id}
+                        product={node}
+                        loading={index < 8 ? 'eager' : undefined}
+                    />
+                )}
+            </PaginatedResourceSection>
+        );
+    }
+
+    return (
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gray-50/50 rounded-3xl mt-8">
+            <div className="p-4 bg-white rounded-full shadow-sm mb-4">
+                <X className="text-gray-300" size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-500 max-w-xs mx-auto text-sm leading-relaxed">
+                Try adjusting your filters or search terms to find what you're looking for.
+            </p>
+            <button
+                onClick={clearFilters}
+                className="mt-6 text-sm font-black underline underline-offset-4 hover:text-gray-600 transition-colors"
+            >
+                Clear all filters
+            </button>
+        </div>
+    );
+}
+
 export default function Collection() {
     const { collection, handle, listing } = useLoaderData<typeof loader>();
 
-    const hasProducts = Boolean(
-        collection?.products?.edges?.some((edge) => edge?.node)
-    );
-
     return (
         <div className="collection px-4 md:px-6 lg:px-8">
-            {listing && (
+            {listing ? (
                 <div className="listing-content mb-8">
+                    {/* Visual Media Headers (Sanity) */}
                     <div className="bg-transparent overflow-hidden -mx-4 md:-mx-6 lg:-mx-8">
                         {listing.images && listing.images.length > 0 && (
                             <ImageList images={listing.images} className="w-full" />
@@ -346,7 +427,8 @@ export default function Collection() {
                         )}
                     </div>
 
-                    <div className="mb-8">
+                    {/* SEO / Listing Header Text */}
+                    <div className="mb-8 mt-8">
                         {listing.title && (
                             <h1 className="text-5xl font-black mb-2" style={{ fontSize: '3rem', fontWeight: '900' }}>
                                 {listing.title}
@@ -364,7 +446,8 @@ export default function Collection() {
                         )}
                     </div>
 
-                    <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+                    {/* Breadcrumbs */}
+                    <nav className="breadcrumb-navigation mb-6 text-base">
                         <ol className="flex items-center space-x-2">
                             <li className='flex items-center'>
                                 <span className="transition-colors cursor-pointer">Collection</span>
@@ -376,31 +459,18 @@ export default function Collection() {
                         </ol>
                     </nav>
 
+                    {/* Filters and Grid */}
                     <SortFilter filters={collection?.products?.filters || []}>
-                        {collection?.products?.edges?.length > 0 && (
-                            <PaginatedResourceSection
-                                connection={collection?.products}
-                                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                            >
-                                {({ node, index }) => (
-                                    <VariantProductCard
-                                        key={node.id}
-                                        product={node}
-                                        loading={index < 8 ? 'eager' : undefined}
-                                    />
-                                )}
-                            </PaginatedResourceSection>
-                        )}
+                        <ProductGrid products={collection?.products} />
                     </SortFilter>
                 </div>
-            )}
-
-            {!listing && (
-                <>
+            ) : (
+                <div className="collection-standard py-8">
                     <h1 className="text-4xl font-extrabold mb-4">{collection?.title}</h1>
-                    <p className="collection-description">{collection?.description}</p>
+                    <p className="collection-description text-gray-600 mb-8">{collection?.description}</p>
 
-                    <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+                    {/* Breadcrumbs */}
+                    <nav className="breadcrumb-navigation mb-6 text-base">
                         <ol className="flex items-center space-x-2">
                             <li className='flex items-center'>
                                 <span className="transition-colors cursor-pointer">Collection</span>
@@ -412,23 +482,11 @@ export default function Collection() {
                         </ol>
                     </nav>
 
+                    {/* Filters and Grid */}
                     <SortFilter filters={collection?.products?.filters || []}>
-                        {collection?.products?.edges?.length > 0 && (
-                            <PaginatedResourceSection
-                                connection={collection?.products}
-                                resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                            >
-                                {({ node, index }) => (
-                                    <VariantProductCard
-                                        key={node.id}
-                                        product={node}
-                                        loading={index < 8 ? 'eager' : undefined}
-                                    />
-                                )}
-                            </PaginatedResourceSection>
-                        )}
+                        <ProductGrid products={collection?.products} />
                     </SortFilter>
-                </>
+                </div>
             )}
 
             {collection?.id && collection?.handle &&

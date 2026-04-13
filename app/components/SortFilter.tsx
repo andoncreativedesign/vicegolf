@@ -139,6 +139,9 @@ export function SortFilter({
     useEffect(() => {
         setPersistentProductTypes([]);
         setPtFilterId(null);
+        setOpenFilters([]); // Reset open filters to re-initialize with new collection's filters
+        setIsFilterVisible(false);
+        setIsSortOpen(false);
     }, [location.pathname]);
 
     const productTypeFilter = filters.find(f => f.label.toLowerCase() === 'product type');
@@ -198,10 +201,17 @@ export function SortFilter({
             <div className="flex items-center justify-between py-6 border-b border-gray-100 mb-8 sticky top-0 bg-[var(--main-bg-color)] z-10 mx-[-1rem] px-[1rem]">
                 <button
                     onClick={() => setIsFilterVisible(!isFilterVisible)}
-                    className="flex items-center gap-2 text-xs font-black hover:text-gray-600 transition-colors"
+                    className="flex items-center gap-3 text-xs font-black hover:text-gray-600 transition-colors"
                 >
-                    <SlidersHorizontal size={16} />
-                    <span>{isFilterVisible ? 'Hide filters' : 'Show filters'}</span>
+                    <div className="flex items-center gap-2">
+                        <SlidersHorizontal size={16} />
+                        <span>{isFilterVisible ? 'Hide filters' : 'Show filters'}</span>
+                    </div>
+                    {activeFilters.length > 0 && (
+                        <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-bold animate-fadeIn">
+                            {activeFilters.length}
+                        </span>
+                    )}
                 </button>
 
                 <div className="relative">
@@ -280,13 +290,34 @@ export function SortFilter({
                                         {activeFilters.map(({ key, value }) => {
                                             const filter = filters.find(f => f.id === key);
                                             const filterValue = filter?.values.find(v => v.input === value);
+                                            
+                                            let label = filterValue?.label;
+                                            if (!label) {
+                                                try {
+                                                    const parsed = JSON.parse(value);
+                                                    if (parsed.variantOption) {
+                                                        label = parsed.variantOption.value;
+                                                    } else if (parsed.productMetafield) {
+                                                        label = parsed.productMetafield.value;
+                                                    } else if (parsed.productType) {
+                                                        label = parsed.productType;
+                                                    } else if (parsed.tag) {
+                                                        label = parsed.tag;
+                                                    } else {
+                                                        label = value;
+                                                    }
+                                                } catch {
+                                                    label = value;
+                                                }
+                                            }
+
                                             return (
                                                 <button
                                                     key={`${key}-${value}`}
                                                     onClick={() => removeFilter(key, value)}
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-full text-[11px] font-bold border border-gray-100 shadow-sm transition-all active:scale-95 group"
                                                 >
-                                                    <span>{filterValue?.label || value}</span>
+                                                    <span>{label}</span>
                                                     <X size={12} className="text-gray-300 group-hover:text-black" />
                                                 </button>
                                             );
