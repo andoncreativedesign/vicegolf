@@ -159,27 +159,86 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         });
     }
 
-    // For multiple collections, we might have multiple nodes. We'll merge them or take the first one 
-    // as the base for metadata, but the product list will be complete if our query supports multiple IDs.
-    // GET_PRODUCTS_BY_COLLECTION usually takes an array of IDs and returns an array of collections.
-    
-    // Merge products from all collections in the response
-    const allProducts: any[] = [];
-    collectionResponse.nodes.forEach((col: any) => {
-        if (col.products?.edges) {
-            allProducts.push(...col.products.edges);
+    // NEW: Extract the true collection handle from Shopify's response
+    // This is the full, canonical handle (e.g., "junior-towels")—use it for Sanity lookup
+    const trueCollectionHandle = collectionResponse.nodes[0]?.handle;
+
+    // Robust function to combine products from multiple collections
+    const combineCollectionProducts = (collections: any): ShopifyCollection | null => {
+        try {
+            if (!collections?.nodes?.length) {
+                console.warn('No collection nodes returned from Shopify');
+                return null;
+            }
+
+            // Filter collections that actually have products
+            const validCollections = collections.nodes.filter(
+                (c: any): c is NonNullable<typeof c> => Boolean(c?.products?.edges?.length)
+            );
+
+            if (validCollections.length === 0) {
+                console.warn('No collections with products found');
+                return {
+                    ...collections.nodes[0]!,
+                    products: {
+                        edges: [],
+                        pageInfo: { hasNextPage: false, hasPreviousPage: false }
+                    }
+                };
+            }
+
+            // If only one collection → return it directly
+            if (validCollections.length === 1) {
+                return validCollections[0]!;
+            }
+
+            // Multiple collections → merge products with deduplication
+            const baseCollection = { ...validCollections[0]! };
+            const allEdges = validCollections.flatMap((c: any) => c.products.edges);
+
+            const uniqueProducts = new Map<string, any>();
+            allEdges.forEach((edge: any) => {
+                if (edge?.node?.id) {
+                    uniqueProducts.set(edge.node.id, edge);
+                }
+            });
+
+            const hasNextPage = validCollections.some((c: any) => c.products.pageInfo.hasNextPage);
+            const hasPreviousPage = validCollections.some((c: any) => c.products.pageInfo.hasPreviousPage);
+            const startCursor = validCollections.find((c: any) => c.products.pageInfo.startCursor)?.products.pageInfo.startCursor || null;
+            const endCursor = validCollections.find((c: any) => c.products.pageInfo.endCursor)?.products.pageInfo.endCursor || null;
+
+            return {
+                ...baseCollection,
+                products: {
+                    ...baseCollection.products,
+                    edges: Array.from(uniqueProducts.values()),
+                    pageInfo: {
+                        hasNextPage,
+                        hasPreviousPage,
+                        startCursor,
+                        endCursor
+                    }
+                }
+            };
+        } catch (error) {
+            console.error('Error in combineCollectionProducts:', error);
+            return collections.nodes[0] ? {
+                ...collections.nodes[0],
+                products: { edges: [], pageInfo: { hasNextPage: false, hasPreviousPage: false } }
+            } : null;
         }
-    });
+    };
 
-    const baseCollection = collectionResponse.nodes[0];
+    const updatedCollection = combineCollectionProducts(collectionResponse);
 
-    // Sanity listing search - use the handle we navigated with
-    const listingData = await getListingByCollectionHandle(decodedHandle);
+    // Use trueCollectionHandle for Sanity query if available, otherwise fallback to URL handle
+    const listingData = await getListingByCollectionHandle(trueCollectionHandle || decodedHandle.toLowerCase().replace(/\s+/g, '-'));
 
     // Family data loading logic
     const families = [
         ...new Set(
-            allProducts
+            updatedCollection?.products?.edges
                 ?.map(edge => {
                     const product = edge.node as any;
                     const familyValue = product?.metafield?.value ||
@@ -192,7 +251,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
 
     const familyGroups = await loadFamilyData(families as string[]);
 
-    const updatedEdges = allProducts.map(edge => {
+    const updatedEdges = (updatedCollection?.products?.edges || []).map(edge => {
         const product = edge.node as any;
         const familyValue = product.metafield?.value || product.family?.value;
         const variantFamilyProducts = familyGroups[familyValue] || [];
@@ -205,18 +264,18 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         };
     });
 
-    const updatedCollection = {
-        ...baseCollection,
+    const finalCollection = {
+        ...updatedCollection,
         title: displayTitle,
         handle: decodedHandle,
         products: {
-            ...baseCollection.products,
+            ...updatedCollection?.products,
             edges: updatedEdges
         }
     };
 
     return {
-        collection: updatedCollection,
+        collection: finalCollection,
         handle: displayTitle,
         listing: listingData
     };

@@ -7,7 +7,7 @@ import type { FeaturedCollectionFragment, RecommendedProductsQuery } from 'store
 import { ProductItem } from '~/components/ProductItem';
 import { HeroSection } from '~/components/HeroSection';
 import { ProductGrid } from '~/components/ProductGrid';
-import { getHomePageData } from '~/lib/sanity/home';
+import { getHomePageHeroData, getHomePageSectionData, getHomePageViceLookData } from '~/lib/sanity/home';
 import {
   ADMIN_PRODUCTS_BY_FAMILY,
   ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD,
@@ -37,8 +37,10 @@ export async function loader(args: Route.LoaderArgs) {
   const criticalDataWithFamilies = await loadCriticalData(args);
   const { families, ...criticalData } = criticalDataWithFamilies;
   const familyData = loadFamilyData(families);
-  const homePageData = getHomePageData();
-  return { ...deferredData, ...criticalData, homePageData, familyData };
+  const homePageHeroData = await getHomePageHeroData(args.context.env);
+  const homePageSectionData = await getHomePageSectionData(args.context.env);
+  const homePageViceLookData = await getHomePageViceLookData(args.context.env);
+  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData };
 }
 
 
@@ -383,10 +385,10 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   return (
     <div >
       <Suspense fallback={<div className="min-h-[50vh]"></div>}>
-        <Await resolve={data.homePageData}>
-          {(homePageData) => (
+        <Await resolve={data.homePageHeroData}>
+          {(homePageHeroData) => (
             <HeroSection
-              heroData={homePageData?.heroes}
+              heroData={homePageHeroData?.heroes}
               bgColor="bg-transparent"
             />
           )}
@@ -430,14 +432,14 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
           )}
         </div>
         <Suspense fallback={<div className="min-h-[20vh]"></div>}>
-          <Await resolve={data.homePageData}>
-            {(homePageData) => (
+          <Await resolve={Promise.all([data.homePageHeroData, data.homePageSectionData])}>
+            {([homePageHeroData, homePageSectionData]) => (
               <>
-                <ClientLogos brands={homePageData?.brand || []} />
-                {homePageData?.homeCategories && (
+                <ClientLogos brands={homePageHeroData?.brand || []} />
+                {homePageSectionData?.homeCategories && (
                   <ShopByCategories
                     menuItems={menu.slice(0, 4)}
-                    sanityHomeCategories={homePageData?.homeCategories}
+                    sanityHomeCategories={homePageSectionData?.homeCategories}
                   />
                 )}
               </>
@@ -457,10 +459,10 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
         )}
       </div>
       <Suspense fallback={<div className="min-h-[50vh]"></div>}>
-        <Await resolve={data.homePageData}>
-          {(homePageData) => (
+        <Await resolve={data.homePageSectionData}>
+          {(homePageSectionData) => (
             <HeroSection
-              heroData={homePageData?.secondaryHero || null}
+              heroData={homePageSectionData?.secondaryHero || null}
               textColor="text-black"
               buttonBgColor="bg-black"
               buttonTextColor="text-white"
@@ -482,9 +484,9 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
       )} */}
       <div className='home'>
         <Suspense fallback={<div className="min-h-[50vh]"></div>}>
-          <Await resolve={data.homePageData}>
-            {(homePageData) => (
-              <ViceLookSection data={homePageData?.viceLook} />
+          <Await resolve={data.homePageViceLookData}>
+            {(homePageViceLookData) => (
+              <ViceLookSection data={homePageViceLookData?.viceLook} />
             )}
           </Await>
         </Suspense>
