@@ -352,7 +352,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     const updatedCollection = combineCollectionProducts(collection);
 
     // NEW: Use trueCollectionHandle for Sanity query
-    const listingData = await getListingByCollectionHandle(trueCollectionHandle || decodedHandle.toLowerCase().replace(/\s+/g, '-'));
+    const listingData = await getListingByCollectionHandle(decodedHandle.toLowerCase().replace(/\s+/g, '-') || trueCollectionHandle);
 
     // console.log("\n\nupdatedCollection data 213123");
     // console.log(JSON.stringify(updatedCollection?.products?.edges?.[0]));
