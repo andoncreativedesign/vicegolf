@@ -28,8 +28,37 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { loadFamilyData } from '~/utils/loadFamilyData';
 
 
-export const meta: Route.MetaFunction = () => {
-  return [{ title: 'Vice Golf | Home' }];
+export const meta: Route.MetaFunction = ({data}: Route.MetaArgs) => {
+  const url = data?.url || '';
+  const title = 'Vice Golf';
+  const description = 'Premium Golf Gear & Apparel | Vice Golf';
+  const logoUrl =
+    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo.svg?v=1776335270&width=1200&height=630&crop=center';
+
+  const metaTags: any[] = [
+    {title},
+    {name: 'description', content: description},
+    {property: 'og:title', content: title},
+    {property: 'og:description', content: description},
+    {property: 'og:type', content: 'website'},
+    {property: 'og:url', content: url},
+    {property: 'og:image', content: logoUrl},
+    {property: 'og:image:secure_url', content: logoUrl},
+    {property: 'og:image:width', content: '1200'},
+    {property: 'og:image:height', content: '630'},
+    {property: 'og:image:alt', content: 'Vice Golf Logo'},
+    {property: 'twitter:card', content: 'summary_large_image'},
+    {property: 'twitter:image', content: logoUrl},
+  ];
+
+  if (url) {
+    metaTags.push({
+      rel: 'canonical',
+      href: url,
+    });
+  }
+
+  return metaTags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -40,7 +69,7 @@ export async function loader(args: Route.LoaderArgs) {
   const homePageHeroData = await getHomePageHeroData(args.context.env);
   const homePageSectionData = await getHomePageSectionData(args.context.env);
   const homePageViceLookData = await getHomePageViceLookData(args.context.env);
-  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData };
+  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
 
 
