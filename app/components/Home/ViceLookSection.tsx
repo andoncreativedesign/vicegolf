@@ -19,10 +19,7 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
 
         // Handle collection navigation
         if (item.collectionHandle) {
-            fetcher.submit(
-                { handle: item.collectionHandle },
-                { method: 'POST', action: '/api/collection' }
-            );
+            navigate(`/collections/${item.collectionHandle}`);
             return;
         }
 
