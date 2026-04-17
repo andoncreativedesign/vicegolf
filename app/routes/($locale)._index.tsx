@@ -28,33 +28,42 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { loadFamilyData } from '~/utils/loadFamilyData';
 
 
-export const meta: Route.MetaFunction = ({data}: Route.MetaArgs) => {
+export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
   const url = data?.url || '';
-  const title = 'Vice Golf';
-  const description = 'Premium Golf Gear & Apparel | Vice Golf';
-  const logoUrl =
-    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo.png?v=1776335270&width=1200&height=630&crop=center';
+  const title = 'Vice Golf Official Store | Premium Golf Gear';
+  const description =
+    'Discover premium golf balls, apparel, and accessories at Vice Golf. Engineered for performance, designed for style.';
 
-  // Use hero image if available for OG image, otherwise fallback to logo
-  const heroImage = data?.homePageHeroData?.heroes?.[0]?.image?.url;
-  const ogImage = heroImage || logoUrl;
+  // Determine the best image: Hero > Brand Logo > Fallback Logo
+  const heroImage = data?.homePageHeroData?.heroes?.[0]?.image;
+  const brandLogo = data?.homePageHeroData?.brand?.[0]?.logo;
+  const logoFallback =
+    'https://cdn.shopify.com/s/files/1/0816/2423/6314/files/vice_golf_logo_black.png?v=1712836254';
+
+  let ogImage = heroImage || brandLogo || logoFallback;
+
+  if (ogImage.startsWith('//')) {
+    ogImage = `https:${ogImage}`;
+  }
 
   const metaTags: any[] = [
-    {title},
-    {name: 'description', content: description},
-    {property: 'og:title', content: title},
-    {property: 'og:description', content: description},
-    {property: 'og:type', content: 'website'},
-    {property: 'og:url', content: url},
-    {property: 'og:image', content: ogImage},
-    {property: 'og:image:secure_url', content: ogImage},
-    {property: 'og:image:width', content: '1200'},
-    {property: 'og:image:height', content: '630'},
-    {property: 'og:image:alt', content: 'Vice Golf Logo'},
-    {property: 'og:site_name', content: title},
-    {property: 'og:locale', content: 'en_US'},
-    {property: 'twitter:card', content: 'summary_large_image'},
-    {property: 'twitter:image', content: ogImage},
+    { title },
+    { name: 'description', content: description },
+    { property: 'og:site_name', content: 'Vice Golf' },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: url },
+    { property: 'og:image', content: ogImage },
+    { property: 'og:image:secure_url', content: ogImage },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { property: 'og:image:alt', content: 'Vice Golf' },
+    { property: 'og:locale', content: 'en_US' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: ogImage },
   ];
 
   if (url) {
