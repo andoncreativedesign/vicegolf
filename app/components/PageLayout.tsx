@@ -106,10 +106,11 @@ function SearchAside() {
     e.preventDefault()
     if (!item?.handle) navigate(-1)
     try {
-      fetcher.submit(
-        { handle: item.handle },
-        { method: "post", action: "/api/collection" }
-      );
+      navigate(`/collections/${item.handle}`)
+      // fetcher.submit(
+      //   { handle: item.handle },
+      //   { method: "post", action: "/api/collection" }
+      // );
     } catch (error) {
       navigate(-1)
     }
