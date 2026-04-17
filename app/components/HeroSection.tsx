@@ -114,8 +114,10 @@ export function HeroSection({
   }, [fetcher.state, fetcher.data, navigate]);
 
   const handleCTA = (handle?: string) => {
+    console.log("handle : ", handle);
     if (!handle) return;
-    fetcher.submit({ handle }, { method: "post", action: "/api/collection" });
+    // fetcher.submit({ handle }, { method: "post", action: "/api/collection" });
+    navigate(`/collections/${handle}`)
   };
 
   const current = slides[currentSlide];
