@@ -33,7 +33,11 @@ export const meta: Route.MetaFunction = ({data}: Route.MetaArgs) => {
   const title = 'Vice Golf';
   const description = 'Premium Golf Gear & Apparel | Vice Golf';
   const logoUrl =
-    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo.svg?v=1776335270&width=1200&height=630&crop=center';
+    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo.png?v=1776335270&width=1200&height=630&crop=center';
+
+  // Use hero image if available for OG image, otherwise fallback to logo
+  const heroImage = data?.homePageHeroData?.heroes?.[0]?.image?.url;
+  const ogImage = heroImage || logoUrl;
 
   const metaTags: any[] = [
     {title},
@@ -42,13 +46,15 @@ export const meta: Route.MetaFunction = ({data}: Route.MetaArgs) => {
     {property: 'og:description', content: description},
     {property: 'og:type', content: 'website'},
     {property: 'og:url', content: url},
-    {property: 'og:image', content: logoUrl},
-    {property: 'og:image:secure_url', content: logoUrl},
+    {property: 'og:image', content: ogImage},
+    {property: 'og:image:secure_url', content: ogImage},
     {property: 'og:image:width', content: '1200'},
     {property: 'og:image:height', content: '630'},
     {property: 'og:image:alt', content: 'Vice Golf Logo'},
+    {property: 'og:site_name', content: title},
+    {property: 'og:locale', content: 'en_US'},
     {property: 'twitter:card', content: 'summary_large_image'},
-    {property: 'twitter:image', content: logoUrl},
+    {property: 'twitter:image', content: ogImage},
   ];
 
   if (url) {
