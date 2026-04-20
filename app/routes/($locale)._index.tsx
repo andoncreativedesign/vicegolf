@@ -38,7 +38,7 @@ export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
   const heroImage = data?.homePageHeroData?.heroes?.[0]?.image;
   const brandLogo = data?.homePageHeroData?.brand?.[0]?.logo;
   const logoFallback =
-    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo.png?v=1776420149&width=1200&height=630&crop=center';
+    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo_extra_padding.png?v=1776675749&width=1200&height=630';
 
   let ogImage = logoFallback || brandLogo || heroImage;
 
