@@ -63,7 +63,7 @@ export function SortFilter({
     const currentSort = optimisticSearchParams.get('sort') || 'featured';
 
     const handleFilterChange = (key: string, value: string, checked: boolean) => {
-        const newParams = new URLSearchParams(searchParams);
+        const newParams = new URLSearchParams(optimisticSearchParams);
         if (checked) {
             newParams.append(key, value);
         } else {
@@ -77,7 +77,7 @@ export function SortFilter({
     };
 
     const handleSortChange = (sortKey: string) => {
-        const newParams = new URLSearchParams(searchParams);
+        const newParams = new URLSearchParams(optimisticSearchParams);
         newParams.set('sort', sortKey);
         newParams.delete('cursor');
         newParams.delete('direction');
@@ -92,7 +92,7 @@ export function SortFilter({
     };
 
     const removeFilter = (key: string, value: string) => {
-        const newParams = new URLSearchParams(searchParams);
+        const newParams = new URLSearchParams(optimisticSearchParams);
         const values = newParams.getAll(key).filter((v) => v !== value);
         newParams.delete(key);
         values.forEach((v) => newParams.append(key, v));
@@ -113,7 +113,7 @@ export function SortFilter({
     }, [isFilterVisible]);
 
     const clearFilters = () => {
-        const newParams = new URLSearchParams(searchParams);
+        const newParams = new URLSearchParams(optimisticSearchParams);
         Array.from(newParams.keys()).forEach((key) => {
             if (key.startsWith('filter.')) {
                 newParams.delete(key);
@@ -183,7 +183,7 @@ export function SortFilter({
                     <div className="flex gap-10 min-w-max">
                         <button
                             onClick={() => {
-                                const newParams = new URLSearchParams(searchParams);
+                                const newParams = new URLSearchParams(optimisticSearchParams);
                                 newParams.delete(targetId);
                                 navigate(`${location.pathname}?${newParams.toString()}`, { replace: true, preventScrollReset: true });
                             }}
@@ -200,10 +200,15 @@ export function SortFilter({
                                 <button
                                     key={value.id}
                                     onClick={() => {
-                                        const newParams = new URLSearchParams(searchParams);
-                                        newParams.delete(targetId);
-                                        if (!isChecked) {
-                                            newParams.set(targetId, value.input);
+                                        const newParams = new URLSearchParams(optimisticSearchParams);
+                                        if (isChecked) {
+                                            // Toggle off
+                                            const values = newParams.getAll(targetId).filter((v) => v !== value.input);
+                                            newParams.delete(targetId);
+                                            values.forEach((v) => newParams.append(targetId, v));
+                                        } else {
+                                            // Toggle on
+                                            newParams.append(targetId, value.input);
                                         }
                                         newParams.delete('cursor');
                                         newParams.delete('direction');
