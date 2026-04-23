@@ -261,33 +261,36 @@ export function SortFilter({
                     >
                         <span className="text-gray-400">Sort by:</span>
                         <span className="font-black">{SORT_OPTIONS.find(o => o.key === currentSort)?.label}</span>
-                        <ChevronDown size={14} className={`transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`transition-transform duration-300 ${isSortOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    {isSortOpen && (
-                        <>
-                            <div className="fixed inset-0 z-20" onClick={() => setIsSortOpen(false)} />
-                            <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-100 shadow-xl z-30 py-2 rounded-lg">
-                                {SORT_OPTIONS.map((option) => (
-                                    <button
-                                        key={option.key}
-                                        onClick={() => handleSortChange(option.key)}
-                                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${currentSort === option.key ? 'font-bold bg-gray-50' : 'hover:bg-gray-50 text-gray-600'}`}
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                    )}
+                    <>
+                        <div 
+                            className={`fixed inset-0 z-20 transition-opacity duration-300 ${isSortOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
+                            onClick={() => setIsSortOpen(false)} 
+                        />
+                        <div 
+                            className={`absolute top-full right-0 mt-2 w-56 bg-white border border-gray-100 shadow-xl z-30 py-2 rounded-lg transition-all duration-300 origin-top-right ${isSortOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}
+                        >
+                            {SORT_OPTIONS.map((option) => (
+                                <button
+                                    key={option.key}
+                                    onClick={() => handleSortChange(option.key)}
+                                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${currentSort === option.key ? 'font-bold bg-gray-50' : 'hover:bg-gray-50 text-gray-600'}`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </>
                 </div>
             </div>
 
             <div className="flex flex-col md:flex-row">
                 {/* Mobile Backdrop */}
-                {isFilterVisible && (
+                {!hide && (
                     <div 
-                        className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+                        className={`fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm transition-opacity duration-300 ease-in-out ${isFilterVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                         onClick={() => setIsFilterVisible(false)}
                     />
                 )}
@@ -372,24 +375,30 @@ export function SortFilter({
                                     </div>
                                 )}
 
-                                {sidebarFilters.map((filter) => (
-                                    <div key={filter.id} className="border-b border-gray-100 pb-6">
-                                        <button
-                                            onClick={() => toggleFilterAccordion(filter.id)}
-                                            className="flex items-center justify-between w-full text-left mb-4 group"
-                                        >
-                                            <span className="text-sm font-bold text-gray-900 leading-none">
-                                                {filter.label}
-                                            </span>
-                                            {openFilters.includes(filter.id) ? (
-                                                <ChevronUp size={16} className="text-gray-400 group-hover:text-black" />
-                                            ) : (
-                                                <ChevronDown size={16} className="text-gray-400 group-hover:text-black" />
-                                            )}
-                                        </button>
+                                {sidebarFilters.map((filter) => {
+                                    const isOpen = openFilters.includes(filter.id);
+                                    return (
+                                        <div key={filter.id} className="border-b border-gray-100 pb-6">
+                                            <button
+                                                onClick={() => toggleFilterAccordion(filter.id)}
+                                                className="flex items-center justify-between w-full text-left group"
+                                            >
+                                                <span className="text-sm font-bold text-gray-900 leading-none">
+                                                    {filter.label}
+                                                </span>
+                                                <ChevronDown 
+                                                    size={16} 
+                                                    className={`text-gray-400 group-hover:text-black transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+                                                />
+                                            </button>
 
-                                        {openFilters.includes(filter.id) && (
-                                            <div className="space-y-3 animate-fadeIn">
+                                            <div 
+                                                className={`grid transition-all duration-300 ease-in-out ${
+                                                    isOpen ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+                                                }`}
+                                            >
+                                                <div className="overflow-hidden">
+                                                    <div className="space-y-3 pb-1">
                                                 {filter.values.map((value) => {
                                                     const isChecked = optimisticSearchParams.getAll(filter.id).includes(value.input);
                                                     return (
@@ -426,10 +435,12 @@ export function SortFilter({
                                                         </label>
                                                     );
                                                 })}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                ))}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {/* Mobile Footer Area */}
