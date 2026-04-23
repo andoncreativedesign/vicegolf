@@ -205,12 +205,10 @@ export function SortFilter({
                                         const newParams = new URLSearchParams(optimisticSearchParams);
                                         if (isChecked) {
                                             // Toggle off
-                                            const values = newParams.getAll(targetId).filter((v) => v !== value.input);
                                             newParams.delete(targetId);
-                                            values.forEach((v) => newParams.append(targetId, v));
                                         } else {
-                                            // Toggle on
-                                            newParams.append(targetId, value.input);
+                                            // Set only this value (single select)
+                                            newParams.set(targetId, value.input);
                                         }
                                         newParams.delete('cursor');
                                         newParams.delete('direction');
