@@ -229,7 +229,7 @@ export function SortFilter({
                 </nav>
             )}
             {/* Top Toolbar */}
-            <div className="flex items-center justify-between py-6 border-b border-gray-100 mb-8 sticky top-0 bg-[var(--main-bg-color)] z-10 mx-[-1rem] px-[1rem]">
+            <div className={`flex items-center ${hide ? 'justify-end' : 'justify-between'} py-6 border-b border-gray-100 mb-8 sticky top-0 bg-[var(--main-bg-color)] z-10 mx-[-1rem] px-[1rem]`}>
                 {!hide && (
                     <button
                         onClick={() => setIsFilterVisible(!isFilterVisible)}
