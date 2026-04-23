@@ -126,7 +126,7 @@ export function SortFilter({
 
     // Persist product types so tabs don't disappear when one is selected
     useEffect(() => {
-        const pt = filters.find(f => f.label.toLowerCase() === 'product type');
+        const pt = filters.find(f => f.label.toLowerCase() === 'product type' || f.label.toLowerCase() === 'category');
         if (pt) {
             setPtFilterId(pt.id);
             if (pt.values.length >= persistentProductTypes.length) {
@@ -170,11 +170,20 @@ export function SortFilter({
         setIsSortOpen(false);
     }, [location.pathname]);
 
-    const productTypeFilter = filters.find(f => f.label.toLowerCase() === 'product type');
-    const sidebarFilters = filters.filter(f => f.label.toLowerCase() !== 'product type');
+    const productTypeFilter = filters.find(f => f.label.toLowerCase() === 'product type' || f.label.toLowerCase() === 'category');
+    const sidebarFilters = filters.filter(f => f.label.toLowerCase() !== 'product type' && f.label.toLowerCase() !== 'category');
 
     // Use persistent types if available, otherwise current types
-    const displayPtValues = persistentProductTypes.length > 0 ? persistentProductTypes : (productTypeFilter?.values || []);
+    const displayPtValues = useMemo(() => {
+        const rawValues = persistentProductTypes.length > 0 ? persistentProductTypes : (productTypeFilter?.values || []);
+        // Filter out empty labels and deduplicate by label to ensure we only show meaningful tabs
+        return rawValues.filter((v, i, self) => 
+            v.label && 
+            v.label.trim() !== '' && 
+            self.findIndex(t => t.label === v.label) === i
+        );
+    }, [persistentProductTypes, productTypeFilter]);
+
     const targetId = ptFilterId || productTypeFilter?.id;
 
     return (
