@@ -181,7 +181,7 @@ export function SortFilter({
         <div className="w-full">
             {/* Product Type Tabs */}
             {targetId && displayPtValues.length > 1 && (
-                <nav className="mb-8 border-b border-gray-100 overflow-x-auto no-scrollbar -mx-[1rem] px-[1rem]">
+                <nav className={`${hide ? 'mb-4' : 'mb-8'} border-b border-gray-100 overflow-x-auto no-scrollbar -mx-[1rem] px-[1rem]`}>
                     <div className="flex gap-10 min-w-max">
                         <button
                             onClick={() => {
@@ -229,7 +229,7 @@ export function SortFilter({
                 </nav>
             )}
             {/* Top Toolbar */}
-            <div className={`flex items-center ${hide ? 'justify-end' : 'justify-between'} py-6 border-b border-gray-100 mb-8 sticky top-0 bg-[var(--main-bg-color)] z-10 mx-[-1rem] px-[1rem]`}>
+            <div className={`flex items-center ${hide ? 'justify-end py-2 mb-4' : 'justify-between py-6 border-b border-gray-100 mb-8'} sticky top-0 bg-[var(--main-bg-color)] z-10 mx-[-1rem] px-[1rem]`}>
                 {!hide && (
                     <button
                         onClick={() => setIsFilterVisible(!isFilterVisible)}
