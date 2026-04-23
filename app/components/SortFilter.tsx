@@ -283,7 +283,7 @@ export function SortFilter({
                 </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col md:flex-row">
                 {/* Mobile Backdrop */}
                 {isFilterVisible && (
                     <div 
@@ -297,16 +297,15 @@ export function SortFilter({
                     <div 
                         className={`
                             fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto
-                            z-50 md:z-0
+                            z-50 md:z-0 shrink-0
                             bg-[var(--main-bg-color)] md:bg-transparent
-                            w-full md:w-[280px]
-                            transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+                            transition-all duration-300 ease-in-out md:overflow-hidden
                             ${isFilterVisible 
-                                ? 'translate-y-0 opacity-100' 
-                                : 'translate-y-full md:translate-y-0 md:w-0 opacity-0 md:hidden'}
+                                ? 'translate-y-0 opacity-100 w-full md:w-[280px] md:mr-8' 
+                                : 'translate-y-full md:translate-y-0 w-full md:w-0 md:mr-0 opacity-0'}
                         `}
                     >
-                        <div className="h-[85vh] md:h-auto flex flex-col md:block rounded-t-[2rem] md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-none overflow-hidden md:overflow-visible">
+                        <div className="h-[85vh] md:h-auto flex flex-col md:block rounded-t-[2rem] md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-none overflow-hidden md:w-[280px]">
                             {/* Mobile Header */}
                             <div className="flex items-center justify-between p-6 border-b border-gray-100 md:hidden bg-[var(--main-bg-color)]">
                                 <div className="flex items-center gap-2">
