@@ -464,7 +464,10 @@ export default function Collection() {
                     </nav>
 
                     {/* Filters and Grid */}
-                    <SortFilter filters={collection?.products?.filters || []}>
+                    <SortFilter 
+                        filters={collection?.products?.filters || []}
+                        hide={collection?.hide_filters?.value === 'true'}
+                    >
                         <ProductGrid products={collection?.products} />
                     </SortFilter>
                 </div>
@@ -487,7 +490,10 @@ export default function Collection() {
                     </nav>
 
                     {/* Filters and Grid */}
-                    <SortFilter filters={collection?.products?.filters || []}>
+                    <SortFilter 
+                        filters={collection?.products?.filters || []}
+                        hide={collection?.hide_filters?.value === 'true'}
+                    >
                         <ProductGrid products={collection?.products} />
                     </SortFilter>
                 </div>

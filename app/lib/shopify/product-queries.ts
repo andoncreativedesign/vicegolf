@@ -465,7 +465,11 @@ export interface ShopifyCollection {
   title: string;
   description: string;
   image?: ShopifyImage | null;
+  hide_filters?: {
+    value: string;
+  } | null;
   products: {
+    filters: any[];
     edges: {
       node: ShopifyProduct;
     }[];
@@ -553,6 +557,9 @@ query GetProductsByCollectionIds(
             }
           }
         }
+      }
+      hide_filters: metafield(namespace: "custom", key: "hide_filters") {
+        value
       }
       image {
         url

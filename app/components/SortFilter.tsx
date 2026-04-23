@@ -31,9 +31,11 @@ const SORT_OPTIONS: SortParam[] = [
 export function SortFilter({
     filters,
     children,
+    hide = false,
 }: {
     filters: Filter[];
     children: ReactNode;
+    hide?: boolean;
 }) {
     const [searchParams] = useSearchParams();
     const location = useLocation();
@@ -228,20 +230,22 @@ export function SortFilter({
             )}
             {/* Top Toolbar */}
             <div className="flex items-center justify-between py-6 border-b border-gray-100 mb-8 sticky top-0 bg-[var(--main-bg-color)] z-10 mx-[-1rem] px-[1rem]">
-                <button
-                    onClick={() => setIsFilterVisible(!isFilterVisible)}
-                    className="flex items-center gap-3 text-xs font-black hover:text-gray-600 transition-colors"
-                >
-                    <div className="flex items-center gap-2">
-                        <SlidersHorizontal size={16} />
-                        <span>{isFilterVisible ? 'Hide filters' : 'Show filters'}</span>
-                    </div>
-                    {activeFilters.length > 0 && (
-                        <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-bold animate-fadeIn">
-                            {activeFilters.length}
-                        </span>
-                    )}
-                </button>
+                {!hide && (
+                    <button
+                        onClick={() => setIsFilterVisible(!isFilterVisible)}
+                        className="flex items-center gap-3 text-xs font-black hover:text-gray-600 transition-colors"
+                    >
+                        <div className="flex items-center gap-2">
+                            <SlidersHorizontal size={16} />
+                            <span>{isFilterVisible ? 'Hide filters' : 'Show filters'}</span>
+                        </div>
+                        {activeFilters.length > 0 && (
+                            <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-black text-white text-[10px] font-bold animate-fadeIn">
+                                {activeFilters.length}
+                            </span>
+                        )}
+                    </button>
+                )}
 
                 <div className="relative">
                     <button
@@ -282,156 +286,158 @@ export function SortFilter({
                 )}
 
                 {/* Sidebar / Drawer Filters */}
-                <div 
-                    className={`
-                        fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto
-                        z-50 md:z-0
-                        bg-[var(--main-bg-color)] md:bg-transparent
-                        w-full md:w-[280px]
-                        transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-                        ${isFilterVisible 
-                            ? 'translate-y-0 opacity-100' 
-                            : 'translate-y-full md:translate-y-0 md:w-0 opacity-0 md:hidden'}
-                    `}
-                >
-                    <div className="h-[85vh] md:h-auto flex flex-col md:block rounded-t-[2rem] md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-none overflow-hidden md:overflow-visible">
-                        {/* Mobile Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-100 md:hidden bg-[var(--main-bg-color)]">
-                            <div className="flex items-center gap-2">
-                                <SlidersHorizontal size={18} />
-                                <h2 className="text-sm font-black tracking-wide">Filters</h2>
+                {!hide && (
+                    <div 
+                        className={`
+                            fixed md:relative bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto
+                            z-50 md:z-0
+                            bg-[var(--main-bg-color)] md:bg-transparent
+                            w-full md:w-[280px]
+                            transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+                            ${isFilterVisible 
+                                ? 'translate-y-0 opacity-100' 
+                                : 'translate-y-full md:translate-y-0 md:w-0 opacity-0 md:hidden'}
+                        `}
+                    >
+                        <div className="h-[85vh] md:h-auto flex flex-col md:block rounded-t-[2rem] md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-none overflow-hidden md:overflow-visible">
+                            {/* Mobile Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-gray-100 md:hidden bg-[var(--main-bg-color)]">
+                                <div className="flex items-center gap-2">
+                                    <SlidersHorizontal size={18} />
+                                    <h2 className="text-sm font-black tracking-wide">Filters</h2>
+                                </div>
+                                <button 
+                                    onClick={() => setIsFilterVisible(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <button 
-                                onClick={() => setIsFilterVisible(false)}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
 
-                        {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto p-6 md:p-0 md:pr-4 space-y-8">
-                            {/* Active Filters Summary (Inside Sidebar/Drawer) */}
-                            {activeFilters.length > 0 && (
-                                <div className="space-y-4 mb-4 pb-8 border-b border-gray-100">
-                                    <h3 className="text-[10px] font-black text-gray-400">Active Filters</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {activeFilters.map(({ key, value }) => {
-                                            const filter = filters.find(f => f.id === key);
-                                            const filterValue = filter?.values.find(v => v.input === value);
-                                            
-                                            let label = filterValue?.label;
-                                            if (!label) {
-                                                try {
-                                                    const parsed = JSON.parse(value);
-                                                    if (parsed.variantOption) {
-                                                        label = parsed.variantOption.value;
-                                                    } else if (parsed.productMetafield) {
-                                                        label = parsed.productMetafield.value;
-                                                    } else if (parsed.productType) {
-                                                        label = parsed.productType;
-                                                    } else if (parsed.tag) {
-                                                        label = parsed.tag;
-                                                    } else {
+                            {/* Scrollable Content */}
+                            <div className="flex-1 overflow-y-auto p-6 md:p-0 md:pr-4 space-y-8">
+                                {/* Active Filters Summary (Inside Sidebar/Drawer) */}
+                                {activeFilters.length > 0 && (
+                                    <div className="space-y-4 mb-4 pb-8 border-b border-gray-100">
+                                        <h3 className="text-[10px] font-black text-gray-400">Active Filters</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {activeFilters.map(({ key, value }) => {
+                                                const filter = filters.find(f => f.id === key);
+                                                const filterValue = filter?.values.find(v => v.input === value);
+                                                
+                                                let label = filterValue?.label;
+                                                if (!label) {
+                                                    try {
+                                                        const parsed = JSON.parse(value);
+                                                        if (parsed.variantOption) {
+                                                            label = parsed.variantOption.value;
+                                                        } else if (parsed.productMetafield) {
+                                                            label = parsed.productMetafield.value;
+                                                        } else if (parsed.productType) {
+                                                            label = parsed.productType;
+                                                        } else if (parsed.tag) {
+                                                            label = parsed.tag;
+                                                        } else {
+                                                            label = value;
+                                                        }
+                                                    } catch {
                                                         label = value;
                                                     }
-                                                } catch {
-                                                    label = value;
                                                 }
-                                            }
 
-                                            return (
-                                                <button
-                                                    key={`${key}-${value}`}
-                                                    onClick={() => removeFilter(key, value)}
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-full text-[11px] font-bold border border-gray-100 shadow-sm transition-all active:scale-95 group"
-                                                >
-                                                    <span>{label}</span>
-                                                    <X size={12} className="text-gray-300 group-hover:text-black" />
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                    <button
-                                        onClick={clearFilters}
-                                        className="text-[11px] font-bold text-gray-400 hover:text-black transition-colors"
-                                    >
-                                        Clear all
-                                    </button>
-                                </div>
-                            )}
-
-                            {sidebarFilters.map((filter) => (
-                                <div key={filter.id} className="border-b border-gray-100 pb-6">
-                                    <button
-                                        onClick={() => toggleFilterAccordion(filter.id)}
-                                        className="flex items-center justify-between w-full text-left mb-4 group"
-                                    >
-                                        <span className="text-sm font-bold text-gray-900 leading-none">
-                                            {filter.label}
-                                        </span>
-                                        {openFilters.includes(filter.id) ? (
-                                            <ChevronUp size={16} className="text-gray-400 group-hover:text-black" />
-                                        ) : (
-                                            <ChevronDown size={16} className="text-gray-400 group-hover:text-black" />
-                                        )}
-                                    </button>
-
-                                    {openFilters.includes(filter.id) && (
-                                        <div className="space-y-3 animate-fadeIn">
-                                            {filter.values.map((value) => {
-                                                const isChecked = optimisticSearchParams.getAll(filter.id).includes(value.input);
                                                 return (
-                                                    <label 
-                                                        key={value.id} 
-                                                        className="flex items-center gap-3 cursor-pointer group py-0.5"
+                                                    <button
+                                                        key={`${key}-${value}`}
+                                                        onClick={() => removeFilter(key, value)}
+                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 rounded-full text-[11px] font-bold border border-gray-100 shadow-sm transition-all active:scale-95 group"
                                                     >
-                                                        <div className="relative flex items-center justify-center h-5 w-5 shrink-0">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="peer h-full w-full rounded-[4px] border-gray-300 text-black focus:ring-0 accent-black cursor-pointer appearance-none border transition-all checked:bg-black checked:border-black hover:border-black"
-                                                                checked={isChecked}
-                                                                onChange={(e) => handleFilterChange(filter.id, value.input, e.target.checked)}
-                                                            />
-                                                            <svg
-                                                                className="absolute w-3 h-3 text-white transition-opacity opacity-0 peer-checked:opacity-100 pointer-events-none"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="4"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                            >
-                                                                <polyline points="20 6 9 17 4 12"></polyline>
-                                                            </svg>
-                                                        </div>
-                                                        <div className="flex items-baseline justify-between w-full">
-                                                            <span className={`text-sm tracking-tight transition-colors leading-tight ${isChecked ? 'font-bold text-black' : 'text-gray-600 group-hover:text-black'}`}>
-                                                                {value.label}
-                                                            </span>
-                                                            <span className="ml-2 text-[10px] text-gray-400 font-medium tabular-nums">({value.count})</span>
-                                                        </div>
-                                                    </label>
+                                                        <span>{label}</span>
+                                                        <X size={12} className="text-gray-300 group-hover:text-black" />
+                                                    </button>
                                                 );
                                             })}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                                        <button
+                                            onClick={clearFilters}
+                                            className="text-[11px] font-bold text-gray-400 hover:text-black transition-colors"
+                                        >
+                                            Clear all
+                                        </button>
+                                    </div>
+                                )}
 
-                        {/* Mobile Footer Area */}
-                        <div className="p-6 border-t border-gray-100 md:hidden bg-white">
-                            <button 
-                                onClick={() => setIsFilterVisible(false)}
-                                className="w-full h-14 bg-black text-white text-xs font-black tracking-[0.1em] rounded-xl hover:bg-gray-900 transition-colors"
-                            >
-                                Show Results
-                            </button>
+                                {sidebarFilters.map((filter) => (
+                                    <div key={filter.id} className="border-b border-gray-100 pb-6">
+                                        <button
+                                            onClick={() => toggleFilterAccordion(filter.id)}
+                                            className="flex items-center justify-between w-full text-left mb-4 group"
+                                        >
+                                            <span className="text-sm font-bold text-gray-900 leading-none">
+                                                {filter.label}
+                                            </span>
+                                            {openFilters.includes(filter.id) ? (
+                                                <ChevronUp size={16} className="text-gray-400 group-hover:text-black" />
+                                            ) : (
+                                                <ChevronDown size={16} className="text-gray-400 group-hover:text-black" />
+                                            )}
+                                        </button>
+
+                                        {openFilters.includes(filter.id) && (
+                                            <div className="space-y-3 animate-fadeIn">
+                                                {filter.values.map((value) => {
+                                                    const isChecked = optimisticSearchParams.getAll(filter.id).includes(value.input);
+                                                    return (
+                                                        <label 
+                                                            key={value.id} 
+                                                            className="flex items-center gap-3 cursor-pointer group py-0.5"
+                                                        >
+                                                            <div className="relative flex items-center justify-center h-5 w-5 shrink-0">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="peer h-full w-full rounded-[4px] border-gray-300 text-black focus:ring-0 accent-black cursor-pointer appearance-none border transition-all checked:bg-black checked:border-black hover:border-black"
+                                                                    checked={isChecked}
+                                                                    onChange={(e) => handleFilterChange(filter.id, value.input, e.target.checked)}
+                                                                />
+                                                                <svg
+                                                                    className="absolute w-3 h-3 text-white transition-opacity opacity-0 peer-checked:opacity-100 pointer-events-none"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="4"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                >
+                                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                                </svg>
+                                                            </div>
+                                                            <div className="flex items-baseline justify-between w-full">
+                                                                <span className={`text-sm tracking-tight transition-colors leading-tight ${isChecked ? 'font-bold text-black' : 'text-gray-600 group-hover:text-black'}`}>
+                                                                    {value.label}
+                                                                </span>
+                                                                <span className="ml-2 text-[10px] text-gray-400 font-medium tabular-nums">({value.count})</span>
+                                                            </div>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Mobile Footer Area */}
+                            <div className="p-6 border-t border-gray-100 md:hidden bg-white">
+                                <button 
+                                    onClick={() => setIsFilterVisible(false)}
+                                    className="w-full h-14 bg-black text-white text-xs font-black tracking-[0.1em] rounded-xl hover:bg-gray-900 transition-colors"
+                                >
+                                    Show Results
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Content Area */}
                 <div className="flex-1 min-w-0">
