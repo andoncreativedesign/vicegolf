@@ -21,6 +21,7 @@ declare global {
         PUBLIC_CHECKOUT_DOMAIN: string;
         PUBLIC_STOREFRONT_API_TOKEN: string;
         SESSION_SECRET: string;
+        STORE_DOMAIN: string;
     }
 }
 
