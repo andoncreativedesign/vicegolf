@@ -3,6 +3,7 @@ import { Image } from '@shopify/hydrogen';
 import { Link } from 'react-router';
 import type { ScanOffersData } from '~/lib/sanity/scanOffers';
 import { ProductCard } from '../ProductCard';
+import { useEffect } from 'react';
 
 const DEFAULT_STORES = [
   {
@@ -54,6 +55,10 @@ export function ScanOffers({ data, discountValue }: { data?: ScanOffersData | nu
     url: '/products/vice-golf-pro-plus-white'
   };
 
+  useEffect(() => {
+    console.log('discountValue', discountValue);
+  }, [discountValue])
+
   const transformedProducts = products?.map((p: any) => {
     let price = parseFloat(p.priceRange?.minVariantPrice?.toString() || '0');
     let compareAtPrice = null;
@@ -61,7 +66,8 @@ export function ScanOffers({ data, discountValue }: { data?: ScanOffersData | nu
     if (discountValue) {
       compareAtPrice = price;
       if (discountValue.percentage) {
-        price = price * (1 - discountValue.percentage / 100);
+        // Shopify Admin API percentage is a decimal (e.g., 0.8 for 80%)
+        price = price * (1 - discountValue.percentage);
       } else if (discountValue.amount) {
         price = Math.max(0, price - parseFloat(discountValue.amount.amount));
       }

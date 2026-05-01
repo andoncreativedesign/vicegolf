@@ -17,13 +17,16 @@ export async function loader({ context }: Route.LoaderArgs) {
       const response = await axiosShopifyAdmin.post('', {
         query: GET_CODE_DISCOUNT_QUERY,
         variables: {
-          query: `code:${scanOffersData.featuredProductDiscountCode}`
+          code: scanOffersData.featuredProductDiscountCode
         }
       });
       
-      const nodes = response.data?.data?.codeDiscountNodes?.nodes;
-      if (nodes && nodes.length > 0) {
-        discountValue = nodes[0].codeDiscount?.customerGets?.value;
+      const node = response.data?.data?.codeDiscountNodeByCode;
+      console.log('\n\ndiscount node');
+      console.log(JSON.stringify(node));
+      
+      if (node) {
+        discountValue = node.codeDiscount?.customerGets?.value;
       }
     } catch (error) {
       console.error('Error fetching discount code:', error);
