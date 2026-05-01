@@ -18,7 +18,7 @@ const DEFAULT_STORES = [
   }
 ];
 
-export function ScanOffers({ data, discountValue }: { data?: ScanOffersData | null, discountValue?: any }) {
+export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanOffersData | null, discountValue?: any, overrideCode?: string }) {
   // Mapping with home-page UI styles extracted from HeroSection.tsx
   const heroTitle = data?.hero?.title?.text || 'TRY BEFORE YOU BUY';
   const heroTitleColor = data?.hero?.title?.color || '#FFFFFF';
@@ -73,8 +73,9 @@ export function ScanOffers({ data, discountValue }: { data?: ScanOffersData | nu
       }
     }
 
-    const offerUrl = featuredProductDiscountCode 
-      ? `/discount/${featuredProductDiscountCode}?redirect=/products/${p.handle}`
+    const activeCode = overrideCode || featuredProductDiscountCode;
+    const offerUrl = activeCode 
+      ? `/discount/${activeCode}?redirect=/products/${p.handle}`
       : undefined;
 
     return {

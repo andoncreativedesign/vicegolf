@@ -121,7 +121,7 @@ export async function getScanOffersData(): Promise<ScanOffersData | null> {
     const { result } = response.data;
     if (!result) return null;
 
-    
+
     return {
       hero: {
         title: result.hero?.title,
