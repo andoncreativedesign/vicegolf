@@ -1,21 +1,21 @@
-import type { Route } from './+types/($locale).clubs-demo-fitting';
+import type { Route } from './+types/($locale).scan-offers';
 import { ScanOffers } from '~/components/ScanOffers/ScanOffers';
-import { getDemoFittingData } from '~/lib/sanity/demoFitting';
+import { getScanOffersData } from '~/lib/sanity/scanOffers';
 
 export const meta: Route.MetaFunction = ({ data }) => {
-  return [{ title: data?.demoFittingData?.seo?.title || 'Demo & Fitting | Vice Golf' }];
+  return [{ title: data?.scanOffersData?.seo?.title || 'Scan Offers | Vice Golf' }];
 };
 
 export async function loader({ context }: Route.LoaderArgs) {
-  const demoFittingData = await getDemoFittingData();
-  return { demoFittingData };
+  const scanOffersData = await getScanOffersData();
+  return { scanOffersData };
 }
 
 export default function ScanOffersRoute({ loaderData }: Route.ComponentProps) {
-  const { demoFittingData } = loaderData;
+  const { scanOffersData } = loaderData;
   return (
-    <div className="demo-fitting-page">
-      <ScanOffers data={demoFittingData} />
+    <div className="scan-offers-page">
+      <ScanOffers data={scanOffersData} />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { DemoFittingData } from '~/lib/sanity/demoFitting';
 import { Image } from '@shopify/hydrogen';
 import { Link } from 'react-router';
 import { ShoppingBag, ChevronRight } from 'lucide-react';
+import type { ScanOffersData } from '~/lib/sanity/scanOffers';
 
 const DEFAULT_STORES = [
   {
@@ -17,7 +18,7 @@ const DEFAULT_STORES = [
   }
 ];
 
-export function ScanOffers({ data }: { data?: DemoFittingData | null }) {
+export function ScanOffers({ data }: { data?: ScanOffersData | null }) {
   // Mapping with home-page UI styles extracted from HeroSection.tsx
   const heroTitle = data?.hero?.title?.text || 'TRY BEFORE YOU BUY';
   const heroTitleColor = data?.hero?.title?.color || '#FFFFFF';
@@ -41,6 +42,15 @@ export function ScanOffers({ data }: { data?: DemoFittingData | null }) {
     'Whether you are upgrading your setup or trying Vice for the first time, our retail partners offer the chance to test, compare, and get expert guidance.',
     'Take your time, try the gear, and find the setup that suits you best.'
   ];
+
+  const cta1 = data?.hero?.cta1 || {
+    name: 'SHOP BALLS',
+    url: '/collections/golf-balls'
+  };
+  const cta2 = data?.hero?.cta2 || {
+    name: 'VICE PRO PLUS',
+    url: '/products/vice-golf-pro-plus-white'
+  };
 
   return (
     <div className="w-full bg-white font-sans selection:bg-[#caff00] selection:text-black">
@@ -107,22 +117,24 @@ export function ScanOffers({ data }: { data?: DemoFittingData | null }) {
                 className="flex flex-wrap gap-4 justify-center pt-6 animate-fade-up"
                 style={{ animationDelay: `${paragraphs.length * 120}ms` }}
               >
-                <Link
-                  to="/discount/LEGENDS15?redirect=/collections/golf-balls"
-                  className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <ShoppingBag className="w-4 h-4 mr-2" />
-                  <span>SHOP BALLS</span>
-                </Link>
-                <Link
-                  to="/discount/LEGENDS15?redirect=/products/vice-golf-pro-plus-white"
-                  className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <ChevronRight className="w-4 h-4 mr-1" />
-                  <span>VICE PRO PLUS</span>
-                </Link>
+                {cta1?.url && cta1?.name && (
+                  <Link
+                    to={cta1.url}
+                    className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <span>{cta1.name}</span>
+                  </Link>
+                )}
+                {cta2?.url && cta2?.name && (
+                  <Link
+                    to={cta2.url}
+                    className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <span>{cta2.name}</span>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
