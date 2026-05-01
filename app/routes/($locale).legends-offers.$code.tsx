@@ -1,4 +1,4 @@
-import type { Route } from './+types/($locale).scan-offers';
+import type { Route } from './+types/($locale).legends-offers.$code';
 import { ScanOffers } from '~/components/ScanOffers/ScanOffers';
 import { getScanOffersData } from '~/lib/sanity/scanOffers';
 import { GET_CODE_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
@@ -17,7 +17,8 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   }
 
   const scanOffersData = await getScanOffersData();
-  
+  const featuredProductCode = scanOffersData?.featuredProductDiscountCode;
+
   let discountValue = null;
   try {
     const response = await axiosShopifyAdmin.post('', {
