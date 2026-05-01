@@ -183,6 +183,7 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
                         key={product.id} 
                         product={product as any} 
                         offerUrl={product.offerUrl}
+                        disableSoldout={true}
                       />
                     ))}
                   </div>
