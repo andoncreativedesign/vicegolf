@@ -32,6 +32,8 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
       url
     }
   },
+  featuredProductTitle,
+  featuredProductDiscountCode,
   descriptionSection {
     paragraphs
   },
@@ -50,7 +52,14 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
       "buttonTextColor": buttonTextColor.hex
     }
   },
-  seo
+  seo,
+  "products": products[]-> {
+    "id": _id,
+    "title": store.title,
+    "handle": store.slug.current,
+    "imageUrl": store.previewImageUrl,
+    "priceRange": store.priceRange
+  }
 }`;
 
 export interface TextColorObject {
@@ -67,6 +76,8 @@ export interface ScanOffersData {
     cta1?: { name?: string; url?: string };
     cta2?: { name?: string; url?: string };
   };
+  featuredProductTitle?: string;
+  featuredProductDiscountCode?: string;
   descriptionSection: {
     paragraphs?: string[];
   };
@@ -86,6 +97,16 @@ export interface ScanOffersData {
     }>;
   };
   seo?: any;
+  products?: Array<{
+    id: string;
+    title: string;
+    handle: string;
+    imageUrl?: string;
+    priceRange?: {
+      minVariantPrice: number;
+      maxVariantPrice: number;
+    };
+  }>;
 }
 
 export async function getScanOffersData(): Promise<ScanOffersData | null> {
@@ -110,11 +131,14 @@ export async function getScanOffersData(): Promise<ScanOffersData | null> {
         cta1: result.hero?.cta1,
         cta2: result.hero?.cta2,
       },
+      featuredProductTitle: result.featuredProductTitle,
+      featuredProductDiscountCode: result.featuredProductDiscountCode,
       descriptionSection: {
         paragraphs: result.descriptionSection?.paragraphs,
       },
       booking: result.booking,
       seo: result.seo,
+      products: result.products,
     };
   } catch (error) {
     console.error('Error fetching demo fitting data:', error);

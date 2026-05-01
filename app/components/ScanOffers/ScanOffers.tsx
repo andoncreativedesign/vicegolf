@@ -1,9 +1,8 @@
 import { StoreContactCard } from '../DemoFitting/StoreContactCard';
-import type { DemoFittingData } from '~/lib/sanity/demoFitting';
 import { Image } from '@shopify/hydrogen';
 import { Link } from 'react-router';
-import { ShoppingBag, ChevronRight } from 'lucide-react';
 import type { ScanOffersData } from '~/lib/sanity/scanOffers';
+import { ProductCard } from '../ProductCard';
 
 const DEFAULT_STORES = [
   {
@@ -18,7 +17,7 @@ const DEFAULT_STORES = [
   }
 ];
 
-export function ScanOffers({ data }: { data?: ScanOffersData | null }) {
+export function ScanOffers({ data, discountValue }: { data?: ScanOffersData | null, discountValue?: any }) {
   // Mapping with home-page UI styles extracted from HeroSection.tsx
   const heroTitle = data?.hero?.title?.text || 'TRY BEFORE YOU BUY';
   const heroTitleColor = data?.hero?.title?.color || '#FFFFFF';
@@ -35,7 +34,10 @@ export function ScanOffers({ data }: { data?: ScanOffersData | null }) {
   const whatsappMessage = data?.booking?.whatsappMessage;
   const emailSubject = data?.booking?.emailSubject;
   const emailBody = data?.booking?.emailBody;
-
+  const products = data?.products;
+  const featuredProductDiscountCode = data?.featuredProductDiscountCode;
+  const featuredProductTitle = data?.featuredProductTitle;
+  
   const paragraphs = data?.descriptionSection?.paragraphs || [
     'Choosing new clubs should be easy.',
     'With our club demos and fittings, you can get hands-on with Vice gear, test different options, and see what truly works for your game before making a decision.',
@@ -51,6 +53,46 @@ export function ScanOffers({ data }: { data?: ScanOffersData | null }) {
     name: 'VICE PRO PLUS',
     url: '/products/vice-golf-pro-plus-white'
   };
+
+  const transformedProducts = products?.map((p: any) => {
+    let price = parseFloat(p.priceRange?.minVariantPrice?.toString() || '0');
+    let compareAtPrice = null;
+
+    if (discountValue) {
+      compareAtPrice = price;
+      if (discountValue.percentage) {
+        price = price * (1 - discountValue.percentage / 100);
+      } else if (discountValue.amount) {
+        price = Math.max(0, price - parseFloat(discountValue.amount.amount));
+      }
+    }
+
+    const offerUrl = featuredProductDiscountCode 
+      ? `/discount/${featuredProductDiscountCode}?redirect=/products/${p.handle}`
+      : undefined;
+
+    return {
+      ...p,
+      offerUrl,
+      featuredImage: p.imageUrl ? { url: p.imageUrl, altText: p.title } : undefined,
+      variants: {
+        nodes: [
+          {
+            id: p.id,
+            availableForSale: true,
+            price: {
+              amount: price.toFixed(2),
+              currencyCode: 'AED',
+            },
+            compareAtPrice: compareAtPrice ? {
+              amount: compareAtPrice.toFixed(2),
+              currencyCode: 'AED',
+            } : undefined,
+          },
+        ],
+      },
+    };
+  });
 
   return (
     <div className="w-full bg-white font-sans selection:bg-[#caff00] selection:text-black">
@@ -112,10 +154,38 @@ export function ScanOffers({ data }: { data?: ScanOffersData | null }) {
                 </div>
               ))}
 
+              {transformedProducts && transformedProducts.length > 0 && (
+                <div className="pt-12">
+                  {featuredProductTitle && (
+                    <h2 
+                      className="font-bold text-gray-800 mb-8 tracking-tight text-center animate-fade-up"
+                      style={{ 
+                        fontSize: '1.875rem',
+                        animationDelay: `${paragraphs.length * 120}ms` 
+                      }}
+                    >
+                      {featuredProductTitle}
+                    </h2>
+                  )}
+                  <div 
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-up"
+                    style={{ animationDelay: `${(paragraphs.length + (featuredProductTitle ? 1 : 0)) * 120}ms` }}
+                  >
+                    {transformedProducts.map((product) => (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product as any} 
+                        offerUrl={product.offerUrl}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Shop Buttons */}
               <div 
                 className="flex flex-wrap gap-4 justify-center pt-6 animate-fade-up"
-                style={{ animationDelay: `${paragraphs.length * 120}ms` }}
+                style={{ animationDelay: `${(paragraphs.length + (transformedProducts?.length ? (featuredProductTitle ? 2 : 1) : 0)) * 120}ms` }}
               >
                 {cta1?.url && cta1?.name && (
                   <Link

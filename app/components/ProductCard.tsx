@@ -6,9 +6,10 @@ import { useMembership } from "~/hooks/useMembership";
 
 interface ProductCardProps {
   product: ProductFragment;
+  offerUrl?: string;
 }
 
-export function ProductCard({ product: _product }: ProductCardProps) {
+export function ProductCard({ product: _product, offerUrl }: ProductCardProps) {
   const { getBestDiscountForProduct } = useMembership();
   const product = _product as any;
   const variant = product.variants?.nodes[0];
@@ -25,7 +26,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       {/* Product Image */}
       <Link
-        to={`/products/${product.handle}`}
+        to={offerUrl || `/products/${product.handle}`}
         className="block flex-shrink-0"
         style={{ textDecoration: 'none' }}
       >
