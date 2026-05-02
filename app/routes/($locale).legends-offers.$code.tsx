@@ -6,7 +6,7 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { redirect } from 'react-router';
 
 export const meta: Route.MetaFunction = ({ data }: any) => {
-  return [{ title: data?.scanOffersData?.seo?.title || 'Scan Offers | Vice Golf' }];
+  return [{ title: data?.scanOffersData?.seo?.title || 'Legends Offers | Vice Golf' }];
 };
 
 export async function loader({ params, context }: Route.LoaderArgs) {
