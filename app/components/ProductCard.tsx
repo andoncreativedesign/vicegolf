@@ -6,9 +6,11 @@ import { useMembership } from "~/hooks/useMembership";
 
 interface ProductCardProps {
   product: ProductFragment;
+  offerUrl?: string;
+  disableSoldout?: boolean;
 }
 
-export function ProductCard({ product: _product }: ProductCardProps) {
+export function ProductCard({ product: _product, offerUrl, disableSoldout = false }: ProductCardProps) {
   const { getBestDiscountForProduct } = useMembership();
   const product = _product as any;
   const variant = product.variants?.nodes[0];
@@ -25,7 +27,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       {/* Product Image */}
       <Link
-        to={`/products/${product.handle}`}
+        to={offerUrl || `/products/${product.handle}`}
         className="block flex-shrink-0"
         style={{ textDecoration: 'none' }}
       >
@@ -48,7 +50,7 @@ export function ProductCard({ product: _product }: ProductCardProps) {
                 }}
               />
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                {!product.availableForSale && (
+                {!product.availableForSale && !disableSoldout && (
                   <span className="bg-[#e2e2e2] text-[#3e3e40] text-[15px] font-medium px-4 py-2 rounded shadow-sm">
                     Sold out
                   </span>
