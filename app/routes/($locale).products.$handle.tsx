@@ -1,5 +1,6 @@
 import { redirect, useLoaderData, Link, useNavigate, useFetcher, Await } from 'react-router';
 import { useCallback, useEffect, useState, Suspense } from 'react';
+import { getDiscount } from '~/utils/discounts.server';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -100,6 +101,17 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
 
   return metaTags;
 };
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const code = formData.get('code');
+
+  if (!code) return { discount: null };
+
+  const discount = await getDiscount(code.toString());
+  return { discount };
+}
+
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
   const { product } = criticalData;
@@ -251,6 +263,29 @@ export default function Product() {
   const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
+  const discountFetcher = useFetcher<any>();
+  const [sessionDiscount, setSessionDiscount] = useState<any>(null);
+
+  useEffect(() => {
+    const code = sessionStorage.getItem('featuredDiscountCode');
+    if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
+      discountFetcher.submit({ code }, { method: 'post' });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (discountFetcher.data?.discount) {
+      const { discount } = discountFetcher.data;
+      const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+      
+      const isEligibleProduct = discount.products.includes(product.id);
+      const isEligibleCollection = productCollections.some((id: string) => discount.collections.includes(id));
+      
+      if (discount.appliesToAll || isEligibleProduct || isEligibleCollection) {
+        setSessionDiscount(discount);
+      }
+    }
+  }, [discountFetcher.data, product.id, product.collections]);
   // useEffect(() => {
   // if (!data) return
   // console.log("data.homePageData ", data.homePageData)
@@ -308,6 +343,17 @@ export default function Product() {
     });
   }, [selectedVariant, images]);
 
+  const price = parseFloat(selectedVariant?.price?.amount || '0');
+  let finalPrice = price;
+
+  if (sessionDiscount) {
+    if (sessionDiscount.percentage) {
+      finalPrice = price * (1 - sessionDiscount.percentage);
+    } else if (sessionDiscount.amount) {
+      finalPrice = Math.max(0, price - parseFloat(sessionDiscount.amount.amount));
+    }
+  }
+
   // Track page view event
   useEffect(() => {
     // Reset selected image when product changes
@@ -329,11 +375,11 @@ export default function Product() {
     // }, [product.id]);
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'ViewContent', {
-        value: product?.selectedOrFirstAvailableVariant?.price?.amount, //replace with price
-        currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode //replace it with curency
+        value: finalPrice.toFixed(2),
+        currency: selectedVariant?.price?.currencyCode
       });
     }
-  }, [product.id]);
+  }, [product.id, finalPrice, selectedVariant?.price?.currencyCode]);
   // Format product type for display and URL
   const formatProductType = (type: string) => {
     if (!type) return { display: '', url: '' };
@@ -438,6 +484,7 @@ export default function Product() {
                   collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
+                  sessionDiscount={sessionDiscount}
                 />
               )}
             </Await>
@@ -712,7 +759,7 @@ export default function Product() {
             {
               id: product.id,
               title: product.title,
-              price: selectedVariant?.price.amount || '0',
+              price: finalPrice.toFixed(2),
               vendor: product.vendor,
               variantId: selectedVariant?.id || '',
               variantTitle: selectedVariant?.title || '',
