@@ -13,6 +13,7 @@ interface ProductGridProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   loading?: boolean;
+  sessionDiscount?: any;
 }
 
 export function ProductGrid({
@@ -23,6 +24,7 @@ export function ProductGrid({
   onLoadMore,
   hasMore = false,
   loading = false,
+  sessionDiscount,
 }: ProductGridProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -137,8 +139,8 @@ export function ProductGrid({
               <div key={product.id} className="w-[85vw] sm:w-[320px] md:w-[384px] flex-shrink-0 transition-transform duration-300">
                 <div className="h-full">
                   {product?.family
-                    ? <VariantProductCard product={product} />
-                    : <ProductCard product={product} />
+                    ? <VariantProductCard product={product} sessionDiscount={sessionDiscount} />
+                    : <ProductCard product={product} sessionDiscount={sessionDiscount} />
                   }
                 </div>
               </div>
@@ -166,6 +168,7 @@ interface CategoryProductGridProps {
   categoryTitle: string;
   categoryHandle: string;
   className?: string;
+  sessionDiscount?: any;
 }
 
 export function CategoryProductGrid({
@@ -173,6 +176,7 @@ export function CategoryProductGrid({
   categoryTitle,
   categoryHandle,
   className = '',
+  sessionDiscount,
 }: CategoryProductGridProps) {
   return (
     <div className={`max-w-7xl mx-auto px-4 lg:px-6 ${className}`}>
@@ -180,6 +184,7 @@ export function CategoryProductGrid({
         products={products}
         title={categoryTitle}
         categoryHandle={categoryHandle}
+        sessionDiscount={sessionDiscount}
       />
     </div>
   );
@@ -193,9 +198,10 @@ interface MultiCategoryGridProps {
     products: ProductFragment[];
   }>;
   className?: string;
+  sessionDiscount?: any;
 }
 
-export function MultiCategoryGrid({ categories, className = '' }: MultiCategoryGridProps) {
+export function MultiCategoryGrid({ categories, className = '', sessionDiscount }: MultiCategoryGridProps) {
   return (
     <div className={`space-y-12 ${className}`}>
       {categories.map((category) => (
@@ -204,6 +210,7 @@ export function MultiCategoryGrid({ categories, className = '' }: MultiCategoryG
           products={category.products}
           categoryTitle={category.title}
           categoryHandle={category.handle}
+          sessionDiscount={sessionDiscount}
         />
       ))}
     </div>

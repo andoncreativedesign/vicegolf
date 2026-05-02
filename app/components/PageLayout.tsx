@@ -351,8 +351,8 @@ function MobileMenuAside({
   const menuItems = productsForNav?.menu?.items[0]?.items || [];
 
   return (
-    header.menu &&
-    header.shop.primaryDomain?.url && (
+    header?.menu &&
+    header?.shop?.primaryDomain?.url && (
       <Aside type="mobile" heading="">
         <HeaderMenu viewport="mobile" menuItems={menuItems} />
       </Aside>
