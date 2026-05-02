@@ -1,6 +1,6 @@
 import type { Route } from './+types/($locale).legends-offers.$code';
 import { ScanOffers } from '~/components/ScanOffers/ScanOffers';
-import { getScanOffersData } from '~/lib/sanity/scanOffers';
+import { getScanOffersData, getScanBookingData } from '~/lib/sanity/scanOffers';
 import { GET_CODE_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { redirect } from 'react-router';
@@ -16,11 +16,18 @@ export async function loader({ params, context }: Route.LoaderArgs) {
     return redirect('/');
   }
 
-  const scanOffersData = await getScanOffersData();
+  const [scanOffersData, bookingData] = await Promise.all([
+    getScanOffersData(),
+    getScanBookingData()
+  ]);
+
+  if (scanOffersData && bookingData) {
+    scanOffersData.booking = bookingData
+  }
+
   const verificationCode = scanOffersData?.verificationCode?.trim();
   const featuredProductCode = scanOffersData?.featuredProductDiscountCode;
 
-  console.log("\n\nverificationCode: ", verificationCode, "code: ", code)
 
   if (code?.trim() !== verificationCode || !verificationCode) {
     return redirect('/');
