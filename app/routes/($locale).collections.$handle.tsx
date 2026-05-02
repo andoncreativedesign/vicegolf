@@ -152,7 +152,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     } else {
         // 2. If not found, check the main menu for a matching virtual handle
         const menuData = await storefront.query(HEADER_QUERY, {
-            variables: { 
+            variables: {
                 headerMenuHandle: 'main-menu',
                 language: storefront.i18n.language,
                 country: storefront.i18n.country
@@ -169,7 +169,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 .filter((inner: any) => inner.type === 'COLLECTION')
                 .map((inner: any) => inner.resourceId)
                 .filter(Boolean);
-            
+
             displayTitle = matchedItem.title;
             isVirtual = true;
         }
@@ -228,7 +228,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             if (validCollections.length === 0) {
                 const firstNonNull = collections.nodes.find((n: any) => n !== null);
                 if (!firstNonNull) return null;
-                
+
                 return {
                     ...firstNonNull,
                     products: {
@@ -254,7 +254,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             // Merge and deduplicate filters
             const allFilters = validCollections.flatMap((c: any) => c.products.filters || []);
             const filterMap = new Map<string, any>();
-            
+
             allFilters.forEach((filter: any) => {
                 if (!filterMap.has(filter.id)) {
                     filterMap.set(filter.id, {
@@ -464,7 +464,7 @@ export default function Collection() {
                     </nav>
 
                     {/* Filters and Grid */}
-                    <SortFilter 
+                    <SortFilter
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
@@ -490,7 +490,7 @@ export default function Collection() {
                     </nav>
 
                     {/* Filters and Grid */}
-                    <SortFilter 
+                    <SortFilter
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >

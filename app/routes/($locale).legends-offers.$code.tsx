@@ -1,8 +1,7 @@
 import type { Route } from './+types/($locale).legends-offers.$code';
 import { ScanOffers } from '~/components/ScanOffers/ScanOffers';
 import { getScanOffersData, getScanBookingData } from '~/lib/sanity/scanOffers';
-import { GET_CODE_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
-import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
+import { getDiscount } from '~/utils/discounts.server';
 import { redirect } from 'react-router';
 import { useEffect } from 'react';
 
@@ -31,30 +30,20 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
 
   if (code?.trim() !== verificationCode || !verificationCode) {
+    console.log(`Code mismatch - URL code: ${code}, Sanity code: ${verificationCode}`);
     return redirect('/');
   }
 
-  let discountValue = null;
-  try {
-    const response = await axiosShopifyAdmin.post('', {
-      query: GET_CODE_DISCOUNT_QUERY,
-      variables: {
-        code: featuredProductCode
-      }
-    });
+  const discount = await getDiscount(featuredProductCode || '');
 
-    const node = response.data?.data?.codeDiscountNodeByCode;
-
-    if (!node) {
-      console.log(`Featured product discount code ${featuredProductCode} not found, redirecting to home.`);
-      return redirect('/');
-    }
-
-    discountValue = node.codeDiscount?.customerGets?.value;
-  } catch (error) {
-    console.error('Error fetching discount code:', error);
+  if (!discount) {
+    console.log(`Featured product discount code ${featuredProductCode} not found or inactive, redirecting to home.`);
     return redirect('/');
   }
+
+  const discountValue = discount.percentage > 0 
+    ? { percentage: discount.percentage } 
+    : { amount: discount.amount };
 
   return { scanOffersData, discountValue, code: featuredProductCode };
 }
