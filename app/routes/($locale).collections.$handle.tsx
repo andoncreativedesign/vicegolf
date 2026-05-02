@@ -1,4 +1,5 @@
-import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation } from 'react-router';
+import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation, useFetcher } from 'react-router';
+import { getDiscount } from '~/utils/discounts.server';
 import type { Route } from './+types/collections.$handle';
 import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
@@ -8,7 +9,7 @@ import { VariantProductCard } from '~/components/Product/VariantProductCard';
 import { type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings } from '~/lib/sanity/products';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
 import { ChevronRight, X } from 'lucide-react';
@@ -72,11 +73,19 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
 
     return metaTags;
 };
-
 export async function loader(args: Route.LoaderArgs) {
     const deferredData = loadDeferredData(args);
     const criticalData = await loadCriticalData(args);
     return { ...deferredData, ...criticalData, url: args.request.url };
+}
+export async function action({ request }: Route.ActionArgs) {
+    const formData = await request.formData();
+    const code = formData.get('code');
+
+    if (!code) return { discount: null };
+
+    const discount = await getDiscount(code.toString());
+    return { discount };
 }
 
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
@@ -152,7 +161,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     } else {
         // 2. If not found, check the main menu for a matching virtual handle
         const menuData = await storefront.query(HEADER_QUERY, {
-            variables: {
+            variables: { 
                 headerMenuHandle: 'main-menu',
                 language: storefront.i18n.language,
                 country: storefront.i18n.country
@@ -169,7 +178,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 .filter((inner: any) => inner.type === 'COLLECTION')
                 .map((inner: any) => inner.resourceId)
                 .filter(Boolean);
-
+            
             displayTitle = matchedItem.title;
             isVirtual = true;
         }
@@ -228,7 +237,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             if (validCollections.length === 0) {
                 const firstNonNull = collections.nodes.find((n: any) => n !== null);
                 if (!firstNonNull) return null;
-
+                
                 return {
                     ...firstNonNull,
                     products: {
@@ -254,7 +263,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             // Merge and deduplicate filters
             const allFilters = validCollections.flatMap((c: any) => c.products.filters || []);
             const filterMap = new Map<string, any>();
-
+            
             allFilters.forEach((filter: any) => {
                 if (!filterMap.has(filter.id)) {
                     filterMap.set(filter.id, {
@@ -360,7 +369,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 /**
  * Sub-component for rendering the product grid or empty state
  */
-function ProductGrid({ products }: { products: any }) {
+function ProductGrid({ products, sessionDiscount }: { products: any, sessionDiscount?: any }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const navigation = useNavigation();
@@ -388,6 +397,7 @@ function ProductGrid({ products }: { products: any }) {
                             key={node.id}
                             product={node}
                             loading={index < 8 ? 'eager' : undefined}
+                            sessionDiscount={sessionDiscount}
                         />
                     )}
                 </PaginatedResourceSection>
@@ -416,6 +426,21 @@ function ProductGrid({ products }: { products: any }) {
 
 export default function Collection() {
     const { collection, handle, listing } = useLoaderData<typeof loader>();
+    const discountFetcher = useFetcher<any>();
+    const [sessionDiscount, setSessionDiscount] = useState<any>(null);
+
+    useEffect(() => {
+        const code = sessionStorage.getItem('featuredDiscountCode');
+        if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
+            discountFetcher.submit({ code }, { method: 'post' });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (discountFetcher.data?.discount) {
+            setSessionDiscount(discountFetcher.data.discount);
+        }
+    }, [discountFetcher.data]);
 
     return (
         <div className="collection px-4 md:px-6 lg:px-8">
@@ -464,11 +489,11 @@ export default function Collection() {
                     </nav>
 
                     {/* Filters and Grid */}
-                    <SortFilter
+                    <SortFilter 
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
-                        <ProductGrid products={collection?.products} />
+                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
                     </SortFilter>
                 </div>
             ) : (
@@ -490,11 +515,11 @@ export default function Collection() {
                     </nav>
 
                     {/* Filters and Grid */}
-                    <SortFilter
+                    <SortFilter 
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
-                        <ProductGrid products={collection?.products} />
+                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
                     </SortFilter>
                 </div>
             )}
