@@ -182,7 +182,6 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
                       <ProductCard 
                         key={product.id} 
                         product={product as any} 
-                        offerUrl={product.offerUrl}
                         disableSoldout={true}
                       />
                     ))}

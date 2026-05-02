@@ -2,6 +2,7 @@ import { HttpStatusCode } from "axios";
 import { axiosSanity } from "~/utils/axiosInsatances";
 
 export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
+  verificationCode,
   hero {
     "title": {
       "text": title.text,
@@ -68,6 +69,7 @@ export interface TextColorObject {
 }
 
 export interface ScanOffersData {
+  verificationCode?: string;
   hero: {
     title?: TextColorObject;
     secondaryText?: TextColorObject;
@@ -123,6 +125,7 @@ export async function getScanOffersData(): Promise<ScanOffersData | null> {
 
 
     return {
+      verificationCode: result.verificationCode,
       hero: {
         title: result.hero?.title,
         secondaryText: result.hero?.secondaryText,

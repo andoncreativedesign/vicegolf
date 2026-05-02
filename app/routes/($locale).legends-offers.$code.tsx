@@ -11,47 +11,54 @@ export const meta: Route.MetaFunction = ({ data }: any) => {
 
 export async function loader({ params, context }: Route.LoaderArgs) {
   const { code } = params;
-  
+
   if (!code) {
     return redirect('/');
   }
 
   const scanOffersData = await getScanOffersData();
+  const verificationCode = scanOffersData?.verificationCode?.trim();
   const featuredProductCode = scanOffersData?.featuredProductDiscountCode;
+
+  console.log("\n\nverificationCode: ", verificationCode, "code: ", code)
+
+  if (code?.trim() !== verificationCode || !verificationCode) {
+    return redirect('/');
+  }
 
   let discountValue = null;
   try {
     const response = await axiosShopifyAdmin.post('', {
       query: GET_CODE_DISCOUNT_QUERY,
       variables: {
-        code: code
+        code: featuredProductCode
       }
     });
-    
+
     const node = response.data?.data?.codeDiscountNodeByCode;
-    
+
     if (!node) {
-      console.log(`Discount code ${code} not found, redirecting to home.`);
+      console.log(`Featured product discount code ${featuredProductCode} not found, redirecting to home.`);
       return redirect('/');
     }
-    
+
     discountValue = node.codeDiscount?.customerGets?.value;
   } catch (error) {
     console.error('Error fetching discount code:', error);
     return redirect('/');
   }
 
-  return { scanOffersData, discountValue, code };
+  return { scanOffersData, discountValue, code: featuredProductCode };
 }
 
 export default function ScanOffersRoute({ loaderData }: Route.ComponentProps) {
   const { scanOffersData, discountValue, code } = loaderData;
   return (
     <div className="scan-offers-page">
-      <ScanOffers 
-        data={scanOffersData} 
-        discountValue={discountValue} 
-        overrideCode={code} 
+      <ScanOffers
+        data={scanOffersData}
+        discountValue={discountValue}
+        overrideCode={code}
       />
     </div>
   );

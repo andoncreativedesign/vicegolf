@@ -6,11 +6,10 @@ import { useMembership } from "~/hooks/useMembership";
 
 interface ProductCardProps {
   product: ProductFragment;
-  offerUrl?: string;
   disableSoldout?: boolean;
 }
 
-export function ProductCard({ product: _product, offerUrl, disableSoldout = false }: ProductCardProps) {
+export function ProductCard({ product: _product, disableSoldout = false }: ProductCardProps) {
   const { getBestDiscountForProduct } = useMembership();
   const product = _product as any;
   const variant = product.variants?.nodes[0];
@@ -27,7 +26,7 @@ export function ProductCard({ product: _product, offerUrl, disableSoldout = fals
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       {/* Product Image */}
       <Link
-        to={offerUrl || `/products/${product.handle}`}
+        to={`/products/${product.handle}`}
         className="block flex-shrink-0"
         style={{ textDecoration: 'none' }}
       >
