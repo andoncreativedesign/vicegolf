@@ -4,6 +4,7 @@ import { getScanOffersData, getScanBookingData } from '~/lib/sanity/scanOffers';
 import { GET_CODE_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { redirect } from 'react-router';
+import { useEffect } from 'react';
 
 export const meta: Route.MetaFunction = ({ data }: any) => {
   return [{ title: data?.scanOffersData?.seo?.title || 'Legends Offers | Vice Golf' }];
@@ -60,6 +61,13 @@ export async function loader({ params, context }: Route.LoaderArgs) {
 
 export default function ScanOffersRoute({ loaderData }: Route.ComponentProps) {
   const { scanOffersData, discountValue, code } = loaderData;
+
+  useEffect(() => {
+    if (code) {
+      sessionStorage.setItem('featuredDiscountCode', code);
+    }
+  }, [code]);
+
   return (
     <div className="scan-offers-page">
       <ScanOffers
