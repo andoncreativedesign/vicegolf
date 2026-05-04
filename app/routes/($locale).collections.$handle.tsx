@@ -78,13 +78,14 @@ export async function loader(args: Route.LoaderArgs) {
     const criticalData = await loadCriticalData(args);
     return { ...deferredData, ...criticalData, url: args.request.url };
 }
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
     const formData = await request.formData();
     const code = formData.get('code');
 
     if (!code) return { discount: null };
 
-    const discount = await getDiscount(code.toString());
+    const { env } = context;
+    const discount = await getDiscount(code.toString(), env);
     return { discount };
 }
 

@@ -34,7 +34,8 @@ export async function loader({ params, context }: Route.LoaderArgs) {
     return redirect('/');
   }
 
-  const discount = await getDiscount(featuredProductCode || '');
+  const { env } = context;
+  const discount = await getDiscount(featuredProductCode || '', env);
 
   if (!discount) {
     console.log(`Featured product discount code ${featuredProductCode} not found or inactive, redirecting to home.`);
