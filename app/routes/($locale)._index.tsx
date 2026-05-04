@@ -239,7 +239,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   useEffect(() => {
     const code = sessionStorage.getItem('featuredDiscountCode');
     if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
-      discountFetcher.submit({ code }, { method: 'post', action: '.' });
+      discountFetcher.submit({ code }, { method: 'post' });
     }
   }, []);
 
