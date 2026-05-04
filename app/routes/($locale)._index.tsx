@@ -88,7 +88,7 @@ export async function loader(args: Route.LoaderArgs) {
   const homePageViceLookData = await getHomePageViceLookData(args.context.env);
   return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   console.log('Action triggered on Homepage');
   const formData = await request.formData();
   const code = formData.get('code');
@@ -96,7 +96,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (!code) return { discount: null };
 
-  const discount = await getDiscount(code.toString());
+  const { env } = context;
+  const discount = await getDiscount(code.toString(), env);
   console.log('Discount found:', discount);
   return { discount };
 }

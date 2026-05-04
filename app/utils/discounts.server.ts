@@ -1,4 +1,4 @@
-import { axiosShopifyAdmin } from './axiosInsatances';
+import { createAxiosShopifyAdmin } from './axiosInsatances';
 import { GET_CODE_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 
 export type Discount = {
@@ -18,7 +18,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  * @param code The discount code to fetch.
  * @returns The discount details or null if not found or inactive.
  */
-export async function getDiscount(code: string): Promise<Discount | null> {
+export async function getDiscount(code: string, env: any): Promise<Discount | null> {
   const now = Date.now();
 
   // Check cache and TTL
@@ -28,6 +28,7 @@ export async function getDiscount(code: string): Promise<Discount | null> {
   }
 
   try {
+    const axiosShopifyAdmin = createAxiosShopifyAdmin(env);
     const response = await axiosShopifyAdmin.post('', {
       query: GET_CODE_DISCOUNT_QUERY,
       variables: { code }
