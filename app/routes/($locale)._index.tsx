@@ -88,8 +88,8 @@ export async function loader(args: Route.LoaderArgs) {
   const homePageViceLookData = await getHomePageViceLookData(args.context.env);
   return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
-export async function action({ request, context }: ActionFunctionArgs) {
-  console.log('Action triggered on Homepage');
+export async function action({ request, context }: Route.ActionArgs) {
+  console.log('Action triggered on Homepage:', request.url);
   const formData = await request.formData();
   const code = formData.get('code');
   console.log('Code from formData:', code);
@@ -238,6 +238,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
 
   useEffect(() => {
     const code = sessionStorage.getItem('featuredDiscountCode');
+    console.log('Homepage session code check:', code);
     if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
       discountFetcher.submit({ code }, { method: 'post' });
     }
