@@ -1,9 +1,8 @@
 // app\routes\($locale)._index.tsx
-import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher } from 'react-router';
-import type { ActionFunctionArgs } from '@shopify/remix-oxygen';
+import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher, useLocation } from 'react-router';
 import { getDiscount } from '~/utils/discounts.server';
 import type { Route } from './+types/_index';
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
 import type { FeaturedCollectionFragment, RecommendedProductsQuery } from 'storefrontapi.generated';
 import { ProductItem } from '~/components/ProductItem';
@@ -89,7 +88,7 @@ export async function loader(args: Route.LoaderArgs) {
   return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
 export async function action({ request, context }: Route.ActionArgs) {
-  console.log('Action triggered on Homepage:', request.url);
+  console.log('Action triggered on Homepage (INDEX):', request.url);
   const formData = await request.formData();
   const code = formData.get('code');
   console.log('Code from formData:', code);
@@ -205,9 +204,11 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
 
 export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
+  const location = useLocation();
   const fetcher = useFetcher();
   const discountFetcher = useFetcher<any>();
   const [sessionDiscount, setSessionDiscount] = useState<any>(null);
+  const hasFetchedDiscount = useRef(false);
   const productsForNav = rootData?.productsForNav;
   const [menu, setMenu] = useState<MenuItem[]>([]);
   // Golf Balls State
@@ -237,18 +238,32 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
 
   useEffect(() => {
+    if (hasFetchedDiscount.current) return;
+    if (typeof window === 'undefined') return;
+
     const code = sessionStorage.getItem('featuredDiscountCode');
-    console.log('Homepage session code check:', code);
     if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
+      console.log('Homepage session code check: SUCCESS', code);
+      hasFetchedDiscount.current = true;
       discountFetcher.submit({ code }, { method: 'post' });
     }
   }, []);
 
   useEffect(() => {
+    console.log('[Homepage] Fetcher State/Data changed:', { 
+      state: discountFetcher.state, 
+      hasData: !!discountFetcher.data,
+      data: discountFetcher.data 
+    });
     if (discountFetcher.data?.discount) {
+      console.log('[Homepage] SUCCESS: Setting session discount state:', discountFetcher.data.discount);
       setSessionDiscount(discountFetcher.data.discount);
     }
-  }, [discountFetcher.data]);
+  }, [discountFetcher.data, discountFetcher.state]);
+
+  useEffect(() => {
+    console.log('[Homepage] Current sessionDiscount State:', sessionDiscount);
+  }, [sessionDiscount]);
 
   // === Golf Balls: Initial Load & Pagination ===
   useEffect(() => {
