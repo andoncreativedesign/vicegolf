@@ -9,23 +9,13 @@ export type Discount = {
   appliesToAll: boolean;
 };
 
-const discountCache: Record<string, Discount> = {};
-const cacheMeta: Record<string, number> = {};
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Fetches discount details from Shopify Admin API with in-memory caching.
+ * Fetches discount details from Shopify Admin API.
  * @param code The discount code to fetch.
  * @returns The discount details or null if not found or inactive.
  */
 export async function getDiscount(code: string, env: any): Promise<Discount | null> {
-  const now = Date.now();
-
-  // Check cache and TTL
-  if (discountCache[code] && now - (cacheMeta[code] || 0) < CACHE_TTL) {
-    console.log(`[Cache Hit] Discount code: ${code}`);
-    return discountCache[code];
-  }
 
   try {
     const axiosShopifyAdmin = createAxiosShopifyAdmin(env);
@@ -51,11 +41,7 @@ export async function getDiscount(code: string, env: any): Promise<Discount | nu
       appliesToAll: items?.__typename === 'AllDiscountItems',
     };
 
-    // Store in cache
-    discountCache[code] = discount;
-    cacheMeta[code] = now;
-
-    console.log(`[Cache Miss] Discount code: ${code} fetched and cached.`);
+    console.log(`[Shopify Admin API] Discount code: ${code} fetched.`);
     return discount;
   } catch (error) {
     console.error('Error fetching discount from Shopify:', error);

@@ -1,6 +1,5 @@
 // app\routes\($locale)._index.tsx
 import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher, useLocation } from 'react-router';
-import { getDiscount } from '~/utils/discounts.server';
 import type { Route } from './+types/_index';
 import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
@@ -87,20 +86,6 @@ export async function loader(args: Route.LoaderArgs) {
   const homePageViceLookData = await getHomePageViceLookData(args.context.env);
   return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
-export async function action({ request, context }: Route.ActionArgs) {
-  console.log('Action triggered on Homepage (INDEX):', request.url);
-  const formData = await request.formData();
-  const code = formData.get('code');
-  console.log('Code from formData:', code);
-
-  if (!code) return { discount: null };
-
-  const { env } = context;
-  const discount = await getDiscount(code.toString(), env);
-  console.log('Discount found:', discount);
-  return { discount };
-}
-
 
 
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
@@ -242,17 +227,12 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
     if (storedData) {
       try {
         const parsedDiscount = JSON.parse(storedData);
-        console.log('[Homepage] Setting session discount from localStorage:', parsedDiscount);
         setSessionDiscount(parsedDiscount);
       } catch (e) {
         console.error('Error parsing stored discount data:', e);
       }
     }
   }, []);
-
-  useEffect(() => {
-    console.log('[Homepage] Current sessionDiscount State:', sessionDiscount);
-  }, [sessionDiscount]);
 
   // === Golf Balls: Initial Load & Pagination ===
   useEffect(() => {

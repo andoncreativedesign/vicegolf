@@ -53,8 +53,6 @@ export default function ScanOffersRoute({ loaderData }: Route.ComponentProps) {
   const { scanOffersData, discountValue, code, discount } = loaderData;
 
   useEffect(() => {
-    console.log("Code from loader", code);
-    console.log("Discount from loader", discount);
     if (code) {
       localStorage.setItem('featuredDiscountCode', code);
       if (discount) {
