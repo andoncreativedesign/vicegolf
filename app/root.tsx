@@ -1,4 +1,5 @@
 import { Analytics, getShopAnalytics, useNonce } from '@shopify/hydrogen';
+import { useEffect } from 'react';
 import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, } from 'react-router';
 import type { Route } from './+types/root';
 import favicon from '~/assets/vicefav.svg';
@@ -145,6 +146,7 @@ export async function loader(args: Route.LoaderArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
+    publicKlaviyoCompanyId: env.PUBLIC_KLAVIYO_COMPANY_ID,
   };
 }
 
@@ -356,6 +358,20 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
         <Links />
+        {/* Klaviyo Onsite Tracking */}
+        <script
+          nonce={nonce}
+          async
+          type="text/javascript"
+          src={`https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${data?.publicKlaviyoCompanyId}`}
+        />
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `window._learnq = window._learnq || [];`,
+          }}
+        />
+        {/* End Klaviyo Onsite Tracking */}
       </head>
       <body className='font-sans'>
         {/* Google Tag Manager (noscript) */}
@@ -395,6 +411,19 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
+
+  useEffect(() => {
+    if (data?.customer) {
+      const { emailAddress, firstName, lastName, phoneNumber } = data.customer;
+      const _learnq = window._learnq || [];
+      _learnq.push(['identify', {
+        '$email': emailAddress?.emailAddress,
+        '$first_name': firstName,
+        '$last_name': lastName,
+        '$phone_number': phoneNumber?.phoneNumber,
+      }]);
+    }
+  }, [data?.customer]);
 
   if (!data) {
     return <Outlet />;

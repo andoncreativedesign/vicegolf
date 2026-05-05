@@ -139,6 +139,20 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         content_type: 'product'
       });
     }
+
+    if (typeof window !== 'undefined' && (window as any)._learnq) {
+      const item = {
+        'ProductName': title,
+        'ProductID': currentProductId,
+        'SKU': selectedVariant?.sku,
+        'ImageURL': selectedVariant?.image?.url,
+        'URL': window.location.href,
+        'Price': unitPriceAmount,
+        'Quantity': totalQuantityDozens,
+        'Value': totalPriceAmount
+      };
+      (window as any)._learnq.push(['track', 'Added to Cart', item]);
+    }
     open('cart');
   };
   const getProductCustomizationStyleType = (productType: string | undefined): 'drivers' | 'club' | 'default' => {

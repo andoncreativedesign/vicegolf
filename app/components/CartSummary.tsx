@@ -144,7 +144,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
         </div>
 
         <div className="mt-6">
-          <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+          <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} cart={cart} />
         </div>
 
         {/* {isPageLayout && (
@@ -162,13 +162,37 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   );
 }
 
-function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
+function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart?: any }) {
   if (!checkoutUrl) return null;
+
+  const handleCheckoutClick = () => {
+    if (typeof window !== 'undefined' && (window as any)._learnq && cart) {
+      const items = cart.lines?.nodes?.map((line: any) => ({
+        'ProductID': line.merchandise?.product?.id,
+        'SKU': line.merchandise?.sku,
+        'ProductName': line.merchandise?.product?.title,
+        'Quantity': line.quantity,
+        'ItemPrice': line.cost?.amountPerQuantity?.amount,
+        'RowTotal': line.cost?.totalAmount?.amount,
+        'ImageURL': line.merchandise?.image?.url,
+        'ProductURL': `${window.location.origin}/products/${line.merchandise?.product?.handle}`
+      }));
+
+      (window as any)._learnq.push(['track', 'Started Checkout', {
+        '$event_id': cart.id,
+        'Value': cart.cost?.totalAmount?.amount,
+        'ItemNames': cart.lines?.nodes?.map((line: any) => line.merchandise?.product?.title),
+        'CheckoutURL': checkoutUrl,
+        'Items': items
+      }]);
+    }
+  };
 
   return (
     <div className="checkout-actions">
       <a
         href={checkoutUrl}
+        onClick={handleCheckoutClick}
         target="_self"
         className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
         style={{ textDecoration: 'none' }}
