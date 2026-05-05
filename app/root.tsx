@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Analytics, getShopAnalytics, useNonce } from '@shopify/hydrogen';
 import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, } from 'react-router';
 import type { Route } from './+types/root';
@@ -299,10 +300,14 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 export function Layout({ children }: { children?: React.ReactNode }) {
   const nonce = useNonce();
   const data = useRouteLoaderData<typeof loader>('root');
+  const isTargetDomain = data?.isTargetDomain;
   const { header, footer, storeDomain } = data || {};
 
-  const isTargetDomain = data?.isTargetDomain;
-  console.log('isTargetDomain:', isTargetDomain);
+  // useEffect(() => {
+  //   if (isTargetDomain !== undefined) {
+  //     console.log('isTargetDomain:', isTargetDomain);
+  //   }
+  // }, [isTargetDomain]);
 
 
   return (

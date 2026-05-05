@@ -5,18 +5,6 @@ import type { ScanOffersData } from '~/lib/sanity/scanOffers';
 import { ProductCard } from '../ProductCard';
 import { useEffect } from 'react';
 
-const DEFAULT_STORES = [
-  {
-    name: 'The Pro Shop',
-    phone: '+971 4 835 7901',
-    email: 'retail@theproshopdubai.com',
-  },
-  {
-    name: 'Green Golf',
-    phone: '+971 55 208 9557',
-    email: 'dubaigreensports@gmail.com',
-  }
-];
 
 export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanOffersData | null, discountValue?: any, overrideCode?: string }) {
   // Mapping with home-page UI styles extracted from HeroSection.tsx
@@ -31,13 +19,14 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
 
   const bookingTitle = data?.booking?.title || 'Book your demo or fitting';
   const bookingSubtitle = data?.booking?.subtitle || 'Select one of our authorized retail partners below to schedule your personalized session.';
-  const stores = data?.booking?.stores || DEFAULT_STORES;
+  const stores = data?.booking?.stores || [];
   const whatsappMessage = data?.booking?.whatsappMessage;
   const emailSubject = data?.booking?.emailSubject;
   const emailBody = data?.booking?.emailBody;
   const products = data?.products;
   const featuredProductDiscountCode = data?.featuredProductDiscountCode;
   const featuredProductTitle = data?.featuredProductTitle;
+  const bookingTitle2 = data?.bookingTitle;
   
   const paragraphs = data?.descriptionSection?.paragraphs || [
     'Choosing new clubs should be easy.',
@@ -56,8 +45,8 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
   };
 
   useEffect(() => {
-    console.log('discountValue', discountValue);
-  }, [discountValue])
+    console.log('booking data', data?.booking);
+  }, [data])
 
   const transformedProducts = products?.map((p: any) => {
     let price = parseFloat(p.priceRange?.minVariantPrice?.toString() || '0');
@@ -182,7 +171,6 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
                       <ProductCard 
                         key={product.id} 
                         product={product as any} 
-                        offerUrl={product.offerUrl}
                         disableSoldout={true}
                       />
                     ))}
@@ -223,6 +211,12 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
       <div id="booking-section" className="bg-[#f6f6f6] py-24 md:py-32 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-12 lg:px-16 relative z-10">
           <div className="flex flex-col items-center text-center mb-16 px-6">
+            <h2
+              className="font-bold text-gray-800 mb-2 tracking-tight text-center"
+              style={{ fontSize: '2.5rem' }}
+            >
+              {bookingTitle2}
+            </h2>
             <h2
               className="font-bold text-gray-800 mb-2 tracking-tight text-center"
               style={{ fontSize: '1.875rem' }}

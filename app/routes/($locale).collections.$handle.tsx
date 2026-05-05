@@ -1,4 +1,4 @@
-import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation } from 'react-router';
+import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation, useFetcher } from 'react-router';
 import type { Route } from './+types/collections.$handle';
 import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
@@ -8,7 +8,7 @@ import { VariantProductCard } from '~/components/Product/VariantProductCard';
 import { type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings } from '~/lib/sanity/products';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
 import { ChevronRight, X } from 'lucide-react';
@@ -72,7 +72,6 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
 
     return metaTags;
 };
-
 export async function loader(args: Route.LoaderArgs) {
     const deferredData = loadDeferredData(args);
     const criticalData = await loadCriticalData(args);
@@ -360,7 +359,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 /**
  * Sub-component for rendering the product grid or empty state
  */
-function ProductGrid({ products }: { products: any }) {
+function ProductGrid({ products, sessionDiscount }: { products: any, sessionDiscount?: any }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const navigation = useNavigation();
@@ -388,6 +387,7 @@ function ProductGrid({ products }: { products: any }) {
                             key={node.id}
                             product={node}
                             loading={index < 8 ? 'eager' : undefined}
+                            sessionDiscount={sessionDiscount}
                         />
                     )}
                 </PaginatedResourceSection>
@@ -416,6 +416,21 @@ function ProductGrid({ products }: { products: any }) {
 
 export default function Collection() {
     const { collection, handle, listing } = useLoaderData<typeof loader>();
+    const [sessionDiscount, setSessionDiscount] = useState<any>(null);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const storedData = localStorage.getItem('featuredDiscountData');
+        if (storedData) {
+            try {
+                const parsedDiscount = JSON.parse(storedData);
+                console.log('[Collection] Setting session discount from localStorage:', parsedDiscount);
+                setSessionDiscount(parsedDiscount);
+            } catch (e) {
+                console.error('Error parsing stored discount data:', e);
+            }
+        }
+    }, []);
 
     return (
         <div className="collection px-4 md:px-6 lg:px-8">
@@ -468,7 +483,7 @@ export default function Collection() {
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
-                        <ProductGrid products={collection?.products} />
+                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
                     </SortFilter>
                 </div>
             ) : (
@@ -494,7 +509,7 @@ export default function Collection() {
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
-                        <ProductGrid products={collection?.products} />
+                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
                     </SortFilter>
                 </div>
             )}
