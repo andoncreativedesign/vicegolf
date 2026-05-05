@@ -46,17 +46,22 @@ export async function loader({ params, context }: Route.LoaderArgs) {
     ? { percentage: discount.percentage } 
     : { amount: discount.amount };
 
-  return { scanOffersData, discountValue, code: featuredProductCode };
+  return { scanOffersData, discountValue, code: featuredProductCode, discount };
 }
 
 export default function ScanOffersRoute({ loaderData }: Route.ComponentProps) {
-  const { scanOffersData, discountValue, code } = loaderData;
+  const { scanOffersData, discountValue, code, discount } = loaderData;
 
   useEffect(() => {
+    console.log("Code from loader", code);
+    console.log("Discount from loader", discount);
     if (code) {
-      sessionStorage.setItem('featuredDiscountCode', code);
+      localStorage.setItem('featuredDiscountCode', code);
+      if (discount) {
+        localStorage.setItem('featuredDiscountData', JSON.stringify(discount));
+      }
     }
-  }, [code]);
+  }, [code, discount]);
 
   return (
     <div className="scan-offers-page">

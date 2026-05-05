@@ -206,9 +206,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
   const location = useLocation();
   const fetcher = useFetcher();
-  const discountFetcher = useFetcher<any>();
   const [sessionDiscount, setSessionDiscount] = useState<any>(null);
-  const hasFetchedDiscount = useRef(false);
   const productsForNav = rootData?.productsForNav;
   const [menu, setMenu] = useState<MenuItem[]>([]);
   // Golf Balls State
@@ -238,28 +236,19 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
 
   useEffect(() => {
-    if (hasFetchedDiscount.current) return;
     if (typeof window === 'undefined') return;
 
-    const code = sessionStorage.getItem('featuredDiscountCode');
-    if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
-      console.log('Homepage session code check: SUCCESS', code);
-      hasFetchedDiscount.current = true;
-      discountFetcher.submit({ code }, { method: 'post' });
+    const storedData = localStorage.getItem('featuredDiscountData');
+    if (storedData) {
+      try {
+        const parsedDiscount = JSON.parse(storedData);
+        console.log('[Homepage] Setting session discount from localStorage:', parsedDiscount);
+        setSessionDiscount(parsedDiscount);
+      } catch (e) {
+        console.error('Error parsing stored discount data:', e);
+      }
     }
   }, []);
-
-  useEffect(() => {
-    console.log('[Homepage] Fetcher State/Data changed:', { 
-      state: discountFetcher.state, 
-      hasData: !!discountFetcher.data,
-      data: discountFetcher.data 
-    });
-    if (discountFetcher.data?.discount) {
-      console.log('[Homepage] SUCCESS: Setting session discount state:', discountFetcher.data.discount);
-      setSessionDiscount(discountFetcher.data.discount);
-    }
-  }, [discountFetcher.data, discountFetcher.state]);
 
   useEffect(() => {
     console.log('[Homepage] Current sessionDiscount State:', sessionDiscount);

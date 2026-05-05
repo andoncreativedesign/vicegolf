@@ -1,6 +1,5 @@
 import { redirect, useLoaderData, Link, useNavigate, useFetcher, Await } from 'react-router';
 import { useCallback, useEffect, useState, Suspense } from 'react';
-import { getDiscount } from '~/utils/discounts.server';
 import type { Route } from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -102,16 +101,6 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
   return metaTags;
 };
 
-export async function action({ request, context }: Route.ActionArgs) {
-  const formData = await request.formData();
-  const code = formData.get('code');
-
-  if (!code) return { discount: null };
-
-  const { env } = context;
-  const discount = await getDiscount(code.toString(), env);
-  return { discount };
-}
 
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
@@ -264,29 +253,29 @@ export default function Product() {
   const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
-  const discountFetcher = useFetcher<any>();
   const [sessionDiscount, setSessionDiscount] = useState<any>(null);
 
   useEffect(() => {
-    const code = sessionStorage.getItem('featuredDiscountCode');
-    if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
-      discountFetcher.submit({ code }, { method: 'post' });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (discountFetcher.data?.discount) {
-      const { discount } = discountFetcher.data;
-      const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-      
-      const isEligibleProduct = discount.products.includes(product.id);
-      const isEligibleCollection = productCollections.some((id: string) => discount.collections.includes(id));
-      
-      if (discount.appliesToAll || isEligibleProduct || isEligibleCollection) {
-        setSessionDiscount(discount);
+    if (typeof window === 'undefined') return;
+    const storedData = localStorage.getItem('featuredDiscountData');
+    if (storedData) {
+      try {
+        const discount = JSON.parse(storedData);
+        console.log('[Product] Checking eligibility for stored discount:', discount);
+        
+        const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+        const isEligibleProduct = discount.products.includes(product.id);
+        const isEligibleCollection = productCollections.some((id: string) => discount.collections.includes(id));
+        
+        if (discount.appliesToAll || isEligibleProduct || isEligibleCollection) {
+          console.log('[Product] SUCCESS: Setting session discount from localStorage');
+          setSessionDiscount(discount);
+        }
+      } catch (e) {
+        console.error('Error parsing stored discount data:', e);
       }
     }
-  }, [discountFetcher.data, product.id, product.collections]);
+  }, [product.id, product.collections]);
   // useEffect(() => {
   // if (!data) return
   // console.log("data.homePageData ", data.homePageData)

@@ -1,5 +1,4 @@
 import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation, useFetcher } from 'react-router';
-import { getDiscount } from '~/utils/discounts.server';
 import type { Route } from './+types/collections.$handle';
 import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
@@ -77,16 +76,6 @@ export async function loader(args: Route.LoaderArgs) {
     const deferredData = loadDeferredData(args);
     const criticalData = await loadCriticalData(args);
     return { ...deferredData, ...criticalData, url: args.request.url };
-}
-export async function action({ request, context }: Route.ActionArgs) {
-    const formData = await request.formData();
-    const code = formData.get('code');
-
-    if (!code) return { discount: null };
-
-    const { env } = context;
-    const discount = await getDiscount(code.toString(), env);
-    return { discount };
 }
 
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
@@ -427,21 +416,21 @@ function ProductGrid({ products, sessionDiscount }: { products: any, sessionDisc
 
 export default function Collection() {
     const { collection, handle, listing } = useLoaderData<typeof loader>();
-    const discountFetcher = useFetcher<any>();
     const [sessionDiscount, setSessionDiscount] = useState<any>(null);
 
     useEffect(() => {
-        const code = sessionStorage.getItem('featuredDiscountCode');
-        if (code && !discountFetcher.data && discountFetcher.state === 'idle') {
-            discountFetcher.submit({ code }, { method: 'post' });
+        if (typeof window === 'undefined') return;
+        const storedData = localStorage.getItem('featuredDiscountData');
+        if (storedData) {
+            try {
+                const parsedDiscount = JSON.parse(storedData);
+                console.log('[Collection] Setting session discount from localStorage:', parsedDiscount);
+                setSessionDiscount(parsedDiscount);
+            } catch (e) {
+                console.error('Error parsing stored discount data:', e);
+            }
         }
     }, []);
-
-    useEffect(() => {
-        if (discountFetcher.data?.discount) {
-            setSessionDiscount(discountFetcher.data.discount);
-        }
-    }, [discountFetcher.data]);
 
     return (
         <div className="collection px-4 md:px-6 lg:px-8">
