@@ -165,6 +165,14 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
   if (!checkoutUrl) return null;
 
+  const handleCheckoutClick = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('featuredDiscountCode');
+      localStorage.removeItem('featuredDiscountData');
+      console.log('[CartSummary] Checkout clicked. Cleared local discount state.');
+    }
+  };
+
   return (
     <div className="checkout-actions">
       <a
@@ -172,6 +180,7 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
         target="_self"
         className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
         style={{ textDecoration: 'none' }}
+        onClick={handleCheckoutClick}
       >
         Checkout securely
       </a>
@@ -251,6 +260,7 @@ function CartDiscounts({
   const codes: string[] = discountCodes?.filter((discount) => discount.applicable)?.map(({ code }) => code) || [];
 
   const applyFetcher = useFetcher({ key: 'discount-apply' });
+  const removeFetcher = useFetcher({ key: 'discount-remove' });
   const isApplying = applyFetcher.state !== 'idle';
 
   useEffect(() => {
@@ -259,6 +269,24 @@ function CartDiscounts({
     }
   }, [applyFetcher.state, applyFetcher.data]);
 
+  const shouldReloadRef = useRef(false);
+
+  useEffect(() => {
+    if (removeFetcher.state === 'idle' && removeFetcher.data && shouldReloadRef.current) {
+      window.location.reload();
+    }
+  }, [removeFetcher.state, removeFetcher.data]);
+
+  const handleRemoveDiscount = () => {
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('featuredDiscountData')) {
+        shouldReloadRef.current = true;
+      }
+      localStorage.removeItem('featuredDiscountCode');
+      localStorage.removeItem('featuredDiscountData');
+    }
+  };
+
   return (
     <div className="discount-section">
       {/* Display existing discounts */}
@@ -266,10 +294,12 @@ function CartDiscounts({
         <div className="applied-discounts mb-3">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Volume discount</span>
-            <UpdateDiscountForm>
+            {/* <UpdateDiscountForm > */}
+            <UpdateDiscountForm fetcherKey="discount-remove">
               <button
                 type="submit"
                 className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200 cursor-pointer"
+                onClick={handleRemoveDiscount}
               >
                 Remove
               </button>
