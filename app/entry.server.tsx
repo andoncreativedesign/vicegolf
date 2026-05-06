@@ -50,6 +50,9 @@ export default async function handleRequest(
       'https://connect.facebook.net',
       'https://static.klaviyo.com',
       'https://a.klaviyo.com',
+      'https://fast.a.klaviyo.com',
+      'https://static-forms.klaviyo.com',
+      'https://*.klaviyo.com',
     ],
 
     mediaSrc: [
