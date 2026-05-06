@@ -11,8 +11,14 @@ export const homePageHeroQuery = `*[_type == "home"][0]{
     content
   },
   heroes[] {
-    title,
-    text2,
+    title {
+      text,
+      color
+    },
+    text2 {
+      text,
+      color
+    },
     description,
     buttonText,
     handle,
@@ -146,9 +152,9 @@ export interface BrandItem {
 }
 
 export interface HeroItemTransformed {
-  title?: { text?: string; color?: string; };
-  text2?: { text?: string; color?: string; };
-  description?: { text?: string; color?: string; };
+  title?: { text?: any[]; color?: string; };
+  text2?: { text?: any[]; color?: string; };
+  description?: { text?: any[]; color?: string; };
   buttonText?: { text?: string; textColor?: string; backgroundColor?: string; };
   image?: string;
   mobileImage?: string;

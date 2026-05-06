@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
 import { Image } from '@shopify/hydrogen';
+import { PortableText } from '@portabletext/react';
 import type { HeroItemTransformed } from '~/lib/sanity/home';
 
 interface HeroSlide {
@@ -10,13 +11,13 @@ interface HeroSlide {
     altText: string;
     mobileUrl?: string;
   };
-  title: string;
+  title: any;
   titleColor?: string;
   text2?: {
-    text?: string;
+    text?: any;
     color?: string;
   };
-  description: string;
+  description: any;
   descriptionColor?: string;
   buttonText?: string;
   buttonTextColor?: string;
@@ -47,6 +48,30 @@ const fallbackSlides: HeroSlide[] = [
   }
 ];
 
+const portableTextComponents = {
+  marks: {
+    color: ({ children, value }: any) => {
+      const color = value.hex?.hex || value.hex || value.color;
+      return <span style={{ color }}>{children}</span>;
+    },
+  },
+  block: {
+    normal: ({ children }: any) => <span className="block min-h-[1em]">{children}</span>,
+  },
+};
+
+function toPlainText(blocks: any[] = []): string {
+  if (!Array.isArray(blocks)) return String(blocks || '');
+  return blocks
+    .map((block) => {
+      if (block._type !== 'block' || !block.children) {
+        return '';
+      }
+      return block.children.map((child: any) => child.text).join('');
+    })
+    .join('\n');
+}
+
 export function HeroSection({
   heroData,
   textColor = 'text-white',
@@ -69,7 +94,7 @@ export function HeroSection({
     id: item._key || `hero-${index}`,
     bgImage: {
       url: item.image || fallbackSlides[0].bgImage.url,
-      altText: item.title?.text || 'Hero Image',
+      altText: toPlainText(item.title?.text) || 'Hero Image',
       mobileUrl: item.mobileImage,
     },
     title: item.title?.text || '',
@@ -151,28 +176,40 @@ export function HeroSection({
 
           {current.title && (
             <h2
-              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-extralight"
+              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-extralight whitespace-pre-line"
               style={{ color: current.titleColor, fontWeight: 200 }}
             >
-              {current.title}
+              {Array.isArray(current.title) ? (
+                <PortableText value={current.title} components={portableTextComponents} />
+              ) : (
+                current.title
+              )}
             </h2>
           )}
 
           {current.text2?.text && (
             <h2
-              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-normal"
+              className="!text-3xl md:!text-4xl lg:!text-5xl xl:!text-5xl uppercase tracking-tight leading-none mb-1 font-normal whitespace-pre-line"
               style={{ color: current.text2.color }}
             >
-              {current.text2.text}
+              {Array.isArray(current.text2.text) ? (
+                <PortableText value={current.text2.text} components={portableTextComponents} />
+              ) : (
+                current.text2.text
+              )}
             </h2>
           )}
 
           {current.description && (
             <p
-              className="!text-base md:!text-lg lg:!text-xl xl:!text-xl font-thin mb-6 leading-tight"
+              className="!text-base md:!text-lg lg:!text-xl xl:!text-xl font-thin mb-6 leading-tight whitespace-pre-line"
               style={{ color: current.descriptionColor }}
             >
-              {current.description}
+              {Array.isArray(current.description) ? (
+                <PortableText value={current.description} components={portableTextComponents} />
+              ) : (
+                current.description
+              )}
             </p>
           )}
 
