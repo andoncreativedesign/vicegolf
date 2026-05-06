@@ -54,9 +54,18 @@ export const homePageHeroQuery = `*[_type == "home"][0]{
 // GraphQL query for non-critical home page data (Lower sections)
 export const homePageLowerSectionsQuery = `*[_type == "home"][0]{
   secondaryHero[] {
-    title,
-    text2,
-    description,
+    title {
+      text,
+      color
+    },
+    text2 {
+      text,
+      color
+    },
+    description {
+      text,
+      color
+    },
     handle,
     buttonText,
     buttonLink,
