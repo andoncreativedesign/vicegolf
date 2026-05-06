@@ -27,7 +27,7 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
   const featuredProductDiscountCode = data?.featuredProductDiscountCode;
   const featuredProductTitle = data?.featuredProductTitle;
   const bookingTitle2 = data?.bookingTitle;
-  
+
   const paragraphs = data?.descriptionSection?.paragraphs || [
     'Choosing new clubs should be easy.',
     'With our club demos and fittings, you can get hands-on with Vice gear, test different options, and see what truly works for your game before making a decision.',
@@ -63,7 +63,7 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
     }
 
     const activeCode = overrideCode || featuredProductDiscountCode;
-    const offerUrl = activeCode 
+    const offerUrl = activeCode
       ? `/discount/${activeCode}?redirect=/products/${p.handle}`
       : undefined;
 
@@ -153,24 +153,24 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
               {transformedProducts && transformedProducts.length > 0 && (
                 <div className="pt-12">
                   {featuredProductTitle && (
-                    <h2 
+                    <h2
                       className="font-bold text-gray-800 mb-8 tracking-tight text-center animate-fade-up"
-                      style={{ 
+                      style={{
                         fontSize: '1.875rem',
-                        animationDelay: `${paragraphs.length * 120}ms` 
+                        animationDelay: `${paragraphs.length * 120}ms`
                       }}
                     >
                       {featuredProductTitle}
                     </h2>
                   )}
-                  <div 
+                  <div
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-up"
                     style={{ animationDelay: `${(paragraphs.length + (featuredProductTitle ? 1 : 0)) * 120}ms` }}
                   >
                     {transformedProducts.map((product) => (
-                      <ProductCard 
-                        key={product.id} 
-                        product={product as any} 
+                      <ProductCard
+                        key={product.id}
+                        product={product as any}
                         disableSoldout={true}
                       />
                     ))}
@@ -179,7 +179,7 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
               )}
 
               {/* Shop Buttons */}
-              <div 
+              <div
                 className="flex flex-wrap gap-4 justify-center pt-6 animate-fade-up"
                 style={{ animationDelay: `${(paragraphs.length + (transformedProducts?.length ? (featuredProductTitle ? 2 : 1) : 0)) * 120}ms` }}
               >

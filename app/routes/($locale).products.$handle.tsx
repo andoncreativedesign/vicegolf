@@ -369,7 +369,22 @@ export default function Product() {
         currency: selectedVariant?.price?.currencyCode
       });
     }
-  }, [product.id, finalPrice, selectedVariant?.price?.currencyCode]);
+
+    if (typeof window !== 'undefined' && (window as any)._learnq) {
+      const item = {
+        'ProductName': product.title,
+        'ProductID': product.id,
+        'SKU': selectedVariant?.sku,
+        'Categories': product.collections?.nodes?.map((c: any) => c.title),
+        'ImageURL': selectedVariant?.image?.url || product.featuredImage?.url,
+        'URL': window.location.href,
+        'Brand': product.vendor,
+        'Price': selectedVariant?.price?.amount,
+        'CompareAtPrice': selectedVariant?.compareAtPrice?.amount
+      };
+      (window as any)._learnq.push(['track', 'Viewed Product', item]);
+    }
+  }, [product.id, finalPrice, selectedVariant?.id, selectedVariant?.price?.currencyCode]);
   // Format product type for display and URL
   const formatProductType = (type: string) => {
     if (!type) return { display: '', url: '' };
