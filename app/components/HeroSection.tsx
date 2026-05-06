@@ -132,19 +132,6 @@ export function HeroSection({
     };
   }, [isPaused, slides.length]);
 
-  useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data?.collection?.handle) {
-      navigate(`/collections/${fetcher.data.collection.handle}`);
-    }
-  }, [fetcher.state, fetcher.data, navigate]);
-
-  const handleCTA = (handle?: string) => {
-    console.log("handle : ", handle);
-    if (!handle) return;
-    // fetcher.submit({ handle }, { method: "post", action: "/api/collection" });
-    navigate(`/collections/${handle}`)
-  };
-
   const current = slides[currentSlide];
 
   return (
@@ -214,13 +201,13 @@ export function HeroSection({
           )}
 
           {current.buttonText && (
-            <button
-              onClick={() => handleCTA(current.handle)}
-              className="!text-sm md:!text-base px-6 py-2.5 md:px-8 md:py-3 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-6 cursor-pointer"
+            <a
+              href={current.handle || '#'}
+              className="inline-block !text-sm md:!text-base px-6 py-2.5 md:px-8 md:py-3 font-medium rounded-full hover:opacity-90 transition-all shadow-lg transform hover:scale-105 mt-6 cursor-pointer"
               style={{ backgroundColor: current.buttonBgColor, color: current.buttonTextColor }}
             >
               {current.buttonText}
-            </button>
+            </a>
           )}
         </div>
       </div>
