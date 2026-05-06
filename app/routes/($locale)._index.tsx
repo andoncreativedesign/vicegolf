@@ -1,7 +1,7 @@
 // app\routes\($locale)._index.tsx
-import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher } from 'react-router';
+import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher, useLocation } from 'react-router';
 import type { Route } from './+types/_index';
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
 import type { FeaturedCollectionFragment, RecommendedProductsQuery } from 'storefrontapi.generated';
 import { ProductItem } from '~/components/ProductItem';
@@ -86,7 +86,6 @@ export async function loader(args: Route.LoaderArgs) {
   const homePageViceLookData = await getHomePageViceLookData(args.context.env);
   return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
-
 
 
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
@@ -190,7 +189,9 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
 
 export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
+  const location = useLocation();
   const fetcher = useFetcher();
+  const [sessionDiscount, setSessionDiscount] = useState<any>(null);
   const productsForNav = rootData?.productsForNav;
   const [menu, setMenu] = useState<MenuItem[]>([]);
   // Golf Balls State
@@ -218,6 +219,20 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const [currentRecommendedCursor, setCurrentRecommendedCursor] = useState<string | null>(null);
   const [hasMoreRecommended, setHasMoreRecommended] = useState(false);
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const storedData = localStorage.getItem('featuredDiscountData');
+    if (storedData) {
+      try {
+        const parsedDiscount = JSON.parse(storedData);
+        setSessionDiscount(parsedDiscount);
+      } catch (e) {
+        console.error('Error parsing stored discount data:', e);
+      }
+    }
+  }, []);
 
   // === Golf Balls: Initial Load & Pagination ===
   useEffect(() => {
@@ -450,6 +465,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
               onLoadMore={handleLoadMoreGolfBalls}
               hasMore={hasMoreGolfBalls}
               loading={isLoadingGolfBalls}
+              sessionDiscount={sessionDiscount}
             />
           )}
           {/* VICE GOLF CLUBS - Infinite Scroll */}
@@ -461,6 +477,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
               onLoadMore={handleLoadMoreGolfClubs}
               hasMore={hasMoreGolfClubs}
               loading={isLoadingGolfClubs}
+              sessionDiscount={sessionDiscount}
             />
           )}
           {/* VICE GEAR - Now with Infinite Scroll */}
@@ -472,6 +489,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
               onLoadMore={handleLoadMoreGear}
               hasMore={hasMoreGear}
               loading={isLoadingGear}
+              sessionDiscount={sessionDiscount}
             />
           )}
         </div>
@@ -499,6 +517,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
             onLoadMore={handleLoadMoreApparel}
             hasMore={hasMoreApparel}
             loading={isLoadingApparel}
+            sessionDiscount={sessionDiscount}
           />
         )}
       </div>

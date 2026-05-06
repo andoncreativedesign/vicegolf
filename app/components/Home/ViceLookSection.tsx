@@ -69,6 +69,7 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
                                                 height: 1600,
                                             }}
                                             className="w-full h-auto object-cover"
+                                            sizes="(min-width: 768px) 33vw, 80vw"
                                             loading="lazy"
                                         />
                                     )}

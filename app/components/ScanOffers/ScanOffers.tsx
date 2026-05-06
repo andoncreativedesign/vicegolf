@@ -5,18 +5,6 @@ import type { ScanOffersData } from '~/lib/sanity/scanOffers';
 import { ProductCard } from '../ProductCard';
 import { useEffect } from 'react';
 
-const DEFAULT_STORES = [
-  {
-    name: 'The Pro Shop',
-    phone: '+971 4 835 7901',
-    email: 'retail@theproshopdubai.com',
-  },
-  {
-    name: 'Green Golf',
-    phone: '+971 55 208 9557',
-    email: 'dubaigreensports@gmail.com',
-  }
-];
 
 export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanOffersData | null, discountValue?: any, overrideCode?: string }) {
   // Mapping with home-page UI styles extracted from HeroSection.tsx
@@ -31,14 +19,15 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
 
   const bookingTitle = data?.booking?.title || 'Book your demo or fitting';
   const bookingSubtitle = data?.booking?.subtitle || 'Select one of our authorized retail partners below to schedule your personalized session.';
-  const stores = data?.booking?.stores || DEFAULT_STORES;
+  const stores = data?.booking?.stores || [];
   const whatsappMessage = data?.booking?.whatsappMessage;
   const emailSubject = data?.booking?.emailSubject;
   const emailBody = data?.booking?.emailBody;
   const products = data?.products;
   const featuredProductDiscountCode = data?.featuredProductDiscountCode;
   const featuredProductTitle = data?.featuredProductTitle;
-  
+  const bookingTitle2 = data?.bookingTitle;
+
   const paragraphs = data?.descriptionSection?.paragraphs || [
     'Choosing new clubs should be easy.',
     'With our club demos and fittings, you can get hands-on with Vice gear, test different options, and see what truly works for your game before making a decision.',
@@ -56,8 +45,8 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
   };
 
   useEffect(() => {
-    console.log('discountValue', discountValue);
-  }, [discountValue])
+    console.log('booking data', data?.booking);
+  }, [data])
 
   const transformedProducts = products?.map((p: any) => {
     let price = parseFloat(p.priceRange?.minVariantPrice?.toString() || '0');
@@ -74,7 +63,7 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
     }
 
     const activeCode = overrideCode || featuredProductDiscountCode;
-    const offerUrl = activeCode 
+    const offerUrl = activeCode
       ? `/discount/${activeCode}?redirect=/products/${p.handle}`
       : undefined;
 
@@ -164,25 +153,24 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
               {transformedProducts && transformedProducts.length > 0 && (
                 <div className="pt-12">
                   {featuredProductTitle && (
-                    <h2 
+                    <h2
                       className="font-bold text-gray-800 mb-8 tracking-tight text-center animate-fade-up"
-                      style={{ 
+                      style={{
                         fontSize: '1.875rem',
-                        animationDelay: `${paragraphs.length * 120}ms` 
+                        animationDelay: `${paragraphs.length * 120}ms`
                       }}
                     >
                       {featuredProductTitle}
                     </h2>
                   )}
-                  <div 
+                  <div
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-up"
                     style={{ animationDelay: `${(paragraphs.length + (featuredProductTitle ? 1 : 0)) * 120}ms` }}
                   >
                     {transformedProducts.map((product) => (
-                      <ProductCard 
-                        key={product.id} 
-                        product={product as any} 
-                        offerUrl={product.offerUrl}
+                      <ProductCard
+                        key={product.id}
+                        product={product as any}
                         disableSoldout={true}
                       />
                     ))}
@@ -191,7 +179,7 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
               )}
 
               {/* Shop Buttons */}
-              <div 
+              <div
                 className="flex flex-wrap gap-4 justify-center pt-6 animate-fade-up"
                 style={{ animationDelay: `${(paragraphs.length + (transformedProducts?.length ? (featuredProductTitle ? 2 : 1) : 0)) * 120}ms` }}
               >
@@ -223,6 +211,12 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
       <div id="booking-section" className="bg-[#f6f6f6] py-24 md:py-32 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-12 lg:px-16 relative z-10">
           <div className="flex flex-col items-center text-center mb-16 px-6">
+            <h2
+              className="font-bold text-gray-800 mb-2 tracking-tight text-center"
+              style={{ fontSize: '2.5rem' }}
+            >
+              {bookingTitle2}
+            </h2>
             <h2
               className="font-bold text-gray-800 mb-2 tracking-tight text-center"
               style={{ fontSize: '1.875rem' }}

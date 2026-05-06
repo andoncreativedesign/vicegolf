@@ -6,11 +6,11 @@ import { useMembership } from "~/hooks/useMembership";
 
 interface ProductCardProps {
   product: ProductFragment;
-  offerUrl?: string;
   disableSoldout?: boolean;
+  sessionDiscount?: any;
 }
 
-export function ProductCard({ product: _product, offerUrl, disableSoldout = false }: ProductCardProps) {
+export function ProductCard({ product: _product, disableSoldout = false, sessionDiscount }: ProductCardProps) {
   const { getBestDiscountForProduct } = useMembership();
   const product = _product as any;
   const variant = product.variants?.nodes[0];
@@ -20,14 +20,46 @@ export function ProductCard({ product: _product, offerUrl, disableSoldout = fals
   const basePrice = parseFloat(variant?.price?.amount || '0');
   const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
 
+  // 1. Calculate price with membership discount
+  let membershipPrice = basePrice;
+  if (productAmount > 0) {
+    membershipPrice = Math.max(0, basePrice - productAmount);
+  } else if (productPercentage > 0) {
+    membershipPrice = basePrice * (1 - productPercentage);
+  }
+
+  // 2. Calculate price with session discount
+  let sessionPrice = basePrice;
+  if (sessionDiscount) {
+    const isEligibleProduct = sessionDiscount.products?.includes(product.id);
+    const isEligibleCollection = productCollections.some((id: string) => sessionDiscount.collections?.includes(id));
+
+    if (sessionDiscount.appliesToAll || isEligibleProduct || isEligibleCollection) {
+      if (sessionDiscount.percentage) {
+        sessionPrice = basePrice * (1 - sessionDiscount.percentage);
+      } else if (sessionDiscount.amount) {
+        sessionPrice = Math.max(0, basePrice - parseFloat(sessionDiscount.amount.amount));
+      }
+    }
+  }
+
+  // 3. Choose the best price (lowest) for the user
+  const finalPrice = Math.min(membershipPrice, sessionPrice);
+
+  // 4. Show strikethrough if any discount is better than original or if Shopify has one
   const price = variant?.price;
   const compareAtPrice = variant?.compareAtPrice;
+
+  let finalCompareAtPrice = parseFloat(compareAtPrice?.amount || '0');
+  if (finalPrice < basePrice) {
+    finalCompareAtPrice = basePrice;
+  }
 
   return (
     <div className="group flex flex-col h-full bg-[#fafafa] rounded-lg overflow-hidden ">
       {/* Product Image */}
       <Link
-        to={offerUrl || `/products/${product.handle}`}
+        to={`/products/${product.handle}`}
         className="block flex-shrink-0"
         style={{ textDecoration: 'none' }}
       >
@@ -155,11 +187,11 @@ export function ProductCard({ product: _product, offerUrl, disableSoldout = fals
         <div className="mt-auto pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {(compareAtPrice || (productPercentage > 0 || productAmount > 0)) && (
+              {finalCompareAtPrice > finalPrice && (
                 <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
                   <AedIcon className="mr-0.5" />
                   <span>
-                    {parseFloat(compareAtPrice?.amount || price.amount).toFixed(2)}
+                    {finalCompareAtPrice.toFixed(2)}
                   </span>
                 </div>
               )}
@@ -167,15 +199,7 @@ export function ProductCard({ product: _product, offerUrl, disableSoldout = fals
                 <div className="flex items-center text-gray-900">
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
-                    {(() => {
-                      const basePriceValue = parseFloat(price.amount || '0');
-                      if (productAmount > 0) {
-                        return Math.max(0, basePriceValue - productAmount).toFixed(2);
-                      } else if (productPercentage > 0) {
-                        return (basePriceValue * (1 - productPercentage)).toFixed(2);
-                      }
-                      return basePriceValue.toFixed(2);
-                    })()}
+                    {finalPrice.toFixed(2)}
                   </span>
                 </div>
               )}

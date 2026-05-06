@@ -81,6 +81,25 @@ export const GET_CODE_DISCOUNT_QUERY = `#graphql
                 }
               }
             }
+            items {
+              ... on AllDiscountItems {
+                __typename
+              }
+              ... on DiscountProducts {
+                products(first: 100) {
+                  nodes {
+                    id
+                  }
+                }
+              }
+              ... on DiscountCollections {
+                collections(first: 100) {
+                  nodes {
+                    id
+                  }
+                }
+              }
+            }
           }
         }
       }

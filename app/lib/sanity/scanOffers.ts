@@ -2,6 +2,7 @@ import { HttpStatusCode } from "axios";
 import { axiosSanity } from "~/utils/axiosInsatances";
 
 export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
+  verificationCode,
   hero {
     "title": {
       "text": title.text,
@@ -37,6 +38,18 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
   descriptionSection {
     paragraphs
   },
+  bookingTitle,
+  seo,
+  "products": products[]-> {
+    "id": _id,
+    "title": store.title,
+    "handle": store.slug.current,
+    "imageUrl": store.previewImageUrl,
+    "priceRange": store.priceRange
+  }
+}`;
+
+export const scanBookingQuery = `*[_type == "demoFitting"][0]{
   booking {
     title,
     subtitle,
@@ -53,13 +66,6 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
     }
   },
   seo,
-  "products": products[]-> {
-    "id": _id,
-    "title": store.title,
-    "handle": store.slug.current,
-    "imageUrl": store.previewImageUrl,
-    "priceRange": store.priceRange
-  }
 }`;
 
 export interface TextColorObject {
@@ -68,6 +74,7 @@ export interface TextColorObject {
 }
 
 export interface ScanOffersData {
+  verificationCode?: string;
   hero: {
     title?: TextColorObject;
     secondaryText?: TextColorObject;
@@ -81,21 +88,8 @@ export interface ScanOffersData {
   descriptionSection: {
     paragraphs?: string[];
   };
-  booking: {
-    title?: string;
-    subtitle?: string;
-    whatsappMessage?: string;
-    stores?: Array<{
-      name: string;
-      phone: string;
-      email: string;
-      whatsappNumber?: string;
-      emailSubject?: string;
-      emailBody?: string;
-      buttonColor?: string;
-      buttonTextColor?: string;
-    }>;
-  };
+  bookingTitle?: string;
+  booking?: Booking;
   seo?: any;
   products?: Array<{
     id: string;
@@ -107,6 +101,24 @@ export interface ScanOffersData {
       maxVariantPrice: number;
     };
   }>;
+}
+
+export interface BookingStore {
+  name: string;
+  phone: string;
+  email: string;
+  whatsappNumber?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+}
+
+export interface Booking {
+  title?: string;
+  subtitle?: string;
+  whatsappMessage?: string;
+  emailSubject?: string;
+  emailBody?: string;
+  stores?: BookingStore[];
 }
 
 export async function getScanOffersData(): Promise<ScanOffersData | null> {
@@ -123,6 +135,7 @@ export async function getScanOffersData(): Promise<ScanOffersData | null> {
 
 
     return {
+      verificationCode: result.verificationCode,
       hero: {
         title: result.hero?.title,
         secondaryText: result.hero?.secondaryText,
@@ -136,12 +149,29 @@ export async function getScanOffersData(): Promise<ScanOffersData | null> {
       descriptionSection: {
         paragraphs: result.descriptionSection?.paragraphs,
       },
-      booking: result.booking,
+      bookingTitle: result.bookingTitle,
       seo: result.seo,
       products: result.products,
     };
   } catch (error) {
-    console.error('Error fetching demo fitting data:', error);
+    console.error('Error fetching scan offers data:', error);
+    return null;
+  }
+}
+
+export async function getScanBookingData(): Promise<Booking | null> {
+  try {
+    const query = encodeURIComponent(scanBookingQuery);
+    const response = await axiosSanity.get("/?query=" + query);
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const { result } = response.data;
+    return result?.booking || null;
+  } catch (error) {
+    console.error('Error fetching scan booking data:', error);
     return null;
   }
 }
