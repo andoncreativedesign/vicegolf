@@ -156,8 +156,6 @@ const HeaderMenu = ({
           }
         };
 
-        console.log("updatedItem")
-        console.log(updatedItem)
 
       } else {
         const itemHandle = handle || item.title.toLowerCase().replace(/\s+/g, '-');
