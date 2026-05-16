@@ -125,6 +125,12 @@ export function SearchFormPredictive({
   }
 
   useEffect(() => {
+    if (aside.type !== 'search' && inputRef.current) {
+      inputRef.current.value = '';
+    }
+  }, [aside.type]);
+
+  useEffect(() => {
     inputRef?.current?.setAttribute('type', 'search');
     return () => {
       if (spaceTimer.current) clearTimeout(spaceTimer.current);

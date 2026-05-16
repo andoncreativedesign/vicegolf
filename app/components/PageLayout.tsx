@@ -187,8 +187,8 @@ function SearchAside() {
           {({ items, total, term, state, closeSearch }) => {
             const { products, collections } = items;
 
-            const hasTerm = !!pendingTerm;
-            const isLoading = state === 'loading' && hasTerm && products.length === 0;
+            const hasTerm = !!pendingTerm && pendingTerm.trim().length > 0;
+            const isLoading = (state === 'loading' || state === 'submitting') && hasTerm && products.length === 0;
 
             return (
               <div className="max-w-[1500px] mx-auto px-4 py-8">
