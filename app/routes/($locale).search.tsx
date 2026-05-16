@@ -1,4 +1,4 @@
-import {useLoaderData} from 'react-router';
+import {useLoaderData, data} from 'react-router';
 import type {Route} from './+types/search';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
@@ -20,24 +20,44 @@ export const meta: Route.MetaFunction = () => {
 export async function loader({request, context}: Route.LoaderArgs) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
-  
+
   try {
-    const searchPromise = isPredictive
-      ? predictiveSearch({ request, context })
-      : regularSearch({ request, context });
-      
-    const result = await searchPromise;
-    return { ...result, url: request.url };
+    if (isPredictive) {
+      // For predictive (fetch) requests, return a proper Response so the
+      // worker can finalize the stream without crossing request contexts.
+      const result = await predictiveSearch({request, context});
+      return data(
+        {...result, url: request.url},
+        {headers: {'Cache-Control': 'no-store'}},
+      );
+    }
+
+    const result = await regularSearch({request, context});
+    return {...result, url: request.url};
   } catch (error: any) {
-    // Add debugging for internal server error
+    // AbortError means the client cancelled – return an empty result quietly.
+    if (error?.name === 'AbortError') {
+      return data(
+        {
+          type: isPredictive ? 'predictive' : 'regular',
+          term: String(url.searchParams.get('q') || ''),
+          result: isPredictive ? getEmptyPredictiveSearchResult() : null,
+          url: request.url,
+        },
+        {headers: {'Cache-Control': 'no-store'}},
+      );
+    }
     console.error('Search loader error:', error);
-    return {
-      type: isPredictive ? 'predictive' : 'regular',
-      term: String(url.searchParams.get('q') || ''),
-      result: isPredictive ? getEmptyPredictiveSearchResult() : null,
-      error: error?.message || String(error),
-      url: request.url
-    };
+    return data(
+      {
+        type: isPredictive ? 'predictive' : 'regular',
+        term: String(url.searchParams.get('q') || ''),
+        result: isPredictive ? getEmptyPredictiveSearchResult() : null,
+        error: error?.message || String(error),
+        url: request.url,
+      },
+      {headers: {'Cache-Control': 'no-store'}},
+    );
   }
 }
 

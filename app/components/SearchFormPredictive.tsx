@@ -31,6 +31,7 @@ export function SearchFormPredictive({
 }: SearchFormPredictiveProps) {
   const fetcher = useFetcher<PredictiveSearchReturn>({ key: 'search' });
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
   const aside = useAside();
 
@@ -50,23 +51,32 @@ export function SearchFormPredictive({
     aside.close();
   }
 
-  /** Fetch search results based on the input value */
+  /** Fetch search results based on the input value, debounced to avoid
+   *  flooding the worker with overlapping requests on every keystroke. */
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
-    void fetcher.submit(
-      { q: event.target.value || '', limit: 5, predictive: true },
-      { method: 'GET', action: SEARCH_ENDPOINT },
-    );
-    if (event.target.value.length > 2) {
-      // window?.dataLayer?.push({
-      //   event: "search",
-      //   search_term: event.target.value,
-      // });
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'Search', {
-          search_string: event.target.value
-        });
-      }
+    const value = event.target.value;
+
+    // Track the pixel data value for analytics (captured now before async)
+    const shouldTrackPixel = value.length > 2;
+
+    // Cancel any in-flight debounce timer from the previous keystroke
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
+
+    debounceTimer.current = setTimeout(() => {
+      debounceTimer.current = null;
+      void fetcher.submit(
+        { q: value || '', limit: 5, predictive: true },
+        { method: 'GET', action: SEARCH_ENDPOINT },
+      );
+
+      if (shouldTrackPixel) {
+        if (typeof window !== 'undefined' && (window as any).fbq) {
+          (window as any).fbq('track', 'Search', { search_string: value });
+        }
+      }
+    }, 500);
   }
 
   // ensure the passed input has a type of search, because SearchResults
