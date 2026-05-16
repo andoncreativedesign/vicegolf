@@ -73,7 +73,7 @@ const runTypegen = () => {
         console.error('❌ Type generation failed');
       }
     });
-  }, 500); // Debounce for 500ms
+  }, 300); // Debounce for 500ms
 };
 
 // Watch routes directory
