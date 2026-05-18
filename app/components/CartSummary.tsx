@@ -2,7 +2,7 @@ import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLayout } from '~/types/cart';
 import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useFetcher } from 'react-router';
+import { Link, useFetcher, useFetchers, useNavigation } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 import { AedIcon } from './ui/AedIcon';
 import { useMembership } from '~/hooks/useMembership';
@@ -17,6 +17,13 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const originalTotal = cart?.cost?.totalAmount;
+
+  const fetchers = useFetchers();
+  const navigation = useNavigation();
+  const isCartUpdating = 
+    navigation.state !== 'idle' || 
+    fetchers.some((f) => f.state !== 'idle' && f.formAction?.includes('/cart')) || 
+    (cart as any)?.isPending;
 
   // Calculate line-level original sum and expected discounted sum
   let lineOriginalSum = 0;
@@ -58,18 +65,14 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   const shopifySubtotalVal = subtotal?.amount ? parseFloat(subtotal.amount.replace(/,/g, '')) : 0;
   const shopifyTotalVal = originalTotal?.amount ? parseFloat(originalTotal.amount.replace(/,/g, '')) : 0;
 
-  // Our accurate total takes the lowest of Shopify's total OR our manually calculated discounted sum
-  // This shields us from Shopify Cart API delays
-  let currentSubtotalVal = Math.min(shopifySubtotalVal, lineExpectedDiscountedSum);
-  let totVal = Math.min(shopifyTotalVal, lineExpectedDiscountedSum + (shopifyTotalVal - shopifySubtotalVal)); // maintain any taxes/shipping added in total
+  // Our accurate total should rely on our manually calculated discounted sum
+  // This shields us from Shopify Cart API delays and stale totals during optimistic updates
+  let currentSubtotalVal = lineExpectedDiscountedSum;
+  let totVal = Math.max(0, lineExpectedDiscountedSum + (shopifyTotalVal - shopifySubtotalVal)); // maintain any taxes/shipping added in total, and apply order-level discounts
 
   // Base value for display
   let baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
 
-  // Fallback: If no discount detected yet but user is member, they might have a hidden tier discount (legacy fallback)
-  if (baseVal <= totVal && isMember && (membershipDiscount?.percentage || 0) > 0) {
-    baseVal = totVal / (1 - membershipDiscount.percentage);
-  }
 
   let actualPercentage = 0;
   let actualAmount = 0;
@@ -109,7 +112,14 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </div>
           </div>
 
-          {(actualPercentage > 0 || actualAmount > 0) && (
+          {isCartUpdating ? (
+            <div className="flex justify-between items-center text-emerald-600 text-sm font-medium opacity-50">
+              <span className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-emerald-600"></div>
+                Updating totals...
+              </span>
+            </div>
+          ) : (actualPercentage > 0 || actualAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
               <span className="flex items-center">
                 {isMember ? 'Membership' : 'Savings'} {actualAmount > 0 ? (
