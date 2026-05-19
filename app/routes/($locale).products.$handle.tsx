@@ -493,6 +493,7 @@ export default function Product() {
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
                   sessionDiscount={sessionDiscount}
+                  product={product}
                 />
               )}
             </Await>

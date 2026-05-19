@@ -19,6 +19,7 @@ import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
 import { useMembership } from '~/hooks/useMembership';
+import { YotpoRating } from './yopto/YotpoRating';
 
 export type ProductFormProps = {
   productOptions: MappedProductOptions[];
@@ -37,6 +38,7 @@ export type ProductFormProps = {
     handle: string;
   } | null;
   sessionDiscount?: any;
+  product: any;
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -53,6 +55,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   bundleBtn,
   collectionIds,
   sessionDiscount,
+  product,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -144,7 +147,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     //   }
     // });
     // open('cart');
-   
+
     if (typeof window !== 'undefined' && (window as any).fbq) {
       console.log('FB Pixel fired', {
         currency: currencyCode,
@@ -244,6 +247,10 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
           </span>
         )}
       </div>
+
+      <YotpoRating
+        productId={product.id.split('/')[product.id.split('/').length - 1]}
+      />
 
       {/* Product Description */}
       {description && (
