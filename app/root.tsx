@@ -423,8 +423,8 @@ export default function App() {
   useEffect(() => {
     if (data?.customer) {
       const { emailAddress, firstName, lastName, phoneNumber } = data.customer;
-      const _learnq = window._learnq || [];
-      _learnq.push(['identify', {
+      const _learnq = (window as any)._learnq || [];
+      _learnq?.push(['identify', {
         '$email': emailAddress?.emailAddress,
         '$first_name': firstName,
         '$last_name': lastName,

@@ -382,7 +382,7 @@ export default function Product() {
         'Price': selectedVariant?.price?.amount,
         'CompareAtPrice': selectedVariant?.compareAtPrice?.amount
       };
-      (window as any)._learnq.push(['track', 'Viewed Product', item]);
+      (window as any)._learnq?.push(['track', 'Viewed Product', item]);
     }
   }, [product.id, finalPrice, selectedVariant?.id, selectedVariant?.price?.currencyCode]);
   // Format product type for display and URL
