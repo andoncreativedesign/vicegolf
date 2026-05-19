@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useRouteLoaderData } from 'react-router';
 
 export function YotpoReviewWidget({
   product,
@@ -11,6 +12,9 @@ export function YotpoReviewWidget({
   price?: string;
   currency?: string;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const appKey = rootData?.publicYotpoAppKey || '';
+
   useEffect(() => {
     console.log("url from yotpo", url)
     const existingScript = document.querySelector(
@@ -23,11 +27,11 @@ export function YotpoReviewWidget({
       }
     };
 
-    if (!existingScript) {
+    if (!existingScript && appKey) {
       const script = document.createElement('script');
 
       script.src =
-        'https://cdn-widgetsrepository.yotpo.com/v1/loader/1EU1bXsXSLoWFlPOIvXu2rVvbKELtHN0e8xPiPQb';
+        `https://cdn-widgetsrepository.yotpo.com/v1/loader/${appKey}`;
 
       script.async = true;
 
@@ -37,7 +41,7 @@ export function YotpoReviewWidget({
     } else {
       initialize();
     }
-  }, [product.id]);
+  }, [product.id, appKey]);
 
   const yotpoUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
   const yotpoPrice =

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
+import { useRouteLoaderData } from 'react-router';
 
 type YotpoRatingProps = {
   productId: string;
@@ -13,20 +14,25 @@ type Bottomline = {
 export function YotpoRating({
   productId,
 }: YotpoRatingProps) {
+  const rootData = useRouteLoaderData<any>('root');
   const [rating, setRating] =
     useState<Bottomline | null>(null);
 
   const [loading, setLoading] =
     useState(true);
 
+  const appKey = rootData?.publicYotpoAppKey || '1EU1bXsXSLoWFlPOIvXu2rVvbKELtHN0e8xPiPQb';
+
   useEffect(() => {
     async function fetchRating() {
-      try {
-        const APP_KEY =
-          '1EU1bXsXSLoWFlPOIvXu2rVvbKELtHN0e8xPiPQb';
+      if (!appKey) {
+        setLoading(false);
+        return;
+      }
 
+      try {
         const response = await fetch(
-          `https://api-cdn.yotpo.com/v1/widget/${APP_KEY}/products/${productId}/reviews.json`
+          `https://api-cdn.yotpo.com/v1/widget/${appKey}/products/${productId}/reviews.json?page=1&per_page=1`
         );
 
         const data = await response.json();
@@ -43,7 +49,7 @@ export function YotpoRating({
     }
 
     fetchRating();
-  }, [productId]);
+  }, [productId, appKey]);
 
   if (loading) {
     return (
