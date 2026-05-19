@@ -188,7 +188,7 @@ function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart
         'ProductURL': `${window.location.origin}/products/${line.merchandise?.product?.handle}`
       }));
 
-      (window as any)._learnq.push(['track', 'Started Checkout', {
+      (window as any)._learnq?.push(['track', 'Started Checkout', {
         '$event_id': cart.id,
         'Value': cart.cost?.totalAmount?.amount,
         'ItemNames': cart.lines?.nodes?.map((line: any) => line.merchandise?.product?.title),

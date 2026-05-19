@@ -178,7 +178,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         'Quantity': totalQuantityDozens,
         'Value': totalPriceAmount
       };
-      (window as any)._learnq.push(['track', 'Added to Cart', item]);
+      (window as any)._learnq?.push(['track', 'Added to Cart', item]);
     }
     open('cart');
   };

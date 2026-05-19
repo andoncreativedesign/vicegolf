@@ -363,18 +363,22 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <Meta />
         <Links />
         {/* Klaviyo Onsite Tracking */}
-        <script
-          nonce={nonce}
-          async
-          type="text/javascript"
-          src={`https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${data?.publicKlaviyoCompanyId}`}
-        />
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `window._learnq = window._learnq || [];`,
-          }}
-        />
+        {isTargetDomain && (
+          <>
+            <script
+              nonce={nonce}
+              async
+              type="text/javascript"
+              src={`https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${data?.publicKlaviyoCompanyId}`}
+            />
+            <script
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `window._learnq = window._learnq || [];`,
+              }}
+            />
+          </>
+        )}
         {/* End Klaviyo Onsite Tracking */}
       </head>
       <body className='font-sans'>
@@ -419,8 +423,8 @@ export default function App() {
   useEffect(() => {
     if (data?.customer) {
       const { emailAddress, firstName, lastName, phoneNumber } = data.customer;
-      const _learnq = window._learnq || [];
-      _learnq.push(['identify', {
+      const _learnq = (window as any)._learnq || [];
+      _learnq?.push(['identify', {
         '$email': emailAddress?.emailAddress,
         '$first_name': firstName,
         '$last_name': lastName,
