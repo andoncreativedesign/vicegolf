@@ -363,18 +363,22 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <Meta />
         <Links />
         {/* Klaviyo Onsite Tracking */}
-        <script
-          nonce={nonce}
-          async
-          type="text/javascript"
-          src={`https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${data?.publicKlaviyoCompanyId}`}
-        />
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `window._learnq = window._learnq || [];`,
-          }}
-        />
+        {isTargetDomain && (
+          <>
+            <script
+              nonce={nonce}
+              async
+              type="text/javascript"
+              src={`https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${data?.publicKlaviyoCompanyId}`}
+            />
+            <script
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `window._learnq = window._learnq || [];`,
+              }}
+            />
+          </>
+        )}
         {/* End Klaviyo Onsite Tracking */}
       </head>
       <body className='font-sans'>
