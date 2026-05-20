@@ -25,7 +25,6 @@ declare global {
         PUBLIC_KLAVIYO_COMPANY_ID: string;
         PUBLIC_YOTPO_APP_KEY?: string;
         PUBLIC_YOTPO_SECRET_KEY?: string;
-        PUBLIC_YOTPO_ACCESS_TOKEN?: string;
     }
 }
 
