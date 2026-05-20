@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import { AedIcon } from '../ui/AedIcon';
 import { useMembership } from "~/hooks/useMembership";
+import { YotpoRating } from "../yopto/YotpoRating";
 
 type ColorOption = {
   id: string;
@@ -74,11 +75,6 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
 
   const allVariants = useMemo(() => {
-    // Create a Set to track unique variant handles
-    if (product.title === "Vice Pro Plus") {
-      // console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
-    }
-
     const seenHandles = new Set();
     const variants = [];
 
@@ -211,7 +207,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
   // 3. Choose the best price (lowest) for the user
   const finalPrice = Math.min(membershipPrice, sessionPrice);
-  
+
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
   let finalCompareAtPrice = parseFloat(firstVariant?.compareAtPrice?.amount || '0');
   if (finalPrice < basePrice) {
@@ -395,6 +391,10 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
           <p className="text-sm text-gray-500 font-medium">
             {product.productType || 'Golf Equipment'}
           </p>
+
+          <div className="flex items-center space-y-3">
+            <YotpoRating productId={product.id?.split('/').pop() || product.id} />
+          </div>
 
           {/* ball variants */}
           {isGolfBall && allVariants.length > 1 && (

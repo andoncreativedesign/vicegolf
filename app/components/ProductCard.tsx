@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { AedIcon } from "./ui/AedIcon";
 import type { ProductFragment } from "storefrontapi.generated";
 import { useMembership } from "~/hooks/useMembership";
+import { YotpoRating } from "./yopto/YotpoRating";
 
 interface ProductCardProps {
   product: ProductFragment;
@@ -181,6 +182,10 @@ export function ProductCard({ product: _product, disableSoldout = false, session
           <p className="text-sm text-gray-500 font-medium tracking-wide">
             {product.productType || 'Golf Equipment'}
           </p>
+        </div>
+
+        <div className="flex items-center space-y-3">
+          <YotpoRating productId={product.id?.split('/').pop() || product.id} />
         </div>
 
         {/* Price */}

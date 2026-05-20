@@ -38,6 +38,8 @@ import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
 import { DriversProduct } from '~/components/Product/DriversProduct';
+import { YotpoReviewWidget } from '~/components/yopto/YotpoReviewWidget';
+import { YotpoReviewWidgetLegacy } from '~/components/yopto/YotpoReviewWidgetLegacy';
 type ProductImageType = {
   id: string;
   url: string;
@@ -112,6 +114,7 @@ export async function loader(args: Route.LoaderArgs) {
     ...criticalData,
     productDetails,
     url: args.request.url,
+    publicStoreDomain: args.context.env.PUBLIC_STORE_DOMAIN,
   };
 }
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
@@ -250,7 +253,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   return { recommendedProducts, shippingDetails, showBestSellers };
 }
 export default function Product() {
-  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails, url, publicStoreDomain } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   const [sessionDiscount, setSessionDiscount] = useState<any>(null);
@@ -490,6 +493,7 @@ export default function Product() {
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
                   sessionDiscount={sessionDiscount}
+                  product={product}
                 />
               )}
             </Await>
@@ -773,6 +777,22 @@ export default function Product() {
           ],
         }}
       />
+      {/* Yotpo Reviews Widget */}
+      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 mt-12 mb-12">
+        <YotpoReviewWidget
+          product={product}
+          url={`https://${publicStoreDomain}/products/${product.handle}`}
+          price={selectedVariant?.price?.amount || finalPrice.toFixed(2)}
+          currency={selectedVariant?.price?.currencyCode || 'USD'}
+        />
+
+        {/* <YotpoReviewWidgetLegacy
+          product={product}
+          url={`https://${publicStoreDomain}/products/${product.handle}`}
+          price={selectedVariant?.price?.amount || finalPrice.toFixed(2)}
+          currency={selectedVariant?.price?.currencyCode || 'USD'}
+        /> */}
+      </div>
     </div>
   );
 }

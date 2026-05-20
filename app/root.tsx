@@ -380,6 +380,13 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           </>
         )}
         {/* End Klaviyo Onsite Tracking */}
+        {/* Yotpo CDN Widget Loader */}
+        <script
+          nonce={nonce}
+          src="https://cdn-widgetsrepository.yotpo.com/v1/loader/1EU1bXsXSLoWFlPOIvXu2rVvbKELtHN0e8xPiPQb"
+          async
+        />
+        {/* End Yotpo CDN Widget Loader */}
       </head>
       <body className='font-sans'>
         {/* Google Tag Manager (noscript) */}
