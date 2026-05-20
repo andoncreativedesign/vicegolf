@@ -147,6 +147,7 @@ export async function loader(args: Route.LoaderArgs) {
       language: args.context.storefront.i18n.language,
     },
     publicKlaviyoCompanyId: env.PUBLIC_KLAVIYO_COMPANY_ID,
+    publicYotpoAppKey: env.PUBLIC_YOTPO_APP_KEY,
   };
 }
 
@@ -302,7 +303,8 @@ export function Layout({ children }: { children?: React.ReactNode }) {
   const nonce = useNonce();
   const data = useRouteLoaderData<typeof loader>('root');
   const isTargetDomain = data?.isTargetDomain;
-  const { header, footer, storeDomain } = data || {};
+  const { header, footer, storeDomain, publicYotpoAppKey } = data || {};
+  const yotpoAppKey = publicYotpoAppKey || '';
 
   // useEffect(() => {
   //   if (isTargetDomain !== undefined) {
@@ -383,7 +385,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         {/* Yotpo CDN Widget Loader */}
         <script
           nonce={nonce}
-          src="https://cdn-widgetsrepository.yotpo.com/v1/loader/1EU1bXsXSLoWFlPOIvXu2rVvbKELtHN0e8xPiPQb"
+          src={`https://cdn-widgetsrepository.yotpo.com/v1/loader/${yotpoAppKey}`}
           async
         />
         {/* End Yotpo CDN Widget Loader */}
