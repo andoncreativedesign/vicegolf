@@ -186,8 +186,18 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
                           <Link
                             key={index}
                             to={btn.url}
-                            className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
-                            style={{ textDecoration: 'none' }}
+                            className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 hover:opacity-90 transition-all duration-200"
+                            style={{
+                              textDecoration: 'none',
+                              ...(btn.backgroundColor ? {
+                                backgroundColor: btn.backgroundColor,
+                                borderColor: btn.textColor || 'transparent'
+                              } : {}),
+                              ...(btn.textColor ? {
+                                color: btn.textColor,
+                                ...(!btn.backgroundColor ? { borderColor: btn.textColor } : {})
+                              } : {})
+                            }}
                           >
                             <span>{btn.name}</span>
                           </Link>
@@ -207,8 +217,18 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
                           <Link
                             key={index}
                             to={btn.url}
-                            className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
-                            style={{ textDecoration: 'none' }}
+                            className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 hover:opacity-90 transition-all duration-200"
+                            style={{
+                              textDecoration: 'none',
+                              ...(btn.backgroundColor ? {
+                                backgroundColor: btn.backgroundColor,
+                                borderColor: btn.textColor || 'transparent'
+                              } : {}),
+                              ...(btn.textColor ? {
+                                color: btn.textColor,
+                                ...(!btn.backgroundColor ? { borderColor: btn.textColor } : {})
+                              } : {})
+                            }}
                           >
                             <span>{btn.name}</span>
                           </Link>

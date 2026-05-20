@@ -27,11 +27,15 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
   },
   ctaButtons[] {
     name,
-    url
+    url,
+    "backgroundColor": backgroundColor.hex,
+    "textColor": textColor.hex
   },
   secondaryCtaButtons[] {
     name,
-    url
+    url,
+    "backgroundColor": backgroundColor.hex,
+    "textColor": textColor.hex
   },
   featuredProductTitle,
   featuredProductDiscountCode,
@@ -81,8 +85,8 @@ export interface ScanOffersData {
     backgroundImage?: string;
     mobileBackgroundImage?: string;
   };
-  ctaButtons?: Array<{ name?: string; url?: string }>;
-  secondaryCtaButtons?: Array<{ name?: string; url?: string }>;
+  ctaButtons?: Array<{ name?: string; url?: string; backgroundColor?: string; textColor?: string }>;
+  secondaryCtaButtons?: Array<{ name?: string; url?: string; backgroundColor?: string; textColor?: string }>;
   featuredProductTitle?: string;
   featuredProductDiscountCode?: string;
   descriptionSection: {
