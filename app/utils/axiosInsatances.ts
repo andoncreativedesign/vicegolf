@@ -57,6 +57,24 @@ export const axiosShopifyAdmin = axios.create({
   }
 });
 
+/**
+ * Creates a Shopify Admin API axios instance using dynamic environment variables.
+ */
+export function createAxiosShopifyAdmin(env: any) {
+  const accessToken = env?.VITE_ADMIN_ACCESS_TOKEN || ADMIN_ACCESS_TOKEN;
+  const apiUrl = env?.VITE_ADMIN_API_URL || ADMIN_API_URL;
+
+  return axios.create({
+    baseURL: apiUrl + '/graphql.json',
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Shopify-Access-Token": accessToken,
+    },
+    timeout: 20000,
+  });
+}
+
 export const axiosShopifyAdminCustomerApi = axios.create({
   baseURL: ADMIN_API_URL,
   headers: {
@@ -64,3 +82,20 @@ export const axiosShopifyAdminCustomerApi = axios.create({
     'X-Shopify-Access-Token': ADMIN_ACCESS_TOKEN,
   },
 });
+
+/**
+ * Creates a Shopify Admin Customer API axios instance using dynamic environment variables.
+ */
+export function createAxiosShopifyAdminCustomerApi(env: any) {
+  const accessToken = env?.VITE_ADMIN_ACCESS_TOKEN || ADMIN_ACCESS_TOKEN;
+  const apiUrl = env?.VITE_ADMIN_API_URL || ADMIN_API_URL;
+
+  return axios.create({
+    baseURL: apiUrl,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': accessToken,
+    },
+    timeout: 20000,
+  });
+}

@@ -1,7 +1,7 @@
 // app\routes\($locale)._index.tsx
-import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher } from 'react-router';
+import { Await, useLoaderData, Link, useRouteLoaderData, useFetcher, useLocation } from 'react-router';
 import type { Route } from './+types/_index';
-import { Suspense, useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { Image } from '@shopify/hydrogen';
 import type { FeaturedCollectionFragment, RecommendedProductsQuery } from 'storefrontapi.generated';
 import { ProductItem } from '~/components/ProductItem';
@@ -28,8 +28,52 @@ import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { loadFamilyData } from '~/utils/loadFamilyData';
 
 
-export const meta: Route.MetaFunction = () => {
-  return [{ title: 'Vice Golf | Home' }];
+export const meta: Route.MetaFunction = ({ data }: Route.MetaArgs) => {
+  const url = data?.url || '';
+  const title = 'Vice Golf Official Store | Premium Golf Gear';
+  const description =
+    'Discover premium golf balls, apparel, and accessories at Vice Golf. Engineered for performance, designed for style.';
+
+  // Determine the best image: Hero > Brand Logo > Fallback Logo
+  const heroImage = data?.homePageHeroData?.heroes?.[0]?.image;
+  const brandLogo = data?.homePageHeroData?.brand?.[0]?.logo;
+  const logoFallback =
+    'https://cdn.shopify.com/s/files/1/0732/0505/5640/files/vice_logo_extra_padding.png?v=1776675749&width=1200&height=630';
+
+  let ogImage = logoFallback || brandLogo || heroImage;
+
+  if (ogImage && ogImage.startsWith('//')) {
+    ogImage = `https:${ogImage}`;
+  }
+
+  const metaTags: any[] = [
+    { title },
+    { name: 'description', content: description },
+    { property: 'og:site_name', content: 'Vice Golf' },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: url },
+    { property: 'og:image', content: ogImage },
+    { property: 'og:image:secure_url', content: ogImage },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { property: 'og:image:alt', content: 'Vice Golf' },
+    { property: 'og:locale', content: 'en_US' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:image', content: ogImage },
+  ];
+
+  if (url) {
+    metaTags.push({
+      rel: 'canonical',
+      href: url,
+    });
+  }
+
+  return metaTags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -40,9 +84,8 @@ export async function loader(args: Route.LoaderArgs) {
   const homePageHeroData = await getHomePageHeroData(args.context.env);
   const homePageSectionData = await getHomePageSectionData(args.context.env);
   const homePageViceLookData = await getHomePageViceLookData(args.context.env);
-  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData };
+  return { ...deferredData, ...criticalData, homePageHeroData, homePageSectionData, homePageViceLookData, familyData, url: args.request.url };
 }
-
 
 
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
@@ -146,7 +189,9 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
 
 export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const rootData = useRouteLoaderData<{ productsForNav: MenuData }>('root');
+  const location = useLocation();
   const fetcher = useFetcher();
+  const [sessionDiscount, setSessionDiscount] = useState<any>(null);
   const productsForNav = rootData?.productsForNav;
   const [menu, setMenu] = useState<MenuItem[]>([]);
   // Golf Balls State
@@ -174,6 +219,20 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
   const [currentRecommendedCursor, setCurrentRecommendedCursor] = useState<string | null>(null);
   const [hasMoreRecommended, setHasMoreRecommended] = useState(false);
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const storedData = localStorage.getItem('featuredDiscountData');
+    if (storedData) {
+      try {
+        const parsedDiscount = JSON.parse(storedData);
+        setSessionDiscount(parsedDiscount);
+      } catch (e) {
+        console.error('Error parsing stored discount data:', e);
+      }
+    }
+  }, []);
 
   // === Golf Balls: Initial Load & Pagination ===
   useEffect(() => {
@@ -406,6 +465,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
               onLoadMore={handleLoadMoreGolfBalls}
               hasMore={hasMoreGolfBalls}
               loading={isLoadingGolfBalls}
+              sessionDiscount={sessionDiscount}
             />
           )}
           {/* VICE GOLF CLUBS - Infinite Scroll */}
@@ -417,6 +477,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
               onLoadMore={handleLoadMoreGolfClubs}
               hasMore={hasMoreGolfClubs}
               loading={isLoadingGolfClubs}
+              sessionDiscount={sessionDiscount}
             />
           )}
           {/* VICE GEAR - Now with Infinite Scroll */}
@@ -428,6 +489,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
               onLoadMore={handleLoadMoreGear}
               hasMore={hasMoreGear}
               loading={isLoadingGear}
+              sessionDiscount={sessionDiscount}
             />
           )}
         </div>
@@ -455,6 +517,7 @@ export default function Homepage({ loaderData: data }: Route.ComponentProps) {
             onLoadMore={handleLoadMoreApparel}
             hasMore={hasMoreApparel}
             loading={isLoadingApparel}
+            sessionDiscount={sessionDiscount}
           />
         )}
       </div>

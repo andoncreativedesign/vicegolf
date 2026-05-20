@@ -465,7 +465,11 @@ export interface ShopifyCollection {
   title: string;
   description: string;
   image?: ShopifyImage | null;
+  hide_filters?: {
+    value: string;
+  } | null;
   products: {
+    filters: any[];
     edges: {
       node: ShopifyProduct;
     }[];
@@ -517,7 +521,7 @@ export interface ShopifyPageInfo {
   endCursor?: string;
 }
 
-// ! collection query without sorting
+// ! collection query with sorting and filtering
 export const GET_PRODUCTS_BY_COLLECTION = `#graphql
 ${MONEY_FRAGMENT}
 ${PRODUCT_FRAGMENT_FOR_COLLECTION}
@@ -530,6 +534,9 @@ query GetProductsByCollectionIds(
   $last: Int
   $startCursor: String
   $endCursor: String
+  $filters: [ProductFilter!]
+  $sortKey: ProductCollectionSortKeys
+  $reverse: Boolean
 ) @inContext(country: $country, language: $language) {
   nodes(ids: $ids) {
     ... on Collection {
@@ -551,6 +558,9 @@ query GetProductsByCollectionIds(
           }
         }
       }
+      hide_filters: metafield(namespace: "custom", key: "hide_filters") {
+        value
+      }
       image {
         url
         altText
@@ -560,7 +570,21 @@ query GetProductsByCollectionIds(
         last: $last
         before: $startCursor
         after: $endCursor
+        filters: $filters
+        sortKey: $sortKey
+        reverse: $reverse
       ) {
+        filters {
+          id
+          label
+          type
+          values {
+            id
+            label
+            count
+            input
+          }
+        }
         edges {
           node {
             ...ProductItem

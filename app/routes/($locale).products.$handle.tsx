@@ -100,6 +100,8 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
 
   return metaTags;
 };
+
+
 export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
   const { product } = criticalData;
@@ -251,6 +253,29 @@ export default function Product() {
   const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
+  const [sessionDiscount, setSessionDiscount] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedData = localStorage.getItem('featuredDiscountData');
+    if (storedData) {
+      try {
+        const discount = JSON.parse(storedData);
+        console.log('[Product] Checking eligibility for stored discount:', discount);
+        
+        const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+        const isEligibleProduct = discount.products.includes(product.id);
+        const isEligibleCollection = productCollections.some((id: string) => discount.collections.includes(id));
+        
+        if (discount.appliesToAll || isEligibleProduct || isEligibleCollection) {
+          console.log('[Product] SUCCESS: Setting session discount from localStorage');
+          setSessionDiscount(discount);
+        }
+      } catch (e) {
+        console.error('Error parsing stored discount data:', e);
+      }
+    }
+  }, [product.id, product.collections]);
   // useEffect(() => {
   // if (!data) return
   // console.log("data.homePageData ", data.homePageData)
@@ -308,6 +333,17 @@ export default function Product() {
     });
   }, [selectedVariant, images]);
 
+  const price = parseFloat(selectedVariant?.price?.amount || '0');
+  let finalPrice = price;
+
+  if (sessionDiscount) {
+    if (sessionDiscount.percentage) {
+      finalPrice = price * (1 - sessionDiscount.percentage);
+    } else if (sessionDiscount.amount) {
+      finalPrice = Math.max(0, price - parseFloat(sessionDiscount.amount.amount));
+    }
+  }
+
   // Track page view event
   useEffect(() => {
     // Reset selected image when product changes
@@ -329,11 +365,26 @@ export default function Product() {
     // }, [product.id]);
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'ViewContent', {
-        value: product?.selectedOrFirstAvailableVariant?.price?.amount, //replace with price
-        currency: product?.selectedOrFirstAvailableVariant?.price?.currencyCode //replace it with curency
+        value: finalPrice.toFixed(2),
+        currency: selectedVariant?.price?.currencyCode
       });
     }
-  }, [product.id]);
+
+    if (typeof window !== 'undefined' && (window as any)._learnq) {
+      const item = {
+        'ProductName': product.title,
+        'ProductID': product.id,
+        'SKU': selectedVariant?.sku,
+        'Categories': product.collections?.nodes?.map((c: any) => c.title),
+        'ImageURL': selectedVariant?.image?.url || product.featuredImage?.url,
+        'URL': window.location.href,
+        'Brand': product.vendor,
+        'Price': selectedVariant?.price?.amount,
+        'CompareAtPrice': selectedVariant?.compareAtPrice?.amount
+      };
+      (window as any)._learnq?.push(['track', 'Viewed Product', item]);
+    }
+  }, [product.id, finalPrice, selectedVariant?.id, selectedVariant?.price?.currencyCode]);
   // Format product type for display and URL
   const formatProductType = (type: string) => {
     if (!type) return { display: '', url: '' };
@@ -438,6 +489,7 @@ export default function Product() {
                   collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
+                  sessionDiscount={sessionDiscount}
                 />
               )}
             </Await>
@@ -712,7 +764,7 @@ export default function Product() {
             {
               id: product.id,
               title: product.title,
-              price: selectedVariant?.price.amount || '0',
+              price: finalPrice.toFixed(2),
               vendor: product.vendor,
               variantId: selectedVariant?.id || '',
               variantTitle: selectedVariant?.title || '',

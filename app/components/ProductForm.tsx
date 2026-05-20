@@ -35,7 +35,8 @@ export type ProductFormProps = {
   bundleBtn: {
     text: string;
     handle: string;
-  } | null
+  } | null;
+  sessionDiscount?: any;
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -51,6 +52,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   currentProductId,
   bundleBtn,
   collectionIds,
+  sessionDiscount,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -63,14 +65,39 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const [selectedTier, setSelectedTier] = useState('1');
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
 
-  let unitPriceAmount = originalUnitPrice;
+  // 1. Calculate price with membership discount
+  let membershipPrice = originalUnitPrice;
   if (productAmount > 0) {
-    unitPriceAmount = Math.max(0, originalUnitPrice - productAmount);
+    membershipPrice = Math.max(0, originalUnitPrice - productAmount);
   } else if (productPercentage > 0) {
-    unitPriceAmount = originalUnitPrice * (1 - productPercentage);
+    membershipPrice = originalUnitPrice * (1 - productPercentage);
   }
 
-  const unitCompareAmount = parseFloat(selectedVariant?.compareAtPrice?.amount || (originalUnitPrice > unitPriceAmount ? originalUnitPrice.toString() : '0'));
+  // 2. Calculate price with session discount (starting from original price)
+  let sessionPrice = originalUnitPrice;
+  let isSessionEligible = false;
+  if (sessionDiscount) {
+    const isEligibleProduct = sessionDiscount.products?.includes(currentProductId);
+    const isEligibleCollection = collectionIds?.some((id: string) => sessionDiscount.collections?.includes(id));
+
+    if (sessionDiscount.appliesToAll || isEligibleProduct || isEligibleCollection) {
+      isSessionEligible = true;
+      if (sessionDiscount.percentage) {
+        sessionPrice = originalUnitPrice * (1 - sessionDiscount.percentage);
+      } else if (sessionDiscount.amount) {
+        sessionPrice = Math.max(0, originalUnitPrice - parseFloat(sessionDiscount.amount.amount));
+      }
+    }
+  }
+
+  // 3. Choose the best price (lowest) for the user
+  const unitPriceAmount = Math.min(membershipPrice, sessionPrice);
+
+  // 4. Show strikethrough if any discount is better than original or if Shopify has one
+  let unitCompareAmount = parseFloat(selectedVariant?.compareAtPrice?.amount || '0');
+  if (unitPriceAmount < originalUnitPrice) {
+    unitCompareAmount = originalUnitPrice;
+  }
 
   const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
@@ -138,6 +165,20 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         content_name: title,
         content_type: 'product'
       });
+    }
+
+    if (typeof window !== 'undefined' && (window as any)._learnq) {
+      const item = {
+        'ProductName': title,
+        'ProductID': currentProductId,
+        'SKU': selectedVariant?.sku,
+        'ImageURL': selectedVariant?.image?.url,
+        'URL': window.location.href,
+        'Price': unitPriceAmount,
+        'Quantity': totalQuantityDozens,
+        'Value': totalPriceAmount
+      };
+      (window as any)._learnq?.push(['track', 'Added to Cart', item]);
     }
     open('cart');
   };

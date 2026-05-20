@@ -21,6 +21,8 @@ declare global {
         PUBLIC_CHECKOUT_DOMAIN: string;
         PUBLIC_STOREFRONT_API_TOKEN: string;
         SESSION_SECRET: string;
+        STORE_DOMAIN: string;
+        PUBLIC_KLAVIYO_COMPANY_ID: string;
     }
 }
 
@@ -28,6 +30,7 @@ declare global {
 declare global {
     interface Window {
         dataLayer: any[];
+        _learnq: any[];
     }
     interface HydrogenAdditionalContext {
         // Add any custom context properties your app needs

@@ -31,6 +31,8 @@ export default async function handleRequest(
       'https://www.googletagmanager.com',
       'https://*.clarity.ms',
       'https://www.facebook.com',
+      'https://static.klaviyo.com',
+      'https://a.klaviyo.com',
       'data:',
     ],
 
@@ -46,6 +48,11 @@ export default async function handleRequest(
       'https://*.clarity.ms',
       'https://www.facebook.com',
       'https://connect.facebook.net',
+      'https://static.klaviyo.com',
+      'https://a.klaviyo.com',
+      'https://fast.a.klaviyo.com',
+      'https://static-forms.klaviyo.com',
+      'https://*.klaviyo.com',
     ],
 
     mediaSrc: [
@@ -73,6 +80,8 @@ export default async function handleRequest(
       'https://www.googletagmanager.com',
       'https://*.clarity.ms',
       'https://connect.facebook.net',
+      'https://static.klaviyo.com',
+      'https://klaviyo.com',
       "'sha256-s3SZTSyQxUKs/jb32OwDqhQD//UmajtRhqPKWi2BlbM='",
       "'sha256-ZHvi1PGvqzZ4VRdQO7VkiV7s1Y65GtErug8DAAzcHNY='",
       "'sha256-5q0ADi4wbx+5wxfG5iGAyEw/5EuQBTuMZ+y+XszyL60='",

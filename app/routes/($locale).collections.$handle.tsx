@@ -1,5 +1,6 @@
-import { redirect, useLoaderData, Link } from 'react-router';
+import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigation, useFetcher } from 'react-router';
 import type { Route } from './+types/collections.$handle';
+import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { ProductCard } from '~/components/ProductCard';
@@ -7,10 +8,10 @@ import { VariantProductCard } from '~/components/Product/VariantProductCard';
 import { type ShopifyCollection, type ShopifyCollectionResponse } from '~/lib/shopify/product-queries';
 import { GET_PRODUCTS_BY_COLLECTION } from '~/lib/shopify/product-queries';
 import { getListingByCollectionHandle, getAllListings } from '~/lib/sanity/products';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageList } from '~/components/ImageList';
 import { VideoList } from '~/components/VideoList';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import { loadFamilyData } from '~/utils/loadFamilyData';
 import { HEADER_QUERY } from '~/lib/fragments';
 
@@ -71,7 +72,6 @@ export const meta: Route.MetaFunction = ({ data }: { data: any }) => {
 
     return metaTags;
 };
-
 export async function loader(args: Route.LoaderArgs) {
     const deferredData = loadDeferredData(args);
     const criticalData = await loadCriticalData(args);
@@ -84,6 +84,43 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
     const paginationVariables = getPaginationVariables(request, {
         pageBy: 8,
     });
+
+    const searchParams = new URL(request.url).searchParams;
+    const filters: any[] = [];
+    for (const [key, value] of searchParams.entries()) {
+        if (key.startsWith('filter.')) {
+            try {
+                filters.push(JSON.parse(value));
+            } catch (e) {
+                // Ignore invalid filter values
+            }
+        }
+    }
+
+    const sort = searchParams.get('sort');
+    let sortKey: string = 'COLLECTION_DEFAULT';
+    let reverse = false;
+
+    switch (sort) {
+        case 'price-low-high':
+            sortKey = 'PRICE';
+            reverse = false;
+            break;
+        case 'price-high-low':
+            sortKey = 'PRICE';
+            reverse = true;
+            break;
+        case 'newest':
+            sortKey = 'CREATED';
+            reverse = true;
+            break;
+        case 'featured':
+            sortKey = 'MANUAL';
+            reverse = false;
+            break;
+        default:
+            sortKey = 'COLLECTION_DEFAULT';
+    }
 
     if (!handle) {
         throw redirect('/collections');
@@ -148,12 +185,23 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
         storefront.query(GET_PRODUCTS_BY_COLLECTION, {
             variables: {
                 ids: collectionIds,
-                ...paginationVariables
+                ...paginationVariables,
+                filters,
+                sortKey,
+                reverse
             },
         }),
     ]);
 
-    if (!collectionResponse || !collectionResponse.nodes?.length) {
+    if (!collectionResponse || !collectionResponse.nodes || collectionResponse.nodes.length === 0) {
+        throw new Response(`Collection products for ${decodedHandle} not found`, {
+            status: 404,
+        });
+    }
+
+    // Filter out null nodes (deleted or draft collections) early
+    const nonNullNodes = collectionResponse.nodes.filter((n: any) => n !== null);
+    if (nonNullNodes.length === 0) {
         throw new Response(`Collection products for ${decodedHandle} not found`, {
             status: 404,
         });
@@ -177,29 +225,51 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             );
 
             if (validCollections.length === 0) {
-                console.warn('No collections with products found');
+                const firstNonNull = collections.nodes.find((n: any) => n !== null);
+                if (!firstNonNull) return null;
+                
                 return {
-                    ...collections.nodes[0]!,
+                    ...firstNonNull,
                     products: {
+                        ...firstNonNull.products,
                         edges: [],
-                        pageInfo: { hasNextPage: false, hasPreviousPage: false }
+                        pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null }
                     }
                 };
             }
 
-            // If only one collection → return it directly
-            if (validCollections.length === 1) {
-                return validCollections[0]!;
-            }
-
-            // Multiple collections → merge products with deduplication
+            // Multiple collections → merge products and filters
             const baseCollection = { ...validCollections[0]! };
             const allEdges = validCollections.flatMap((c: any) => c.products.edges);
 
+            // Deduplicate products
             const uniqueProducts = new Map<string, any>();
             allEdges.forEach((edge: any) => {
                 if (edge?.node?.id) {
                     uniqueProducts.set(edge.node.id, edge);
+                }
+            });
+
+            // Merge and deduplicate filters
+            const allFilters = validCollections.flatMap((c: any) => c.products.filters || []);
+            const filterMap = new Map<string, any>();
+            
+            allFilters.forEach((filter: any) => {
+                if (!filterMap.has(filter.id)) {
+                    filterMap.set(filter.id, {
+                        ...filter,
+                        values: [...filter.values.map((v: any) => ({ ...v }))]
+                    });
+                } else {
+                    const existingFilter = filterMap.get(filter.id);
+                    filter.values.forEach((val: any) => {
+                        const existingValue = existingFilter.values.find((v: any) => v.id === val.id);
+                        if (existingValue) {
+                            existingValue.count += val.count;
+                        } else {
+                            existingFilter.values.push({ ...val });
+                        }
+                    });
                 }
             });
 
@@ -212,6 +282,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
                 ...baseCollection,
                 products: {
                     ...baseCollection.products,
+                    filters: Array.from(filterMap.values()),
                     edges: Array.from(uniqueProducts.values()),
                     pageInfo: {
                         hasNextPage,
@@ -285,17 +356,87 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     return {};
 }
 
+/**
+ * Sub-component for rendering the product grid or empty state
+ */
+function ProductGrid({ products, sessionDiscount }: { products: any, sessionDiscount?: any }) {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const navigation = useNavigation();
+    const isPending = navigation.state !== 'idle' && navigation.location?.pathname === window.location.pathname;
+
+    const clearFilters = () => {
+        const newParams = new URLSearchParams(searchParams);
+        Array.from(newParams.keys()).forEach(key => {
+            if (key.startsWith('filter.')) newParams.delete(key);
+        });
+        newParams.delete('cursor');
+        newParams.delete('direction');
+        navigate(`${window.location.pathname}?${newParams.toString()}`, { replace: true, preventScrollReset: true });
+    };
+
+    if (products?.edges?.length > 0) {
+        return (
+            <div className={`transition-opacity duration-200 ${isPending ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                <PaginatedResourceSection
+                    connection={products}
+                    resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                >
+                    {({ node, index }) => (
+                        <VariantProductCard
+                            key={node.id}
+                            product={node}
+                            loading={index < 8 ? 'eager' : undefined}
+                            sessionDiscount={sessionDiscount}
+                        />
+                    )}
+                </PaginatedResourceSection>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gray-50/50 rounded-3xl mt-8">
+            <div className="p-4 bg-white rounded-full shadow-sm mb-4">
+                <X className="text-gray-300" size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-500 max-w-xs mx-auto text-sm leading-relaxed">
+                Try adjusting your filters or search terms to find what you're looking for.
+            </p>
+            <button
+                onClick={clearFilters}
+                className="mt-6 text-sm font-black underline underline-offset-4 hover:text-gray-600 transition-colors"
+            >
+                Clear all filters
+            </button>
+        </div>
+    );
+}
+
 export default function Collection() {
     const { collection, handle, listing } = useLoaderData<typeof loader>();
+    const [sessionDiscount, setSessionDiscount] = useState<any>(null);
 
-    const hasProducts = Boolean(
-        collection?.products?.edges?.some((edge) => edge?.node)
-    );
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const storedData = localStorage.getItem('featuredDiscountData');
+        if (storedData) {
+            try {
+                const parsedDiscount = JSON.parse(storedData);
+                console.log('[Collection] Setting session discount from localStorage:', parsedDiscount);
+                setSessionDiscount(parsedDiscount);
+            } catch (e) {
+                console.error('Error parsing stored discount data:', e);
+            }
+        }
+    }, []);
 
     return (
         <div className="collection px-4 md:px-6 lg:px-8">
-            {listing && (
+            {listing ? (
                 <div className="listing-content mb-8">
+                    {/* Visual Media Headers (Sanity) */}
                     <div className="bg-transparent overflow-hidden -mx-4 md:-mx-6 lg:-mx-8">
                         {listing.images && listing.images.length > 0 && (
                             <ImageList images={listing.images} className="w-full" />
@@ -305,7 +446,8 @@ export default function Collection() {
                         )}
                     </div>
 
-                    <div className="mb-8">
+                    {/* SEO / Listing Header Text */}
+                    <div className="mb-8 mt-8">
                         {listing.title && (
                             <h1 className="text-5xl font-black mb-2" style={{ fontSize: '3rem', fontWeight: '900' }}>
                                 {listing.title}
@@ -323,7 +465,8 @@ export default function Collection() {
                         )}
                     </div>
 
-                    <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+                    {/* Breadcrumbs */}
+                    <nav className="breadcrumb-navigation mb-6 text-base">
                         <ol className="flex items-center space-x-2">
                             <li className='flex items-center'>
                                 <span className="transition-colors cursor-pointer">Collection</span>
@@ -335,29 +478,21 @@ export default function Collection() {
                         </ol>
                     </nav>
 
-                    {collection?.products?.edges?.length > 0 && (
-                        <PaginatedResourceSection
-                            connection={collection?.products}
-                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                        >
-                            {({ node, index }) => (
-                                <VariantProductCard
-                                    key={node.id}
-                                    product={node}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                            )}
-                        </PaginatedResourceSection>
-                    )}
+                    {/* Filters and Grid */}
+                    <SortFilter 
+                        filters={collection?.products?.filters || []}
+                        hide={collection?.hide_filters?.value === 'true'}
+                    >
+                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
+                    </SortFilter>
                 </div>
-            )}
-
-            {!listing && (
-                <>
+            ) : (
+                <div className="collection-standard py-8">
                     <h1 className="text-4xl font-extrabold mb-4">{collection?.title}</h1>
-                    <p className="collection-description">{collection?.description}</p>
+                    <p className="collection-description text-gray-600 mb-8">{collection?.description}</p>
 
-                    <nav className="breadcrumb-navigation mt-8 mb-6 text-base">
+                    {/* Breadcrumbs */}
+                    <nav className="breadcrumb-navigation mb-6 text-base">
                         <ol className="flex items-center space-x-2">
                             <li className='flex items-center'>
                                 <span className="transition-colors cursor-pointer">Collection</span>
@@ -369,21 +504,14 @@ export default function Collection() {
                         </ol>
                     </nav>
 
-                    {collection?.products?.edges?.length > 0 && (
-                        <PaginatedResourceSection
-                            connection={collection?.products}
-                            resourcesClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
-                        >
-                            {({ node, index }) => (
-                                <VariantProductCard
-                                    key={node.id}
-                                    product={node}
-                                    loading={index < 8 ? 'eager' : undefined}
-                                />
-                            )}
-                        </PaginatedResourceSection>
-                    )}
-                </>
+                    {/* Filters and Grid */}
+                    <SortFilter 
+                        filters={collection?.products?.filters || []}
+                        hide={collection?.hide_filters?.value === 'true'}
+                    >
+                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
+                    </SortFilter>
+                </div>
             )}
 
             {collection?.id && collection?.handle &&

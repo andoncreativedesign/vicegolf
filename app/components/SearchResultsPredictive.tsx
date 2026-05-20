@@ -1,310 +1,105 @@
-import {Link, useFetcher, type Fetcher} from 'react-router';
-import {Image, Money} from '@shopify/hydrogen';
-import React, {useRef, useEffect} from 'react';
-import {
-  getEmptyPredictiveSearchResult,
-  urlWithTrackingParams,
-  type PredictiveSearchReturn,
-} from '~/lib/search';
-import {useAside} from './Aside';
+import { useRef } from 'react';
+import { useAside } from './Aside';
+import type { Fetcher } from 'react-router';
+import type { PredictiveSearchReturn } from '~/lib/search';
 
-type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
-
-type UsePredictiveSearchReturn = {
-  term: React.MutableRefObject<string>;
-  total: number;
-  inputRef: React.MutableRefObject<HTMLInputElement | null>;
-  items: PredictiveSearchItems;
-  fetcher: Fetcher<PredictiveSearchReturn>;
+export type NormalizedItems = {
+  articles: any[];
+  collections: any[];
+  pages: any[];
+  products: any[];
+  queries: any[];
 };
 
-type SearchResultsPredictiveArgs = Pick<
-  UsePredictiveSearchReturn,
-  'term' | 'total' | 'inputRef' | 'items'
-> & {
-  state: Fetcher['state'];
-  closeSearch: () => void;
+export const EMPTY_ITEMS: NormalizedItems = {
+  articles: [],
+  collections: [],
+  pages: [],
+  products: [],
+  queries: [],
 };
 
-type PartialPredictiveSearchResult<
-  ItemType extends keyof PredictiveSearchItems,
-  ExtraProps extends keyof SearchResultsPredictiveArgs = 'term' | 'closeSearch',
-> = Pick<PredictiveSearchItems, ItemType> &
-  Pick<SearchResultsPredictiveArgs, ExtraProps>;
+type CachedData = { items: NormalizedItems; total: number; term: string };
+const EMPTY_CACHE: CachedData = { items: EMPTY_ITEMS, total: 0, term: '' };
 
 type SearchResultsPredictiveProps = {
-  children: (args: SearchResultsPredictiveArgs) => React.ReactNode;
+  fetcher: Fetcher<PredictiveSearchReturn>;
+  pendingTerm: string;
+  children: (args: {
+    items: NormalizedItems;
+    total: number;
+    term: string;
+    state: Fetcher['state'];
+    closeSearch: () => void;
+  }) => React.ReactNode;
 };
 
 /**
- * Component that renders predictive search results
+ * HOW THIS WORKS
+ * ──────────────
+ * fetcher lives in SearchAside (parent). When fetcher.data changes, React
+ * re-renders SearchAside, which re-renders SearchResultsPredictive with the
+ * new fetcher prop. So by the time this render function runs, fetcher.data
+ * is already the fresh value — we just read it inline, no effects needed.
+ *
+ * The lastGood ref provides stale-while-revalidate: while a new request is
+ * in flight fetcher.data hasn't changed yet, so we pass the previous cached
+ * items to children (no blank flicker). The moment the response arrives,
+ * fetcher.data is a new object, the block below runs, and children receive
+ * fresh items on this same render.
  */
 export function SearchResultsPredictive({
+  fetcher,
+  pendingTerm,
   children,
 }: SearchResultsPredictiveProps) {
-  const aside = useAside();
-  const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
+  const { close } = useAside();
 
-  /*
-   * Utility that resets the search input
-   */
-  function resetInput() {
-    if (inputRef.current) {
-      inputRef.current.blur();
-      inputRef.current.value = '';
+  const lastGood = useRef<CachedData>(EMPTY_CACHE);
+  const lastSeenData = useRef<unknown>(undefined);
+
+  const fetcherData = fetcher.data as any;
+
+  // Inline during render — runs on the same render that React schedules when
+  // SearchAside re-renders due to fetcher.data changing.
+  if (fetcherData !== lastSeenData.current) {
+    lastSeenData.current = fetcherData;
+
+    if (fetcherData?.result?.items) {
+      // Skip abort/empty responses so we never wipe good cached results.
+      // Loader sets aborted:true on abort; fallback: term==='' with active input.
+      const isAbort =
+        fetcherData.aborted === true ||
+        (fetcherData.term === '' && !!pendingTerm);
+
+      if (!isAbort) {
+        const raw = fetcherData.result.items;
+        lastGood.current = {
+          term: fetcherData.term ?? '',
+          total: fetcherData.result.total ?? 0,
+          items: {
+            articles: raw.articles ?? [],
+            collections: raw.collections ?? [],
+            pages: raw.pages ?? [],
+            products: raw.products ?? [],
+            queries: raw.queries ?? [],
+          },
+        };
+      }
     }
   }
 
-  /**
-   * Utility that resets the search input and closes the search aside
-   */
-  function closeSearch() {
-    resetInput();
-    aside.close();
-  }
-
-  return children({
-    items,
-    closeSearch,
-    inputRef,
-    state: fetcher.state,
-    term,
-    total,
-  });
-}
-
-SearchResultsPredictive.Articles = SearchResultsPredictiveArticles;
-SearchResultsPredictive.Collections = SearchResultsPredictiveCollections;
-SearchResultsPredictive.Pages = SearchResultsPredictivePages;
-SearchResultsPredictive.Products = SearchResultsPredictiveProducts;
-SearchResultsPredictive.Queries = SearchResultsPredictiveQueries;
-SearchResultsPredictive.Empty = SearchResultsPredictiveEmpty;
-
-function SearchResultsPredictiveArticles({
-  term,
-  articles,
-  closeSearch,
-}: PartialPredictiveSearchResult<'articles'>) {
-  if (!articles.length) return null;
+  const { items, total, term } = lastGood.current;
 
   return (
-    <div className="predictive-search-result" key="articles">
-      <h5>Articles</h5>
-      <ul>
-        {articles.map((article) => {
-          const articleUrl = urlWithTrackingParams({
-            baseUrl: `/blogs/${article.blog.handle}/${article.handle}`,
-            trackingParams: article.trackingParameters,
-            term: term.current ?? '',
-          });
-
-          return (
-            <li className="predictive-search-result-item" key={article.id}>
-              <Link onClick={closeSearch} to={articleUrl}>
-                {article.image?.url && (
-                  <Image
-                    alt={article.image.altText ?? ''}
-                    src={article.image.url}
-                    width={50}
-                    height={50}
-                  />
-                )}
-                <div>
-                  <span>{article.title}</span>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-function SearchResultsPredictiveCollections({
-  term,
-  collections,
-  closeSearch,
-}: PartialPredictiveSearchResult<'collections'>) {
-  if (!collections.length) return null;
-
-  return (
-    <div
-      className="predictive-search-result predictive-search-result-collections"
-      key="collections"
-    >
-      <h5>Collections</h5>
-      <ul>
-        {collections.map((collection) => {
-          const collectionUrl = urlWithTrackingParams({
-            baseUrl: `/collections/${collection.handle}`,
-            trackingParams: collection.trackingParameters,
-            term: term.current,
-          });
-
-          return (
-            <li className="predictive-search-result-item" key={collection.id}>
-              <Link onClick={closeSearch} to={collectionUrl}>
-                {collection.image?.url && (
-                  <Image
-                    alt={collection.image.altText ?? ''}
-                    src={collection.image.url}
-                    width={400}
-                    height={400}
-                  />
-                )}
-                <div>
-                  <span>{collection.title}</span>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-function SearchResultsPredictivePages({
-  term,
-  pages,
-  closeSearch,
-}: PartialPredictiveSearchResult<'pages'>) {
-  if (!pages.length) return null;
-
-  return (
-    <div className="predictive-search-result" key="pages">
-      <h5>Pages</h5>
-      <ul>
-        {pages.map((page) => {
-          const pageUrl = urlWithTrackingParams({
-            baseUrl: `/pages/${page.handle}`,
-            trackingParams: page.trackingParameters,
-            term: term.current,
-          });
-
-          return (
-            <li className="predictive-search-result-item" key={page.id}>
-              <Link onClick={closeSearch} to={pageUrl}>
-                <div>
-                  <span>{page.title}</span>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-function SearchResultsPredictiveProducts({
-  term,
-  products,
-  closeSearch,
-}: PartialPredictiveSearchResult<'products'>) {
-  if (!products.length) return null;
-
-  return (
-    <div
-      className="predictive-search-result predictive-search-result-products"
-      key="products"
-    >
-      <h5>Products</h5>
-      <ul>
-        {products.map((product) => {
-          const productUrl = urlWithTrackingParams({
-            baseUrl: `/products/${product.handle}`,
-            trackingParams: product.trackingParameters,
-            term: term.current,
-          });
-
-          const price = product?.selectedOrFirstAvailableVariant?.price;
-          const image = product?.selectedOrFirstAvailableVariant?.image;
-          return (
-            <li className="predictive-search-result-item" key={product.id}>
-              <Link to={productUrl} onClick={closeSearch}>
-                {image && (
-                  <Image
-                    alt={image.altText ?? ''}
-                    src={image.url}
-                    width={400}
-                    height={400}
-                  />
-                )}
-                <div>
-                  <p>{product.title}</p>
-                  <small>{price && <Money data={price} />}</small>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-function SearchResultsPredictiveQueries({
-  queries,
-  queriesDatalistId,
-}: PartialPredictiveSearchResult<'queries', never> & {
-  queriesDatalistId: string;
-}) {
-  if (!queries.length) return null;
-
-  return (
-    <datalist id={queriesDatalistId}>
-      {queries.map((suggestion) => {
-        if (!suggestion) return null;
-
-        return <option key={suggestion.text} value={suggestion.text} />;
+    <>
+      {children({
+        items,
+        total,
+        term,
+        state: fetcher.state,
+        closeSearch: close,
       })}
-    </datalist>
+    </>
   );
-}
-
-function SearchResultsPredictiveEmpty({
-  term,
-}: {
-  term: React.MutableRefObject<string>;
-}) {
-  if (!term.current) {
-    return null;
-  }
-
-  return (
-    <p>
-      No results found for <q>{term.current}</q>
-    </p>
-  );
-}
-
-/**
- * Hook that returns the predictive search results and fetcher and input ref.
- * @example
- * '''ts
- * const { items, total, inputRef, term, fetcher } = usePredictiveSearch();
- * '''
- **/
-function usePredictiveSearch(): UsePredictiveSearchReturn {
-  const fetcher = useFetcher<PredictiveSearchReturn>({key: 'search'});
-  const term = useRef<string>('');
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  if (fetcher?.state === 'loading') {
-    term.current = String(fetcher.formData?.get('q') || '');
-  }
-
-  // capture the search input element as a ref
-  useEffect(() => {
-    if (!inputRef.current) {
-      inputRef.current = document.querySelector('input[type="search"]');
-    }
-  }, []);
-
-  const {items, total} =
-    fetcher?.data?.result ?? getEmptyPredictiveSearchResult();
-
-  return {items, total, inputRef, term, fetcher};
 }

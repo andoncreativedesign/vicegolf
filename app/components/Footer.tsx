@@ -113,7 +113,7 @@ function FooterContent({
   footer: FooterQuery | null;
   header: HeaderQuery;
   publicStoreDomain: string;
-})  {
+}) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     help: false,
     legal: false,
@@ -121,17 +121,17 @@ function FooterContent({
   });
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
-      ...prev,  
+      ...prev,
       [section]: !prev[section]
     }));
-  };  
-  
+  };
+
   const { setShowPreferences } = useCookieConsent();
 
 
   return (
-<div className="max-w-7xl mx-auto px-6 md:px-8 py-8 md:py-12">
-  <div className="flex flex-col md:flex-row flex-wrap justify-center md:justify-between gap-6 md:text-left">
+    <div className="max-w-7xl mx-auto px-6 md:px-8 py-8 md:py-12">
+      <div className="flex flex-col md:flex-row flex-wrap justify-center md:justify-between gap-6 md:text-left">
         {/* About Column */}
         {/* <div>
           <h3 className="font-semibold text-white mb-4">About</h3>
@@ -145,52 +145,52 @@ function FooterContent({
         </div> */}
 
         {/* Help & Info Column */}
-         <div className="border-b md:border-none border-gray-700 mb-4 md:mb-0">
-         <button  onClick={() => toggleSection('help')}
-          className="flex justify-between items-center w-full py-3 md:py-0">
-          <h3 className="font-semibold text-white ">Help & Info</h3>
-          <svg className="w-4 h-4 lg:hidden text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-         </button>
+        <div className="border-b md:border-none border-gray-700 mb-4 md:mb-0">
+          <button onClick={() => toggleSection('help')}
+            className="flex justify-between items-center w-full py-3 md:py-0">
+            <h3 className="font-semibold text-white ">Help & Info</h3>
+            <svg className="w-4 h-4 lg:hidden text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           <div className={`${openSections.help ? 'block' : 'hidden'} lg:block lg:mt-4`}>
-          <ul className="space-y-2">
-            {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Delivery & Shipping</NavLink></li> */}
-            {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Refund Policy</NavLink></li> */}
-            {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li> */}
-            <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
-          </ul>   
-              <p className="!text-white text-sm mt-2">For any queries,</p>
-              <p>email us at    <a href="mailto:info@vgmesportstrading.com" className="underline !text-white">info@vgmesportstrading.com</a></p>
-            </div>
+            <ul className="space-y-2">
+              {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Delivery & Shipping</NavLink></li> */}
+              {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Refund Policy</NavLink></li> */}
+              {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li> */}
+              <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
+            </ul>
+            <p className="!text-white text-sm mt-2">For any queries,</p>
+            <p>email us at    <a href="mailto:info@vgmesportstrading.com" className="underline !text-white">info@vgmesportstrading.com</a></p>
+          </div>
         </div>
 
         {/* Legal Column */}
         <div className="border-b md:border-none border-gray-700 mb-4 md:mb-0">
           <button onClick={() => toggleSection('legal')}
-           className="flex justify-between items-center w-full py-3 md:py-0">
-           <h3 className="font-semibold text-white ">Legal</h3>
-          <svg className="w-4 h-4 lg:hidden text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-        </button>
+            className="flex justify-between items-center w-full py-3 md:py-0">
+            <h3 className="font-semibold text-white ">Legal</h3>
+            <svg className="w-4 h-4 lg:hidden text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           <div className={`${openSections.legal ? 'block' : 'hidden'} lg:block lg:mt-4`}>
-        <ul className="space-y-2"> 
-            <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
-            <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-100 transition-colors"style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
-            <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Privacy Policy</NavLink></li>
-            <li>
-              <button
-                onClick={() => setShowPreferences(true)}
-                className="!text-white hover:!text-gray-300 transition-colors"
-                style={{ textDecoration: 'none' }}>
-                Cookie Settings
-              </button>
-            </li>
-          </ul>
+            <ul className="space-y-2">
+              <li><NavLink to="/terms-of-service" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Terms of Service</NavLink></li>
+              <li><NavLink to="/return-policy" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Returns Policy</NavLink></li>
+              <li><NavLink to="/privacy-policy" className="!text-white hover:!text-gray-300 transition-colors" style={{ textDecoration: 'none' }}>Privacy Policy</NavLink></li>
+              <li>
+                <button
+                  onClick={() => setShowPreferences(true)}
+                  className="!text-white hover:!text-gray-300 transition-colors"
+                  style={{ textDecoration: 'none' }}>
+                  Cookie Settings
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
-         {/* Your Vice Golf Column */}
+        {/* Your Vice Golf Column */}
         {/* <div>
           <h3 className="font-semibold text-white mb-4">Your Vice Golf</h3>
           <ul className="space-y-2">
@@ -202,14 +202,14 @@ function FooterContent({
           </ul>
         </div> */}
 
-         {/* Follow Us  */}
+        {/* Follow Us  */}
         <div>
           <h3 className="font-semibold text-white mb-4">Follow Us</h3>
           <div className="flex space-x-3 mb-6">
-            <a href="https://www.instagram.com/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.instagram.com/vicegolfme/" className="!text-white hover:!text-gray-300 transition-colors">
               <FaInstagram className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="https://www.facebook.com/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.facebook.com/profile.php?id=61581584603862" className="!text-white hover:!text-gray-300 transition-colors">
               <FaFacebookF className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.tiktok.com/@vicegolfofficial" className="!text-white hover:!text-gray-300 transition-colors">
@@ -218,7 +218,7 @@ function FooterContent({
             <a href="https://www.youtube.com/user/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
               <FaYoutube className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
-            <a href="https://www.linkedin.com/company/vice-sporting-goods-gmbh" className="!text-white hover:!text-gray-300 transition-colors">
+            <a href="https://www.linkedin.com/company/vicegolfme/" className="!text-white hover:!text-gray-300 transition-colors">
               <FaLinkedinIn className="w-6 h-6 !text-white" style={{ color: 'white !important' }} />
             </a>
             <a href="https://www.pinterest.de/vicegolf" className="!text-white hover:!text-gray-300 transition-colors">
@@ -257,21 +257,21 @@ function FooterContent({
           <div>
             <h4 className="font-semibold text-white mb-2">Safe & Fast Shipping</h4>
             <div className="flex items-center space-x-4">
-               <a href="https://jeebly.com/" aria-label="Jeebly Home">
-              <img
-                src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/logo.svg?v=1765342145'
-                alt="Jeebly"
-                className="h-9 w-auto"
-                loading="lazy"
-              />
+              <a href="https://jeebly.com/" aria-label="Jeebly Home">
+                <img
+                  src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/logo.svg?v=1765342145'
+                  alt="Jeebly"
+                  className="h-9 w-auto"
+                  loading="lazy"
+                />
               </a>
-               <a href="https://asyad.om/" aria-label="asyad Home">
-              <img
-                src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/asyad_logo.png?v=1768477591'
-                alt="asyad "
-                className="h-8 w-auto"
-                loading="lazy"
-              />
+              <a href="https://asyad.om/" aria-label="asyad Home">
+                <img
+                  src='https://cdn.shopify.com/s/files/1/0732/0505/5640/files/asyad_logo.png?v=1768477591'
+                  alt="asyad "
+                  className="h-8 w-auto"
+                  loading="lazy"
+                />
               </a>
             </div>
           </div>

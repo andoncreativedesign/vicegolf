@@ -2,7 +2,7 @@ import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLayout } from '~/types/cart';
 import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useFetcher } from 'react-router';
+import { Link, useFetcher, useFetchers, useNavigation } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 import { AedIcon } from './ui/AedIcon';
 import { useMembership } from '~/hooks/useMembership';
@@ -17,6 +17,13 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   const isPageLayout = layout === 'page';
   const subtotal = cart?.cost?.subtotalAmount;
   const originalTotal = cart?.cost?.totalAmount;
+
+  const fetchers = useFetchers();
+  const navigation = useNavigation();
+  const isCartUpdating = 
+    navigation.state !== 'idle' || 
+    fetchers.some((f) => f.state !== 'idle' && f.formAction?.includes('/cart')) || 
+    (cart as any)?.isPending;
 
   // Calculate line-level original sum and expected discounted sum
   let lineOriginalSum = 0;
@@ -58,18 +65,14 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   const shopifySubtotalVal = subtotal?.amount ? parseFloat(subtotal.amount.replace(/,/g, '')) : 0;
   const shopifyTotalVal = originalTotal?.amount ? parseFloat(originalTotal.amount.replace(/,/g, '')) : 0;
 
-  // Our accurate total takes the lowest of Shopify's total OR our manually calculated discounted sum
-  // This shields us from Shopify Cart API delays
-  let currentSubtotalVal = Math.min(shopifySubtotalVal, lineExpectedDiscountedSum);
-  let totVal = Math.min(shopifyTotalVal, lineExpectedDiscountedSum + (shopifyTotalVal - shopifySubtotalVal)); // maintain any taxes/shipping added in total
+  // Our accurate total should rely on our manually calculated discounted sum
+  // This shields us from Shopify Cart API delays and stale totals during optimistic updates
+  let currentSubtotalVal = lineExpectedDiscountedSum;
+  let totVal = Math.max(0, lineExpectedDiscountedSum + (shopifyTotalVal - shopifySubtotalVal)); // maintain any taxes/shipping added in total, and apply order-level discounts
 
   // Base value for display
   let baseVal = Math.max(lineOriginalSum, currentSubtotalVal);
 
-  // Fallback: If no discount detected yet but user is member, they might have a hidden tier discount (legacy fallback)
-  if (baseVal <= totVal && isMember && (membershipDiscount?.percentage || 0) > 0) {
-    baseVal = totVal / (1 - membershipDiscount.percentage);
-  }
 
   let actualPercentage = 0;
   let actualAmount = 0;
@@ -109,7 +112,14 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
             </div>
           </div>
 
-          {(actualPercentage > 0 || actualAmount > 0) && (
+          {isCartUpdating ? (
+            <div className="flex justify-between items-center text-emerald-600 text-sm font-medium opacity-50">
+              <span className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-b-2 border-emerald-600"></div>
+                Updating totals...
+              </span>
+            </div>
+          ) : (actualPercentage > 0 || actualAmount > 0) && (
             <div className="flex justify-between items-center text-emerald-600 text-sm font-medium">
               <span className="flex items-center">
                 {isMember ? 'Membership' : 'Savings'} {actualAmount > 0 ? (
@@ -144,7 +154,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
         </div>
 
         <div className="mt-6">
-          <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+          <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} cart={cart} />
         </div>
 
         {/* {isPageLayout && (
@@ -162,13 +172,42 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   );
 }
 
-function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
+function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart?: any }) {
   if (!checkoutUrl) return null;
+
+  const handleCheckoutClick = () => {
+    if (typeof window !== 'undefined' && (window as any)._learnq && cart) {
+      const items = cart.lines?.nodes?.map((line: any) => ({
+        'ProductID': line.merchandise?.product?.id,
+        'SKU': line.merchandise?.sku,
+        'ProductName': line.merchandise?.product?.title,
+        'Quantity': line.quantity,
+        'ItemPrice': line.cost?.amountPerQuantity?.amount,
+        'RowTotal': line.cost?.totalAmount?.amount,
+        'ImageURL': line.merchandise?.image?.url,
+        'ProductURL': `${window.location.origin}/products/${line.merchandise?.product?.handle}`
+      }));
+
+      (window as any)._learnq?.push(['track', 'Started Checkout', {
+        '$event_id': cart.id,
+        'Value': cart.cost?.totalAmount?.amount,
+        'ItemNames': cart.lines?.nodes?.map((line: any) => line.merchandise?.product?.title),
+        'CheckoutURL': checkoutUrl,
+        'Items': items
+      }]);
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('featuredDiscountCode');
+      localStorage.removeItem('featuredDiscountData');
+      console.log('[CartSummary] Checkout clicked. Cleared local discount state.');
+    }
+  };
 
   return (
     <div className="checkout-actions">
       <a
         href={checkoutUrl}
+        onClick={handleCheckoutClick}
         target="_self"
         className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
         style={{ textDecoration: 'none' }}
@@ -251,6 +290,7 @@ function CartDiscounts({
   const codes: string[] = discountCodes?.filter((discount) => discount.applicable)?.map(({ code }) => code) || [];
 
   const applyFetcher = useFetcher({ key: 'discount-apply' });
+  const removeFetcher = useFetcher({ key: 'discount-remove' });
   const isApplying = applyFetcher.state !== 'idle';
 
   useEffect(() => {
@@ -259,6 +299,24 @@ function CartDiscounts({
     }
   }, [applyFetcher.state, applyFetcher.data]);
 
+  const shouldReloadRef = useRef(false);
+
+  useEffect(() => {
+    if (removeFetcher.state === 'idle' && removeFetcher.data && shouldReloadRef.current) {
+      window.location.reload();
+    }
+  }, [removeFetcher.state, removeFetcher.data]);
+
+  const handleRemoveDiscount = () => {
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('featuredDiscountData')) {
+        shouldReloadRef.current = true;
+      }
+      localStorage.removeItem('featuredDiscountCode');
+      localStorage.removeItem('featuredDiscountData');
+    }
+  };
+
   return (
     <div className="discount-section">
       {/* Display existing discounts */}
@@ -266,10 +324,12 @@ function CartDiscounts({
         <div className="applied-discounts mb-3">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Volume discount</span>
-            <UpdateDiscountForm>
+            {/* <UpdateDiscountForm > */}
+            <UpdateDiscountForm fetcherKey="discount-remove">
               <button
                 type="submit"
                 className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors duration-200 cursor-pointer"
+                onClick={handleRemoveDiscount}
               >
                 Remove
               </button>

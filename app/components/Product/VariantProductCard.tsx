@@ -58,9 +58,10 @@ type ProductCardProps = {
       'variantFamilyProducts'
     >[]
   };
+  sessionDiscount?: any;
 }
 
-export function VariantProductCard({ product }: ProductCardProps) {
+export function VariantProductCard({ product, sessionDiscount }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes?.[0];
   const [selectedVariant, setSelectedVariant] = useState(0);
@@ -179,10 +180,43 @@ export function VariantProductCard({ product }: ProductCardProps) {
   }, [hoverDelayTimeout]);
 
   const { getBestDiscountForProduct } = useMembership();
-
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
   const basePrice = parseFloat(firstVariant?.price?.amount || '0');
   const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+
+  // 1. Calculate price with membership discount
+  let membershipPrice = basePrice;
+  if (productAmount > 0) {
+    membershipPrice = Math.max(0, basePrice - productAmount);
+  } else if (productPercentage > 0) {
+    membershipPrice = basePrice * (1 - productPercentage);
+  }
+
+  // 2. Calculate price with session discount (starting from original base price)
+  let sessionPrice = basePrice;
+  let isSessionEligible = false;
+  if (sessionDiscount) {
+    const isEligibleProduct = sessionDiscount.products?.includes(product.id);
+    const isEligibleCollection = productCollections.some((id: string) => sessionDiscount.collections?.includes(id));
+
+    if (sessionDiscount.appliesToAll || isEligibleProduct || isEligibleCollection) {
+      isSessionEligible = true;
+      if (sessionDiscount.percentage) {
+        sessionPrice = basePrice * (1 - sessionDiscount.percentage);
+      } else if (sessionDiscount.amount) {
+        sessionPrice = Math.max(0, basePrice - parseFloat(sessionDiscount.amount.amount));
+      }
+    }
+  }
+
+  // 3. Choose the best price (lowest) for the user
+  const finalPrice = Math.min(membershipPrice, sessionPrice);
+  
+  // 4. Show strikethrough if any discount is better than original or if Shopify has one
+  let finalCompareAtPrice = parseFloat(firstVariant?.compareAtPrice?.amount || '0');
+  if (finalPrice < basePrice) {
+    finalCompareAtPrice = basePrice;
+  }
 
 
   return (
@@ -416,24 +450,16 @@ export function VariantProductCard({ product }: ProductCardProps) {
           {firstVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
-                {(firstVariant.compareAtPrice || (productPercentage > 0 || productAmount > 0)) && (
+                {(finalCompareAtPrice > finalPrice) && (
                   <div className="flex items-center text-sm text-gray-400 line-through font-medium">
                     <AedIcon className="mr-0.5" />
-                    {parseFloat(firstVariant.compareAtPrice?.amount || firstVariant.price.amount).toFixed(2)}
+                    {finalCompareAtPrice.toFixed(2)}
                   </div>
                 )}
                 <div className="flex items-center">
                   <AedIcon className="mr-1" />
                   <span className="text-xl font-bold tracking-tight">
-                    {(() => {
-                      const basePriceValue = parseFloat(firstVariant.price?.amount || '0');
-                      if (productAmount > 0) {
-                        return Math.max(0, basePriceValue - productAmount).toFixed(2);
-                      } else if (productPercentage > 0) {
-                        return (basePriceValue * (1 - productPercentage)).toFixed(2);
-                      }
-                      return basePriceValue.toFixed(2);
-                    })()}
+                    {finalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>

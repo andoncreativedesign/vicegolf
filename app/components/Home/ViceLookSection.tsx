@@ -19,10 +19,7 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
 
         // Handle collection navigation
         if (item.collectionHandle) {
-            fetcher.submit(
-                { handle: item.collectionHandle },
-                { method: 'POST', action: '/api/collection' }
-            );
+            navigate(`/collections/${item.collectionHandle}`);
             return;
         }
 
@@ -71,7 +68,9 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
                                                 width: 1200,
                                                 height: 1600,
                                             }}
+                                            sizes="(min-width: 768px) 33vw, 100vw"
                                             className="w-full h-auto object-cover"
+                                            sizes="(min-width: 768px) 33vw, 80vw"
                                             loading="lazy"
                                         />
                                     )}
