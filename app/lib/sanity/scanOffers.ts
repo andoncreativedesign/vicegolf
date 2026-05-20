@@ -49,7 +49,8 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
     "title": store.title,
     "handle": store.slug.current,
     "imageUrl": store.previewImageUrl,
-    "priceRange": store.priceRange
+    "priceRange": store.priceRange,
+    "productType": store.productType
   }
 }`;
 
@@ -104,6 +105,7 @@ export interface ScanOffersData {
       minVariantPrice: number;
       maxVariantPrice: number;
     };
+    productType?: string;
   }>;
 }
 
