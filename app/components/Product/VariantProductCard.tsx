@@ -392,7 +392,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
             {product.productType || 'Golf Equipment'}
           </p>
 
-          <div className="flex items-center space-y-3">
+          <div className="flex items-center py-2">
             <YotpoRating productId={product.id?.split('/').pop() || product.id} />
           </div>
 

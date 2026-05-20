@@ -14,6 +14,7 @@ export function YotpoReviewWidget({
 }) {
   const rootData = useRouteLoaderData<any>('root');
   const appKey = rootData?.publicYotpoAppKey || '';
+  const instanceId = rootData?.publicYotpoInstanceId || '1329554';
 
   useEffect(() => {
     console.log("url from yotpo", url)
@@ -58,7 +59,7 @@ export function YotpoReviewWidget({
   return (
     <div
       className="yotpo-widget-instance"
-      data-yotpo-instance-id="1329554"
+      data-yotpo-instance-id={instanceId}
       data-yotpo-product-id={product.id?.split('/').pop() || product.id}
       data-yotpo-external-id={product.id?.split('/').pop() || product.id}
       data-yotpo-name={product.title}

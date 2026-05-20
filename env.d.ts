@@ -24,7 +24,7 @@ declare global {
         STORE_DOMAIN: string;
         PUBLIC_KLAVIYO_COMPANY_ID: string;
         PUBLIC_YOTPO_APP_KEY?: string;
-        PUBLIC_YOTPO_SECRET_KEY?: string;
+        PUBLIC_YOTPO_INSTANCE_ID?: string;
     }
 }
 

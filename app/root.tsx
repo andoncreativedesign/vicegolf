@@ -148,6 +148,7 @@ export async function loader(args: Route.LoaderArgs) {
     },
     publicKlaviyoCompanyId: env.PUBLIC_KLAVIYO_COMPANY_ID,
     publicYotpoAppKey: env.PUBLIC_YOTPO_APP_KEY,
+    publicYotpoInstanceId: env.PUBLIC_YOTPO_INSTANCE_ID,
   };
 }
 
