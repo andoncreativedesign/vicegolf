@@ -40,6 +40,7 @@ body {
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
@@ -116,14 +117,14 @@ aside {
 }
 
 /* Adjust close button position for mobile menu */
-.overlay .mobile-menu ~ .close-outside {
+.overlay .mobile-menu~.close-outside {
   left: var(--aside-width) !important;
   right: auto !important;
   width: calc(100% - var(--aside-width)) !important;
 }
 
 /* Ensure the overlay click area is on the right side of the menu */
-.overlay .mobile-menu + .close-outside {
+.overlay .mobile-menu+.close-outside {
   left: var(--aside-width) !important;
   right: auto !important;
   width: calc(100% - var(--aside-width)) !important;
@@ -253,6 +254,7 @@ aside li {
   pointer-events: auto;
   visibility: visible;
 }
+
 /* animate aside */
 aside {
   transition: transform 400ms ease-in-out;
@@ -268,7 +270,7 @@ button.reset {
   font-size: inherit;
 }
 
-button.reset > * {
+button.reset>* {
   margin: 0;
 }
 
@@ -313,6 +315,7 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-desktop {
   display: none;
   grid-gap: 1rem;
+
   @media (min-width: 45em) {
     display: flex;
     grid-gap: 1rem;
@@ -331,7 +334,7 @@ button.reset:hover:not(:has(> *)) {
   margin-left: auto;
 }
 
-.header-ctas > * {
+.header-ctas>* {
   min-width: fit-content;
 }
 
@@ -429,6 +432,7 @@ button.reset:hover:not(:has(> *)) {
   align-items: center;
   display: flex;
 }
+
 /*
 * --------------------------------------------------
 * components/Search
@@ -487,14 +491,16 @@ button.reset:hover:not(:has(> *)) {
   height: auto;
   min-height: 200px;
   /* Default desktop style */
-  max-height: 65vh; /* Decreased height */
+  max-height: 65vh;
+  /* Decreased height */
   border-radius: 0 0 16px 16px;
   overflow: hidden;
-  
+
   /* Restored Base Styles */
   background: white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  transform: translateX(100%); /* Slide from right */
+  transform: translateX(100%);
+  /* Slide from right */
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -515,7 +521,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Hide default aside header for search */
-.overlay[aria-modal] aside.search-aside > header {
+.overlay[aria-modal] aside.search-aside>header {
   display: none !important;
 }
 
@@ -555,12 +561,15 @@ button.reset:hover:not(:has(> *)) {
 
 /* Hide scrollbar in search overlay */
 .search-aside .search-body {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
 }
 
 .search-aside .search-body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 /* Remove link styling from product cards */
@@ -880,7 +889,7 @@ button.reset:hover:not(:has(> *)) {
   color: #111;
   text-decoration: none;
   transform: translateY(-1px);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Product results */
@@ -889,12 +898,15 @@ button.reset:hover:not(:has(> *)) {
   margin: 0 !important;
   background: white;
   width: 100% !important;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .product-results::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none;
+  /* Chrome, Safari and Opera */
   max-width: 100% !important;
   overflow-y: auto;
   max-height: 80vh;
@@ -932,7 +944,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Ensure product cards take full width of their container */
-.products-grid > * {
+.products-grid>* {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -960,7 +972,7 @@ button.reset:hover:not(:has(> *)) {
 
 .product-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .search-results-container .product-card:hover {
@@ -1013,8 +1025,13 @@ button.reset:hover:not(:has(> *)) {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .search-results-container .product-info {
@@ -1072,7 +1089,7 @@ button.reset:hover:not(:has(> *)) {
 /* Hover effects */
 .product-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive adjustments */
@@ -1081,16 +1098,16 @@ button.reset:hover:not(:has(> *)) {
     grid-template-columns: repeat(2, 1fr);
     gap: 0;
   }
-  
+
   .product-card {
     border-radius: 3px;
   }
-  
+
   .product-title {
     font-size: 13px;
     min-height: 36px;
   }
-  
+
   .product-price {
     font-size: 14px;
   }
@@ -1110,7 +1127,7 @@ button.reset:hover:not(:has(> *)) {
     grid-template-columns: 1fr;
     gap: 0;
   }
-  
+
   .search-middle-section .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1127,11 +1144,11 @@ button.reset:hover:not(:has(> *)) {
   .product-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .suggestions-container {
     padding: 16px;
   }
-  
+
   .search-results-container {
     padding: 0;
   }
@@ -1207,10 +1224,10 @@ button.reset:hover:not(:has(> *)) {
   padding: 0 0;
   display: flex;
   background: rgb(255, 255, 255);
-  border-bottom: 1px  #e5e7eb;
- margin: auto;
- max-width: initial;
- width: 750px;
+  border-bottom: 1px #e5e7eb;
+  margin: auto;
+  max-width: initial;
+  width: 750px;
   justify-content: center;
   align-items: full;
 }
@@ -1220,7 +1237,7 @@ button.reset:hover:not(:has(> *)) {
   position: relative;
   width: 100%;
   max-width: 900px;
-  padding:0 10px;
+  padding: 0 10px;
   margin: 0 0 20px;
   display: flex;
   align-items: center;
@@ -1270,7 +1287,7 @@ button.reset:hover:not(:has(> *)) {
 }
 
 /* Main search results container */
-.overlay[aria-modal] aside.search-aside .predictive-search > div:not(.predictive-search-form) {
+.overlay[aria-modal] aside.search-aside .predictive-search>div:not(.predictive-search-form) {
   padding: 20px 40px 30px;
   max-width: 1400px;
   margin: 0 auto;
@@ -1281,7 +1298,8 @@ button.reset:hover:not(:has(> *)) {
 
 /* Left section */
 .search-left-section {
-  flex: 0 0 200px; /* Reduced width */
+  flex: 0 0 200px;
+  /* Reduced width */
   padding: 20px;
   border-right: 1px solid #e5e7eb;
 }
@@ -1298,7 +1316,8 @@ button.reset:hover:not(:has(> *)) {
 
 /* Right section */
 .search-right-section {
-  flex: 0 0 150px; /* Reduced width */
+  flex: 0 0 150px;
+  /* Reduced width */
   padding: 20px 10px;
   border-left: 1px solid #e5e7eb;
 }
@@ -1560,7 +1579,7 @@ button.reset:hover:not(:has(> *)) {
   margin: 0;
 }
 
-.products-grid > * {
+.products-grid>* {
   padding: 0 !important;
   margin: 0 !important;
   width: 100% !important;
@@ -1645,6 +1664,7 @@ button.reset:hover:not(:has(> *)) {
 
 .featured-collection-image {
   aspect-ratio: 1 / 1;
+
   @media (min-width: 45em) {
     aspect-ratio: 16 / 9;
   }
@@ -1660,9 +1680,10 @@ button.reset:hover:not(:has(> *)) {
   display: grid;
   grid-gap: 1.5rem;
   grid-template-columns: repeat(2, 1fr);
+
   @media (min-width: 45em) {
     grid-template-columns: repeat(4, 1fr);
-   }
+  }
 }
 
 .recommended-product img {
@@ -1693,6 +1714,7 @@ button.reset:hover:not(:has(> *)) {
 .collection-description {
   margin-bottom: 1rem;
   max-width: 95%;
+
   @media (min-width: 45em) {
     max-width: 600px;
   }
@@ -1723,22 +1745,25 @@ button.reset:hover:not(:has(> *)) {
   background: #fff;
   outline: none;
   transition: border-color 0.2s ease;
-  -webkit-appearance: none; /* Removes default search input styling in WebKit */
+  -webkit-appearance: none;
+  /* Removes default search input styling in WebKit */
 }
 
 .search-input:focus {
-    outline: none;
+  outline: none;
   border-color: #999;
   box-shadow: 0 0 0 1px #999;
 }
 
 .search-input::placeholder {
   color: #999;
-  opacity: 1; /* Firefox */
+  opacity: 1;
+  /* Firefox */
 }
 
 .search-input::-webkit-search-cancel-button {
-  display: none; /* Hide the default clear button in WebKit */
+  display: none;
+  /* Hide the default clear button in WebKit */
 }
 
 .clear-search {
@@ -1801,6 +1826,7 @@ button.reset:hover:not(:has(> *)) {
 */
 .product {
   display: grid;
+
   @media (min-width: 45em) {
     grid-template-columns: 1fr 1fr;
     grid-gap: 4rem;
@@ -1955,12 +1981,15 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
 
 /*
@@ -1991,7 +2020,8 @@ button.reset:hover:not(:has(> *)) {
 */
 .hero-section {
   position: relative;
-  isolation: isolate; /* Creates a new stacking context */
+  isolation: isolate;
+  /* Creates a new stacking context */
 }
 
 .hero-slide {
@@ -2062,11 +2092,9 @@ button.reset:hover:not(:has(> *)) {
 
 .Toastify__progress-bar {
   height: 2px !important;
-  background: linear-gradient(
-    90deg,
-    rgba(99, 102, 241, 0.8) 0%,
-    rgba(139, 92, 246, 0.8) 100%
-  ) !important;
+  background: linear-gradient(90deg,
+      rgba(99, 102, 241, 0.8) 0%,
+      rgba(139, 92, 246, 0.8) 100%) !important;
   border-radius: 1px !important;
 }
 
@@ -2213,4 +2241,121 @@ button.reset:hover:not(:has(> *)) {
 .product-description li {
   margin-bottom: 0.25rem;
   line-height: 1.5;
+}
+
+/* Fix Yotpo write a review modal positioning/offset issue */
+.yotpo-modal-dialog,
+.yotpo-modal-wrapper,
+.yotpo-modal,
+.yotpo-widget-instance .yotpo-modal-dialog {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  z-index: 99999 !important;
+}
+
+.yotpo-modal-mask,
+.yotpo-modal-wrapper,
+.yotpo-widget-instance .yotpo-modal-mask {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  transform: none !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 99998 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Yotpo modal body & form centering overrides - scoped to #modalDescription */
+#modalDescription.yotpo-modal-body {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+#modalDescription .yotpo-review-form {
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Full-width inputs and textareas inside the form (excluding radio buttons to prevent layout issues) */
+#modalDescription .yotpo-review-form .yotpo-input-wrapper,
+#modalDescription .yotpo-review-form .yotpo-new-input-container,
+#modalDescription .yotpo-review-form textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Star rating section left-alignment and stabilization */
+#modalDescription .yotpo-review-form .yotpo-star-rating-wrapper {
+  width: 100% !important;
+  display: block !important;
+  margin-bottom: 1.5rem !important;
+}
+
+#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper {
+  display: block !important;
+  text-align: left !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper legend {
+  display: block !important;
+  width: 100% !important;
+  text-align: left !important;
+  margin-bottom: 8px !important;
+  float: none !important;
+}
+
+#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper label,
+#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper label:hover {
+  display: inline-block !important;
+  width: 30px !important;
+  height: 30px !important;
+  margin: 0 4px 0 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  transform: none !important;
+  transition: none !important;
+  vertical-align: middle !important;
+  cursor: pointer !important;
+  pointer-events: auto !important; /* Ensure the label captures hover events */
+}
+
+/* Lock star rating SVG sizes to prevent width flickering on hover/state change */
+#modalDescription .yotpo-star-rating-icon,
+#modalDescription .yotpo-star-rating-icon:hover,
+#modalDescription .yotpo-star-rating-icon:focus,
+#modalDescription .yotpo-star-rating-icon:active {
+  width: 30px !important;
+  height: 30px !important;
+  max-width: 30px !important;
+  max-height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  transform: none !important;
+  transition: none !important;
+  pointer-events: none !important; /* Prevent hover loops/flickering on the SVG element itself */
+}
+
+/* Form footer/submit button centering */
+#modalDescription .yotpo-review-form .form-footer {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 1.5rem !important;
 }

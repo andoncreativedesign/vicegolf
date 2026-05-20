@@ -778,7 +778,8 @@ export default function Product() {
         }}
       />
       {/* Yotpo Reviews Widget */}
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 mt-12 mb-12">
+      {/* <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 mt-12 mb-12"> */}
+      <div className="yotpo-wrapper">
         <YotpoReviewWidget
           product={product}
           url={`https://${publicStoreDomain}/products/${product.handle}`}
