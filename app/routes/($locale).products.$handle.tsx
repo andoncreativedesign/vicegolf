@@ -39,7 +39,6 @@ import { getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
 import { DriversProduct } from '~/components/Product/DriversProduct';
 import { YotpoReviewWidget } from '~/components/yopto/YotpoReviewWidget';
-import { YotpoReviewWidgetLegacy } from '~/components/yopto/YotpoReviewWidgetLegacy';
 type ProductImageType = {
   id: string;
   url: string;
@@ -778,7 +777,8 @@ export default function Product() {
         }}
       />
       {/* Yotpo Reviews Widget */}
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 mt-12 mb-12">
+      {/* <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 mt-12 mb-12"> */}
+      <div className="yotpo-wrapper">
         <YotpoReviewWidget
           product={product}
           url={`https://${publicStoreDomain}/products/${product.handle}`}
@@ -786,12 +786,6 @@ export default function Product() {
           currency={selectedVariant?.price?.currencyCode || 'USD'}
         />
 
-        {/* <YotpoReviewWidgetLegacy
-          product={product}
-          url={`https://${publicStoreDomain}/products/${product.handle}`}
-          price={selectedVariant?.price?.amount || finalPrice.toFixed(2)}
-          currency={selectedVariant?.price?.currencyCode || 'USD'}
-        /> */}
       </div>
     </div>
   );

@@ -184,7 +184,7 @@ export function ProductCard({ product: _product, disableSoldout = false, session
           </p>
         </div>
 
-        <div className="flex items-center space-y-3">
+        <div className="flex items-center py-2">
           <YotpoRating productId={product.id?.split('/').pop() || product.id} />
         </div>
 

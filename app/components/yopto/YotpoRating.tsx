@@ -21,7 +21,7 @@ export function YotpoRating({
   const [loading, setLoading] =
     useState(true);
 
-  const appKey = rootData?.publicYotpoAppKey || '1EU1bXsXSLoWFlPOIvXu2rVvbKELtHN0e8xPiPQb';
+  const appKey = rootData?.publicYotpoAppKey || '';
 
   useEffect(() => {
     async function fetchRating() {
