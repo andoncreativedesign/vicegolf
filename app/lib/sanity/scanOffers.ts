@@ -23,15 +23,15 @@ export const scanOffersQuery = `*[_type == "scannedOffer"][0]{
         _id,
         url
       }
-    },
-    cta1 {
-      name,
-      url
-    },
-    cta2 {
-      name,
-      url
     }
+  },
+  ctaButtons[] {
+    name,
+    url
+  },
+  secondaryCtaButtons[] {
+    name,
+    url
   },
   featuredProductTitle,
   featuredProductDiscountCode,
@@ -80,9 +80,9 @@ export interface ScanOffersData {
     secondaryText?: TextColorObject;
     backgroundImage?: string;
     mobileBackgroundImage?: string;
-    cta1?: { name?: string; url?: string };
-    cta2?: { name?: string; url?: string };
   };
+  ctaButtons?: Array<{ name?: string; url?: string }>;
+  secondaryCtaButtons?: Array<{ name?: string; url?: string }>;
   featuredProductTitle?: string;
   featuredProductDiscountCode?: string;
   descriptionSection: {
@@ -141,9 +141,9 @@ export async function getScanOffersData(): Promise<ScanOffersData | null> {
         secondaryText: result.hero?.secondaryText,
         backgroundImage: result.hero?.backgroundImage?.asset?.url,
         mobileBackgroundImage: result.hero?.mobileBackgroundImage?.asset?.url,
-        cta1: result.hero?.cta1,
-        cta2: result.hero?.cta2,
       },
+      ctaButtons: result.ctaButtons,
+      secondaryCtaButtons: result.secondaryCtaButtons,
       featuredProductTitle: result.featuredProductTitle,
       featuredProductDiscountCode: result.featuredProductDiscountCode,
       descriptionSection: {
