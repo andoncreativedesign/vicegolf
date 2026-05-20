@@ -36,6 +36,14 @@ const BannerText = ({ value }: { value: PortableTextBlock[] }) => {
             {children}
           </a>
         );
+      },
+      color: ({ children, value }: any) => {
+        const color = value.hex?.hex || value.hex || value.color;
+        return <span style={{ color }}>{children}</span>;
+      },
+      textColor: ({ children, value }: any) => {
+        const color = value.hex?.hex || value.hex || value.color || value.value;
+        return <span style={{ color }}>{children}</span>;
       }
     }
   };
