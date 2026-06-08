@@ -271,7 +271,8 @@ export default function Addresses() {
   const { customer } = useOutletContext<{ customer: CustomerFragment }>();
   const { defaultAddress, addresses } = customer;
   const location = useLocation();
-  const isFormRoute = /\/(add|update)(?:\/.+)?$/.test(location.pathname);
+  const navigate = useNavigate();
+  const isFormRoute = /\/(add|update)(?:\/\. +)?$/.test(location.pathname);
 
   // When we're on the add or update routes, render the nested form-only view
   if (isFormRoute) {
@@ -289,13 +290,14 @@ export default function Addresses() {
         <h2 className="text-xl font-bold text-gray-900">
           My addresses ({addresses.nodes.length})
         </h2>
-        <NavLink
-          to="update"
+        <button
+          type="button"
           className="block w-full lg:inline-block lg:w-auto text-center bg-black text-white px-6 py-3 lg:py-2 rounded-full hover:bg-gray-800 transition-colors duration-200 text-sm font-bold tracking-wide no-underline"
           style={{ textDecoration: 'none', color: 'white' }}
+          onClick={() => navigate('update', { state: { address: defaultAddress } })}
         >
           Add new one
-        </NavLink>
+        </button>
       </div>
 
       <ExistingAddresses
