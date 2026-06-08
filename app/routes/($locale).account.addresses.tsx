@@ -272,7 +272,11 @@ export default function Addresses() {
   const { defaultAddress, addresses } = customer;
   const location = useLocation();
   const navigate = useNavigate();
-  const isFormRoute = /\/(add|update)(?:\/\. +)?$/.test(location.pathname);
+  const isFormRoute = /\/(add|update)(?:\/.*)?$/.test(location.pathname);
+
+  const handleSubmit = () => {
+    navigate('update', { state: { address: defaultAddress, isEditMode: false } })
+  }
 
   // When we're on the add or update routes, render the nested form-only view
   if (isFormRoute) {
@@ -294,7 +298,7 @@ export default function Addresses() {
           type="button"
           className="block w-full lg:inline-block lg:w-auto text-center bg-black text-white px-6 py-3 lg:py-2 rounded-full hover:bg-gray-800 transition-colors duration-200 text-sm font-bold tracking-wide no-underline"
           style={{ textDecoration: 'none', color: 'white' }}
-          onClick={() => navigate('update', { state: { address: defaultAddress } })}
+          onClick={handleSubmit}
         >
           Add new one
         </button>
@@ -338,6 +342,7 @@ function ExistingAddresses({
           ...address,
           defaultAddress: defaultAddress?.id === address.id,
         },
+        isEditMode: true,
       },
     });
   };

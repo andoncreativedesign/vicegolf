@@ -202,6 +202,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 type LocationState = {
   address?: (AddressFragment | (CustomerAddressInput & { id?: AddressFragment['id'] | null })) & { defaultAddress?: boolean };
+  isEditMode?: boolean;
 } | null;
 
 export default function AddressEditor() {
@@ -235,7 +236,8 @@ export default function AddressEditor() {
     }
   }, [action?.createdAddress, action?.updatedAddress, action?.error, navigate]);
 
-  const isEditMode = Boolean(addressFromState?.id || preservedAddress?.id);
+  // const isEditMode = Boolean(locationState?.isEditMode ?? (addressFromState?.id || preservedAddress?.id));
+  const isEditMode = locationState?.isEditMode;
   const derivedAddress: Partial<CustomerAddressInput> & { id?: AddressFragment['id'] | null } & { defaultAddress?: boolean } =
     addressFromState ?? preservedAddress ?? {
       address1: '',
@@ -375,15 +377,19 @@ export default function AddressEditor() {
           />
         )}
         <CustomInputFiled
-          label="Zip / Postal Code"
+          hidden={true}
+          // label="Zip / Postal Code"
+          // defaultValue={derivedAddress.zip ?? '00000'}
+          // required
+          label=""
           aria-label="Zip"
           autoComplete="postal-code"
-          defaultValue={derivedAddress.zip ?? ''}
+          defaultValue={'00000'}
           id="zip"
           name="zip"
           placeholder="Zip / Postal Code"
-          required
           type="text"
+          containerClassName='hidden'
         />
         <CountrySelector
           label="Country"
