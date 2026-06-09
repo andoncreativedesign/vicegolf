@@ -275,8 +275,17 @@ export default function Addresses() {
   const isFormRoute = /\/(add|update)(?:\/.*)?$/.test(location.pathname);
 
   const handleSubmit = () => {
-    navigate('update', { state: { address: defaultAddress, isEditMode: false } })
-  }
+    const addressData = defaultAddress ?? {
+      firstName: customer?.firstName ?? '',
+      lastName: customer?.lastName ?? '',
+      phoneNumber: customer?.phoneNumber?.phoneNumber ?? '',
+    };
+    navigate('update', { state: { address: addressData, isEditMode: false } });
+  };
+
+  useEffect(() => {
+    console.log('customer ',customer)
+  }, [customer])
 
   // When we're on the add or update routes, render the nested form-only view
   if (isFormRoute) {
