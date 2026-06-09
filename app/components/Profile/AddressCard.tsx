@@ -53,7 +53,6 @@ export function AddressCard({
   const cityLine = [zip, city, zoneCode].filter(Boolean).join(' ');
 
   const addressLines = [
-    company || undefined,
     address1 || undefined,
     address2 || undefined,
     cityLine || undefined,
@@ -66,10 +65,19 @@ export function AddressCard({
       <div className="flex items-start justify-between gap-4">
         {/* Left Side: Badge + Address Details */}
         <div className="flex flex-col gap-3">
-          {isDefault && (
-            <span className="self-start inline-flex items-center rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-              Default
-            </span>
+          {(isDefault || company) && (
+            <div className="flex flex-wrap gap-2 items-center">
+              {isDefault && (
+                <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                  Default
+                </span>
+              )}
+              {company && (
+                <span className="inline-flex items-center rounded-full bg-gray-200 border border-gray-350 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-800">
+                  {company}
+                </span>
+              )}
+            </div>
           )}
 
           <div className="text-gray-900">

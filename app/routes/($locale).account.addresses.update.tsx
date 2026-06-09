@@ -255,6 +255,29 @@ export default function AddressEditor() {
 
   const [selectedCountryCode, setSelectedCountryCode] = useState(derivedAddress.territoryCode || 'AE');
 
+  const [selectedLabel, setSelectedLabel] = useState(() => {
+    const comp = derivedAddress.company || '';
+    if (['Home', 'Work'].includes(comp)) return comp;
+    return comp ? 'Other' : '';
+  });
+  const [customLabel, setCustomLabel] = useState(() => {
+    const comp = derivedAddress.company || '';
+    return ['Home', 'Work'].includes(comp) ? '' : comp;
+  });
+
+  useEffect(() => {
+    if (derivedAddress.company) {
+      const comp = derivedAddress.company;
+      if (['Home', 'Work'].includes(comp)) {
+        setSelectedLabel(comp);
+        setCustomLabel('');
+      } else {
+        setSelectedLabel('Other');
+        setCustomLabel(comp);
+      }
+    }
+  }, [derivedAddress.company]);
+
   const availableProvinces = useMemo(() => {
     const country = countries.find((c: any) => c.isoCode === selectedCountryCode);
     return country?.availableProvinces || [];
@@ -294,16 +317,72 @@ export default function AddressEditor() {
           required
           type="text"
         />
-        <CustomInputFiled
-          label="Company"
-          aria-label="Company"
-          autoComplete="organization"
-          defaultValue={derivedAddress.company ?? ''}
-          id="company"
-          name="company"
-          placeholder="Company"
-          type="text"
-        />
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Address Label</label>
+          <div className="flex gap-2 mb-2">
+            {['Home', 'Work'].map((label) => {
+              const isActive = selectedLabel === label;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    setSelectedLabel(label);
+                  }}
+                  className={`px-4 py-2 text-sm font-medium border rounded-full transition duration-150 cursor-pointer ${
+                    isActive
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-gray-755 border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  {label === 'Home' ? '🏠 Home' : '💼 Work'}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedLabel(selectedLabel === 'Other' ? '' : 'Other');
+              }}
+              className={`px-4 py-2 text-sm font-medium border rounded-full transition duration-150 cursor-pointer ${
+                selectedLabel === 'Other'
+                  ? 'bg-black text-white border-black'
+                  : 'bg-white text-gray-755 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              📍 Other
+            </button>
+            {selectedLabel && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedLabel('');
+                  setCustomLabel('');
+                }}
+                className="px-4 py-2 text-sm font-medium text-red-650 hover:text-red-800 transition duration-150 cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {selectedLabel === 'Other' && (
+            <input
+              type="text"
+              placeholder="Enter custom label (e.g. Gym, Parent's House)"
+              value={customLabel}
+              onChange={(e) => setCustomLabel(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent text-sm bg-white text-gray-900"
+              required
+            />
+          )}
+
+          <input
+            type="hidden"
+            name="company"
+            value={selectedLabel === 'Other' ? customLabel : selectedLabel}
+          />
+        </div>
         <CustomInputFiled
           label="Address line"
           aria-label="Address line 1"
