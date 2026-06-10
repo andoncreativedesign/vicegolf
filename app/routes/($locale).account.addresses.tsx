@@ -283,10 +283,6 @@ export default function Addresses() {
     navigate('update', { state: { address: addressData, isEditMode: false } });
   };
 
-  useEffect(() => {
-    console.log('customer ',customer)
-  }, [customer])
-
   // When we're on the add or update routes, render the nested form-only view
   if (isFormRoute) {
     return (
