@@ -35,14 +35,8 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
     'Take your time, try the gear, and find the setup that suits you best.'
   ];
 
-  const cta1 = data?.hero?.cta1 || {
-    name: 'SHOP BALLS',
-    url: '/collections/golf-balls'
-  };
-  const cta2 = data?.hero?.cta2 || {
-    name: 'VICE PRO PLUS',
-    url: '/products/vice-golf-pro-plus-white'
-  };
+  const ctaButtons = data?.ctaButtons || [];
+  const secondaryCtaButtons = data?.secondaryCtaButtons || [];
 
   useEffect(() => {
     console.log('booking data', data?.booking);
@@ -179,29 +173,71 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
               )}
 
               {/* Shop Buttons */}
-              <div
-                className="flex flex-wrap gap-4 justify-center pt-6 animate-fade-up"
-                style={{ animationDelay: `${(paragraphs.length + (transformedProducts?.length ? (featuredProductTitle ? 2 : 1) : 0)) * 120}ms` }}
-              >
-                {cta1?.url && cta1?.name && (
-                  <Link
-                    to={cta1.url}
-                    className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <span>{cta1.name}</span>
-                  </Link>
-                )}
-                {cta2?.url && cta2?.name && (
-                  <Link
-                    to={cta2.url}
-                    className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 transition-all duration-200"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <span>{cta2.name}</span>
-                  </Link>
-                )}
-              </div>
+              {((ctaButtons && ctaButtons.length > 0) || (secondaryCtaButtons && secondaryCtaButtons.length > 0)) && (
+                <div className="flex flex-col items-center gap-4 pt-6">
+                  {ctaButtons && ctaButtons.length > 0 && (
+                    <div
+                      className="flex flex-wrap gap-4 justify-center animate-fade-up"
+                      style={{ animationDelay: `${(paragraphs.length + (transformedProducts?.length ? (featuredProductTitle ? 2 : 1) : 0)) * 120}ms` }}
+                    >
+                      {ctaButtons.map((btn, index) => {
+                        if (!btn.name || !btn.url) return null;
+                        return (
+                          <Link
+                            key={index}
+                            to={btn.url}
+                            className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 hover:opacity-90 transition-all duration-200"
+                            style={{
+                              textDecoration: 'none',
+                              ...(btn.backgroundColor ? {
+                                backgroundColor: btn.backgroundColor,
+                                borderColor: btn.textColor || 'transparent'
+                              } : {}),
+                              ...(btn.textColor ? {
+                                color: btn.textColor,
+                                ...(!btn.backgroundColor ? { borderColor: btn.textColor } : {})
+                              } : {})
+                            }}
+                          >
+                            <span>{btn.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {secondaryCtaButtons && secondaryCtaButtons.length > 0 && (
+                    <div
+                      className="flex flex-wrap gap-4 justify-center animate-fade-up"
+                      style={{ animationDelay: `${(paragraphs.length + (transformedProducts?.length ? (featuredProductTitle ? 2 : 1) : 0)) * 120 + 120}ms` }}
+                    >
+                      {secondaryCtaButtons.map((btn, index) => {
+                        if (!btn.name || !btn.url) return null;
+                        return (
+                          <Link
+                            key={index}
+                            to={btn.url}
+                            className="inline-flex items-center px-6 py-3 border border-gray-900 rounded-md text-gray-900 font-bold text-sm tracking-wide hover:bg-gray-50 hover:opacity-90 transition-all duration-200"
+                            style={{
+                              textDecoration: 'none',
+                              ...(btn.backgroundColor ? {
+                                backgroundColor: btn.backgroundColor,
+                                borderColor: btn.textColor || 'transparent'
+                              } : {}),
+                              ...(btn.textColor ? {
+                                color: btn.textColor,
+                                ...(!btn.backgroundColor ? { borderColor: btn.textColor } : {})
+                              } : {})
+                            }}
+                          >
+                            <span>{btn.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
