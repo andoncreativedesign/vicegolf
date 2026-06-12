@@ -65,6 +65,7 @@ type ProductCardProps = {
 export function VariantProductCard({ product, sessionDiscount }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes?.[0];
+
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [currentImage, setCurrentImage] = useState(image?.url || '');
@@ -72,7 +73,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [hoverDelayTimeout, setHoverDelayTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isOverVariants, setIsOverVariants] = useState(false);
-
+  const [selectedVariantId, setSelectedVariantId] = useState<string>(product.id?.split('/').pop() || product.id);
 
   const allVariants = useMemo(() => {
     const seenHandles = new Set();
@@ -84,7 +85,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
       variants.push({
         ...product,
         isMain: true,
-        id: product.handle,
+        // id: product.handle,
+        id: product.id,
         image: product.featuredImage || product.images?.nodes?.[0],
         variantImage: product.productType === "Golf Balls"
           ? product.variantImage || ""
@@ -100,7 +102,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
           variants.push({
             ...variant,
             isMain: false,
-            id: variant.handle,
+            // id: variant.handle,
+            id: variant.id,
             image: variant.featuredImage || variant.images?.nodes?.[0],
             variantImage: variant.variantImage || variant.featuredImage,
           });
@@ -122,7 +125,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     e.preventDefault();
     e.stopPropagation();
     setSelectedVariant(index);
-    setSelectedVariantHandle(variant.handle)
+    setSelectedVariantHandle(variant.handle);
+    setSelectedVariantId(variant.id?.split('/')?.pop() || variant.id);
     if (variant.image?.url) {
       setCurrentImage(variant.image?.url);
     }
@@ -392,8 +396,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
             {product.productType || 'Golf Equipment'}
           </p>
 
-          <div className="flex items-center py-2">
-            <YotpoRating productId={product.id?.split('/').pop() || product.id} />
+          <div className="flex items-center pt-2 pb-0">
+            <YotpoRating productId={selectedVariantId} />
           </div>
 
           {/* ball variants */}

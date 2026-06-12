@@ -59,11 +59,8 @@ export function YotpoRating({
     );
   }
 
-  if (
-    !rating ||
-    rating.total_review === 0
-  ) {
-    return null;
+  if (!rating || rating.total_review === 0) {
+    return <div className="min-h-[24px]" />;
   }
 
   const roundedRating = Math.round(
