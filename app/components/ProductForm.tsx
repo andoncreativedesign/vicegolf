@@ -39,6 +39,11 @@ export type ProductFormProps = {
   } | null;
   sessionDiscount?: any;
   product: any;
+  optionSubtext?: {
+    text?: string;
+    color?: string;
+    size?: string;
+  };
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -56,6 +61,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   collectionIds,
   sessionDiscount,
   product,
+  optionSubtext,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -274,8 +280,24 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         styling={getProductCustomizationStyleType(productType)}
         clubVariants={clubVariants}
         currentProductId={currentProductId}
+        optionSubtext={optionSubtext}
       />
       }
+
+      {/* Fallback Option Subtext for products without a 'size' option */}
+      {!productOptions?.some(opt => opt.name?.toLowerCase().includes('size')) && optionSubtext?.text && (
+        <div className="mb-4">
+          <p 
+            className="text-sm font-medium text-gray-900 mb-3"
+            style={{
+              color: optionSubtext.color || undefined,
+              fontSize: optionSubtext.size || undefined
+            }}
+          >
+            {optionSubtext.text}
+          </p>
+        </div>
+      )}
 
       {/* Quantity Selector - Only show for products that need quantity selection */}
       {shouldShowQuantitySelector(productType) && (

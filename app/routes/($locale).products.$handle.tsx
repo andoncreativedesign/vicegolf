@@ -488,6 +488,7 @@ export default function Product() {
                   colorVariants={colorVariants}
                   shippingDetails={shippingDetails}
                   currentProductId={product.id}
+                  optionSubtext={resolvedProductDetails?.optionSubtext}
                   collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
