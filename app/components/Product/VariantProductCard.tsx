@@ -313,10 +313,10 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
         {/* all other variants */}
         {!isGolfBall && isHovering && allVariants.length > 1 && (
           <div
-            className="absolute bottom-18 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
+            className="absolute bottom-25 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
             onClick={(e) => e.preventDefault()}
           >
-            <div className="grid grid-cols-6 w-full">
+            <div className="w-full flex justify-start gap-1">
               {allVariants
                 .sort((a, b) => {
                   // Move current variant to the start
@@ -387,7 +387,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
         <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
           <div className="relative">
-            <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[2.8rem]">
+            <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[1.8rem]">
               {product.title}
             </h3>
           </div>
