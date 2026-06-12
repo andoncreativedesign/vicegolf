@@ -34,6 +34,11 @@ export const productDetailsQuery = (gid: string) => `
         }
       }
     },
+    optionSubtext {
+      text,
+      color,
+      size
+    },
 
     // === MAIN ACCORDION (existing) ===
     accordionItems[]{
@@ -347,6 +352,11 @@ export interface ProductDetails {
     title?: string;
     description?: string;
     image?: { asset: SanityImageAsset };
+  };
+  optionSubtext?: {
+    text?: string;
+    color?: string;
+    size?: string;
   };
   accordionItems?: AccordionItem[];
   accordion2?: Accordion2;                    // ← NEW

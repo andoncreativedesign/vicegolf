@@ -39,6 +39,11 @@ export type ProductFormProps = {
   } | null;
   sessionDiscount?: any;
   product: any;
+  optionSubtext?: {
+    text?: string;
+    color?: string;
+    size?: string;
+  };
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -56,6 +61,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   collectionIds,
   sessionDiscount,
   product,
+  optionSubtext,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -274,6 +280,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         styling={getProductCustomizationStyleType(productType)}
         clubVariants={clubVariants}
         currentProductId={currentProductId}
+        optionSubtext={optionSubtext}
       />
       }
 
