@@ -151,6 +151,7 @@ const ProductCustomization = ({
           } `}>
           {option.name}
         </h5>
+        
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 min-w-[300px]">
           {option.optionValues.map((value: any) => {
             const {
@@ -203,6 +204,21 @@ const ProductCustomization = ({
             );
           })}
         </div>
+
+        {option.name?.toLowerCase().includes('size') && optionSubtext?.text && (
+          <div className="mt-4">
+            <p
+              className="text-sm font-medium text-gray-900 mb-3"
+              style={{
+                color: optionSubtext.color || undefined,
+                fontSize: optionSubtext.size || undefined
+              }}
+            >
+              {optionSubtext.text}
+            </p>
+          </div>
+        )}
+
       </div>
     );
   };
