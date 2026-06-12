@@ -284,6 +284,21 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       />
       }
 
+      {/* Fallback Option Subtext for products without a 'size' option */}
+      {!productOptions?.some(opt => opt.name?.toLowerCase().includes('size')) && optionSubtext?.text && (
+        <div className="mb-4">
+          <p 
+            className="text-sm font-medium text-gray-900 mb-3"
+            style={{
+              color: optionSubtext.color || undefined,
+              fontSize: optionSubtext.size || undefined
+            }}
+          >
+            {optionSubtext.text}
+          </p>
+        </div>
+      )}
+
       {/* Quantity Selector - Only show for products that need quantity selection */}
       {shouldShowQuantitySelector(productType) && (
         <div className="mb-6">
