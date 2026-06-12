@@ -170,9 +170,9 @@ export function ProductCard({ product: _product, disableSoldout = false, session
       </Link>
 
       {/* Product Info */}
-      <div className="flex flex-col flex-1 px-5 pb-5 pt-4">
+      <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
         <div className="mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[3rem]">
+          <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[1.8rem]">
             {product.title}
           </h3>
         </div>
@@ -184,12 +184,12 @@ export function ProductCard({ product: _product, disableSoldout = false, session
           </p>
         </div>
 
-        <div className="flex items-center py-2">
+        <div className="flex items-center pt-2 pb-0">
           <YotpoRating productId={product.id?.split('/').pop() || product.id} />
         </div>
 
         {/* Price */}
-        <div className="mt-auto pt-2">
+        <div className="pt-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               {finalCompareAtPrice > finalPrice && (
