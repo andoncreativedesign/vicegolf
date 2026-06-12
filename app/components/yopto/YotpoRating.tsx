@@ -35,9 +35,9 @@ export function YotpoRating({
           `https://api-cdn.yotpo.com/v1/widget/${appKey}/products/${productId}/reviews.json?page=1&per_page=1`
         );
 
-        const data = await response.json();
+        const data = await response.json() as any;
 
-        setRating(data.response.bottomline);
+        setRating(data?.response?.bottomline);
       } catch (error) {
         console.error(
           'Failed to fetch Yotpo rating',
@@ -59,11 +59,8 @@ export function YotpoRating({
     );
   }
 
-  if (
-    !rating ||
-    rating.total_review === 0
-  ) {
-    return null;
+  if (!rating || rating.total_review === 0) {
+    return <div className="min-h-[24px]" />;
   }
 
   const roundedRating = Math.round(
@@ -77,17 +74,31 @@ export function YotpoRating({
       </span>
 
       <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            size={22}
-            className={
-              star <= roundedRating
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-300'
-            }
-          />
-        ))}
+        {[1, 2, 3, 4, 5].map((star) => {
+          const isFull = rating.average_score >= star;
+          const isPartial = !isFull && rating.average_score > star - 1;
+          const rawPercentage = (rating.average_score - (star - 1)) * 100;
+          const fillPercentage = isPartial
+            ? Math.round(rawPercentage / 10) * 11
+            : 0;
+
+          return (
+            <div key={star} className="relative w-[22px] h-[22px]">
+              {/* Background empty star */}
+              <Star size={22} className="text-gray-300" />
+
+              {/* Foreground colored star */}
+              {(isFull || isPartial) && (
+                <div
+                  className="absolute top-0 left-0 overflow-hidden h-full"
+                  style={{ width: isFull ? '100%' : `${fillPercentage}%` }}
+                >
+                  <Star size={22} className="fill-yellow-400 text-yellow-400" />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <span className="text-md text-gray-500">

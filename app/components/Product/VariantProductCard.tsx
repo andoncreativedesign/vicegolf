@@ -65,6 +65,7 @@ type ProductCardProps = {
 export function VariantProductCard({ product, sessionDiscount }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes?.[0];
+
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [currentImage, setCurrentImage] = useState(image?.url || '');
@@ -72,7 +73,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [hoverDelayTimeout, setHoverDelayTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isOverVariants, setIsOverVariants] = useState(false);
-
+  const [selectedVariantId, setSelectedVariantId] = useState<string>(product.id?.split('/').pop() || product.id);
 
   const allVariants = useMemo(() => {
     const seenHandles = new Set();
@@ -84,7 +85,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
       variants.push({
         ...product,
         isMain: true,
-        id: product.handle,
+        // id: product.handle,
+        id: product.id,
         image: product.featuredImage || product.images?.nodes?.[0],
         variantImage: product.productType === "Golf Balls"
           ? product.variantImage || ""
@@ -100,7 +102,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
           variants.push({
             ...variant,
             isMain: false,
-            id: variant.handle,
+            // id: variant.handle,
+            id: variant.id,
             image: variant.featuredImage || variant.images?.nodes?.[0],
             variantImage: variant.variantImage || variant.featuredImage,
           });
@@ -122,7 +125,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     e.preventDefault();
     e.stopPropagation();
     setSelectedVariant(index);
-    setSelectedVariantHandle(variant.handle)
+    setSelectedVariantHandle(variant.handle);
+    setSelectedVariantId(variant.id?.split('/')?.pop() || variant.id);
     if (variant.image?.url) {
       setCurrentImage(variant.image?.url);
     }
@@ -309,10 +313,10 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
         {/* all other variants */}
         {!isGolfBall && isHovering && allVariants.length > 1 && (
           <div
-            className="absolute bottom-18 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
+            className="absolute bottom-25 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
             onClick={(e) => e.preventDefault()}
           >
-            <div className="grid grid-cols-6 w-full">
+            <div className="w-full flex justify-start gap-1">
               {allVariants
                 .sort((a, b) => {
                   // Move current variant to the start
@@ -383,7 +387,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
         <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
           <div className="relative">
-            <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[2.8rem]">
+            <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[1.8rem]">
               {product.title}
             </h3>
           </div>
@@ -392,8 +396,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
             {product.productType || 'Golf Equipment'}
           </p>
 
-          <div className="flex items-center py-2">
-            <YotpoRating productId={product.id?.split('/').pop() || product.id} />
+          <div className="flex items-center pt-2 pb-0">
+            <YotpoRating productId={selectedVariantId} />
           </div>
 
           {/* ball variants */}
