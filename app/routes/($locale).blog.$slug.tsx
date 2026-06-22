@@ -48,6 +48,12 @@ export default function BlogPost() {
 
       <header className="blog-post__header">
         <h1 className="blog-post__title">{post.title}</h1>
+        
+        {post.excerpt && (
+          <p className="blog-post__subtitle" style={{ fontSize: '1.2rem', marginTop: '0.5rem', marginBottom: '1.5rem', color: '#555' }}>
+            {post.excerpt}
+          </p>
+        )}
 
         <div className="blog-post__meta">
           <span className="blog-post__date">
