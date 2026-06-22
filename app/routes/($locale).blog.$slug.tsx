@@ -47,12 +47,10 @@ export default function BlogPost() {
           </div>
         )}
         <h1 className="blog-post__title">{post.title}</h1>
-        
+
         <div className="blog-post__meta">
-          <span className="blog-post__author">{post.author || 'Vice Golf Team'}</span>
-          <span className="blog-post__dot"></span>
           <span className="blog-post__date">
-            {new Intl.DateTimeFormat('en-US', {
+            Published: {new Intl.DateTimeFormat('en-US', {
               month: 'long',
               day: 'numeric',
               year: 'numeric'
@@ -62,21 +60,22 @@ export default function BlogPost() {
       </header>
 
       {post.heroImage && (
-        <div className="blog-post__hero">
-          <img 
-            src={post.heroImage.asset?.url || post.heroImage.url} 
-            alt={post.heroImage.alt || post.title} 
+        <div className="blog-post__hero" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)' }}>
+          <img
+            src={post.heroImage.asset?.url || post.heroImage.url}
+            alt={post.heroImage.alt || post.title}
+            style={{ width: '100%', maxHeight:'75vh',objectFit:'cover', objectPosition: 'center top' }}
           />
         </div>
       )}
 
       <div className="blog-post__body">
         {post.body ? (
-          <PortableText 
-            value={post.body} 
+          <PortableText
+            value={post.body}
             components={{
               types: {
-                image: ({value}) => {
+                image: ({ value }) => {
                   return (
                     <figure>
                       <img src={value.asset?.url || value.url} alt={value.alt || ''} />
@@ -94,7 +93,7 @@ export default function BlogPost() {
 
       {relatedPosts && relatedPosts.length > 0 && (
         <section className="blog-related">
-          <h2 className="blog-related__title">You might also like</h2>
+          <h2 className="blog-related__title">Discover More</h2>
           <div className="blog-related__grid">
             {relatedPosts.map(related => (
               <BlogCard key={related._id} post={related} />

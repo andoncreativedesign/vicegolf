@@ -287,7 +287,7 @@
 
 .blog-post {
   width: 100%;
-  max-width: 880px;
+  max-width: 90%;
   margin: 0 auto;
   padding: 2rem var(--blog-padding) 5rem;
 }
@@ -334,8 +334,8 @@
 
 .blog-post__title {
   font-family: var(--font-primary, 'Inter', sans-serif);
-  font-size: clamp(1.75rem, 4vw, 3rem);
-  font-weight: 800;
+font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 500;
   letter-spacing: -0.025em;
   line-height: 1.15;
   color: var(--blog-text);
@@ -370,7 +370,7 @@
 /* Hero Image */
 .blog-post__hero {
   width: 100%;
-  border-radius: var(--blog-radius);
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 3rem;
   box-shadow: var(--blog-shadow);
@@ -477,7 +477,7 @@
   font-weight: 700;
   color: var(--blog-text);
   margin: 0 0 2rem;
-  text-align: center;
+  text-align: left;
 }
 
 .blog-related__grid {

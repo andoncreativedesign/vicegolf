@@ -52,7 +52,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
         <h3 className="blog-card__title">{title}</h3>
         {excerpt && <p className="blog-card__excerpt">{excerpt}</p>}
         <div className="blog-card__meta">
-          <span className="blog-card__author">{author || 'Vice Golf Team'}</span>
+          {/* <span className="blog-card__author">{author || 'Vice Golf Team'}</span> */}
           <span className="blog-card__date">
             {publishedAt &&
               new Intl.DateTimeFormat('en-US', {
