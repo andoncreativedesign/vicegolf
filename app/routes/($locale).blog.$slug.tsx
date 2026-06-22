@@ -34,18 +34,19 @@ export default function BlogPost() {
 
   return (
     <article className="blog-post">
-      <Link to="/blog" className="blog-post__back" prefetch="intent">
-        &larr; Back to Blog
-      </Link>
+      <div className="blog-post__breadcrumb" style={{ marginBottom: '2rem', fontSize: '1rem' }}>
+        <Link to="/blog" prefetch="intent" style={{ textDecoration: 'none', color: 'inherit' }}>
+          Blog
+        </Link>
+        {post.categories && post.categories.length > 0 && (
+          <>
+            {' > '}
+            <span style={{ fontWeight: 'bold' }}>{post.categories[0].title}</span>
+          </>
+        )}
+      </div>
 
       <header className="blog-post__header">
-        {post.categories && post.categories.length > 0 && (
-          <div className="blog-post__categories">
-            {post.categories.map(c => (
-              <span key={c._id} className="blog-post__cat-badge">{c.title}</span>
-            ))}
-          </div>
-        )}
         <h1 className="blog-post__title">{post.title}</h1>
 
         <div className="blog-post__meta">
