@@ -376,6 +376,9 @@
   color: var(--blog-text-muted);
   /* Use standard muted gray */
   line-height: 1.4;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .blog-post__meta {
@@ -515,7 +518,8 @@
 /* ─── Related Posts Section ─────────────────────────────── */
 .blog-related {
   width: 100%;
-  max-width: 1400px; /* Align with the wider breadcrumb and site container */
+  max-width: 1400px;
+  /* Align with the wider breadcrumb and site container */
   margin: 0 auto;
   padding: 0 var(--blog-padding) 5rem;
 }
