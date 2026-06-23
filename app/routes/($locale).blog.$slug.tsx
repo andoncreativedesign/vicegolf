@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useLoaderData, Link } from 'react-router';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { getBlogPostBySlug, getRelatedPosts } from '~/lib/sanity/blog';
@@ -31,6 +32,17 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 
 export default function BlogPost() {
   const { post, relatedPosts } = useLoaderData<typeof loader>();
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = carouselRef.current.clientWidth * 0.8;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
     <article className="blog-post">
@@ -99,9 +111,17 @@ export default function BlogPost() {
 
       {relatedPosts && relatedPosts.length > 0 && (
         <section className="blog-related">
-          <h2 className="blog-related__title">Discover More</h2>
-          <div className="blog-related__grid">
-            {relatedPosts.map(related => (
+          <div className="blog-category-header">
+            <h2 className="blog-category-title">Discover More</h2>
+            {relatedPosts.length > 3 && (
+              <div className="blog-carousel-controls">
+                <button onClick={() => scroll('left')} className="blog-carousel-btn">&lt;</button>
+                <button onClick={() => scroll('right')} className="blog-carousel-btn">&gt;</button>
+              </div>
+            )}
+          </div>
+          <div className="blog-carousel" ref={carouselRef}>
+            {relatedPosts.map((related: any) => (
               <BlogCard key={related._id} post={related} />
             ))}
           </div>
