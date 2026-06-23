@@ -111,6 +111,26 @@
   gap: 0.5rem;
 }
 
+/* Hide controls on desktop if they don't exceed the 3 columns */
+.blog-carousel-controls[data-count="2"],
+.blog-carousel-controls[data-count="3"] {
+  display: none;
+}
+
+/* On tablet (2 columns), 3 items overflow so show controls */
+@media (max-width: 1024px) {
+  .blog-carousel-controls[data-count="3"] {
+    display: flex;
+  }
+}
+
+/* On mobile (1 column), 2 items overflow so show controls */
+@media (max-width: 640px) {
+  .blog-carousel-controls[data-count="2"] {
+    display: flex;
+  }
+}
+
 .blog-carousel-btn {
   width: 32px;
   height: 32px;

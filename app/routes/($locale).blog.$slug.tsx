@@ -113,8 +113,8 @@ export default function BlogPost() {
         <section className="blog-related">
           <div className="blog-category-header">
             <h2 className="blog-category-title">Discover More</h2>
-            {relatedPosts.length > 3 && (
-              <div className="blog-carousel-controls">
+            {relatedPosts.length > 1 && (
+              <div className="blog-carousel-controls" data-count={relatedPosts.length}>
                 <button onClick={() => scroll('left')} className="blog-carousel-btn">&lt;</button>
                 <button onClick={() => scroll('right')} className="blog-carousel-btn">&gt;</button>
               </div>

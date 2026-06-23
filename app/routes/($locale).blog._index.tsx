@@ -34,8 +34,8 @@ function CategorySection({ categoryGroup }: { categoryGroup: any }) {
     <section className="blog-category-section">
       <div className="blog-category-header">
         <h2 className="blog-category-title">{categoryGroup.title}</h2>
-        {categoryGroup.posts.length > 3 && (
-          <div className="blog-carousel-controls">
+        {categoryGroup.posts.length > 1 && (
+          <div className="blog-carousel-controls" data-count={categoryGroup.posts.length}>
             <button onClick={() => scroll('left')} className="blog-carousel-btn">&lt;</button>
             <button onClick={() => scroll('right')} className="blog-carousel-btn">&gt;</button>
           </div>
