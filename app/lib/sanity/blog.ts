@@ -54,7 +54,8 @@ export const blogPostBySlugQuery = `*[_type == "blogPost" && slug.current == $sl
       }
     }
   },
-  seoDescription
+  seoDescription,
+  showDiscoverMore
 }`;
 
 export const relatedPostsQuery = `*[_type == "blogPost" && slug.current != $slug && count(categories[@._ref in $categoryIds]) > 0] | order(publishedAt desc) [0...4] {
@@ -110,6 +111,7 @@ export interface SanityBlogPost {
   categories?: SanityBlogCategory[];
   body?: any[];
   seoDescription?: string;
+  showDiscoverMore?: boolean;
 }
 
 // ─── Fetch Functions ────────────────────────────────────────────

@@ -109,7 +109,7 @@ export default function BlogPost() {
         )}
       </div>
 
-      {relatedPosts && relatedPosts.length > 0 && (
+      {post.showDiscoverMore !== false && relatedPosts && relatedPosts.length > 0 && (
         <section className="blog-related">
           <div className="blog-category-header">
             <h2 className="blog-category-title">Discover More</h2>
