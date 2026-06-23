@@ -158,6 +158,7 @@ function FooterContent({
               {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Delivery & Shipping</NavLink></li> */}
               {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors"style={{ textDecoration: 'none' }}>Refund Policy</NavLink></li> */}
               {/* <li><NavLink to="/" className="!text-white hover:!text-gray-300 transition-colors">Store Locator</NavLink></li> */}
+              <li><NavLink to="/blog" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Blog</NavLink></li>
               <li><NavLink to="/customs-guide" className="!text-white hover:!text-gray-100 transition-colors" style={{ textDecoration: 'none' }}>Customs Guide</NavLink></li>
             </ul>
             <p className="!text-white text-sm mt-2">For any queries,</p>
