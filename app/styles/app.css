@@ -2251,48 +2251,19 @@ button.reset:hover:not(:has(> *)) {
    Yotpo Widget & Tailwind CSS Conflict Resets
    ========================================================================== */
 
-/* 1. Modal Positioning & Mask fixes */
-.yotpo-widget-instance .yotpo-modal-dialog,
-[class*="yotpo-modal-dialog"] {
-  position: fixed !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  z-index: 99999 !important;
-  width: calc(100% - 32px) !important;
-  max-width: 600px !important;
-  box-sizing: border-box !important;
+
+
+/* Ensure the actual modal dialog retains its white background */
+.yotpo-modal-dialog,
+[class*="yotpo-modal-dialog"],
+[class*="yotpo-modal-content"],
+[class*="yotpo-modal-body"] {
+  background-color: #ffffff !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
 }
 
-.yotpo-modal-mask,
-.yotpo-modal-wrapper,
-.yotpo-widget-instance .yotpo-modal-mask,
-[class*="yotpo-modal-mask"],
-[class*="yotpo-modal-wrapper"] {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  transform: none !important;
-  z-index: 99998 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
 
-/* Only apply dark background to the mask, let wrapper be transparent to avoid double-dark overlays */
-.yotpo-modal-mask,
-.yotpo-widget-instance .yotpo-modal-mask,
-[class*="yotpo-modal-mask"] {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-}
-
-.yotpo-modal-wrapper,
-[class*="yotpo-modal-wrapper"] {
-  background-color: transparent !important;
-}
 
 /* 2. Tailwind Global Reset Overrides */
 /* Tailwind sets SVG to display: block, which squishes and cuts off Yotpo's star rating SVGs */
@@ -2313,4 +2284,36 @@ button.reset:hover:not(:has(> *)) {
 [class*="yotpo"] .yotpo-star-rating-icon svg {
   width: 100% !important;
   height: 100% !important;
+}
+
+/* 4. Form Layout & Full-Width Inputs (Fixes desktop right-side white space) */
+form[class*="yotpo-review-form"],
+.yotpo-review-form {
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+form[class*="yotpo-review-form"] .yotpo-input-wrapper,
+.yotpo-review-form .yotpo-input-wrapper,
+form[class*="yotpo-review-form"] .yotpo-new-input-container,
+.yotpo-review-form .yotpo-new-input-container,
+form[class*="yotpo-review-form"] textarea,
+.yotpo-review-form textarea,
+form[class*="yotpo-review-form"] input[type="text"],
+.yotpo-review-form input[type="text"],
+form[class*="yotpo-review-form"] input[type="email"],
+.yotpo-review-form input[type="email"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure the submit button / footer is nicely centered */
+[class*="yotpo-review-form"] .form-footer,
+[class*="yotpo-review-form"] .yotpo-bottom-line {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 1rem !important;
 }
