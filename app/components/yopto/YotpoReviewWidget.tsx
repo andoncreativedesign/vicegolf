@@ -23,8 +23,11 @@ export function YotpoReviewWidget({
     );
 
     const initialize = () => {
-      if (typeof window !== 'undefined' && (window as any).yotpoWidgetsContainer) {
-        (window as any).yotpoWidgetsContainer?.initWidgets();
+      if (typeof window !== 'undefined') {
+        const container = (window as any).yotpoWidgetsContainer;
+        if (container && typeof container.initWidgets === 'function') {
+          container.initWidgets();
+        }
       }
     };
 
