@@ -82,15 +82,14 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     // Add main product first if not already in the set
     if (!seenHandles.has(product.handle)) {
       seenHandles.add(product.handle);
+      const mainVariantImage = product.variantImage?.reference?.image || product.variantImage || null;
       variants.push({
         ...product,
         isMain: true,
         // id: product.handle,
         id: product.id,
         image: product.featuredImage || product.images?.nodes?.[0],
-        variantImage: product.productType === "Golf Balls"
-          ? product.variantImage || ""
-          : product.variantImage || product.featuredImage,
+        variantImage: mainVariantImage || product.featuredImage || "",
       });
     }
 
@@ -99,13 +98,14 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
       product.variantFamilyProducts.forEach(variant => {
         if (!seenHandles.has(variant.handle)) {
           seenHandles.add(variant.handle);
+          const famVariantImage = variant.variantImage?.reference?.image || variant.variantImage || null;
           variants.push({
             ...variant,
             isMain: false,
             // id: variant.handle,
             id: variant.id,
             image: variant.featuredImage || variant.images?.nodes?.[0],
-            variantImage: variant.variantImage || variant.featuredImage,
+            variantImage: famVariantImage || variant.featuredImage || "",
           });
         }
       });

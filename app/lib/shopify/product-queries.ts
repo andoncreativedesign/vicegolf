@@ -97,6 +97,20 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
           badge_colors: metafield(namespace: "custom", key: "badge_colors") {
             value
           }
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
           featuredImage {
             id
             url
@@ -428,6 +442,20 @@ fragment ProductItem on Product {
       id
     }
   }
+  variantImage: metafield(namespace: "custom", key: "variant_image") {
+    reference {
+      ... on MediaImage {
+        id
+        image {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
+  }
     featuredImage {
     id
     altText
@@ -718,6 +746,20 @@ fragment ProductCardFragment on Product {
     vendor
     badge_colors: metafield(namespace: "custom", key: "badge_colors") {
       value
+    }
+    variantImage: metafield(namespace: "custom", key: "variant_image") {
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
     }
     featuredImage {
       id
