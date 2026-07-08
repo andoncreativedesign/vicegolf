@@ -94,27 +94,29 @@ export function ProductGrid({
             <button
               onClick={scrollLeft}
               disabled={!canScrollLeft}
-              className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200 ${canScrollLeft
-                ? 'border-gray-200 hover:border-black text-gray-800 cursor-pointer'
-                : 'border-gray-100 text-gray-300 cursor-not-allowed opacity-50'
+              className={`rounded-full p-1 border-0 w-10 h-10 flex items-center justify-center transition-all duration-200 ${canScrollLeft
+                ? 'bg-[#e2e2e2] hover:bg-[#d6d6d6] text-[#787878] cursor-pointer'
+                : 'bg-[#f6f6f6] text-[#C0C0C0] cursor-not-allowed'
                 }`}
               aria-label="Scroll left"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" className="w-8 h-8 transition-transform rotate-90">
+                <title>Caret Left</title>
+                <path d="M14 8L10 12L6 8" strokeWidth={1.25} />
               </svg>
             </button>
             <button
               onClick={scrollRight}
               disabled={!canScrollRight}
-              className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full border bg-white shadow-sm transition-all duration-200 ${canScrollRight
-                ? 'border-gray-200 hover:border-black text-gray-800 cursor-pointer'
-                : 'border-gray-100 text-gray-300 cursor-not-allowed opacity-50'
+              className={`rounded-full p-1 border-0 w-10 h-10 flex items-center justify-center transition-all duration-200 ${canScrollRight
+                ? 'bg-[#e2e2e2] hover:bg-[#d6d6d6] text-[#787878] cursor-pointer'
+                : 'bg-[#f6f6f6] text-[#C0C0C0] cursor-not-allowed'
                 }`}
               aria-label="Scroll right"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" className="w-8 h-8 transition-transform -rotate-90">
+                <title>Caret Right</title>
+                <path d="M14 8L10 12L6 8" strokeWidth={1.25} />
               </svg>
             </button>
           </div>
