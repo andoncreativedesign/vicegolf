@@ -2,6 +2,8 @@ import { redirect, useLoaderData, Link, useNavigate, useSearchParams, useNavigat
 import type { Route } from './+types/collections.$handle';
 import { SortFilter } from '~/components/SortFilter';
 import { getPaginationVariables, Analytics } from '@shopify/hydrogen';
+import { getCollectionCardSection } from '~/lib/sanity/products';
+import { CollectionCardSection } from '~/components/collection/CollectionCardSection';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import { ProductCard } from '~/components/ProductCard';
 import { VariantProductCard } from '~/components/Product/VariantProductCard';
@@ -344,11 +346,13 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             edges: updatedEdges
         }
     };
+const cardSection = await getCollectionCardSection(trueCollectionHandle || decodedHandle.toLowerCase().replace(/\s+/g, '-'));
 
     return {
         collection: finalCollection,
         handle: displayTitle,
-        listing: listingData
+        listing: listingData,
+        cardSection
     };
 }
 
@@ -415,7 +419,7 @@ function ProductGrid({ products, sessionDiscount }: { products: any, sessionDisc
 }
 
 export default function Collection() {
-    const { collection, handle, listing } = useLoaderData<typeof loader>();
+    const { collection, handle, listing, cardSection } = useLoaderData<typeof loader>();
     const [sessionDiscount, setSessionDiscount] = useState<any>(null);
 
     useEffect(() => {
@@ -465,6 +469,10 @@ export default function Collection() {
                         )}
                     </div>
 
+                    {/* Collection Card Section */}
+                    {cardSection && cardSection.length > 0 && (
+                        <CollectionCardSection cards={cardSection} />
+                    )}
                     {/* Breadcrumbs */}
                     <nav className="breadcrumb-navigation mb-6 text-base">
                         <ol className="flex items-center space-x-2">
