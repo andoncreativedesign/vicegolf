@@ -891,6 +891,7 @@ export interface UIColorVariant {
     url: string;
     altText: string | null;
   } | null;
+  categoryVariant?: string | null;
 }
 
 export interface ClubVariant {
@@ -998,6 +999,10 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
             namespace
             key
             type
+            value
+          }
+
+          category_variant: metafield(namespace: "custom", key: "category_variant") {
             value
           }
 
