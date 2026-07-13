@@ -15,6 +15,7 @@ import { useState, useEffect, forwardRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { ClubVariant, UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
+import VariantGroup from './Product/VariantGroup';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
@@ -268,11 +269,21 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
-        <ColorVariant
-          productType={productType?.toLowerCase()}
-          colorVariants={colorVariants}
-          selectedVariant={selectedVariant}
-        />
+        <>
+          {true ? (
+            <VariantGroup
+
+            colorVariants={colorVariants}
+              selectedVariant={selectedVariant}
+            />
+          ) : (
+            <ColorVariant
+              productType={productType?.toLowerCase()}
+              colorVariants={colorVariants}
+              selectedVariant={selectedVariant}
+            />
+          )}
+        </>
       )}
 
       {<ProductCustomization

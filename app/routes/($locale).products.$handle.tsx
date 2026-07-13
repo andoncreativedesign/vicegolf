@@ -177,6 +177,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             title: node.title,
             handle: node.handle,
             featuredImage: finalImage,
+            categoryVariant: node.category_variant?.value || null,
           };
         });
       }
