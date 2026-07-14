@@ -272,8 +272,8 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         <>
           {true ? (
             <VariantGroup
-
-            colorVariants={colorVariants}
+              productType={productType?.toLowerCase()}
+              colorVariants={colorVariants}
               selectedVariant={selectedVariant}
             />
           ) : (
