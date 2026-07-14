@@ -45,6 +45,7 @@ export type ProductFormProps = {
     color?: string;
     size?: string;
   };
+  specialVariants?: UIColorVariant[];
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -63,6 +64,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   sessionDiscount,
   product,
   optionSubtext,
+  specialVariants,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -270,7 +272,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <>
-          {true ? (
+          {specialVariants?.length ? (
             <VariantGroup
               productType={productType?.toLowerCase()}
               colorVariants={colorVariants}
@@ -284,6 +286,15 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
             />
           )}
         </>
+      )}
+
+      {specialVariants && specialVariants.length > 0 && (
+        <ColorVariant
+          productType={productType?.toLowerCase()}
+          colorVariants={specialVariants}
+          selectedVariant={selectedVariant}
+          label="Special & Limited Editions"
+        />
       )}
 
       {<ProductCustomization

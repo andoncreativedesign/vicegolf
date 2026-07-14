@@ -1005,6 +1005,11 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
           category_variant: metafield(namespace: "custom", key: "category_variant") {
             value
           }
+          
+          # type for indentifying special variant
+          variant_type: metafield(namespace: "custom", key: "variant_type") {
+            value
+          }
 
           # Product-level: Variant Image metafield 
           variantImage: metafield(namespace: "custom", key: "variant_image") {
