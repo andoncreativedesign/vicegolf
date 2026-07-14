@@ -498,6 +498,11 @@ export default function Product() {
                   sessionDiscount={sessionDiscount}
                   product={product}
                   specialVariants={specialVariants}
+                  selectedSpecialVariant={
+                    specialVariants?.some((v: any) => v.handle === product?.handle) 
+                      ? selectedVariant 
+                      : null
+                  }
                 />
               )}
             </Await>
