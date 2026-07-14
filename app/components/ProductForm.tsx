@@ -140,8 +140,15 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     },
   ];
   const handleCustomQuantity = (q: number) => {
-    setQuantity(Math.max(1, q));
-    if (selectedTier !== 'custom') {
+    const newQuantity = Math.max(1, q);
+    setQuantity(newQuantity);
+    
+    // Check if the new quantity matches any available Dozen tier
+    const matchingTier = pricingTiers.find(tier => parseInt(tier.key) === newQuantity);
+    
+    if (matchingTier) {
+      setSelectedTier(matchingTier.key);
+    } else {
       setSelectedTier('custom');
     }
   };
@@ -315,7 +322,12 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         <div className="mb-6">
           <QuantitySelector
             selectedTier={selectedTier}
-            setSelectedTier={setSelectedTier}
+            setSelectedTier={(tier) => {
+              setSelectedTier(tier);
+              if (tier !== 'custom') {
+                setQuantity(parseInt(tier));
+              }
+            }}
             quantity={quantity}
             setQuantity={handleCustomQuantity}
             pricingTiers={pricingTiers}
@@ -325,7 +337,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         </div>
       )}
 
-      {bundleBtn && (
+      {/* bundleBtn && (
         <div className="mb-6 md:max-w-[399px]">
           <button
             className="w-full cursor-pointer bg-white text-black border border-black py-4 px-6 rounded-full font-medium text-base transition-all duration-300"
@@ -334,7 +346,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
             {bundleBtn?.text || 'not text'}
           </button>
         </div>
-      )}
+      ) */}
 
       {/* Add to Cart Button */}
       <div className="mb-6">

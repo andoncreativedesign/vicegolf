@@ -81,14 +81,10 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
       <div className="space-y-4">
         {option.optionValues.map((value, index) => {
 
-          const pricePerDozen = index === 0 ? null :  getPricePerItem(value.variant?.price?.amount, value?.name, value.variant?.price?.currencyCode);
-          const totalPrice = value.variant?.price?.amount
-            ? formatPrice(value.variant.price.amount, value.variant.price.currencyCode)
-            : null
-          const originalPrice = index === 0 ? null : getOriginalDozenPrice(value.name, value.variant?.price?.currencyCode)
-          const savings = index === 0 ? null : getDozenSavedPrice(value.name, value.variant.price.amount)
+          const pricePerDozenText = value.variant?.price?.amount ? getPricePerItem(value.variant.price.amount, value.name, value.variant.price.currencyCode) : null;
+          const totalPriceText = value.variant?.price?.amount ? `$${formatPrice(value.variant.price.amount)}` : null;
+          const originalPricePerDozenText = index === 0 || !singleDozenPrice ? null : `$${singleDozenPrice.toFixed(2)}/dz`;
 
-          const isBestDeal = value === bestDealValue && savings;
           const {
             name,
             handle,
@@ -97,75 +93,59 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
             available,
             exists,
             isDifferentProduct,
-
-            swatch,
           } = value;
 
           const optionContent = (
             <div className="w-full">
-              <div className="flex items-start justify-between w-full">
+              <div className="flex items-center justify-between w-full">
                 <div className="flex items-start gap-3">
                   <div className="pt-0.5">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selected
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300 bg-white'
-                        }`}
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                        selected
+                          ? 'border-black bg-white'
+                          : 'border-gray-400 bg-white'
+                      }`}
                     >
                       {selected && (
-                        <div className="w-2.5 h-2.5 rounded-full" />
+                        <div className="w-2 h-2 rounded-full bg-black" />
                       )}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base font-bold text-gray-900">
+                  <div className="flex-1 flex flex-col justify-center h-full">
+                    <div className="relative">
+                      <span className="text-sm font-semibold text-gray-900 leading-none">
                         {name}
                       </span>
                       {index === option?.optionValues?.length - 1 && (
-                        <div className="absolute -top-3 left-2">
-                          <span className="font-semibold bg-yellow-300 text-black px-2 py-0.5 rounded-md border border-red-200">
+                        <div className="absolute -top-6 left-0">
+                          <span className="font-semibold bg-[#FFA500] text-black text-xs px-2.5 py-0.5 rounded-full whitespace-nowrap">
                             Top Savings
                           </span>
                         </div>
                       )}
                     </div>
 
-                    {pricePerDozen && (
-                      <div className="text-sm text-gray-500 mt-0.5">
-                        <span className="flex items-center">
-                          <AedIcon className="mr-1" />
-                          {pricePerDozen}
-                        </span>
+                    {index > 0 && totalPriceText && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {totalPriceText}
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="relative">
-                    {savings && (
-                      <div className="absolute text-sm -top-7 -right-2 bg-[#DA1000] text-white font-semibold px-2 py-0.5 rounded-md border border-red-700 shadow-sm whitespace-nowrap">
-                        Save <span className="flex items-center"><AedIcon className="mx-0.5" />{savings}</span>
-                      </div>
-                    )}
-                    <div className={`text-lg font-bold ${index===0 ? 'text-gray-800' : 'text-[#DA1000]'}`}>
-                      <span className="flex items-center">
-                        <AedIcon className="mr-1" />
-                        {formatPrice(value.variant.price.amount)}
-                      </span>
+                  <div className="flex flex-col items-end">
+                    <div className="text-sm font-bold text-gray-900">
+                      {pricePerDozenText}
                     </div>
-                    {originalPrice && (
-                      <div className="line-through text-sm text-gray-500">
-                        <span className="flex items-center">
-                          <AedIcon className="mr-1" />
-                          {originalPrice}
-                        </span>
+                    {originalPricePerDozenText && (
+                      <div className="line-through text-xs text-gray-400 mt-0.5">
+                        {originalPricePerDozenText}
                       </div>
                     )}
                   </div>
                 </div>
-
               </div>
             </div>
           );
@@ -174,10 +154,11 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
             return (
               <Link
                 key={option.name + name}
-                className={`relative flex items-start w-full p-4 rounded-xl border-2 transition-all duration-200 ${selected
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  } ${!available ? 'opacity-40 grayscale' : ''} ${isBestDeal ? 'ring-2 ring-yellow-400' : ''}`}
+                className={`relative flex items-center w-full p-3 rounded border transition-all duration-200 ${
+                  selected
+                    ? 'border-[#FFA500] bg-white ring-1 ring-[#FFA500]'
+                    : 'border-gray-300 hover:border-gray-400 bg-white'
+                } ${!available ? 'opacity-40 grayscale' : ''}`}
                 prefetch="intent"
                 preventScrollReset
                 replace
@@ -191,11 +172,11 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
               <button
                 key={option.name + name}
                 type="button"
-                className={`relative flex items-center justify-between w-full p-4 rounded-xl border transition-all duration-200 ${selected
-                  ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  } ${!exists ? 'opacity-40 cursor-not-allowed' : ''
-                  } `}
+                className={`relative flex items-center w-full p-3 rounded border transition-all duration-200 ${
+                  selected
+                    ? 'border-[#FFA500] bg-white ring-1 ring-[#FFA500]'
+                    : 'border-gray-300 hover:border-gray-400 bg-white'
+                } ${!exists ? 'opacity-40 cursor-not-allowed' : ''}`}
                 disabled={!exists}
                 onClick={() => {
                   if (!selected) {
