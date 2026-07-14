@@ -139,6 +139,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
   const family = product?.metafields?.find((item: any) => item?.key === "family")
   let colorVariants: UIColorVariant[] = [];
+  let specialVariants: UIColorVariant[] = [];
   if (product.metafield?.value) {
     try {
       const FAMILY = product.metafield.value.trim();
@@ -181,7 +182,8 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
           };
         });
       }
-      colorVariants = mapColorVariants(colorVariantsRes)
+      colorVariants = mapColorVariants(colorVariantsRes.filter((edge: any) => edge.node.variant_type?.value !== 'special'))
+      specialVariants = mapColorVariants(colorVariantsRes.filter((edge: any) => edge.node.variant_type?.value === 'special'))
       // Include all variants, we'll handle the current product styling in the UI
       // The current product will be identified by matching the handle
     } catch (error) {
@@ -207,7 +209,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       console.error('Error fetching club variants:', error);
     }
   }
-  return { product, colorVariants, clubVariants, bundleBtn };
+  return { product, colorVariants, clubVariants, bundleBtn, specialVariants };
 }
 
 async function loadDeferredData({ context, request, product }: Route.LoaderArgs & { product?: any }) {
@@ -253,7 +255,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   return { recommendedProducts, shippingDetails, showBestSellers };
 }
 export default function Product() {
-  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails, url, publicStoreDomain } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails, url, publicStoreDomain, specialVariants } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   const [sessionDiscount, setSessionDiscount] = useState<any>(null);
@@ -495,6 +497,12 @@ export default function Product() {
                   bundleBtn={bundleBtn}
                   sessionDiscount={sessionDiscount}
                   product={product}
+                  specialVariants={specialVariants}
+                  selectedSpecialVariant={
+                    specialVariants?.some((v: any) => v.handle === product?.handle) 
+                      ? selectedVariant 
+                      : null
+                  }
                 />
               )}
             </Await>
