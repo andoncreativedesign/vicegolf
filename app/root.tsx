@@ -96,6 +96,9 @@ export async function loader(args: Route.LoaderArgs) {
   // 1. If a discount starts with 'Vice ', assume it is a tier discount.
   // 2. All other automatic discounts (global ones) are shown to everyone.
   const eligibleDiscounts = (automaticDiscounts || []).filter((d: any) => {
+    // Treat volume bundle discounts as global
+    if (d.minQuantity && d.minQuantity > 1) return true;
+
     const isTierDiscount = d.title && d.title.toLowerCase().startsWith('vice');
 
     if (!isTierDiscount) return true; // Global discount
@@ -271,7 +274,8 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
             eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
             eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
             appliesToAll: items?.__typename === 'AllDiscountItems',
-            appliesOnEachItem: value?.percentage ? true : (value?.appliesOnEachItem ?? false)
+            appliesOnEachItem: value?.percentage ? true : (value?.appliesOnEachItem ?? false),
+            minQuantity: ad.minimumRequirement?.greaterThanOrEqualToQuantity ? parseInt(ad.minimumRequirement.greaterThanOrEqualToQuantity) : 1
           };
         }
 

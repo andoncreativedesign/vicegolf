@@ -34,6 +34,7 @@ export function QuantitySelector({
       <div className="flex flex-col gap-4">
         {/* Pricing Tiers */}
         {/* Pricing Tiers */}
+        {pricingTiers.length > 0 && (
         <div className="space-y-4">
           {pricingTiers.map((tier, index) => {
             const isSelected = selectedTier === tier.key;
@@ -43,27 +44,9 @@ export function QuantitySelector({
             const tierNum = parseInt(tier.key);
             const priceNum = parseFloat(tier.price.replace(/[^0-9.]/g, ''));
             const oldPriceNum = tier.oldPrice ? parseFloat(tier.oldPrice.replace(/[^0-9.]/g, '')) : (unitPrice * tierNum);     
-            // Apply mock discounts if they don't exist from Shopify (to match design)
-            // If the unitPrice is applied uniformly, we create a tiered discount for display
-            let displayPricePerDozen = unitPrice;
-            let displayOldPricePerDozen: number | null = null;
-            let displayTotalPrice = priceNum;
-            
-            // Simulate Vice Golf tiered pricing if unitPrice is constant
-            if (tierNum === 3 && priceNum === unitPrice * 3) {
-                displayPricePerDozen = unitPrice - 2; // e.g. 41.99 -> 39.99
-                displayOldPricePerDozen = unitPrice;
-                displayTotalPrice = displayPricePerDozen * 3;
-            } else if (tierNum === 6 && priceNum === unitPrice * 6) {
-                displayPricePerDozen = unitPrice - 5; // e.g. 41.99 -> 36.99
-                displayOldPricePerDozen = unitPrice;
-                displayTotalPrice = displayPricePerDozen * 6;
-            } else {
-                displayPricePerDozen = priceNum / tierNum;
-                if (oldPriceNum > priceNum) {
-                    displayOldPricePerDozen = oldPriceNum / tierNum;
-                }
-            }
+            // Use total price instead of per-dozen price
+            const displayPrice = priceNum;
+            const displayOldPrice = oldPriceNum > priceNum ? oldPriceNum : null;
 
             const formatMoney = (amount: number) => {
               return new Intl.NumberFormat('en-US', {
@@ -72,9 +55,8 @@ export function QuantitySelector({
               }).format(amount);
             };
 
-            const pricePerDozenText = `${formatMoney(displayPricePerDozen)}/dz`;
-            const originalPricePerDozenText = displayOldPricePerDozen ? `${formatMoney(displayOldPricePerDozen)}/dz` : null;
-            const totalPriceText = tierNum > 1 ? formatMoney(displayTotalPrice) : null;
+            const priceText = formatMoney(displayPrice);
+            const originalPriceText = displayOldPrice ? formatMoney(displayOldPrice) : null;
 
             return (
               <label
@@ -113,7 +95,7 @@ export function QuantitySelector({
                       <span className="text-sm font-semibold text-gray-900 leading-none">
                         {tier.label}
                       </span>
-                      {isTopSavings && (
+                      {isTopSavings && pricingTiers.length > 1 && (
                         <div className="absolute -top-6 left-0">
                           <span className="font-semibold bg-[#FFA500] text-black text-xs px-2.5 py-0.5 rounded-full whitespace-nowrap">
                             Top Savings
@@ -121,23 +103,17 @@ export function QuantitySelector({
                         </div>
                       )}
                     </div>
-
-                    {totalPriceText && (
-                      <div className="text-xs text-gray-400 mt-1">
-                        {totalPriceText}
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 <div className="text-right">
                   <div className="flex flex-col items-end">
                     <div className="text-sm font-bold text-gray-900">
-                      {pricePerDozenText}
+                      {priceText}
                     </div>
-                    {originalPricePerDozenText && (
+                    {originalPriceText && (
                       <div className="line-through text-xs text-gray-400 mt-0.5">
-                        {originalPricePerDozenText}
+                        {originalPriceText}
                       </div>
                     )}
                   </div>
@@ -146,13 +122,16 @@ export function QuantitySelector({
             );
           })}
         </div>
+        )}
 
         {/* Divider */}
+        {pricingTiers.length > 0 && (
         <div className="relative flex items-center py-2">
           <div className="flex-grow border-t border-gray-200"></div>
           <span className="flex-shrink mx-4 text-sm text-gray-500">or</span>
           <div className="flex-grow border-t border-gray-200"></div>
         </div>
+        )}
 
         {/* Custom Quantity Selector */}
         <div className="space-y-4">

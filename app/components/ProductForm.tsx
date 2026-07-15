@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -79,6 +79,15 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const [selectedTier, setSelectedTier] = useState('1');
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
 
+  const rootData = useRouteLoaderData<any>('root');
+  const automaticDiscounts = rootData?.automaticDiscounts || [];
+
+  const applicableDiscounts = automaticDiscounts.filter((d: any) => {
+    const isEligibleProduct = d.eligibleProducts?.includes(currentProductId);
+    const isEligibleCollection = collectionIds?.some((id: string) => d.eligibleCollections?.includes(id));
+    return d.appliesToAll || isEligibleProduct || isEligibleCollection;
+  });
+
   // 1. Calculate price with membership discount
   let membershipPrice = originalUnitPrice;
   if (productAmount > 0) {
@@ -113,36 +122,72 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     unitCompareAmount = originalUnitPrice;
   }
 
-  const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
+  const getBestPriceForQuantity = (qty: number) => {
+    let bestTotal = unitPriceAmount * qty;
+    for (const d of applicableDiscounts) {
+      if (d.minQuantity && qty >= d.minQuantity) {
+        let total = originalUnitPrice * qty;
+        if (d.percentage) {
+           total = total * (1 - d.percentage);
+        } else if (d.amount) {
+           if (d.appliesOnEachItem) {
+               total = Math.max(0, originalUnitPrice - d.amount) * qty;
+           } else {
+               total = Math.max(0, total - d.amount);
+           }
+        }
+        if (total < bestTotal) bestTotal = total;
+      }
+    }
+    return bestTotal;
+  };
+
+  const totalPriceAmount = getBestPriceForQuantity(totalQuantityDozens);
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = unitCompareAmount > unitPriceAmount;
+  const showCompare = unitCompareAmount > unitPriceAmount || totalPriceAmount < (unitPriceAmount * totalQuantityDozens);
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currencyCode,
     }).format(amount);
   };
-  const pricingTiers = [
-    {
-      key: '1',
-      label: '1 dozen',
-      price: formatPrice(unitPriceAmount),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount) : undefined
-    },
-    {
-      key: '3',
-      label: '3 dozen',
-      price: formatPrice(unitPriceAmount * 3),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount * 3) : undefined
-    },
-    {
-      key: '6',
-      label: '6 dozen',
-      price: formatPrice(unitPriceAmount * 6),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount * 6) : undefined
-    },
-  ];
+
+  let hasVolumeDiscount = false;
+  applicableDiscounts.forEach((d: any) => {
+    if (d.minQuantity && d.minQuantity > 1) {
+      hasVolumeDiscount = true;
+    }
+  });
+
+  let tierQuantities: number[] = [];
+  if (hasVolumeDiscount) {
+    tierQuantities = [1];
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tierQuantities.includes(d.minQuantity)) {
+        tierQuantities.push(d.minQuantity);
+      }
+    });
+  }
+  tierQuantities.sort((a, b) => a - b);
+
+  const isGolfBall = productType?.toLowerCase().includes('ball') || false;
+  const getUnitLabel = (qty: number) => {
+    if (isGolfBall) return 'dozen';
+    return qty === 1 ? 'item' : 'items';
+  };
+
+  const pricingTiers = tierQuantities.map(qty => {
+    const price = getBestPriceForQuantity(qty);
+    const oldPriceTotal = unitCompareAmount * qty;
+    return {
+      key: qty.toString(),
+      label: `${qty} ${getUnitLabel(qty)}`,
+      price: formatPrice(price),
+      oldPrice: (showCompare || oldPriceTotal > price) ? formatPrice(oldPriceTotal) : undefined
+    };
+  });
+
   const handleCustomQuantity = (q: number) => {
     const newQuantity = Math.max(1, q);
     setQuantity(newQuantity);
