@@ -179,12 +179,15 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const pricingTiers = tierQuantities.map(qty => {
     const price = getBestPriceForQuantity(qty);
+    const unitPrice = price / qty;
     const oldPriceTotal = unitCompareAmount * qty;
     return {
       key: qty.toString(),
       label: `${qty} ${getUnitLabel(qty)}`,
       price: formatPrice(price),
-      oldPrice: (showCompare || oldPriceTotal > price) ? formatPrice(oldPriceTotal) : undefined
+      oldPrice: (showCompare || oldPriceTotal > price) ? formatPrice(oldPriceTotal) : undefined,
+      unitPrice: formatPrice(unitPrice),
+      oldUnitPrice: (showCompare || unitCompareAmount > unitPrice) ? formatPrice(unitCompareAmount) : undefined
     };
   });
 

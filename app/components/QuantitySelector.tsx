@@ -7,6 +7,8 @@ type Tier = {
   price: string;
   subtext?: string;
   oldPrice?: string;
+  unitPrice?: string;
+  oldUnitPrice?: string;
 };
 
 type Props = ComponentProps<'div'> & {
@@ -44,9 +46,6 @@ export function QuantitySelector({
             const tierNum = parseInt(tier.key);
             const priceNum = parseFloat(tier.price.replace(/[^0-9.]/g, ''));
             const oldPriceNum = tier.oldPrice ? parseFloat(tier.oldPrice.replace(/[^0-9.]/g, '')) : (unitPrice * tierNum);     
-            // Use total price instead of per-dozen price
-            const displayPrice = priceNum;
-            const displayOldPrice = oldPriceNum > priceNum ? oldPriceNum : null;
 
             const formatMoney = (amount: number) => {
               return new Intl.NumberFormat('en-US', {
@@ -55,8 +54,21 @@ export function QuantitySelector({
               }).format(amount);
             };
 
-            const priceText = formatMoney(displayPrice);
-            const originalPriceText = displayOldPrice ? formatMoney(displayOldPrice) : null;
+            const totalPriceText = formatMoney(priceNum);
+            
+            let unitPriceText = '';
+            let oldUnitPriceText = null;
+
+            if (tier.unitPrice) {
+                const uPrice = parseFloat(tier.unitPrice.replace(/[^0-9.]/g, ''));
+                unitPriceText = formatMoney(uPrice);
+                if (tier.label.includes('dozen')) unitPriceText += '/dz';
+            }
+            if (tier.oldUnitPrice) {
+                const oUPrice = parseFloat(tier.oldUnitPrice.replace(/[^0-9.]/g, ''));
+                oldUnitPriceText = formatMoney(oUPrice);
+                if (tier.label.includes('dozen')) oldUnitPriceText += '/dz';
+            }
 
             return (
               <label
@@ -103,17 +115,22 @@ export function QuantitySelector({
                         </div>
                       )}
                     </div>
+                    {tierNum > 1 && (
+                      <div className="text-sm text-gray-500 mt-1">
+                        {totalPriceText}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="text-right">
                   <div className="flex flex-col items-end">
                     <div className="text-sm font-bold text-gray-900">
-                      {priceText}
+                      {unitPriceText || totalPriceText}
                     </div>
-                    {originalPriceText && (
+                    {oldUnitPriceText && (
                       <div className="line-through text-xs text-gray-400 mt-0.5">
-                        {originalPriceText}
+                        {oldUnitPriceText}
                       </div>
                     )}
                   </div>

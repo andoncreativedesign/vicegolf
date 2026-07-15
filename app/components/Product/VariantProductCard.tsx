@@ -179,12 +179,12 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     };
   }, [hoverDelayTimeout]);
 
-  const { getBestDiscountForProduct } = useMembership();
+  const { getBestDiscountForProduct, automaticDiscounts } = useMembership();
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
   const basePrice = parseFloat(firstVariant?.price?.amount || '0');
+
   const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
 
-  // 1. Calculate price with membership discount
   let membershipPrice = basePrice;
   if (productAmount > 0) {
     membershipPrice = Math.max(0, basePrice - productAmount);
@@ -192,15 +192,11 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     membershipPrice = basePrice * (1 - productPercentage);
   }
 
-  // 2. Calculate price with session discount (starting from original base price)
   let sessionPrice = basePrice;
-  let isSessionEligible = false;
   if (sessionDiscount) {
     const isEligibleProduct = sessionDiscount.products?.includes(product.id);
     const isEligibleCollection = productCollections.some((id: string) => sessionDiscount.collections?.includes(id));
-
     if (sessionDiscount.appliesToAll || isEligibleProduct || isEligibleCollection) {
-      isSessionEligible = true;
       if (sessionDiscount.percentage) {
         sessionPrice = basePrice * (1 - sessionDiscount.percentage);
       } else if (sessionDiscount.amount) {
@@ -209,8 +205,44 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     }
   }
 
-  // 3. Choose the best price (lowest) for the user
-  const finalPrice = Math.min(membershipPrice, sessionPrice);
+  const unitPrice = Math.min(membershipPrice, sessionPrice);
+
+  // Find the lowest possible volume price
+  let bestVolumePrice = unitPrice;
+  let bestVolumeQuantity = 1;
+
+  if (automaticDiscounts && automaticDiscounts.length > 0) {
+    let quantities = [1];
+    automaticDiscounts.forEach((d: any) => {
+      const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
+      if (isEligible && d.minQuantity > 1 && !quantities.includes(d.minQuantity)) {
+        quantities.push(d.minQuantity);
+      }
+    });
+
+    quantities.forEach(qty => {
+      let bestTotalForQty = unitPrice * qty;
+      automaticDiscounts.forEach((d: any) => {
+        const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
+        if (isEligible && d.minQuantity <= qty) {
+          let total = basePrice * qty;
+          if (d.percentage) total = total * (1 - d.percentage);
+          else if (d.amount) {
+            if (d.appliesOnEachItem) total = Math.max(0, basePrice - d.amount) * qty;
+            else total = Math.max(0, total - d.amount);
+          }
+          if (total < bestTotalForQty) bestTotalForQty = total;
+        }
+      });
+      const pricePerUnit = bestTotalForQty / qty;
+      if (pricePerUnit < bestVolumePrice) {
+        bestVolumePrice = pricePerUnit;
+        bestVolumeQuantity = qty;
+      }
+    });
+  }
+
+  const finalPrice = bestVolumePrice;
 
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
   let finalCompareAtPrice = parseFloat(firstVariant?.compareAtPrice?.amount || '0');
@@ -465,6 +497,9 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
                   <span className="text-xl font-bold tracking-tight">
                     {finalPrice.toFixed(2)}
                   </span>
+                  {bestVolumeQuantity > 1 && (
+                     <span className="text-sm font-medium text-gray-900 ml-2 whitespace-nowrap">from {bestVolumeQuantity} dozen</span>
+                  )}
                 </div>
               </div>
             </div>
