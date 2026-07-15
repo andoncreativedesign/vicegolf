@@ -99,11 +99,20 @@ export async function loader(args: Route.LoaderArgs) {
     // Treat volume bundle discounts as global
     if (d.minQuantity && d.minQuantity > 1) return true;
 
-    const isTierDiscount = d.title && d.title.toLowerCase().startsWith('vice');
+    const lowerTitle = d.title ? d.title.toLowerCase() : '';
+    let isTierDiscount = lowerTitle.startsWith('vice');
+
+    // Verify it is ACTUALLY a tier discount by checking if Shopify restricted it to a segment
+    if (isTierDiscount) {
+        const summary = d.summary ? d.summary.toLowerCase() : '';
+        const isRestrictedToSegment = summary.includes(' • for ') && summary.includes(' customers');
+        if (!isRestrictedToSegment) isTierDiscount = false;
+    }
 
     if (!isTierDiscount) return true; // Global discount
 
     // It's a tier discount, check if it matches the current user's normalized tier
+    if (!normalizedUserSegment) return false;
     return normalizeTierName(d.title) === normalizedUserSegment;
   });
 
@@ -112,7 +121,16 @@ export async function loader(args: Route.LoaderArgs) {
   if (normalizedUserSegment && eligibleDiscounts.length) {
     // Find the best discount among the ones specifically for this tier
     const bestTierDiscount = [...eligibleDiscounts]
-      .filter(d => d.title && d.title.toLowerCase().startsWith('vice'))
+      .filter(d => {
+        const lowerTitle = d.title ? d.title.toLowerCase() : '';
+        let isTierDiscount = lowerTitle.startsWith('vice');
+        if (isTierDiscount) {
+            const summary = d.summary ? d.summary.toLowerCase() : '';
+            const isRestrictedToSegment = summary.includes(' • for ') && summary.includes(' customers');
+            if (!isRestrictedToSegment) isTierDiscount = false;
+        }
+        return isTierDiscount;
+      })
       .sort((a: any, b: any) => {
         // Prioritize amount if percentage is 0, else prioritize percentage
         const aVal = a.percentage || 0;
@@ -273,7 +291,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
             currencyCode: value?.amount?.currencyCode || null,
             eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
             eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
-            appliesToAll: items?.__typename === 'AllDiscountItems',
+            appliesToAll: items?.__typename === 'AllDiscountItems' || !items,
             appliesOnEachItem: value?.percentage ? true : (value?.appliesOnEachItem ?? false),
             minQuantity: ad.minimumRequirement?.greaterThanOrEqualToQuantity ? parseInt(ad.minimumRequirement.greaterThanOrEqualToQuantity) : 1
           };

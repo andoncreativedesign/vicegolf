@@ -362,7 +362,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
       {/* Fallback Option Subtext for products without a 'size' option */}
       {!productOptions?.some(opt => opt.name?.toLowerCase().includes('size')) && optionSubtext?.text && (
-        <div className="mb-4">
+        <div className="product-form-container">
           <p 
             className="text-sm font-medium text-gray-900 mb-3"
             style={{
