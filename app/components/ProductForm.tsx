@@ -319,11 +319,26 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       // ADDED: Some padding for better spacing on larger screens
       className="product-form py-4 md:py-5 w-full"
     >
-      {/* Product Title */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-      {productType && (
-        <div className="text-sm text-gray-500 mb-2">{productType}</div>
-      )}
+      {/* Product Title and Category */}
+      <div 
+        className="mb-4"
+        style={{ padding: 0, minHeight: 0, height: 'max-content', overflow: 'hidden' }}
+      >
+        <h1 
+          className="text-[32px] md:text-[36px] font-bold text-gray-900 m-0 p-0 leading-none tracking-tight block"
+          style={{ padding: 0, margin: 0, lineHeight: 1 }}
+        >
+          {title?.trim()}
+        </h1>
+        {productType && (
+          <span 
+            className="text-[15px] text-gray-500 font-medium m-0 p-0 block mt-2"
+            style={{ padding: 0, margin: 0, marginTop: '8px', lineHeight: 1.2 }}
+          >
+            {productType?.trim()}
+          </span>
+        )}
+      </div>
 
       {/* Product Price */}
       <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1">
