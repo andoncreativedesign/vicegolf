@@ -498,7 +498,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
                     {finalPrice.toFixed(2)}
                   </span>
                   {bestVolumeQuantity > 1 && (
-                     <span className="text-sm font-medium text-gray-900 ml-2 whitespace-nowrap">from {bestVolumeQuantity} dozen</span>
+                     <span className="text-sm font-medium text-gray-900 ml-2 whitespace-nowrap">from {bestVolumeQuantity} {isGolfBall ? 'dozen' : 'items'}</span>
                   )}
                 </div>
               </div>

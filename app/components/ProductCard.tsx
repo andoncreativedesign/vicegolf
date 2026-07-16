@@ -79,6 +79,7 @@ export function ProductCard({ product: _product, disableSoldout = false, session
   }
 
   const finalPrice = bestVolumePrice;
+  const isGolfBall = product.productType?.toLowerCase().includes('ball') || false;
 
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
   const price = variant?.price;
@@ -240,7 +241,7 @@ export function ProductCard({ product: _product, disableSoldout = false, session
                     {finalPrice.toFixed(2)}
                   </span>
                   {bestVolumeQuantity > 1 && (
-                     <span className="text-sm font-medium text-gray-900 ml-2 whitespace-nowrap">from {bestVolumeQuantity} dozen</span>
+                     <span className="text-sm font-medium text-gray-900 ml-2 whitespace-nowrap">from {bestVolumeQuantity} {isGolfBall ? 'dozen' : 'items'}</span>
                   )}
                 </div>
               )}
