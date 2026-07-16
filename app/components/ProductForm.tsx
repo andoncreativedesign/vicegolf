@@ -326,14 +326,33 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       )}
 
       {/* Product Price */}
-      <div className="mb-6">
-        <ProductPrice
-          price={{ amount: totalPriceAmount.toFixed(2), currencyCode }}
-          compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
-        />
-        {showCompare && (
-          <span className="text-sm text-emerald-600 font-medium ml-2 flex items-center inline-flex">
-            (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {showCompare ? (
+          <>
+            <span className="text-xl font-bold text-[#e32619] flex items-center">
+              <AedIcon className="w-4 h-4 mr-0.5" />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
+            </span>
+            <s className="text-[17px] text-gray-500 line-through flex items-center">
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalCompareAmount)}
+            </s>
+            {totalQuantityDozens > 1 ? (
+              <span className="text-[15px] font-medium text-gray-600 flex items-center">
+                (<AedIcon className="w-3 h-3 mr-0.5" />
+                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount / totalQuantityDozens)}
+                /{isGolfBall ? 'dozen' : 'unit'})
+              </span>
+            ) : (
+              <span className="text-sm text-emerald-600 font-medium flex items-center">
+                (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="text-xl font-bold text-gray-900 flex items-center">
+            <AedIcon className="w-4 h-4 mr-0.5" />
+            {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
           </span>
         )}
       </div>
