@@ -80,12 +80,12 @@ export function QuantitySelector({
             if (tier.unitPrice) {
                 const uPrice = parseFloat(tier.unitPrice.replace(/[^0-9.]/g, ''));
                 unitPriceText = formatMoney(uPrice);
-                if (tier.label.includes('dozen')) unitPriceText += '/dz';
+                unitPriceText += tier.label.includes('dozen') ? '/dz' : '/unit';
             }
             if (tier.oldUnitPrice) {
                 const oUPrice = parseFloat(tier.oldUnitPrice.replace(/[^0-9.]/g, ''));
                 oldUnitPriceBase = formatMoney(oUPrice);
-                if (tier.label.includes('dozen')) oldUnitPriceSuffix = '/dz';
+                oldUnitPriceSuffix = tier.label.includes('dozen') ? '/dz' : '/unit';
             }
 
             return (

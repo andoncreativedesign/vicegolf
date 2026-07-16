@@ -191,7 +191,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const isGolfBall = productType?.toLowerCase().includes('ball') || false;
   const getUnitLabel = (qty: number) => {
     if (isGolfBall) return 'dozen';
-    return qty === 1 ? 'item' : 'items';
+    return '';
   };
 
   const pricingTiers = tierQuantities.map(qty => {
@@ -202,9 +202,12 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     const baseUnitPrice = getBestPriceForQuantity(1);
     const oldPriceTotal = baseUnitPrice * qty;
     
+    const unitLabel = getUnitLabel(qty);
+    const labelString = unitLabel ? `${qty} ${unitLabel}` : `${qty}`;
+    
     return {
       key: qty.toString(),
-      label: `${qty} ${getUnitLabel(qty)}`,
+      label: labelString,
       price: formatPrice(price),
       oldPrice: oldPriceTotal > price ? formatPrice(oldPriceTotal) : undefined,
       unitPrice: formatPrice(unitPrice),
