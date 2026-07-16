@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react';
 import type { ComponentProps } from 'react';
+import { AedIcon } from './ui/AedIcon';
 
 type Tier = {
   key: string;
@@ -61,19 +62,20 @@ export function QuantitySelector({
             // Calculate price per dozen
             const tierNum = parseInt(tier.key);
             const priceNum = parseFloat(tier.price.replace(/[^0-9.]/g, ''));
-            const oldPriceNum = tier.oldPrice ? parseFloat(tier.oldPrice.replace(/[^0-9.]/g, '')) : (unitPrice * tierNum);     
 
             const formatMoney = (amount: number) => {
               return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: currencyCode,
+                style: 'decimal',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               }).format(amount);
             };
 
             const totalPriceText = formatMoney(priceNum);
             
             let unitPriceText = '';
-            let oldUnitPriceText = null;
+            let oldUnitPriceBase = '';
+            let oldUnitPriceSuffix = '';
 
             if (tier.unitPrice) {
                 const uPrice = parseFloat(tier.unitPrice.replace(/[^0-9.]/g, ''));
@@ -82,22 +84,22 @@ export function QuantitySelector({
             }
             if (tier.oldUnitPrice) {
                 const oUPrice = parseFloat(tier.oldUnitPrice.replace(/[^0-9.]/g, ''));
-                oldUnitPriceText = formatMoney(oUPrice);
-                if (tier.label.includes('dozen')) oldUnitPriceText += '/dz';
+                oldUnitPriceBase = formatMoney(oUPrice);
+                if (tier.label.includes('dozen')) oldUnitPriceSuffix = '/dz';
             }
 
             return (
               <label
                 key={tier.key}
-                className={`relative flex items-center justify-between w-full p-4 md:p-5 rounded border cursor-pointer transition-all duration-200 ${
+                className={`relative flex items-center justify-between w-full p-4 md:px-5 md:py-4 rounded cursor-pointer transition-all duration-200 ${
                   isSelected
-                    ? 'border-[#FFA500] bg-[#FFFDF6] ring-1 ring-[#FFA500]'
-                    : 'border-gray-300 hover:border-gray-400 bg-white'
+                    ? 'border border-[#FFAC00] bg-[#FFF9E6]'
+                    : 'border border-gray-300 hover:border-gray-400 bg-white'
                 } ${index > 0 ? (hasBadge ? 'mt-7' : 'mt-3') : ''}`}
               >
                 {hasBadge && (
                   <div className="absolute -top-[15px] left-4 md:left-5">
-                    <span className="font-bold bg-[#FFA500] text-black text-[14px] md:text-[15px] px-4 py-1.5 rounded-full whitespace-nowrap">
+                    <span className="font-bold bg-[#FFAC00] text-black text-[14px] md:text-[15px] px-4 py-1.5 rounded-full whitespace-nowrap">
                       Top Savings
                     </span>
                   </div>
@@ -108,7 +110,7 @@ export function QuantitySelector({
                   name="quantity"
                   value={tier.key}
                   checked={isSelected}
-                  onChange={(e) => setSelectedTier(e.target.value)}
+                  onChange={() => setSelectedTier(tier.key)}
                   className="absolute opacity-0"
                 />
                 
@@ -133,7 +135,8 @@ export function QuantitySelector({
                       </span>
                     </div>
                     {tierNum > 1 && (
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-sm text-gray-500 mt-1 flex items-center">
+                        {currencyCode === 'AED' ? <AedIcon className="w-[11px] h-[11px] mr-1" /> : <span className="mr-1">{currencyCode}</span>}
                         {totalPriceText}
                       </div>
                     )}
@@ -142,12 +145,17 @@ export function QuantitySelector({
 
                 <div className="text-right">
                   <div className="flex flex-col items-end">
-                    <div className="text-[17px] md:text-lg font-bold text-gray-900">
+                    <div className="text-[17px] md:text-lg font-bold text-gray-900 flex items-center">
+                      {currencyCode === 'AED' ? <AedIcon className="w-3.5 h-3.5 mr-1" /> : <span className="mr-1">{currencyCode}</span>}
                       {unitPriceText || totalPriceText}
                     </div>
-                    {oldUnitPriceText && (
-                      <div className="line-through text-sm text-gray-400 mt-0.5">
-                        {oldUnitPriceText}
+                    {oldUnitPriceBase && (
+                      <div className="text-sm text-gray-400 mt-0.5 flex items-center justify-end">
+                        <span className="line-through flex items-center">
+                          {currencyCode === 'AED' ? <AedIcon className="w-3 h-3 mr-0.5" /> : <span className="mr-0.5">{currencyCode}</span>}
+                          {oldUnitPriceBase}
+                        </span>
+                        {oldUnitPriceSuffix}
                       </div>
                     )}
                   </div>
