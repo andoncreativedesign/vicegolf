@@ -225,25 +225,27 @@ export function ProductCard({ product: _product, disableSoldout = false, session
         {/* Price */}
         <div className="pt-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {finalCompareAtPrice > finalPrice && (
-                <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
-                  <AedIcon className="mr-0.5" />
-                  <span>
-                    {finalCompareAtPrice.toFixed(2)}
-                  </span>
-                </div>
-              )}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               {price && (
-                <div className="flex items-center text-gray-900">
-                  <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold tracking-tight">
-                    {finalPrice.toFixed(2)}
-                  </span>
-                  {bestVolumeQuantity > 1 && (
-                     <span className="text-sm font-medium text-gray-900 ml-2 whitespace-nowrap">from {bestVolumeQuantity} {isGolfBall ? 'dozen' : 'items'}</span>
+                <>
+                  <div className={`flex items-center ${finalCompareAtPrice > finalPrice ? 'text-[#e32619]' : 'text-gray-900'}`}>
+                    <AedIcon className="mr-1" />
+                    <span className="text-[17px] font-bold tracking-tight">
+                      {finalPrice.toFixed(2)}
+                    </span>
+                  </div>
+                  {finalCompareAtPrice > finalPrice && (
+                    <div className="flex items-center text-[15px] text-gray-500 line-through font-medium">
+                      <AedIcon className="w-3.5 h-3.5 mr-0.5" />
+                      {finalCompareAtPrice.toFixed(2)}
+                    </div>
                   )}
-                </div>
+                  {bestVolumeQuantity > 1 && (
+                    <span className="text-[15px] font-medium text-gray-900 whitespace-nowrap">
+                      from {bestVolumeQuantity} {isGolfBall ? 'dozen' : 'items'}
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>
