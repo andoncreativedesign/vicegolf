@@ -31,16 +31,32 @@ export function QuantitySelector({
   currencyCode,
   ...props
 }: Props) {
+  // Find the tier with the lowest unit cost for the Top Savings badge
+  let minUnitPrice = Infinity;
+  let topSavingsKey = '';
+  if (pricingTiers.length > 1) {
+    pricingTiers.forEach((tier) => {
+      const priceNum = parseFloat(tier.price.replace(/[^0-9.]/g, ''));
+      const qty = parseInt(tier.key);
+      const unitCost = priceNum / qty;
+      // Use <= so if multiple tiers have the same lowest price, the larger volume gets the badge (optional, but < is safer to prioritize the first lowest)
+      if (unitCost < minUnitPrice) {
+        minUnitPrice = unitCost;
+        topSavingsKey = tier.key;
+      }
+    });
+  }
+
   return (
     <div className="w-full" {...props}>
       <div className="flex flex-col gap-4">
         {/* Pricing Tiers */}
-        {/* Pricing Tiers */}
         {pricingTiers.length > 0 && (
-        <div className="space-y-4">
+        <div className="flex flex-col">
           {pricingTiers.map((tier, index) => {
             const isSelected = selectedTier === tier.key;
-            const isTopSavings = index === pricingTiers.length - 1;
+            const isTopSavings = tier.key === topSavingsKey;
+            const hasBadge = isTopSavings;
             
             // Calculate price per dozen
             const tierNum = parseInt(tier.key);
@@ -73,12 +89,20 @@ export function QuantitySelector({
             return (
               <label
                 key={tier.key}
-                className={`relative flex items-center justify-between w-full p-3 rounded border cursor-pointer transition-all duration-200 ${
+                className={`relative flex items-center justify-between w-full p-4 md:p-5 rounded border cursor-pointer transition-all duration-200 ${
                   isSelected
-                    ? 'border-[#FFA500] bg-white ring-1 ring-[#FFA500]'
+                    ? 'border-[#FFA500] bg-[#FFFDF6] ring-1 ring-[#FFA500]'
                     : 'border-gray-300 hover:border-gray-400 bg-white'
-                }`}
+                } ${index > 0 ? (hasBadge ? 'mt-7' : 'mt-3') : ''}`}
               >
+                {hasBadge && (
+                  <div className="absolute -top-[15px] left-4 md:left-5">
+                    <span className="font-bold bg-[#FFA500] text-black text-[14px] md:text-[15px] px-4 py-1.5 rounded-full whitespace-nowrap">
+                      Top Savings
+                    </span>
+                  </div>
+                )}
+                
                 <input
                   type="radio"
                   name="quantity"
@@ -88,32 +112,25 @@ export function QuantitySelector({
                   className="absolute opacity-0"
                 />
                 
-                <div className="flex items-start gap-3">
-                  <div className="pt-0.5">
+                <div className="flex items-center gap-4">
+                  <div>
                     <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
                         isSelected
                           ? 'border-black bg-white'
                           : 'border-gray-400 bg-white'
                       }`}
                     >
                       {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-black" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-black" />
                       )}
                     </div>
                   </div>
                   <div className="flex-1 flex flex-col justify-center h-full">
                     <div className="relative">
-                      <span className="text-sm font-semibold text-gray-900 leading-none">
+                      <span className="text-[17px] font-medium text-gray-900 leading-none">
                         {tier.label}
                       </span>
-                      {isTopSavings && pricingTiers.length > 1 && (
-                        <div className="absolute -top-6 left-0">
-                          <span className="font-semibold bg-[#FFA500] text-black text-xs px-2.5 py-0.5 rounded-full whitespace-nowrap">
-                            Top Savings
-                          </span>
-                        </div>
-                      )}
                     </div>
                     {tierNum > 1 && (
                       <div className="text-sm text-gray-500 mt-1">
@@ -125,11 +142,11 @@ export function QuantitySelector({
 
                 <div className="text-right">
                   <div className="flex flex-col items-end">
-                    <div className="text-sm font-bold text-gray-900">
+                    <div className="text-[17px] md:text-lg font-bold text-gray-900">
                       {unitPriceText || totalPriceText}
                     </div>
                     {oldUnitPriceText && (
-                      <div className="line-through text-xs text-gray-400 mt-0.5">
+                      <div className="line-through text-sm text-gray-400 mt-0.5">
                         {oldUnitPriceText}
                       </div>
                     )}

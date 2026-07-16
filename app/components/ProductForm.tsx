@@ -75,9 +75,6 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const navigate = useNavigate();
   const { open } = useAside();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedTier, setSelectedTier] = useState('1');
-  const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
 
   const rootData = useRouteLoaderData<any>('root');
   const automaticDiscounts = rootData?.automaticDiscounts || [];
@@ -87,6 +84,26 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     const isEligibleCollection = collectionIds?.some((id: string) => d.eligibleCollections?.includes(id));
     return d.appliesToAll || isEligibleProduct || isEligibleCollection;
   });
+
+  const getInitialTier = () => {
+    let tiers = [1];
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity)) {
+        tiers.push(d.minQuantity);
+      }
+    });
+    return Math.max(...tiers);
+  };
+
+  const [quantity, setQuantity] = useState(getInitialTier);
+  const [selectedTier, setSelectedTier] = useState(() => getInitialTier().toString());
+  const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+
+  useEffect(() => {
+    const defaultTier = getInitialTier();
+    setQuantity(defaultTier);
+    setSelectedTier(defaultTier.toString());
+  }, [currentProductId]);
 
   // 1. Calculate price with membership discount
   let membershipPrice = originalUnitPrice;
@@ -180,14 +197,18 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const pricingTiers = tierQuantities.map(qty => {
     const price = getBestPriceForQuantity(qty);
     const unitPrice = price / qty;
-    const oldPriceTotal = unitCompareAmount * qty;
+    
+    // Compare against the base 1-dozen price for volume discount visualization
+    const baseUnitPrice = getBestPriceForQuantity(1);
+    const oldPriceTotal = baseUnitPrice * qty;
+    
     return {
       key: qty.toString(),
       label: `${qty} ${getUnitLabel(qty)}`,
       price: formatPrice(price),
-      oldPrice: (showCompare || oldPriceTotal > price) ? formatPrice(oldPriceTotal) : undefined,
+      oldPrice: oldPriceTotal > price ? formatPrice(oldPriceTotal) : undefined,
       unitPrice: formatPrice(unitPrice),
-      oldUnitPrice: (showCompare || unitCompareAmount > unitPrice) ? formatPrice(unitCompareAmount) : undefined
+      oldUnitPrice: baseUnitPrice > unitPrice ? formatPrice(baseUnitPrice) : undefined
     };
   });
 
