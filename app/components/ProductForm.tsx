@@ -75,9 +75,6 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const navigate = useNavigate();
   const { open } = useAside();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedTier, setSelectedTier] = useState('1');
-  const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
 
   const rootData = useRouteLoaderData<any>('root');
   const automaticDiscounts = rootData?.automaticDiscounts || [];
@@ -87,6 +84,26 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     const isEligibleCollection = collectionIds?.some((id: string) => d.eligibleCollections?.includes(id));
     return d.appliesToAll || isEligibleProduct || isEligibleCollection;
   });
+
+  const getInitialTier = () => {
+    let tiers = [1];
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity)) {
+        tiers.push(d.minQuantity);
+      }
+    });
+    return Math.max(...tiers);
+  };
+
+  const [quantity, setQuantity] = useState(getInitialTier);
+  const [selectedTier, setSelectedTier] = useState(() => getInitialTier().toString());
+  const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+
+  useEffect(() => {
+    const defaultTier = getInitialTier();
+    setQuantity(defaultTier);
+    setSelectedTier(defaultTier.toString());
+  }, [currentProductId]);
 
   // 1. Calculate price with membership discount
   let membershipPrice = originalUnitPrice;
@@ -174,20 +191,27 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const isGolfBall = productType?.toLowerCase().includes('ball') || false;
   const getUnitLabel = (qty: number) => {
     if (isGolfBall) return 'dozen';
-    return qty === 1 ? 'item' : 'items';
+    return '';
   };
 
   const pricingTiers = tierQuantities.map(qty => {
     const price = getBestPriceForQuantity(qty);
     const unitPrice = price / qty;
-    const oldPriceTotal = unitCompareAmount * qty;
+    
+    // Compare against the base 1-dozen price for volume discount visualization
+    const baseUnitPrice = getBestPriceForQuantity(1);
+    const oldPriceTotal = baseUnitPrice * qty;
+    
+    const unitLabel = getUnitLabel(qty);
+    const labelString = unitLabel ? `${qty} ${unitLabel}` : `${qty}`;
+    
     return {
       key: qty.toString(),
-      label: `${qty} ${getUnitLabel(qty)}`,
+      label: labelString,
       price: formatPrice(price),
-      oldPrice: (showCompare || oldPriceTotal > price) ? formatPrice(oldPriceTotal) : undefined,
+      oldPrice: oldPriceTotal > price ? formatPrice(oldPriceTotal) : undefined,
       unitPrice: formatPrice(unitPrice),
-      oldUnitPrice: (showCompare || unitCompareAmount > unitPrice) ? formatPrice(unitCompareAmount) : undefined
+      oldUnitPrice: baseUnitPrice > unitPrice ? formatPrice(baseUnitPrice) : undefined
     };
   });
 
@@ -295,21 +319,55 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       // ADDED: Some padding for better spacing on larger screens
       className="product-form py-4 md:py-5 w-full"
     >
-      {/* Product Title */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-      {productType && (
-        <div className="text-sm text-gray-500 mb-2">{productType}</div>
-      )}
+      {/* Product Title and Category */}
+      <div 
+        className="mb-4"
+        style={{ padding: 0, minHeight: 0, height: 'max-content', overflow: 'hidden' }}
+      >
+        <h1 
+          className="text-[32px] md:text-[36px] font-bold text-gray-900 m-0 p-0 leading-none tracking-tight block"
+          style={{ padding: 0, margin: 0, lineHeight: 1 }}
+        >
+          {title?.trim()}
+        </h1>
+        {productType && (
+          <span 
+            className="text-[15px] text-gray-500 font-medium m-0 p-0 block mt-2"
+            style={{ padding: 0, margin: 0, marginTop: '8px', lineHeight: 1.2 }}
+          >
+            {productType?.trim()}
+          </span>
+        )}
+      </div>
 
       {/* Product Price */}
-      <div className="mb-6">
-        <ProductPrice
-          price={{ amount: totalPriceAmount.toFixed(2), currencyCode }}
-          compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
-        />
-        {showCompare && (
-          <span className="text-sm text-emerald-600 font-medium ml-2 flex items-center inline-flex">
-            (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {showCompare ? (
+          <>
+            <span className="text-xl font-bold text-[#e32619] flex items-center">
+              <AedIcon className="w-4 h-4 mr-0.5" />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
+            </span>
+            <s className="text-[17px] text-gray-500 line-through flex items-center">
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalCompareAmount)}
+            </s>
+            {totalQuantityDozens > 1 ? (
+              <span className="text-[15px] font-medium text-gray-600 flex items-center">
+                (<AedIcon className="w-3 h-3 mr-0.5" />
+                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount / totalQuantityDozens)}
+                /{isGolfBall ? 'dozen' : 'unit'})
+              </span>
+            ) : (
+              <span className="text-sm text-emerald-600 font-medium flex items-center">
+                (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="text-xl font-bold text-gray-900 flex items-center">
+            <AedIcon className="w-4 h-4 mr-0.5" />
+            {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
           </span>
         )}
       </div>

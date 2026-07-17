@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react';
 import type { ComponentProps } from 'react';
+import { AedIcon } from './ui/AedIcon';
 
 type Tier = {
   key: string;
@@ -31,92 +32,111 @@ export function QuantitySelector({
   currencyCode,
   ...props
 }: Props) {
+  // Find the tier with the lowest unit cost for the Top Savings badge
+  let minUnitPrice = Infinity;
+  let topSavingsKey = '';
+  if (pricingTiers.length > 1) {
+    pricingTiers.forEach((tier) => {
+      const priceNum = parseFloat(tier.price.replace(/[^0-9.]/g, ''));
+      const qty = parseInt(tier.key);
+      const unitCost = priceNum / qty;
+      // Use <= so if multiple tiers have the same lowest price, the larger volume gets the badge (optional, but < is safer to prioritize the first lowest)
+      if (unitCost < minUnitPrice) {
+        minUnitPrice = unitCost;
+        topSavingsKey = tier.key;
+      }
+    });
+  }
+
   return (
     <div className="w-full" {...props}>
       <div className="flex flex-col gap-4">
         {/* Pricing Tiers */}
-        {/* Pricing Tiers */}
         {pricingTiers.length > 0 && (
-        <div className="space-y-4">
+        <div className="flex flex-col">
           {pricingTiers.map((tier, index) => {
             const isSelected = selectedTier === tier.key;
-            const isTopSavings = index === pricingTiers.length - 1;
+            const isTopSavings = tier.key === topSavingsKey;
+            const hasBadge = isTopSavings;
             
             // Calculate price per dozen
             const tierNum = parseInt(tier.key);
             const priceNum = parseFloat(tier.price.replace(/[^0-9.]/g, ''));
-            const oldPriceNum = tier.oldPrice ? parseFloat(tier.oldPrice.replace(/[^0-9.]/g, '')) : (unitPrice * tierNum);     
 
             const formatMoney = (amount: number) => {
               return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: currencyCode,
+                style: 'decimal',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               }).format(amount);
             };
 
             const totalPriceText = formatMoney(priceNum);
             
             let unitPriceText = '';
-            let oldUnitPriceText = null;
+            let oldUnitPriceBase = '';
+            let oldUnitPriceSuffix = '';
 
             if (tier.unitPrice) {
                 const uPrice = parseFloat(tier.unitPrice.replace(/[^0-9.]/g, ''));
                 unitPriceText = formatMoney(uPrice);
-                if (tier.label.includes('dozen')) unitPriceText += '/dz';
+                unitPriceText += tier.label.includes('dozen') ? '/dz' : '/unit';
             }
             if (tier.oldUnitPrice) {
                 const oUPrice = parseFloat(tier.oldUnitPrice.replace(/[^0-9.]/g, ''));
-                oldUnitPriceText = formatMoney(oUPrice);
-                if (tier.label.includes('dozen')) oldUnitPriceText += '/dz';
+                oldUnitPriceBase = formatMoney(oUPrice);
+                oldUnitPriceSuffix = tier.label.includes('dozen') ? '/dz' : '/unit';
             }
 
             return (
               <label
                 key={tier.key}
-                className={`relative flex items-center justify-between w-full p-3 rounded border cursor-pointer transition-all duration-200 ${
+                className={`relative flex items-center justify-between w-full p-4 md:px-5 md:py-4 rounded cursor-pointer transition-all duration-200 ${
                   isSelected
-                    ? 'border-[#FFA500] bg-white ring-1 ring-[#FFA500]'
-                    : 'border-gray-300 hover:border-gray-400 bg-white'
-                }`}
+                    ? 'border border-[#FFAC00] bg-[#FFF9E6]'
+                    : 'border border-gray-300 hover:border-gray-400 bg-white'
+                } ${index > 0 ? (hasBadge ? 'mt-7' : 'mt-3') : ''}`}
               >
+                {hasBadge && (
+                  <div className="absolute -top-[15px] left-4 md:left-5">
+                    <span className="font-bold bg-[#FFAC00] text-black text-[14px] md:text-[15px] px-4 py-1.5 rounded-full whitespace-nowrap">
+                      Top Savings
+                    </span>
+                  </div>
+                )}
+                
                 <input
                   type="radio"
                   name="quantity"
                   value={tier.key}
                   checked={isSelected}
-                  onChange={(e) => setSelectedTier(e.target.value)}
+                  onChange={() => setSelectedTier(tier.key)}
                   className="absolute opacity-0"
                 />
                 
-                <div className="flex items-start gap-3">
-                  <div className="pt-0.5">
+                <div className="flex items-center gap-4">
+                  <div>
                     <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
                         isSelected
                           ? 'border-black bg-white'
                           : 'border-gray-400 bg-white'
                       }`}
                     >
                       {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-black" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-black" />
                       )}
                     </div>
                   </div>
                   <div className="flex-1 flex flex-col justify-center h-full">
                     <div className="relative">
-                      <span className="text-sm font-semibold text-gray-900 leading-none">
+                      <span className="text-[17px] font-medium text-gray-900 leading-none">
                         {tier.label}
                       </span>
-                      {isTopSavings && pricingTiers.length > 1 && (
-                        <div className="absolute -top-6 left-0">
-                          <span className="font-semibold bg-[#FFA500] text-black text-xs px-2.5 py-0.5 rounded-full whitespace-nowrap">
-                            Top Savings
-                          </span>
-                        </div>
-                      )}
                     </div>
                     {tierNum > 1 && (
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-sm text-gray-500 mt-1 flex items-center">
+                        {currencyCode === 'AED' ? <AedIcon className="w-[11px] h-[11px] mr-1" /> : <span className="mr-1">{currencyCode}</span>}
                         {totalPriceText}
                       </div>
                     )}
@@ -125,12 +145,17 @@ export function QuantitySelector({
 
                 <div className="text-right">
                   <div className="flex flex-col items-end">
-                    <div className="text-sm font-bold text-gray-900">
+                    <div className="text-[17px] md:text-lg font-bold text-gray-900 flex items-center">
+                      {currencyCode === 'AED' ? <AedIcon className="w-3.5 h-3.5 mr-1" /> : <span className="mr-1">{currencyCode}</span>}
                       {unitPriceText || totalPriceText}
                     </div>
-                    {oldUnitPriceText && (
-                      <div className="line-through text-xs text-gray-400 mt-0.5">
-                        {oldUnitPriceText}
+                    {oldUnitPriceBase && (
+                      <div className="text-sm text-gray-400 mt-0.5 flex items-center justify-end">
+                        <span className="line-through flex items-center">
+                          {currencyCode === 'AED' ? <AedIcon className="w-3 h-3 mr-0.5" /> : <span className="mr-0.5">{currencyCode}</span>}
+                          {oldUnitPriceBase}
+                        </span>
+                        {oldUnitPriceSuffix}
                       </div>
                     )}
                   </div>

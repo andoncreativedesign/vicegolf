@@ -57,11 +57,8 @@ export function useMembership() {
 
         // Check all automatic discounts (which root.tsx already filtered to be Member-Tiers + Global)
         automaticDiscounts.forEach((discount: any) => {
-            // IF it's a fixed amount discount that applies ONCE per order,
-            // we ONLY allow it for product-level displays if it's meant for a single item (minQuantity === 1).
-            // (e.g. "Vice Pro Discount Pack of 1"). Otherwise, a massive 6-dozen bundle discount
-            // would incorrectly appear as a huge price drop on a single unit card!
-            if (!discount.appliesOnEachItem && discount.amount > 0 && discount.minQuantity > 1) {
+            // Volume discounts (minQuantity > 1) should not be applied to the base single-unit price
+            if (discount.minQuantity && discount.minQuantity > 1) {
                 return;
             }
 
