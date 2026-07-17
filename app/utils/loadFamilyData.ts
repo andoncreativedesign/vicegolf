@@ -58,6 +58,13 @@ export async function loadFamilyData(families: string[]) {
         badge_colors: node?.badge_colors?.value || null,
         collections: {
           nodes: node.collections?.edges?.map(({ node: col }: any) => ({ id: col.id })) || []
+        },
+        variants: {
+          nodes: node.variants?.edges?.map(({ node: variant }: any) => ({
+            ...variant,
+            price: { amount: variant.price, currencyCode: 'USD' },
+            compareAtPrice: variant.compareAtPrice ? { amount: variant.compareAtPrice, currencyCode: 'USD' } : null
+          })) || []
         }
       }));
 
