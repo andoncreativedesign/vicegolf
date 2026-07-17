@@ -188,8 +188,10 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
   const { getBestDiscountForProduct } = useMembership();
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-  const basePrice = parseFloat(firstVariant?.price?.amount || '0');
-  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+  const currentSelectedVariantProduct = allVariants[selectedVariant];
+  const activeVariant = currentSelectedVariantProduct?.variants?.nodes?.[0] || firstVariant;
+  const basePrice = parseFloat(activeVariant?.price?.amount || '0');
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(currentSelectedVariantProduct?.id || product.id, productCollections, basePrice);
 
   // 1. Calculate price with membership discount
   let membershipPrice = basePrice;
@@ -220,7 +222,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
   const finalPrice = Math.min(membershipPrice, sessionPrice);
 
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
-  let finalCompareAtPrice = parseFloat(firstVariant?.compareAtPrice?.amount || '0');
+  let finalCompareAtPrice = parseFloat(activeVariant?.compareAtPrice?.amount || '0');
   if (finalPrice < basePrice) {
     finalCompareAtPrice = basePrice;
   }
@@ -458,7 +460,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
             </div>
           )}
 
-          {firstVariant && (
+          {activeVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex items-center space-x-2">
                 {(finalCompareAtPrice > finalPrice) && (
