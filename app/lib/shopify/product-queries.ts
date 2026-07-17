@@ -1089,6 +1089,11 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
             }
           }
 
+          # type for indentifying special variant
+          variant_type: metafield(namespace: "custom", key: "variant_type") {
+            value
+          }
+
           # Featured image
           featuredImage {
             url
@@ -1111,6 +1116,17 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
             edges {
               node {
                 id
+              }
+            }
+          }
+
+          variants(first: 1) {
+            edges {
+              node {
+                id
+                availableForSale
+                price
+                compareAtPrice
               }
             }
           }
