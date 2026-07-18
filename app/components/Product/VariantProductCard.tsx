@@ -417,7 +417,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
         <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
           <div className="relative">
             <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[1.8rem]">
-              {allVariants[selectedVariant]?.variant_type?.value === "special" ? allVariants[selectedVariant]?.title : product.title}
+              {allVariants[selectedVariant]?.title || product.title}
             </h3>
           </div>
 
