@@ -57,9 +57,8 @@ export function useMembership() {
 
         // Check all automatic discounts (which root.tsx already filtered to be Member-Tiers + Global)
         automaticDiscounts.forEach((discount: any) => {
-            // IF it's a fixed amount discount that only applies ONCE per order,
-            // we skip it for product-level displays to avoid confusion.
-            if (!discount.appliesOnEachItem && discount.amount > 0) {
+            // Volume discounts (minQuantity > 1) should not be applied to the base single-unit price
+            if (discount.minQuantity && discount.minQuantity > 1) {
                 return;
             }
 
@@ -99,5 +98,6 @@ export function useMembership() {
         discountAmount,
         getBestDiscountForProduct,
         membershipDiscount,
+        automaticDiscounts,
     };
 }

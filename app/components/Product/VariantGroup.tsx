@@ -103,7 +103,7 @@ const VariantGroup = ({ productType, colorVariants, selectedVariant }: VariantGr
       {regularVariants.length > 0 && (
         <div className="mb-4">
           <div className='flex gap-2 items-center mb-3'>
-            <p className="font-semibold text-gray-800 text-sm">Colour Variants{isRegularSelected ? ':' : ''}</p>
+            <p className="font-semibold text-gray-800 text-sm">Color Variants{isRegularSelected ? ':' : ''}</p>
             {isRegularSelected && (
               <p className="text-sm text-gray-500">{selectedVariant?.selectedOptions?.[0]?.value}</p>
             )}
