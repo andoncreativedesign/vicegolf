@@ -12,6 +12,8 @@ import tailwindCss from './styles/tailwind.css?url';
 import { PageLayout } from './components/PageLayout';
 import { CustomToastContainer } from './components/basic/CustomToast';
 import toastStyles from 'react-toastify/dist/ReactToastify.css?url';
+import blogStyles from '~/components/Blog/blog.css?url';
+
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
@@ -385,6 +387,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
+        <link rel="stylesheet" href={blogStyles}></link>
         <Meta />
         <Links />
         {/* Klaviyo Onsite Tracking */}
