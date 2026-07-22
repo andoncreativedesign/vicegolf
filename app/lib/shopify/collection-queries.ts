@@ -178,6 +178,20 @@ fragment ProductCard on Product {
   badge_colors: metafield(namespace: "custom", key: "badge_colors") {
     value
   }
+  variantImage: metafield(namespace: "custom", key: "variant_image") {
+    reference {
+      ... on MediaImage {
+        id
+        image {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
+  }
   featuredImage {
     id
     url

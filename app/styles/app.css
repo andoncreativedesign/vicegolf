@@ -2247,115 +2247,73 @@ button.reset:hover:not(:has(> *)) {
 .yotpo-modal-dialog,
 .yotpo-modal-wrapper,
 .yotpo-modal,
-.yotpo-widget-instance .yotpo-modal-dialog {
-  position: fixed !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  z-index: 99999 !important;
+/* ==========================================================================
+   Yotpo Widget & Tailwind CSS Conflict Resets
+   ========================================================================== */
+
+
+
+/* Ensure the actual modal dialog retains its white background */
+.yotpo-modal-dialog,
+[class*="yotpo-modal-dialog"],
+[class*="yotpo-modal-content"],
+[class*="yotpo-modal-body"] {
+  background-color: #ffffff !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
 }
 
-.yotpo-modal-mask,
-.yotpo-modal-wrapper,
-.yotpo-widget-instance .yotpo-modal-mask {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  transform: none !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  z-index: 99998 !important;
-  display: flex !important;
+
+
+/* 2. Tailwind Global Reset Overrides */
+/* Tailwind sets SVG to display: block, which squishes and cuts off Yotpo's star rating SVGs */
+[class*="yotpo"] svg, 
+[class*="yotpo"] img {
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* Ensure Star Rating Icons properly align their SVGs */
+[class*="yotpo"] .yotpo-star-rating-icon {
+  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-/* Yotpo modal body & form centering overrides - scoped to #modalDescription */
-#modalDescription.yotpo-modal-body {
-  padding-left: 24px !important;
-  padding-right: 24px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
+/* Ensure SVG fills whatever native size Yotpo assigns to its wrapper */
+[class*="yotpo"] .yotpo-star-rating-icon svg {
+  width: 100% !important;
+  height: 100% !important;
 }
 
-#modalDescription .yotpo-review-form {
+/* 4. Form Layout & Full-Width Inputs (Fixes desktop right-side white space) */
+form[class*="yotpo-review-form"],
+.yotpo-review-form {
   width: 100% !important;
   max-width: 600px !important;
   margin: 0 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
 }
 
-/* Full-width inputs and textareas inside the form (excluding radio buttons to prevent layout issues) */
-#modalDescription .yotpo-review-form .yotpo-input-wrapper,
-#modalDescription .yotpo-review-form .yotpo-new-input-container,
-#modalDescription .yotpo-review-form textarea {
+form[class*="yotpo-review-form"] .yotpo-input-wrapper,
+.yotpo-review-form .yotpo-input-wrapper,
+form[class*="yotpo-review-form"] .yotpo-new-input-container,
+.yotpo-review-form .yotpo-new-input-container,
+form[class*="yotpo-review-form"] textarea,
+.yotpo-review-form textarea,
+form[class*="yotpo-review-form"] input[type="text"],
+.yotpo-review-form input[type="text"],
+form[class*="yotpo-review-form"] input[type="email"],
+.yotpo-review-form input[type="email"] {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
 }
 
-/* Star rating section left-alignment and stabilization */
-#modalDescription .yotpo-review-form .yotpo-star-rating-wrapper {
-  width: 100% !important;
-  display: block !important;
-  margin-bottom: 1.5rem !important;
-}
-
-#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper {
-  display: block !important;
-  text-align: left !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper legend {
-  display: block !important;
-  width: 100% !important;
-  text-align: left !important;
-  margin-bottom: 8px !important;
-  float: none !important;
-}
-
-#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper label,
-#modalDescription .yotpo-review-form .yotpo-star-rating-icons-wrapper label:hover {
-  display: inline-block !important;
-  width: 30px !important;
-  height: 30px !important;
-  margin: 0 4px 0 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  transform: none !important;
-  transition: none !important;
-  vertical-align: middle !important;
-  cursor: pointer !important;
-  pointer-events: auto !important; /* Ensure the label captures hover events */
-}
-
-/* Lock star rating SVG sizes to prevent width flickering on hover/state change */
-#modalDescription .yotpo-star-rating-icon,
-#modalDescription .yotpo-star-rating-icon:hover,
-#modalDescription .yotpo-star-rating-icon:focus,
-#modalDescription .yotpo-star-rating-icon:active {
-  width: 30px !important;
-  height: 30px !important;
-  max-width: 30px !important;
-  max-height: 30px !important;
-  min-width: 30px !important;
-  min-height: 30px !important;
-  transform: none !important;
-  transition: none !important;
-  pointer-events: none !important; /* Prevent hover loops/flickering on the SVG element itself */
-}
-
-/* Form footer/submit button centering */
-#modalDescription .yotpo-review-form .form-footer {
+/* Ensure the submit button / footer is nicely centered */
+[class*="yotpo-review-form"] .form-footer,
+[class*="yotpo-review-form"] .yotpo-bottom-line {
   width: 100% !important;
   display: flex !important;
   justify-content: center !important;
-  margin-top: 1.5rem !important;
+  margin-top: 1rem !important;
 }
