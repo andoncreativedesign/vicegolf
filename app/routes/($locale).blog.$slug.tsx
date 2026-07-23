@@ -111,10 +111,15 @@ export default function BlogPost() {
 
       {post.heroImage && (
         <div className="blog-post__hero">
-          <img
-            src={post.heroImage.asset?.url || post.heroImage.url}
-            alt={post.heroImage.alt || post.title}
-          />
+          <picture>
+            {post.mobileHeroImage && (
+              <source media="(max-width: 767px)" srcSet={post.mobileHeroImage.asset?.url || post.mobileHeroImage.url} />
+            )}
+            <img
+              src={post.heroImage.asset?.url || post.heroImage.url}
+              alt={post.heroImage.alt || post.title}
+            />
+          </picture>
         </div>
       )}
 
@@ -127,7 +132,12 @@ export default function BlogPost() {
                 image: ({ value }) => {
                   return (
                     <figure>
-                      <img src={value.asset?.url || value.url} alt={value.alt || ''} />
+                      <picture>
+                        {value.mobileImage && (
+                          <source media="(max-width: 767px)" srcSet={value.mobileImage.asset?.url || value.mobileImage.url} />
+                        )}
+                        <img src={value.asset?.url || value.url} alt={value.alt || ''} />
+                      </picture>
                       {value.caption && <figcaption>{value.caption}</figcaption>}
                     </figure>
                   );

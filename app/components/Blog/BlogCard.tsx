@@ -18,6 +18,7 @@ export interface BlogPost {
   title: string;
   slug: string;
   heroImage?: HeroImage;
+  mobileHeroImage?: HeroImage;
   excerpt?: string;
   categories?: BlogCategory[];
   author?: string;
@@ -29,15 +30,20 @@ interface BlogCardProps {
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
-  const { title, slug, heroImage, excerpt, categories, author, publishedAt } = post;
+  const { title, slug, heroImage, mobileHeroImage, excerpt, categories, author, publishedAt } = post;
   return (
     <Link to={`/blog/${slug}`} className="blog-card" prefetch="intent">
       <div className="blog-card__image-wrap">
-        <img
-          src={heroImage?.asset?.url || heroImage?.url || ''}
-          alt={heroImage?.alt || title}
-          className="blog-card__image"
-        />
+        <picture>
+          {mobileHeroImage && (
+            <source media="(max-width: 767px)" srcSet={mobileHeroImage.asset?.url || mobileHeroImage.url || ''} />
+          )}
+          <img
+            src={heroImage?.asset?.url || heroImage?.url || ''}
+            alt={heroImage?.alt || title}
+            className="blog-card__image"
+          />
+        </picture>
       </div>
       <div className="blog-card__body">
         {categories && categories.length > 0 && (
