@@ -17,6 +17,13 @@ export const allBlogPostsQuery = `*[_type == "blogPost"] | order(publishedAt des
     },
     alt
   },
+  mobileHeroImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
   categories[]-> {
     _id,
     title,
@@ -39,6 +46,13 @@ export const blogPostBySlugQuery = `*[_type == "blogPost" && slug.current == $sl
     },
     alt
   },
+  mobileHeroImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
   categories[]-> {
     _id,
     title,
@@ -51,6 +65,12 @@ export const blogPostBySlugQuery = `*[_type == "blogPost" && slug.current == $sl
       asset-> {
         _id,
         url
+      },
+      mobileImage {
+        asset-> {
+          _id,
+          url
+        }
       }
     }
   },
@@ -65,6 +85,13 @@ export const relatedPostsQuery = `*[_type == "blogPost" && slug.current != $slug
   excerpt,
   publishedAt,
   heroImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  mobileHeroImage {
     asset-> {
       _id,
       url
@@ -92,6 +119,7 @@ export interface SanityBlogImage {
     url: string;
   };
   alt?: string;
+  url?: string;
 }
 
 export interface SanityBlogCategory {
@@ -108,6 +136,7 @@ export interface SanityBlogPost {
   author?: string;
   publishedAt: string;
   heroImage?: SanityBlogImage;
+  mobileHeroImage?: SanityBlogImage;
   categories?: SanityBlogCategory[];
   body?: any[];
   seoDescription?: string;
