@@ -38,6 +38,7 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
       nodes {
         id
         availableForSale
+        quantityAvailable
         price {
           amount
           currencyCode
@@ -131,6 +132,7 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
             nodes {
               id
               availableForSale
+              quantityAvailable
               price {
                 amount
                 currencyCode
@@ -427,6 +429,7 @@ fragment ProductItem on Product {
         nodes {
       id
       availableForSale
+      quantityAvailable
             price {
         amount
         currencyCode
@@ -717,6 +720,7 @@ fragment ProductCardFragment on Product {
       nodes {
         id
         availableForSale
+        quantityAvailable
         price {
           amount
           currencyCode
@@ -781,6 +785,7 @@ fragment ProductCardFragment on Product {
       nodes {
         id
         availableForSale
+        quantityAvailable
         price {
           amount
           currencyCode
@@ -851,6 +856,7 @@ fragment ColorVariantProduct on Product {
     nodes {
       id
       availableForSale
+      quantityAvailable
       price {
         amount
         currencyCode
@@ -1125,6 +1131,7 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
               node {
                 id
                 availableForSale
+                quantityAvailable
                 price
                 compareAtPrice
               }
@@ -1156,6 +1163,7 @@ export const GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS = `#graphql
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
+    quantityAvailable
     compareAtPrice {
       amount
       currencyCode

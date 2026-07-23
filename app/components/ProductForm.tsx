@@ -87,8 +87,9 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const getInitialTier = () => {
     let tiers = [1];
+    const availableQty = (selectedVariant as any)?.quantityAvailable ?? Infinity;
     applicableDiscounts.forEach((d: any) => {
-      if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity)) {
+      if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity) && d.minQuantity <= availableQty) {
         tiers.push(d.minQuantity);
       }
     });
@@ -180,8 +181,9 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   let tierQuantities: number[] = [];
   if (hasVolumeDiscount) {
     tierQuantities = [1];
+    const availableQty = (selectedVariant as any)?.quantityAvailable ?? Infinity;
     applicableDiscounts.forEach((d: any) => {
-      if (d.minQuantity && d.minQuantity > 1 && !tierQuantities.includes(d.minQuantity)) {
+      if (d.minQuantity && d.minQuantity > 1 && !tierQuantities.includes(d.minQuantity) && d.minQuantity <= availableQty) {
         tierQuantities.push(d.minQuantity);
       }
     });
