@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -15,6 +15,7 @@ import { useState, useEffect, forwardRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { ClubVariant, UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
+import VariantGroup from './Product/VariantGroup';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
@@ -44,6 +45,8 @@ export type ProductFormProps = {
     color?: string;
     size?: string;
   };
+  specialVariants?: UIColorVariant[];
+  selectedSpecialVariant?: any;
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -62,6 +65,8 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   sessionDiscount,
   product,
   optionSubtext,
+  specialVariants,
+  selectedSpecialVariant,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -70,9 +75,36 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const navigate = useNavigate();
   const { open } = useAside();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedTier, setSelectedTier] = useState('1');
+
+  const rootData = useRouteLoaderData<any>('root');
+  const automaticDiscounts = rootData?.automaticDiscounts || [];
+
+  const applicableDiscounts = automaticDiscounts.filter((d: any) => {
+    const isEligibleProduct = d.eligibleProducts?.includes(currentProductId);
+    const isEligibleCollection = collectionIds?.some((id: string) => d.eligibleCollections?.includes(id));
+    return d.appliesToAll || isEligibleProduct || isEligibleCollection;
+  });
+
+  const getInitialTier = () => {
+    let tiers = [1];
+    const availableQty = (selectedVariant as any)?.quantityAvailable ?? Infinity;
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity) && d.minQuantity <= availableQty) {
+        tiers.push(d.minQuantity);
+      }
+    });
+    return Math.max(...tiers);
+  };
+
+  const [quantity, setQuantity] = useState(getInitialTier);
+  const [selectedTier, setSelectedTier] = useState(() => getInitialTier().toString());
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+
+  useEffect(() => {
+    const defaultTier = getInitialTier();
+    setQuantity(defaultTier);
+    setSelectedTier(defaultTier.toString());
+  }, [currentProductId]);
 
   // 1. Calculate price with membership discount
   let membershipPrice = originalUnitPrice;
@@ -108,39 +140,93 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     unitCompareAmount = originalUnitPrice;
   }
 
-  const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
+  const getBestPriceForQuantity = (qty: number) => {
+    let bestTotal = unitPriceAmount * qty;
+    for (const d of applicableDiscounts) {
+      if (d.minQuantity && qty >= d.minQuantity) {
+        let total = originalUnitPrice * qty;
+        if (d.percentage) {
+           total = total * (1 - d.percentage);
+        } else if (d.amount) {
+           if (d.appliesOnEachItem) {
+               total = Math.max(0, originalUnitPrice - d.amount) * qty;
+           } else {
+               total = Math.max(0, total - d.amount);
+           }
+        }
+        if (total < bestTotal) bestTotal = total;
+      }
+    }
+    return bestTotal;
+  };
+
+  const totalPriceAmount = getBestPriceForQuantity(totalQuantityDozens);
   const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = unitCompareAmount > unitPriceAmount;
+  const showCompare = unitCompareAmount > unitPriceAmount || totalPriceAmount < (unitPriceAmount * totalQuantityDozens);
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currencyCode,
     }).format(amount);
   };
-  const pricingTiers = [
-    {
-      key: '1',
-      label: '1 dozen',
-      price: formatPrice(unitPriceAmount),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount) : undefined
-    },
-    {
-      key: '3',
-      label: '3 dozen',
-      price: formatPrice(unitPriceAmount * 3),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount * 3) : undefined
-    },
-    {
-      key: '6',
-      label: '6 dozen',
-      price: formatPrice(unitPriceAmount * 6),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount * 6) : undefined
-    },
-  ];
+
+  let hasVolumeDiscount = false;
+  applicableDiscounts.forEach((d: any) => {
+    if (d.minQuantity && d.minQuantity > 1) {
+      hasVolumeDiscount = true;
+    }
+  });
+
+  let tierQuantities: number[] = [];
+  if (hasVolumeDiscount) {
+    tierQuantities = [1];
+    const availableQty = (selectedVariant as any)?.quantityAvailable ?? Infinity;
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tierQuantities.includes(d.minQuantity) && d.minQuantity <= availableQty) {
+        tierQuantities.push(d.minQuantity);
+      }
+    });
+  }
+  tierQuantities.sort((a, b) => a - b);
+
+  const isGolfBall = productType?.toLowerCase().includes('ball') || false;
+  const getUnitLabel = (qty: number) => {
+    if (isGolfBall) return 'dozen';
+    return '';
+  };
+
+  const pricingTiers = tierQuantities.map(qty => {
+    const price = getBestPriceForQuantity(qty);
+    const unitPrice = price / qty;
+    
+    // Compare against the base 1-dozen price for volume discount visualization
+    const baseUnitPrice = getBestPriceForQuantity(1);
+    const oldPriceTotal = baseUnitPrice * qty;
+    
+    const unitLabel = getUnitLabel(qty);
+    const labelString = unitLabel ? `${qty} ${unitLabel}` : `${qty}`;
+    
+    return {
+      key: qty.toString(),
+      label: labelString,
+      price: formatPrice(price),
+      oldPrice: oldPriceTotal > price ? formatPrice(oldPriceTotal) : undefined,
+      unitPrice: formatPrice(unitPrice),
+      oldUnitPrice: baseUnitPrice > unitPrice ? formatPrice(baseUnitPrice) : undefined
+    };
+  });
+
   const handleCustomQuantity = (q: number) => {
-    setQuantity(Math.max(1, q));
-    if (selectedTier !== 'custom') {
+    const newQuantity = Math.max(1, q);
+    setQuantity(newQuantity);
+    
+    // Check if the new quantity matches any available Dozen tier
+    const matchingTier = pricingTiers.find(tier => parseInt(tier.key) === newQuantity);
+    
+    if (matchingTier) {
+      setSelectedTier(matchingTier.key);
+    } else {
       setSelectedTier('custom');
     }
   };
@@ -235,21 +321,55 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       // ADDED: Some padding for better spacing on larger screens
       className="product-form py-4 md:py-5 w-full"
     >
-      {/* Product Title */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-      {productType && (
-        <div className="text-sm text-gray-500 mb-2">{productType}</div>
-      )}
+      {/* Product Title and Category */}
+      <div 
+        className="mb-4"
+        style={{ padding: 0, minHeight: 0, height: 'max-content', overflow: 'hidden' }}
+      >
+        <h1 
+          className="text-[32px] md:text-[36px] font-bold text-gray-900 m-0 p-0 leading-none tracking-tight block"
+          style={{ padding: 0, margin: 0, lineHeight: 1 }}
+        >
+          {title?.trim()}
+        </h1>
+        {productType && (
+          <span 
+            className="text-[15px] text-gray-500 font-medium m-0 p-0 block mt-2"
+            style={{ padding: 0, margin: 0, marginTop: '8px', lineHeight: 1.2 }}
+          >
+            {productType?.trim()}
+          </span>
+        )}
+      </div>
 
       {/* Product Price */}
-      <div className="mb-6">
-        <ProductPrice
-          price={{ amount: totalPriceAmount.toFixed(2), currencyCode }}
-          compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
-        />
-        {showCompare && (
-          <span className="text-sm text-emerald-600 font-medium ml-2 flex items-center inline-flex">
-            (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {showCompare ? (
+          <>
+            <span className="text-xl font-bold text-[#e32619] flex items-center">
+              <AedIcon className="w-4 h-4 mr-0.5" />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
+            </span>
+            <s className="text-[17px] text-gray-500 line-through flex items-center">
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalCompareAmount)}
+            </s>
+            {totalQuantityDozens > 1 ? (
+              <span className="text-[15px] font-medium text-gray-600 flex items-center">
+                (<AedIcon className="w-3 h-3 mr-0.5" />
+                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount / totalQuantityDozens)}
+                /{isGolfBall ? 'dozen' : 'unit'})
+              </span>
+            ) : (
+              <span className="text-sm text-emerald-600 font-medium flex items-center">
+                (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="text-xl font-bold text-gray-900 flex items-center">
+            <AedIcon className="w-4 h-4 mr-0.5" />
+            {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
           </span>
         )}
       </div>
@@ -268,10 +388,29 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
+        <>
+          {specialVariants?.length ? (
+            <VariantGroup
+              productType={productType?.toLowerCase()}
+              colorVariants={colorVariants}
+              selectedVariant={selectedVariant}
+            />
+          ) : (
+            <ColorVariant
+              productType={productType?.toLowerCase()}
+              colorVariants={colorVariants}
+              selectedVariant={selectedVariant}
+            />
+          )}
+        </>
+      )}
+
+      {specialVariants && specialVariants.length > 0 && (
         <ColorVariant
           productType={productType?.toLowerCase()}
-          colorVariants={colorVariants}
-          selectedVariant={selectedVariant}
+          colorVariants={specialVariants}
+          selectedVariant={selectedSpecialVariant}
+          label="Special & Limited Editions"
         />
       )}
 
@@ -286,7 +425,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
       {/* Fallback Option Subtext for products without a 'size' option */}
       {!productOptions?.some(opt => opt.name?.toLowerCase().includes('size')) && optionSubtext?.text && (
-        <div className="mb-4">
+        <div className="product-form-container">
           <p 
             className="text-sm font-medium text-gray-900 mb-3"
             style={{
@@ -304,7 +443,12 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         <div className="mb-6">
           <QuantitySelector
             selectedTier={selectedTier}
-            setSelectedTier={setSelectedTier}
+            setSelectedTier={(tier) => {
+              setSelectedTier(tier);
+              if (tier !== 'custom') {
+                setQuantity(parseInt(tier));
+              }
+            }}
             quantity={quantity}
             setQuantity={handleCustomQuantity}
             pricingTiers={pricingTiers}
@@ -314,7 +458,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         </div>
       )}
 
-      {bundleBtn && (
+      {/* bundleBtn && (
         <div className="mb-6 md:max-w-[399px]">
           <button
             className="w-full cursor-pointer bg-white text-black border border-black py-4 px-6 rounded-full font-medium text-base transition-all duration-300"
@@ -323,7 +467,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
             {bundleBtn?.text || 'not text'}
           </button>
         </div>
-      )}
+      ) */}
 
       {/* Add to Cart Button */}
       <div className="mb-6">

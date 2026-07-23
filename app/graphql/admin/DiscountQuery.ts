@@ -9,6 +9,18 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
             title
             status
             summary
+         
+            minimumRequirement {
+              ... on DiscountMinimumQuantity {
+                greaterThanOrEqualToQuantity
+              }
+              ... on DiscountMinimumSubtotal {
+                greaterThanOrEqualToSubtotal {
+                  amount
+                  currencyCode
+                }
+              }
+            }
             customerGets {
               value {
                 ... on DiscountPercentage {

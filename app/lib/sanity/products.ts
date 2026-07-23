@@ -599,3 +599,54 @@ export async function getBestSellersMapping(identifiers: string[], productGid?: 
     return null;
   }
 }
+
+// ==================== COLLECTION CARD SECTION ====================
+
+export const collectionCardSectionQuery = (handle: string) => `
+  *[_type == "collectionCardSection" && targetCollection->store.slug.current == "${handle}"][0]{
+    cards[]{
+      tag,
+      tagColor,
+      title,
+      description,
+      link,
+      image{
+        asset->{
+          _id,
+          url,
+          metadata { dimensions, lqip }
+        }
+      }
+    }
+  }
+`;
+
+export interface CollectionCard {
+  tag?: string;
+  tagColor?: string;
+  title?: string;
+  description?: string;
+  link?: string;
+  image?: {
+    asset: SanityImageAsset;
+  };
+}
+
+export interface CollectionCardSectionData {
+  cards?: CollectionCard[];
+}
+
+export async function getCollectionCardSection(handle: string): Promise<CollectionCard[] | null> {
+  try {
+    const query = collectionCardSectionQuery(handle);
+    const response = await axiosSanity.post("/", { query });
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const result = response.data.result;
+    return result?.cards ?? null;
+  } catch (error) {
+    console.error('Error fetching collection card section:', error);
+    return null;
+  }
+}
