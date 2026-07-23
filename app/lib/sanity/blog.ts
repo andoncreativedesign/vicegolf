@@ -3,7 +3,7 @@ import {createAxiosSanity} from '~/utils/axiosInsatances';
 
 // ─── GROQ Queries ───────────────────────────────────────────────
 
-export const allBlogPostsQuery = `*[_type == "blogPost"] | order(publishedAt desc) {
+export const allBlogPostsQuery = `*[_type == "blogPost" && !(_id in path('drafts.**'))] | order(publishedAt desc) {
   _id,
   title,
   "slug": slug.current,
@@ -18,6 +18,20 @@ export const allBlogPostsQuery = `*[_type == "blogPost"] | order(publishedAt des
     alt
   },
   mobileHeroImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  cardImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  mobileCardImage {
     asset-> {
       _id,
       url
@@ -32,7 +46,7 @@ export const allBlogPostsQuery = `*[_type == "blogPost"] | order(publishedAt des
   seoDescription
 }`;
 
-export const blogPostBySlugQuery = `*[_type == "blogPost" && slug.current == $slug][0] {
+export const blogPostBySlugQuery = `*[_type == "blogPost" && !(_id in path('drafts.**')) && slug.current == $slug][0] {
   _id,
   title,
   "slug": slug.current,
@@ -47,6 +61,20 @@ export const blogPostBySlugQuery = `*[_type == "blogPost" && slug.current == $sl
     alt
   },
   mobileHeroImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  cardImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  mobileCardImage {
     asset-> {
       _id,
       url
@@ -78,7 +106,7 @@ export const blogPostBySlugQuery = `*[_type == "blogPost" && slug.current == $sl
   showDiscoverMore
 }`;
 
-export const relatedPostsQuery = `*[_type == "blogPost" && slug.current != $slug && count(categories[@._ref in $categoryIds]) > 0] | order(publishedAt desc) [0...4] {
+export const relatedPostsQuery = `*[_type == "blogPost" && !(_id in path('drafts.**')) && slug.current != $slug && count(categories[@._ref in $categoryIds]) > 0] | order(publishedAt desc) [0...4] {
   _id,
   title,
   "slug": slug.current,
@@ -98,6 +126,20 @@ export const relatedPostsQuery = `*[_type == "blogPost" && slug.current != $slug
     },
     alt
   },
+  cardImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
+  mobileCardImage {
+    asset-> {
+      _id,
+      url
+    },
+    alt
+  },
   categories[]-> {
     _id,
     title,
@@ -105,7 +147,7 @@ export const relatedPostsQuery = `*[_type == "blogPost" && slug.current != $slug
   }
 }`;
 
-export const allCategoriesQuery = `*[_type == "blogCategory"] | order(title asc) {
+export const allCategoriesQuery = `*[_type == "blogCategory" && !(_id in path('drafts.**'))] | order(title asc) {
   _id,
   title,
   "slug": slug.current
@@ -137,6 +179,8 @@ export interface SanityBlogPost {
   publishedAt: string;
   heroImage?: SanityBlogImage;
   mobileHeroImage?: SanityBlogImage;
+  cardImage?: SanityBlogImage;
+  mobileCardImage?: SanityBlogImage;
   categories?: SanityBlogCategory[];
   body?: any[];
   seoDescription?: string;
