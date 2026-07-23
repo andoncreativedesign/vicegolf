@@ -47,10 +47,8 @@ export function PageLayout({
         <Header header={header} cart={cart} isLoggedIn={isLoggedIn} publicStoreDomain={publicStoreDomain} banner={banner} />
       )}
       <main className={`bg-[#fafafa] ${banner?.enabled ? 'pt-[90px] md:pt-[110px] lg:pt-[180px]' : 'pt-[60px] md:pt-[80px] lg:pt-[140px]'}`}>
-        <div className="w-full max-w-[2560px] mx-auto">
-          <div className="w-full max-w-[1920px] mx-auto ">
-            {children}
-          </div>
+        <div className="w-full mx-auto">
+          {children}
         </div>
       </main>
       <Footer footer={footer} header={header} publicStoreDomain={publicStoreDomain} />
@@ -70,7 +68,7 @@ function CartAside({ cart }: { cart: PageLayoutProps['cart'] }) {
               {`Your Cart${cartData?.totalQuantity ? ` (${cartData.totalQuantity})` : ''}`}
             </span>
           }>
-            <CartMain cart={cartData} layout="aside" />
+            <CartMain cart={cartData} />
           </Aside>
         )}
       </Await>
