@@ -33,6 +33,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
           ...Money
         }
         requiresShipping
+        quantityAvailable
         title
         image {
           id
@@ -89,6 +90,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
           ...Money
         }
         requiresShipping
+        quantityAvailable
         title
         image {
           id
