@@ -20,6 +20,7 @@ type Props = ComponentProps<'div'> & {
   pricingTiers: Tier[];
   unitPrice: number;
   currencyCode: string;
+  quantityAvailable?: number;
 };
 
 export function QuantitySelector({
@@ -30,8 +31,10 @@ export function QuantitySelector({
   pricingTiers,
   unitPrice,
   currencyCode,
+  quantityAvailable,
   ...props
 }: Props) {
+  const maxQty = typeof quantityAvailable === 'number' ? quantityAvailable : Infinity;
   // Find the tier with the lowest unit cost for the Top Savings badge
   let minUnitPrice = Infinity;
   let topSavingsKey = '';
@@ -186,8 +189,9 @@ export function QuantitySelector({
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  disabled={quantity <= 1}
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded-full transition-colors shadow-sm cursor-pointer"
+                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full transition-colors shadow-sm cursor-pointer"
                 >
                   <Minus className="h-3 w-3" />
                 </button>
@@ -198,8 +202,9 @@ export function QuantitySelector({
 
                 <button
                   type="button"
+                  disabled={quantity >= maxQty}
                   onClick={() => setQuantity(quantity + 1)}
-                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 rounded-full transition-colors shadow-sm cursor-pointer"
+                  className="h-8 w-8 flex items-center justify-center text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full transition-colors shadow-sm cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
                 </button>

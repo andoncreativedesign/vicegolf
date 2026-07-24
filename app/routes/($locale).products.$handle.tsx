@@ -125,6 +125,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: { handle, selectedOptions: getSelectedProductOptions(request) },
+      cache: storefront.CacheNone(),
     }),
   ]);
   if (!product?.id) {

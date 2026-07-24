@@ -77,6 +77,25 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const { open } = useAside();
 
   const rootData = useRouteLoaderData<any>('root');
+  const [cartData, setCartData] = useState<any>(null);
+
+  useEffect(() => {
+    if (rootData?.cart) {
+      Promise.resolve(rootData.cart)
+        .then((resolvedCart) => {
+          setCartData(resolvedCart);
+        })
+        .catch((err) => {
+          console.error('Error resolving cart in ProductForm:', err);
+        });
+    }
+  }, [rootData?.cart]);
+
+  const cartLine = cartData?.lines?.nodes?.find(
+    (node: any) => node.merchandise?.id === selectedVariant?.id
+  );
+  const quantityInCart = cartLine?.quantity || 0;
+
   const automaticDiscounts = rootData?.automaticDiscounts || [];
 
   const applicableDiscounts = automaticDiscounts.filter((d: any) => {
@@ -87,7 +106,10 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const getInitialTier = () => {
     let tiers = [1];
-    const availableQty = (selectedVariant as any)?.quantityAvailable ?? Infinity;
+    const rawAvailableQty = typeof (selectedVariant as any)?.quantityAvailable === 'number' && (selectedVariant as any).quantityAvailable > 0
+      ? (selectedVariant as any).quantityAvailable
+      : Infinity;
+    const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
     applicableDiscounts.forEach((d: any) => {
       if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity) && d.minQuantity <= availableQty) {
         tiers.push(d.minQuantity);
@@ -99,12 +121,41 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const [quantity, setQuantity] = useState(getInitialTier);
   const [selectedTier, setSelectedTier] = useState(() => getInitialTier().toString());
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+  const [prevProductId, setPrevProductId] = useState(currentProductId);
 
   useEffect(() => {
-    const defaultTier = getInitialTier();
-    setQuantity(defaultTier);
-    setSelectedTier(defaultTier.toString());
-  }, [currentProductId]);
+    if (prevProductId !== currentProductId) {
+      const defaultTier = getInitialTier();
+      setQuantity(defaultTier);
+      setSelectedTier(defaultTier.toString());
+      setPrevProductId(currentProductId);
+    } else {
+      const rawAvailableQty = typeof (selectedVariant as any)?.quantityAvailable === 'number' && (selectedVariant as any).quantityAvailable > 0
+        ? (selectedVariant as any).quantityAvailable
+        : Infinity;
+      const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+
+      let tiers = [1];
+      applicableDiscounts.forEach((d: any) => {
+        if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity) && d.minQuantity <= availableQty) {
+          tiers.push(d.minQuantity);
+        }
+      });
+
+      const currentQty = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+
+      if (currentQty > availableQty) {
+        const cappedQty = availableQty === Infinity ? 1 : Math.max(availableQty > 0 ? 1 : 0, availableQty);
+        if (tiers.includes(cappedQty)) {
+          setSelectedTier(cappedQty.toString());
+          setQuantity(cappedQty);
+        } else {
+          setSelectedTier('custom');
+          setQuantity(cappedQty);
+        }
+      }
+    }
+  }, [selectedVariant?.id, currentProductId, quantityInCart]);
 
   // 1. Calculate price with membership discount
   let membershipPrice = originalUnitPrice;
@@ -164,7 +215,12 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const baseUnitCompare = unitCompareAmount > 0 ? unitCompareAmount : originalUnitPrice;
   const totalCompareAmount = baseUnitCompare * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = (unitCompareAmount > 0 && unitCompareAmount > unitPriceAmount) || totalPriceAmount < (originalUnitPrice * totalQuantityDozens);
+
+  const displayQuantity = Math.max(1, totalQuantityDozens);
+  const displayPriceAmount = getBestPriceForQuantity(displayQuantity);
+  const displayCompareAmount = baseUnitCompare * displayQuantity;
+  const showCompare = (unitCompareAmount > 0 && unitCompareAmount > unitPriceAmount) || displayPriceAmount < (originalUnitPrice * displayQuantity);
+
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -179,10 +235,17 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     }
   });
 
+  const rawAvailableQty = typeof (selectedVariant as any)?.quantityAvailable === 'number' && (selectedVariant as any).quantityAvailable > 0
+    ? (selectedVariant as any).quantityAvailable
+    : Infinity;
+  const isMaxQuantityReached = rawAvailableQty !== Infinity && quantityInCart >= rawAvailableQty;
+
   let tierQuantities: number[] = [];
   if (hasVolumeDiscount) {
-    tierQuantities = [1];
-    const availableQty = (selectedVariant as any)?.quantityAvailable ?? Infinity;
+    const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+    if (1 <= availableQty) {
+      tierQuantities.push(1);
+    }
     applicableDiscounts.forEach((d: any) => {
       if (d.minQuantity && d.minQuantity > 1 && !tierQuantities.includes(d.minQuantity) && d.minQuantity <= availableQty) {
         tierQuantities.push(d.minQuantity);
@@ -219,7 +282,8 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   });
 
   const handleCustomQuantity = (q: number) => {
-    const newQuantity = Math.max(1, q);
+    const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+    const newQuantity = Math.min(availableQty, Math.max(availableQty > 0 ? 1 : 0, q));
     setQuantity(newQuantity);
     
     // Check if the new quantity matches any available Dozen tier
@@ -349,28 +413,28 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
           <>
             <span className="text-xl font-bold text-[#e32619] flex items-center">
               <AedIcon className="w-4 h-4 mr-0.5" />
-              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount)}
             </span>
             <s className="text-[17px] text-gray-500 line-through flex items-center">
               <AedIcon className="w-3.5 h-3.5 mr-0.5" />
-              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalCompareAmount)}
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayCompareAmount)}
             </s>
-            {totalQuantityDozens > 1 ? (
+            {displayQuantity > 1 ? (
               <span className="text-[15px] font-medium text-gray-600 flex items-center">
                 (<AedIcon className="w-3 h-3 mr-0.5" />
-                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount / totalQuantityDozens)}
+                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount / displayQuantity)}
                 /{isGolfBall ? 'dozen' : 'unit'})
               </span>
             ) : (
               <span className="text-sm text-emerald-600 font-medium flex items-center">
-                (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+                (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(displayCompareAmount - displayPriceAmount).toFixed(2)})
               </span>
             )}
           </>
         ) : (
           <span className="text-xl font-bold text-gray-900 flex items-center">
             <AedIcon className="w-4 h-4 mr-0.5" />
-            {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalPriceAmount)}
+            {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount)}
           </span>
         )}
       </div>
@@ -455,6 +519,11 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
             pricingTiers={pricingTiers}
             unitPrice={unitPriceAmount}
             currencyCode={currencyCode}
+            quantityAvailable={
+              rawAvailableQty !== Infinity
+                ? Math.max(0, rawAvailableQty - quantityInCart)
+                : undefined
+            }
           />
         </div>
       )}
@@ -473,7 +542,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       {/* Add to Cart Button */}
       <div className="mb-6">
         <AddToCartButton
-          disabled={!selectedVariant || !selectedVariant.availableForSale}
+          disabled={!selectedVariant || !selectedVariant.availableForSale || isMaxQuantityReached}
           onClick={handleAddToCart}
           lines={
             selectedVariant
@@ -487,7 +556,11 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
               : []
           }
         >
-          {selectedVariant?.availableForSale ? (
+          {!selectedVariant || !selectedVariant.availableForSale ? (
+            'Out of stock'
+          ) : isMaxQuantityReached ? (
+            'Max quantity in cart reached'
+          ) : (
             <span className="flex items-center justify-center gap-1">
               Add to Cart • <AedIcon className="w-3 h-3 text-white" />
               {new Intl.NumberFormat('en-US', {
@@ -495,8 +568,6 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
                 maximumFractionDigits: 2,
               }).format(totalPriceAmount)}
             </span>
-          ) : (
-            'Out of stock'
           )}
         </AddToCartButton>
       </div>
