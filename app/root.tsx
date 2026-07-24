@@ -288,6 +288,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
           return {
             title: ad.title,
+            summary: ad.summary,
             percentage: pct,
             amount: value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null,
             currencyCode: value?.amount?.currencyCode || null,
@@ -302,6 +303,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         // BXGY or other types
         return {
           title: ad.title,
+          summary: ad.summary,
           percentage: 0,
           amount: null,
         };
