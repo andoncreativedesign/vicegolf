@@ -161,9 +161,10 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   };
 
   const totalPriceAmount = getBestPriceForQuantity(totalQuantityDozens);
-  const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
+  const baseUnitCompare = unitCompareAmount > 0 ? unitCompareAmount : originalUnitPrice;
+  const totalCompareAmount = baseUnitCompare * totalQuantityDozens;
   const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = unitCompareAmount > unitPriceAmount || totalPriceAmount < (unitPriceAmount * totalQuantityDozens);
+  const showCompare = (unitCompareAmount > 0 && unitCompareAmount > unitPriceAmount) || totalPriceAmount < (originalUnitPrice * totalQuantityDozens);
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
