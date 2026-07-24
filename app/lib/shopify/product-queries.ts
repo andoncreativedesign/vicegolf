@@ -856,7 +856,6 @@ fragment ColorVariantProduct on Product {
     nodes {
       id
       availableForSale
-      quantityAvailable
       price {
         amount
         currencyCode
@@ -1131,7 +1130,6 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
               node {
                 id
                 availableForSale
-                quantityAvailable
                 price
                 compareAtPrice
               }
