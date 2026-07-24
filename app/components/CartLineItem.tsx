@@ -170,6 +170,9 @@ function CartLineQuantity({ line }: { line: CartLine }) {
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
+  const quantityAvailable = (line.merchandise as any)?.quantityAvailable;
+  const maxQty = typeof quantityAvailable === 'number' && quantityAvailable > 0 ? quantityAvailable : Infinity;
+
   return (
     <div className="flex items-center gap-2">
       <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
@@ -196,7 +199,7 @@ function CartLineQuantity({ line }: { line: CartLine }) {
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
-          disabled={!!isOptimistic}
+          disabled={quantity >= maxQty || !!isOptimistic}
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
