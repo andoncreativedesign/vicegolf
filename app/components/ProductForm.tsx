@@ -454,7 +454,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
         <>
-          {specialVariants?.length ? (
+          {(specialVariants?.length || productType?.toLowerCase() === 'golf balls') ? (
             <VariantGroup
               productType={productType?.toLowerCase()}
               colorVariants={colorVariants}
