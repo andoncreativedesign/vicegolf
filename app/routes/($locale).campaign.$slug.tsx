@@ -170,26 +170,28 @@ const campaignStyles = `
     cursor: not-allowed;
   }
 
-  /* Prize SVG and Overlay Text */
+  /* Prize Overlay Text */
   .cp-prize {
     position: relative;
     width: 100%;
     max-width: 1017px;
-    margin: 0 auto 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin: 0 auto 32px;
+    border: 2px solid #c0df16;
+    border-radius: 16px;
+    padding: 64px 40px;
   }
-  .cp-prize__svg {
-    width: 100%;
-    height: auto;
-    display: block;
+  .cp-prize::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 25%;
+    width: 50%;
+    height: 4px;
+    background: #000000;
+    z-index: 1;
   }
   .cp-prize__text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: static;
     color: #ffffff;
     font-size: 38px;
     font-weight: 400;
@@ -197,13 +199,24 @@ const campaignStyles = `
     margin: 0;
     text-align: center;
     width: 100%;
-    padding: 0 40px;
-    pointer-events: none;
   }
+  .cp-prize__text::before, .cp-prize__text::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    width: 8px;
+    height: 8px;
+    background: #c0df16;
+    border-radius: 50%;
+    z-index: 2;
+  }
+  .cp-prize__text::before { left: calc(25% - 4px); }
+  .cp-prize__text::after { right: calc(25% - 4px); }
 
   .cp-prize__balls {
-    width: 100%;
-    max-width: 380px;
+    width: 45%;
+    max-width: 420px;
+    min-width: min(260px, 100%);
     margin: -48px auto 0;
     position: relative;
     z-index: 2;
@@ -330,6 +343,9 @@ const campaignStyles = `
       font-size: 32px;
       margin-bottom: 32px;
     }
+    .cp-prize {
+      padding: 48px 32px;
+    }
     .cp-prize__text {
       font-size: 32px;
     }
@@ -344,6 +360,9 @@ const campaignStyles = `
   @media (max-width: 700px) {
     .cp-signup__lead {
       font-size: 24px;
+    }
+    .cp-prize {
+      padding: 40px 24px;
     }
     .cp-prize__text {
       font-size: 24px;
@@ -362,27 +381,31 @@ const campaignStyles = `
       height: auto;
       border-radius: 8px;
       margin-bottom: 40px;
+      background: transparent;
     }
     .cp-signup__input {
       height: 48px;
       font-size: 16px;
       padding: 0 16px;
+      border-radius: 8px 8px 0 0 !important;
+      width: 100%;
     }
     .cp-signup__btn {
       height: 48px;
       width: 100%;
       font-size: 16px;
       padding: 0;
+      border-radius: 0 0 8px 8px !important;
+      margin: 0;
     }
     .cp-prize {
-      max-width: 100%;
+      padding: 32px 16px 24px;
     }
     .cp-prize__text {
       font-size: 16px;
-      padding: 0 16px;
     }
     .cp-prize__balls {
-      margin: -32px auto 0;
+      margin: 0 auto;
     }
     .cp-benefits__title {
       font-size: 20px;

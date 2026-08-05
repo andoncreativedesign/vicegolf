@@ -80,11 +80,6 @@ export default function SignupSection({
           </form>
 
           <div className="cp-prize">
-            <img
-              src="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-08.svg"
-              alt="Prize Outline"
-              className="cp-prize__svg"
-            />
             <p 
               className="cp-prize__text"
               dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
