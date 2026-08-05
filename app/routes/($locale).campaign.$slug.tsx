@@ -1,24 +1,58 @@
+import { useLoaderData, isRouteErrorResponse, useRouteError, Link, useNavigation, type LoaderFunctionArgs } from 'react-router';
 import HeroSection from '~/components/campaign/newsletter-signup/HeroSection';
 import SignupSection from '~/components/campaign/newsletter-signup/SignupSection';
 import BenefitsSection from '~/components/campaign/newsletter-signup/BenefitsSection';
+import { getCampaignDataBySlug } from '~/lib/sanity/campaign';
 
-export const meta = () => {
+export async function loader({ params, context }: LoaderFunctionArgs) {
+  const slug = params.slug;
+  if (!slug) {
+    throw new Response('Not Found', { status: 404 });
+  }
+
+  const campaign = await getCampaignDataBySlug(slug, context.env);
+  
+  if (!campaign) {
+    throw new Response('Campaign Not Found', { status: 404 });
+  }
+
+  return { campaign };
+}
+
+export const meta = ({ data }: any) => {
   return [
-    { title: "Win a Year's Supply of Golf Balls | Vice Golf UAE" },
+    { title: data?.campaign?.title || "Vice Golf Campaign" },
     {
       name: 'description',
-      content:
-        "Sign up to the Vice Golf UAE newsletter for your chance to win a year's supply of golf balls. 5 lucky winners will each receive one box of 12 Vice golf balls every month for a year.",
+      content: data?.campaign?.newsletterHeading?.replace(/\n/g, ' ') || "Join the Vice Golf campaign.",
     },
   ];
 };
 
 export default function CampaignNewsletterSignup() {
+  const { campaign } = useLoaderData<typeof loader>();
+
   return (
     <div className="cp">
-      <HeroSection />
-      <SignupSection />
-      <BenefitsSection />
+      <HeroSection 
+        heroImageDesktop={campaign.heroImageDesktop?.asset?.url}
+        heroImageMobile={campaign.heroImageMobile?.asset?.url}
+      />
+      <SignupSection 
+        heading={campaign.newsletterHeading}
+        description={campaign.newsletterDescription}
+        inputPlaceholder={campaign.inputPlaceholder}
+        inputBgColor={campaign.inputBgColor?.hex}
+        inputTextColor={campaign.inputTextColor?.hex}
+        buttonText={campaign.buttonText}
+        buttonBgColor={campaign.buttonBgColor?.hex}
+        buttonTextColor={campaign.buttonTextColor?.hex}
+      />
+      <BenefitsSection 
+        heading={campaign.benefitsHeading}
+        features={campaign.features}
+        disclaimerText={campaign.disclaimerText}
+      />
 
       <style dangerouslySetInnerHTML={{ __html: campaignStyles }} />
     </div>
@@ -364,3 +398,124 @@ const campaignStyles = `
     }
   }
 `;
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const navigation = useNavigation();
+  const isNotFound = isRouteErrorResponse(error) && error.status === 404;
+
+  const isNavigatingToHome = navigation.state === 'loading' && navigation.location?.pathname === '/';
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '120px 24px',
+      minHeight: '65vh',
+      textAlign: 'center',
+      backgroundColor: '#ffffff',
+      fontFamily: 'inherit'
+    }}>
+      <div style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '72px',
+        height: '72px',
+        borderRadius: '50%',
+        backgroundColor: '#f5f5f5',
+        color: '#000',
+        marginBottom: '24px'
+      }}>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+
+      <h1 style={{ 
+        fontSize: '42px', 
+        fontWeight: '800', 
+        marginBottom: '16px', 
+        color: '#000',
+        letterSpacing: '-0.02em',
+        lineHeight: '1.2',
+        textTransform: 'uppercase'
+      }}>
+        {isNotFound ? "Looks like a lost ball" : "Something Went Wrong"}
+      </h1>
+      
+      <p style={{ 
+        fontSize: '16px', 
+        color: '#555', 
+        maxWidth: '440px', 
+        marginBottom: '36px', 
+        lineHeight: '1.6' 
+      }}>
+        {isNotFound 
+          ? "The campaign you're looking for has ended, but your game doesn't have to stop here. Explore our premium golf balls, clubs, and apparel designed to lower your score."
+          : "An unexpected error occurred while loading this campaign. Please try again later."}
+      </p>
+      
+      <Link 
+        to="/" 
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#000',
+          color: '#fff',
+          padding: '0 32px',
+          height: '48px',
+          borderRadius: '24px',
+          textDecoration: 'none',
+          fontWeight: '600',
+          fontSize: '14px',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          minWidth: '220px',
+          transition: 'all 0.2s ease',
+          opacity: isNavigatingToHome ? 0.8 : 1,
+          pointerEvents: isNavigatingToHome ? 'none' : 'auto'
+        }}
+        onMouseEnter={(e) => {
+           if(!isNavigatingToHome) e.currentTarget.style.backgroundColor = '#333';
+        }}
+        onMouseLeave={(e) => {
+           if(!isNavigatingToHome) e.currentTarget.style.backgroundColor = '#000';
+        }}
+      >
+        {isNavigatingToHome ? (
+          <>
+            <svg 
+              style={{ 
+                marginRight: '12px', 
+                width: '18px', 
+                height: '18px', 
+                animation: 'spin 1s linear infinite' 
+              }} 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            RETURNING...
+          </>
+        ) : (
+          'SHOP VICE GOLF'
+        )}
+      </Link>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}} />
+    </div>
+  );
+}
