@@ -16,81 +16,71 @@ function BenefitItem({ iconSrc, text }: BenefitItemProps) {
   );
 }
 
-export default function BenefitsSection() {
+interface Feature {
+  icon?: { asset?: { url?: string } };
+  title?: string;
+}
+
+interface BenefitsSectionProps {
+  heading?: string;
+  features?: Feature[];
+  disclaimerText?: string;
+}
+
+const DEFAULT_FEATURES = [
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-04.svg", title: "First access to new\nproduct drops" },
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-05.svg", title: "Honest product\nreviews and gear\nrecommendations" },
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-06.svg", title: "Exclusive\nsubscriber-only offers" },
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-07.svg", title: "Early access to sales\nand limited releases" },
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-03.svg", title: "Heads-up on local golf\nevents and activations" },
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-02.svg", title: "Tips, tricks and picks to\nhelp you play smarter" },
+  { icon: "/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-01.svg", title: "Competitions\n& giveaways throughout\nthe year" }
+];
+
+export default function BenefitsSection({
+  heading = "SUBSCRIBE TO THE NEWSLETTER FOR",
+  features,
+  disclaimerText = "A year's supply of golf balls includes one box of 12 golf balls per month for 12 months, worth AED 3,000. Winners may choose any available box of Vice golf balls each month. Subject to availability. T&Cs apply."
+}: BenefitsSectionProps) {
+  
+  const activeFeatures = features && features.length > 0 ? features.map(f => ({
+    icon: f.icon?.asset?.url || '',
+    title: f.title || ''
+  })) : DEFAULT_FEATURES;
+
+  // The original layout had 4 items in the top row, and 3 items in the bottom row centered.
+  const row1 = activeFeatures.slice(0, 4);
+  const row2 = activeFeatures.slice(4);
+
   return (
     <section className="cp-benefits">
-      <h2 className="cp-benefits__title">SUBSCRIBE TO THE NEWSLETTER FOR</h2>
+      <h2 className="cp-benefits__title">{heading}</h2>
 
-      {/* Row 1 – 4 items */}
       <div className="cp-benefits__row">
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-04.svg"
-          text={
-            <>
-              First access to new<br />product drops
-            </>
-          }
-        />
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-05.svg"
-          text={
-            <>
-              Honest product<br />reviews and gear<br />recommendations
-            </>
-          }
-        />
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-06.svg"
-          text={
-            <>
-              Exclusive<br />subscriber-only offers
-            </>
-          }
-        />
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-07.svg"
-          text={
-            <>
-              Early access to sales<br />and limited releases
-            </>
-          }
-        />
+        {row1.map((feature, idx) => (
+          <BenefitItem
+            key={idx}
+            iconSrc={feature.icon}
+            text={<span dangerouslySetInnerHTML={{ __html: feature.title.replace(/\n/g, '<br />') }} />}
+          />
+        ))}
       </div>
 
-      {/* Row 2 – 3 items centered */}
-      <div className="cp-benefits__row cp-benefits__row--center">
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-03.svg"
-          text={
-            <>
-              Heads-up on local golf<br />events and activations
-            </>
-          }
-        />
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-02.svg"
-          text={
-            <>
-              Tips, tricks and picks to<br />help you play smarter
-            </>
-          }
-        />
-        <BenefitItem
-          iconSrc="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-01.svg"
-          text={
-            <>
-              Competitions<br />&amp; giveaways throughout<br />the year
-            </>
-          }
-        />
-      </div>
+      {row2.length > 0 && (
+        <div className="cp-benefits__row cp-benefits__row--center">
+          {row2.map((feature, idx) => (
+            <BenefitItem
+              key={idx}
+              iconSrc={feature.icon}
+              text={<span dangerouslySetInnerHTML={{ __html: feature.title.replace(/\n/g, '<br />') }} />}
+            />
+          ))}
+        </div>
+      )}
 
       <hr className="cp-benefits__divider" />
       <p className="cp-benefits__disclaimer">
-        A year&apos;s supply of golf balls includes one box of 12 golf balls
-        per month for 12 months, worth AED 3,000. Winners may choose any
-        available box of Vice golf balls each month. Subject to availability.
-        T&amp;Cs apply.
+        {disclaimerText}
       </p>
     </section>
   );

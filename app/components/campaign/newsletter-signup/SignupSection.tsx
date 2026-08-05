@@ -1,6 +1,26 @@
 import { useState } from 'react';
 
-export default function SignupSection() {
+interface SignupSectionProps {
+  heading?: string;
+  description?: string;
+  inputPlaceholder?: string;
+  inputBgColor?: string;
+  inputTextColor?: string;
+  buttonText?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+}
+
+export default function SignupSection({
+  heading = "Sign up to the Vice Golf UAE newsletter\nfor your chance to be one of 5 lucky winners.",
+  description = "Each winner will receive one box of\n12 Vice golf balls every month for a year.",
+  inputPlaceholder = "YOUR MAIL ID HERE",
+  inputBgColor,
+  inputTextColor,
+  buttonText = "ENTER NOW",
+  buttonBgColor,
+  buttonTextColor
+}: SignupSectionProps) {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -14,7 +34,6 @@ export default function SignupSection() {
       return;
     }
     setLoading(true);
-    // TODO: Replace with real API call
     setTimeout(() => {
       setLoading(false);
       setSubmitted(true);
@@ -25,11 +44,10 @@ export default function SignupSection() {
     <section className="cp-signup">
       {!submitted ? (
         <>
-          <p className="cp-signup__lead">
-            Sign up to the Vice Golf UAE newsletter
-            <br />
-            for your chance to be one of 5 lucky winners.
-          </p>
+          <p 
+            className="cp-signup__lead"
+            dangerouslySetInnerHTML={{ __html: heading.replace(/\n/g, '<br />') }}
+          />
 
           {error && <p className="cp-signup__error">{error}</p>}
 
@@ -37,33 +55,40 @@ export default function SignupSection() {
             <input
               id="campaign-email"
               type="email"
-              placeholder="YOUR MAIL ID HERE"
+              placeholder={inputPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="cp-signup__input"
               autoComplete="email"
+              style={{
+                backgroundColor: inputBgColor,
+                color: inputTextColor,
+              }}
               required
             />
             <button
               type="submit"
               className="cp-signup__btn"
               disabled={loading}
+              style={{
+                backgroundColor: buttonBgColor,
+                color: buttonTextColor,
+              }}
             >
-              {loading ? 'ENTERING...' : 'ENTER NOW'}
+              {loading ? 'ENTERING...' : buttonText}
             </button>
           </form>
 
-          {/* Prize graphic – using the SVG instead of CSS box */}
           <div className="cp-prize">
             <img
               src="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA-08.svg"
               alt="Prize Outline"
               className="cp-prize__svg"
             />
-            <p className="cp-prize__text">
-              Each winner will receive one box of<br />
-              12 Vice golf balls every month for a year.
-            </p>
+            <p 
+              className="cp-prize__text"
+              dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
+            />
           </div>
 
           <div className="cp-prize__balls">
