@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Form, useNavigation } from 'react-router';
 
 interface SignupSectionProps {
   heading?: string;
@@ -9,6 +10,10 @@ interface SignupSectionProps {
   buttonText?: string;
   buttonBgColor?: string;
   buttonTextColor?: string;
+  isLoggedIn?: boolean;
+  isSubscribed?: boolean;
+  customerEmail?: string;
+  actionData?: any;
 }
 
 export default function SignupSection({
@@ -19,47 +24,56 @@ export default function SignupSection({
   inputTextColor,
   buttonText = "ENTER NOW",
   buttonBgColor,
-  buttonTextColor
+  buttonTextColor,
+  isLoggedIn = false,
+  isSubscribed = false,
+  customerEmail = '',
+  actionData
 }: SignupSectionProps) {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState(customerEmail || '');
+  const navigation = useNavigation();
+  const loading = navigation.state === 'submitting';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address.');
-      return;
+  useEffect(() => {
+    if (customerEmail && !email) {
+      setEmail(customerEmail);
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1200);
-  };
+  }, [customerEmail, email]);
+
+  const showAlreadySubscribed = isLoggedIn && isSubscribed && !actionData?.success;
+  const showSuccess = actionData?.success;
 
   return (
     <section className="cp-signup">
-      {!submitted ? (
+      {showAlreadySubscribed ? (
+        <div className="cp-success" style={{ marginTop: '20px' }}>
+          <div className="cp-success__icon" style={{ borderColor: '#c0df16', color: '#c0df16' }}>✓</div>
+          <h2 style={{ fontSize: '28px', color: '#ffffff', marginBottom: '16px' }}>Already Subscribed</h2>
+          <p style={{ color: '#c5c5c5', fontSize: '18px' }}>
+            You are already subscribed to the newsletter.<br />Good luck in the giveaway!
+          </p>
+        </div>
+      ) : !showSuccess ? (
         <>
           <p 
             className="cp-signup__lead"
             dangerouslySetInnerHTML={{ __html: heading.replace(/\n/g, '<br />') }}
           />
 
-          {error && <p className="cp-signup__error">{error}</p>}
+          {actionData?.error && <p className="cp-signup__error">{actionData.error}</p>}
 
-          <form className="cp-signup__form" onSubmit={handleSubmit} noValidate>
+          <Form method="post" className="cp-signup__form" noValidate>
+            <input type="hidden" name="actionType" value="newsletter_signup" />
             <input
               id="campaign-email"
+              name="email"
               type="email"
               placeholder={inputPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="cp-signup__input"
               autoComplete="email"
+              readOnly={isLoggedIn && !!customerEmail}
               style={{
                 backgroundColor: inputBgColor,
                 color: inputTextColor,
@@ -77,7 +91,7 @@ export default function SignupSection({
             >
               {loading ? 'ENTERING...' : buttonText}
             </button>
-          </form>
+          </Form>
 
           <div className="cp-prize">
             <p 

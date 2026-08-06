@@ -1,8 +1,10 @@
-import { useLoaderData, isRouteErrorResponse, useRouteError, Link, useNavigation, type LoaderFunctionArgs } from 'react-router';
+import { useLoaderData, isRouteErrorResponse, useRouteError, Link, useNavigation, type LoaderFunctionArgs, type ActionFunctionArgs, useActionData } from 'react-router';
 import HeroSection from '~/components/campaign/newsletter-signup/HeroSection';
 import SignupSection from '~/components/campaign/newsletter-signup/SignupSection';
 import BenefitsSection from '~/components/campaign/newsletter-signup/BenefitsSection';
 import { getCampaignDataBySlug } from '~/lib/sanity/campaign';
+import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
+import { getCustomerSubscriptionStatus, processNewsletterSignup } from '~/lib/shopify/newsletter.server';
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
   const slug = params.slug;
@@ -16,7 +18,49 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
     throw new Response('Campaign Not Found', { status: 404 });
   }
 
-  return { campaign };
+  let isLoggedIn = false;
+  let customerEmail = '';
+  let isSubscribed = false;
+
+  try {
+    isLoggedIn = await context.customerAccount.isLoggedIn();
+    if (isLoggedIn) {
+      const { data } = await context.customerAccount.query(CUSTOMER_DETAILS_QUERY, {
+        variables: { language: context.customerAccount.i18n.language },
+      });
+      if (data?.customer?.emailAddress?.emailAddress) {
+        customerEmail = data.customer.emailAddress.emailAddress;
+        
+        // Check Admin API for marketing consent and tags
+        const subStatus = await getCustomerSubscriptionStatus(customerEmail, slug, context.env);
+        isSubscribed = subStatus.isSubscribed && subStatus.hasTag;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching customer context:", error);
+  }
+
+  return { campaign, isLoggedIn, customerEmail, isSubscribed };
+}
+
+export async function action({ request, params, context }: ActionFunctionArgs) {
+  const slug = params.slug;
+  if (!slug) return Response.json({ error: 'Missing campaign slug' }, { status: 400 });
+
+  const formData = await request.formData();
+  const email = formData.get('email') as string;
+
+  if (!email || !email.includes('@')) {
+    return Response.json({ error: 'Please enter a valid email address' }, { status: 400 });
+  }
+
+  const result = await processNewsletterSignup(email, slug, context.env);
+
+  if (result.success) {
+    return Response.json({ success: true, message: 'You have successfully entered the giveaway!' });
+  } else {
+    return Response.json({ error: result.error || 'Failed to process signup' }, { status: 500 });
+  }
 }
 
 export const meta = ({ data }: any) => {
@@ -30,7 +74,8 @@ export const meta = ({ data }: any) => {
 };
 
 export default function CampaignNewsletterSignup() {
-  const { campaign } = useLoaderData<typeof loader>();
+  const { campaign, isLoggedIn, customerEmail, isSubscribed } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
 
   return (
     <div className="cp">
@@ -47,6 +92,10 @@ export default function CampaignNewsletterSignup() {
         buttonText={campaign.buttonText}
         buttonBgColor={campaign.buttonBgColor?.hex}
         buttonTextColor={campaign.buttonTextColor?.hex}
+        isLoggedIn={isLoggedIn}
+        isSubscribed={isSubscribed}
+        customerEmail={customerEmail}
+        actionData={actionData}
       />
       <BenefitsSection 
         heading={campaign.benefitsHeading}
