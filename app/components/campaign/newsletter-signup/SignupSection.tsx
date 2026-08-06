@@ -45,21 +45,24 @@ export default function SignupSection({
 
   return (
     <section className="cp-signup">
-      <p 
+      <p
         className="cp-signup__lead"
         dangerouslySetInnerHTML={{ __html: heading.replace(/\n/g, '<br />') }}
       />
 
       {showAlreadySubscribed ? (
-        <div style={{ 
+        <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '48px auto 64px',
+          padding: '0 20px',
           textAlign: 'center'
         }}>
-          <div style={{
+          <div 
+            className="cp-success-icon"
+            style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -73,36 +76,43 @@ export default function SignupSection({
             marginBottom: '20px',
             boxShadow: '0 0 20px rgba(192, 223, 22, 0.4)'
           }}>✓</div>
-          <h2 style={{ 
-            color: '#c0df16', 
-            fontSize: '32px', 
+          <h2 
+            className="cp-success-title"
+            style={{
+            color: '#c0df16',
+            fontSize: 'clamp(24px, 7vw, 32px)',
             fontWeight: '900',
             letterSpacing: '1.5px',
             textTransform: 'uppercase',
             margin: '0 0 12px 0'
           }}>
-            Already Registered
+            You're on the list.
           </h2>
-          <p style={{
+          <p 
+            className="cp-success-text"
+            style={{
             color: '#b0b0b0',
-            fontSize: '18px',
+            fontSize: 'clamp(15px, 4vw, 18px)',
             fontWeight: '500',
             maxWidth: '400px',
             lineHeight: '1.5'
           }}>
-            You are securely on the list for this giveaway. Keep an eye on your inbox!
+            Your spot is already secured. We'll be drawing the 5 lucky winners soon—keep a close eye on your inbox!
           </p>
         </div>
       ) : showSuccess ? (
-        <div style={{ 
+        <div style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '48px auto 64px',
+          padding: '0 20px',
           textAlign: 'center'
         }}>
-          <div style={{
+          <div 
+            className="cp-success-icon"
+            style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -116,24 +126,28 @@ export default function SignupSection({
             marginBottom: '20px',
             boxShadow: '0 0 20px rgba(192, 223, 22, 0.4)'
           }}>✓</div>
-          <h2 style={{ 
-            color: '#c0df16', 
-            fontSize: '32px', 
+          <h2 
+            className="cp-success-title"
+            style={{
+            color: '#c0df16',
+            fontSize: 'clamp(24px, 7vw, 32px)',
             fontWeight: '900',
             letterSpacing: '1.5px',
             textTransform: 'uppercase',
             margin: '0 0 12px 0'
           }}>
-            Successfully Entered
+            Entry Confirmed!
           </h2>
-          <p style={{
+          <p 
+            className="cp-success-text"
+            style={{
             color: '#b0b0b0',
-            fontSize: '18px',
+            fontSize: 'clamp(15px, 4vw, 18px)',
             fontWeight: '500',
             maxWidth: '400px',
             lineHeight: '1.5'
           }}>
-            Thanks for signing up! We will contact the 5 lucky winners very soon.
+            You're officially in the draw. Keep a close eye on your inbox—we'll be notifying the 5 lucky winners very soon. Good luck!
           </p>
         </div>
       ) : (
@@ -166,14 +180,14 @@ export default function SignupSection({
                 color: buttonTextColor,
               }}
             >
-              {loading ? 'ENTERING...' : buttonText}
+              {loading ? <div className="cp-spinner"></div> : buttonText}
             </button>
           </Form>
         </>
       )}
 
       <div className="cp-prize">
-        <p 
+        <p
           className="cp-prize__text"
           dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
         />

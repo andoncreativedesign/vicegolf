@@ -219,6 +219,41 @@ const campaignStyles = `
     cursor: not-allowed;
   }
 
+  @keyframes cp-spin {
+    to { transform: rotate(360deg); }
+  }
+  .cp-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0,0,0,0.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: cp-spin 0.8s linear infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes cp-success-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes cp-success-fade-up {
+    0% { transform: translateY(15px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .cp-success-icon {
+    animation: cp-success-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  .cp-success-title {
+    opacity: 0;
+    animation: cp-success-fade-up 0.5s ease forwards 0.2s;
+  }
+  .cp-success-text {
+    opacity: 0;
+    animation: cp-success-fade-up 0.5s ease forwards 0.35s;
+  }
+
   /* Prize Overlay Text */
   .cp-prize {
     position: relative;
