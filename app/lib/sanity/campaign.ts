@@ -8,6 +8,10 @@ export interface CampaignData {
   heroImageMobile?: { asset: { url: string } };
   newsletterHeading?: string;
   newsletterDescription?: string;
+  successTitle?: string;
+  successText?: string;
+  alreadyRegisteredTitle?: string;
+  alreadyRegisteredText?: string;
   inputPlaceholder?: string;
   inputBgColor?: { hex: string };
   inputTextColor?: { hex: string };
@@ -37,6 +41,10 @@ export async function getCampaignDataBySlug(slug: string, env?: any): Promise<Ca
       heroImageMobile { asset->{url} },
       newsletterHeading,
       newsletterDescription,
+      successTitle,
+      successText,
+      alreadyRegisteredTitle,
+      alreadyRegisteredText,
       inputPlaceholder,
       inputBgColor,
       inputTextColor,

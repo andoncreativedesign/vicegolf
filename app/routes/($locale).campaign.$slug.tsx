@@ -86,6 +86,10 @@ export default function CampaignNewsletterSignup() {
       <SignupSection 
         heading={campaign.newsletterHeading}
         description={campaign.newsletterDescription}
+        successTitle={campaign.successTitle}
+        successText={campaign.successText}
+        alreadyRegisteredTitle={campaign.alreadyRegisteredTitle}
+        alreadyRegisteredText={campaign.alreadyRegisteredText}
         inputPlaceholder={campaign.inputPlaceholder}
         inputBgColor={campaign.inputBgColor?.hex}
         inputTextColor={campaign.inputTextColor?.hex}

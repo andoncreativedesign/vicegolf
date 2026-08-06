@@ -4,6 +4,10 @@ import { Form, useNavigation } from 'react-router';
 interface SignupSectionProps {
   heading?: string;
   description?: string;
+  successTitle?: string;
+  successText?: string;
+  alreadyRegisteredTitle?: string;
+  alreadyRegisteredText?: string;
   inputPlaceholder?: string;
   inputBgColor?: string;
   inputTextColor?: string;
@@ -19,6 +23,10 @@ interface SignupSectionProps {
 export default function SignupSection({
   heading = "Sign up to the Vice Golf UAE newsletter\nfor your chance to be one of 5 lucky winners.",
   description = "Each winner will receive one box of\n12 Vice golf balls every month for a year.",
+  successTitle = "Entry Confirmed!",
+  successText = "You're officially in the draw. Keep a close eye on your inbox—we'll be notifying the 5 lucky winners very soon. Good luck!",
+  alreadyRegisteredTitle = "You're on the list.",
+  alreadyRegisteredText = "Your spot is already secured. We'll be drawing the 5 lucky winners soon—keep a close eye on your inbox!",
   inputPlaceholder = "YOUR MAIL ID HERE",
   inputBgColor,
   inputTextColor,
@@ -86,7 +94,7 @@ export default function SignupSection({
             textTransform: 'uppercase',
             margin: '0 0 12px 0'
           }}>
-            You're on the list.
+            {alreadyRegisteredTitle}
           </h2>
           <p 
             className="cp-success-text"
@@ -96,9 +104,9 @@ export default function SignupSection({
             fontWeight: '500',
             maxWidth: '400px',
             lineHeight: '1.5'
-          }}>
-            Your spot is already secured. We'll be drawing the 5 lucky winners soon—keep a close eye on your inbox!
-          </p>
+          }}
+          dangerouslySetInnerHTML={{ __html: alreadyRegisteredText.replace(/\n/g, '<br />') }}
+          />
         </div>
       ) : showSuccess ? (
         <div style={{
@@ -136,7 +144,7 @@ export default function SignupSection({
             textTransform: 'uppercase',
             margin: '0 0 12px 0'
           }}>
-            Entry Confirmed!
+            {successTitle}
           </h2>
           <p 
             className="cp-success-text"
@@ -146,9 +154,9 @@ export default function SignupSection({
             fontWeight: '500',
             maxWidth: '400px',
             lineHeight: '1.5'
-          }}>
-            You're officially in the draw. Keep a close eye on your inbox—we'll be notifying the 5 lucky winners very soon. Good luck!
-          </p>
+          }}
+          dangerouslySetInnerHTML={{ __html: successText.replace(/\n/g, '<br />') }}
+          />
         </div>
       ) : (
         <>
