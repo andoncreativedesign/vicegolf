@@ -131,17 +131,24 @@ const campaignStyles = `
     width: 100%;
     line-height: 0;
     overflow: hidden;
+    border-radius: 0 !important;
+  }
+  .cp-hero picture {
+    display: block;
+    width: 100%;
+    border-radius: 0 !important;
   }
   .cp-hero__img {
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 0 !important;
   }
 
   /* ── SIGNUP SECTION ── */
   .cp-signup {
     background: #000000;
-    padding: 56px 20px 72px;
+    padding: 72px 20px 80px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -152,7 +159,8 @@ const campaignStyles = `
     font-weight: 400;
     color: #ffffff;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
     margin-bottom: 48px;
     max-width: 900px;
   }
@@ -172,48 +180,46 @@ const campaignStyles = `
     height: 60px;
     border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 72px;
+    margin-bottom: 80px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
 
   .cp-signup__input {
     flex: 1;
     background: #ffffff;
+    color: #111111;
     border: none;
     border-radius: 0 !important;
     -webkit-appearance: none;
     appearance: none;
-    padding: 0 32px;
-    font-size: 20px;
-    font-weight: 400;
-    font-family: inherit;
-    letter-spacing: 0.04em;
-    color: #111;
+    padding: 0 28px;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
     outline: none;
-    min-width: 0;
   }
   .cp-signup__input::placeholder {
-    color: #c5c5c5;
+    color: #aaaaaa;
+    font-weight: 500;
     letter-spacing: 0.08em;
-    font-size: 20px;
-    font-weight: 300;
   }
 
   .cp-signup__btn {
     background: #c0df16;
-    color: #000;
+    color: #000000;
     border: none;
     border-radius: 0 !important;
     -webkit-appearance: none;
     appearance: none;
-    padding: 0 48px;
-    font-size: 20px;
-    font-weight: 500;
-    letter-spacing: 0;
+    padding: 0 52px;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     cursor: pointer;
     font-family: inherit;
     white-space: nowrap;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, transform 0.15s ease;
   }
   .cp-signup__btn:hover:not(:disabled) {
     background: #d4f02a;
@@ -258,12 +264,12 @@ const campaignStyles = `
     animation: cp-success-fade-up 0.5s ease forwards 0.35s;
   }
 
-  /* Prize Overlay Text */
+  /* Prize Overlay Text Box */
   .cp-prize {
     position: relative;
     width: 100%;
     max-width: 1017px;
-    margin: 0 auto 32px;
+    margin: 0 auto 0;
     border: 2px solid #c0df16;
     border-radius: 16px;
     padding: 64px 40px;
@@ -406,17 +412,17 @@ const campaignStyles = `
     border: none;
     border-top: 1px solid #d0d0d0;
     max-width: 1100px;
-    margin: 24px auto 32px;
+    margin: 40px auto 32px;
   }
 
   .cp-benefits__disclaimer {
     max-width: 1100px;
     margin: 0 auto;
-    padding-bottom: 32px;
-    font-size: 15px;
-    line-height: 1.6;
+    padding-bottom: 48px;
+    font-size: 14px;
+    line-height: 1.5;
     color: #7a7a7a;
-    text-align: left;
+    text-align: center;
   }
 
   /* ── RESPONSIVE ── */
