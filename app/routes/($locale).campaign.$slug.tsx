@@ -274,12 +274,13 @@ const campaignStyles = `
     border-radius: 16px;
     padding: 64px 40px;
   }
-  .cp-prize::before {
-    content: '';
+  .cp-prize__gap {
     position: absolute;
     bottom: -2px;
-    left: 25%;
-    width: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(240px, 55%, 460px);
+    max-width: calc(100% - 40px);
     height: 4px;
     background: #000000;
     z-index: 1;
@@ -294,23 +295,23 @@ const campaignStyles = `
     text-align: center;
     width: 100%;
   }
-  .cp-prize__text::before, .cp-prize__text::after {
+  .cp-prize__gap::before, .cp-prize__gap::after {
     content: '';
     position: absolute;
-    bottom: -3px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 8px;
     height: 8px;
     background: #c0df16;
     border-radius: 50%;
-    z-index: 2;
   }
-  .cp-prize__text::before { left: calc(25% - 4px); }
-  .cp-prize__text::after { right: calc(25% - 4px); }
+  .cp-prize__gap::before { left: -4px; }
+  .cp-prize__gap::after { right: -4px; }
 
   .cp-prize__balls {
     width: 45%;
     max-width: 420px;
-    min-width: min(260px, 100%);
+    min-width: min(220px, 100%);
     margin: -48px auto 0;
     position: relative;
     z-index: 2;

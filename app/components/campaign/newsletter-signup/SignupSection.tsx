@@ -199,6 +199,7 @@ export default function SignupSection({
           className="cp-prize__text"
           dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
         />
+        <div className="cp-prize__gap"></div>
       </div>
 
       <div className="cp-prize__balls">
