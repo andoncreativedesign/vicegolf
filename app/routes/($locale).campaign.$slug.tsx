@@ -82,10 +82,12 @@ export default function CampaignNewsletterSignup() {
       <HeroSection 
         heroImageDesktop={campaign.heroImageDesktop?.asset?.url}
         heroImageMobile={campaign.heroImageMobile?.asset?.url}
+        heroAltText={campaign.heroAltText}
       />
       <SignupSection 
         heading={campaign.newsletterHeading}
         description={campaign.newsletterDescription}
+        prizeImage={campaign.prizeImage?.asset?.url}
         successTitle={campaign.successTitle}
         successText={campaign.successText}
         alreadyRegisteredTitle={campaign.alreadyRegisteredTitle}
@@ -419,11 +421,11 @@ const campaignStyles = `
   .cp-benefits__disclaimer {
     max-width: 1100px;
     margin: 0 auto;
-    padding-bottom: 48px;
-    font-size: 14px;
-    line-height: 1.5;
+    padding-bottom: 32px;
+    font-size: 15px;
+    line-height: 1.6;
     color: #7a7a7a;
-    text-align: center;
+    text-align: left;
   }
 
   /* ── RESPONSIVE ── */
