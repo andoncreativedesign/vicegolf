@@ -4,6 +4,7 @@ import { Form, useNavigation } from 'react-router';
 interface SignupSectionProps {
   heading?: string;
   description?: string;
+  prizeImage?: string;
   successTitle?: string;
   successText?: string;
   alreadyRegisteredTitle?: string;
@@ -21,16 +22,17 @@ interface SignupSectionProps {
 }
 
 export default function SignupSection({
-  heading = "Sign up to the Vice Golf UAE newsletter\nfor your chance to be one of 5 lucky winners.",
-  description = "Each winner will receive one box of\n12 Vice golf balls every month for a year.",
-  successTitle = "Entry Confirmed!",
-  successText = "You're officially in the draw. Keep a close eye on your inbox—we'll be notifying the 5 lucky winners very soon. Good luck!",
-  alreadyRegisteredTitle = "You're on the list.",
-  alreadyRegisteredText = "Your spot is already secured. We'll be drawing the 5 lucky winners soon—keep a close eye on your inbox!",
-  inputPlaceholder = "YOUR MAIL ID HERE",
+  heading,
+  description,
+  prizeImage,
+  successTitle,
+  successText,
+  alreadyRegisteredTitle,
+  alreadyRegisteredText,
+  inputPlaceholder,
   inputBgColor,
   inputTextColor,
-  buttonText = "ENTER NOW",
+  buttonText,
   buttonBgColor,
   buttonTextColor,
   isLoggedIn = false,
@@ -38,6 +40,15 @@ export default function SignupSection({
   customerEmail = '',
   actionData
 }: SignupSectionProps) {
+  const safeHeading = heading || '';
+  const safeDescription = description || '';
+  const safeSuccessTitle = successTitle || '';
+  const safeSuccessText = successText || '';
+  const safeAlreadyRegisteredTitle = alreadyRegisteredTitle || '';
+  const safeAlreadyRegisteredText = alreadyRegisteredText || '';
+  const safeInputPlaceholder = inputPlaceholder || '';
+  const safeButtonText = buttonText || '';
+
   const [email, setEmail] = useState(customerEmail || '');
   const navigation = useNavigation();
   const loading = navigation.state === 'submitting';
@@ -55,7 +66,7 @@ export default function SignupSection({
     <section className="cp-signup">
       <p
         className="cp-signup__lead"
-        dangerouslySetInnerHTML={{ __html: heading.replace(/\n/g, '<br />') }}
+        dangerouslySetInnerHTML={{ __html: safeHeading.replace(/\n/g, '<br />') }}
       />
 
       {showAlreadySubscribed ? (
@@ -94,7 +105,7 @@ export default function SignupSection({
             textTransform: 'uppercase',
             margin: '0 0 12px 0'
           }}>
-            {alreadyRegisteredTitle}
+            {safeAlreadyRegisteredTitle}
           </h2>
           <p 
             className="cp-success-text"
@@ -105,7 +116,7 @@ export default function SignupSection({
             maxWidth: '400px',
             lineHeight: '1.5'
           }}
-          dangerouslySetInnerHTML={{ __html: alreadyRegisteredText.replace(/\n/g, '<br />') }}
+          dangerouslySetInnerHTML={{ __html: safeAlreadyRegisteredText.replace(/\n/g, '<br />') }}
           />
         </div>
       ) : showSuccess ? (
@@ -144,7 +155,7 @@ export default function SignupSection({
             textTransform: 'uppercase',
             margin: '0 0 12px 0'
           }}>
-            {successTitle}
+            {safeSuccessTitle}
           </h2>
           <p 
             className="cp-success-text"
@@ -155,7 +166,7 @@ export default function SignupSection({
             maxWidth: '400px',
             lineHeight: '1.5'
           }}
-          dangerouslySetInnerHTML={{ __html: successText.replace(/\n/g, '<br />') }}
+          dangerouslySetInnerHTML={{ __html: safeSuccessText.replace(/\n/g, '<br />') }}
           />
         </div>
       ) : (
@@ -167,7 +178,7 @@ export default function SignupSection({
               id="campaign-email"
               name="email"
               type="email"
-              placeholder={inputPlaceholder}
+              placeholder={safeInputPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="cp-signup__input"
@@ -188,7 +199,7 @@ export default function SignupSection({
                 color: buttonTextColor,
               }}
             >
-              {loading ? <div className="cp-spinner"></div> : buttonText}
+              {loading ? <div className="cp-spinner"></div> : safeButtonText}
             </button>
           </Form>
         </>
@@ -197,17 +208,19 @@ export default function SignupSection({
       <div className="cp-prize">
         <p
           className="cp-prize__text"
-          dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
+          dangerouslySetInnerHTML={{ __html: safeDescription.replace(/\n/g, '<br />') }}
         />
         <div className="cp-prize__gap"></div>
       </div>
 
       <div className="cp-prize__balls">
-        <img
-          src="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA Balls-01.jpg"
-          alt="12 Vice Golf Balls"
-          className="cp-prize__balls-img"
-        />
+        {prizeImage && (
+          <img
+            src={prizeImage}
+            alt="Campaign Prize"
+            className="cp-prize__balls-img"
+          />
+        )}
       </div>
     </section>
   );

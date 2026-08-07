@@ -6,8 +6,10 @@ export interface CampaignData {
   slug?: { current: string };
   heroImageDesktop?: { asset: { url: string } };
   heroImageMobile?: { asset: { url: string } };
+  heroAltText?: string;
   newsletterHeading?: string;
   newsletterDescription?: string;
+  prizeImage?: { asset: { url: string } };
   successTitle?: string;
   successText?: string;
   alreadyRegisteredTitle?: string;
@@ -39,8 +41,10 @@ export async function getCampaignDataBySlug(slug: string, env?: any): Promise<Ca
       slug,
       heroImageDesktop { asset->{url} },
       heroImageMobile { asset->{url} },
+      heroAltText,
       newsletterHeading,
       newsletterDescription,
+      prizeImage { asset->{url} },
       successTitle,
       successText,
       alreadyRegisteredTitle,
