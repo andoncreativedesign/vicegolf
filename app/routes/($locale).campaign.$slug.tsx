@@ -32,7 +32,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
         customerEmail = data.customer.emailAddress.emailAddress;
         
         // Check Admin API for marketing consent and tags
-        const subStatus = await getCustomerSubscriptionStatus(customerEmail, slug, context.env);
+        const subStatus = await getCustomerSubscriptionStatus(customerEmail, slug, campaign.customTag, context.env);
         isSubscribed = subStatus.isSubscribed && subStatus.hasTag;
       }
     }
@@ -54,7 +54,8 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
     return Response.json({ error: 'Please enter a valid email address' }, { status: 400 });
   }
 
-  const result = await processNewsletterSignup(email, slug, context.env);
+  const campaign = await getCampaignDataBySlug(slug, context.env);
+  const result = await processNewsletterSignup(email, slug, campaign?.customTag, context.env);
 
   if (result.success) {
     return Response.json({ success: true, message: 'You have successfully entered the giveaway!' });

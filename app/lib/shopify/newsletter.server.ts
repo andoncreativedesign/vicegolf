@@ -62,9 +62,11 @@ const TAGS_ADD_MUTATION = `
   }
 `;
 
-export async function processNewsletterSignup(email: string, campaignSlug: string, env: any) {
+export async function processNewsletterSignup(email: string, campaignSlug: string, customTag?: string, env?: any) {
   const adminApi = createAxiosShopifyAdmin(env);
-  const tag = `campaign_signup:${campaignSlug}`;
+  const universalTag = 'campaign_signup';
+  const specificTag = customTag || `campaign_signup:${campaignSlug}`;
+  const tagsToAdd = Array.from(new Set([universalTag, specificTag]));
 
   try {
     // 1. Check if customer exists
@@ -79,7 +81,7 @@ export async function processNewsletterSignup(email: string, campaignSlug: strin
       // Customer exists, update them
       const customerId = customerNode.id;
       const existingTags = customerNode.tags || [];
-      const hasTag = existingTags.includes(tag);
+      const missingTags = tagsToAdd.filter(t => !existingTags.includes(t));
       const isSubscribed = customerNode.emailMarketingConsent?.marketingState === 'SUBSCRIBED';
 
       if (!isSubscribed) {
@@ -103,13 +105,13 @@ export async function processNewsletterSignup(email: string, campaignSlug: strin
         }
       }
 
-      if (!hasTag) {
-        // Add tag
+      if (missingTags.length > 0) {
+        // Add tags
         const tagRes = await adminApi.post('', {
           query: TAGS_ADD_MUTATION,
           variables: {
             id: customerId,
-            tags: [tag]
+            tags: missingTags
           }
         });
         const tagErrors = tagRes.data?.data?.tagsAdd?.userErrors;
@@ -126,7 +128,7 @@ export async function processNewsletterSignup(email: string, campaignSlug: strin
         variables: {
           input: {
             email,
-            tags: [tag],
+            tags: tagsToAdd,
             emailMarketingConsent: {
               marketingState: 'SUBSCRIBED',
               marketingOptInLevel: 'SINGLE_OPT_IN'
@@ -150,9 +152,10 @@ export async function processNewsletterSignup(email: string, campaignSlug: strin
   }
 }
 
-export async function getCustomerSubscriptionStatus(email: string, campaignSlug: string, env: any) {
+export async function getCustomerSubscriptionStatus(email: string, campaignSlug: string, customTag?: string, env?: any) {
   const adminApi = createAxiosShopifyAdmin(env);
-  const tag = `campaign_signup:${campaignSlug}`;
+  const universalTag = 'campaign_signup';
+  const specificTag = customTag || `campaign_signup:${campaignSlug}`;
 
   try {
     const searchRes = await adminApi.post('', {
@@ -164,7 +167,7 @@ export async function getCustomerSubscriptionStatus(email: string, campaignSlug:
 
     if (customerNode) {
       const existingTags = customerNode.tags || [];
-      const hasTag = existingTags.includes(tag);
+      const hasTag = existingTags.includes(universalTag) || existingTags.includes(specificTag);
       const isSubscribed = customerNode.emailMarketingConsent?.marketingState === 'SUBSCRIBED';
 
       return {
