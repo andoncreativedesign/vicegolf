@@ -278,12 +278,12 @@ const campaignStyles = `
   }
   .cp-prize__gap {
     position: absolute;
-    bottom: -2px;
+    bottom: -4px;
     left: 50%;
     transform: translateX(-50%);
     width: clamp(240px, 55%, 460px);
     max-width: calc(100% - 40px);
-    height: 4px;
+    height: 8px;
     background: #000000;
     z-index: 1;
   }
