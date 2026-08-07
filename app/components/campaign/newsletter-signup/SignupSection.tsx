@@ -1,65 +1,191 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Form, useNavigation } from 'react-router';
 
 interface SignupSectionProps {
   heading?: string;
   description?: string;
+  prizeImage?: string;
+  prizeImageMobile?: string;
+  successTitle?: string;
+  successText?: string;
+  alreadyRegisteredTitle?: string;
+  alreadyRegisteredText?: string;
   inputPlaceholder?: string;
   inputBgColor?: string;
   inputTextColor?: string;
   buttonText?: string;
   buttonBgColor?: string;
   buttonTextColor?: string;
+  isLoggedIn?: boolean;
+  isSubscribed?: boolean;
+  customerEmail?: string;
+  actionData?: any;
 }
 
 export default function SignupSection({
-  heading = "Sign up to the Vice Golf UAE newsletter\nfor your chance to be one of 5 lucky winners.",
-  description = "Each winner will receive one box of\n12 Vice golf balls every month for a year.",
-  inputPlaceholder = "YOUR MAIL ID HERE",
+  heading,
+  description,
+  prizeImage,
+  prizeImageMobile,
+  successTitle,
+  successText,
+  alreadyRegisteredTitle,
+  alreadyRegisteredText,
+  inputPlaceholder,
   inputBgColor,
   inputTextColor,
-  buttonText = "ENTER NOW",
+  buttonText,
   buttonBgColor,
-  buttonTextColor
+  buttonTextColor,
+  isLoggedIn = false,
+  isSubscribed = false,
+  customerEmail = '',
+  actionData
 }: SignupSectionProps) {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const safeHeading = heading || '';
+  const safeDescription = description || '';
+  const safeSuccessTitle = successTitle || '';
+  const safeSuccessText = successText || '';
+  const safeAlreadyRegisteredTitle = alreadyRegisteredTitle || '';
+  const safeAlreadyRegisteredText = alreadyRegisteredText || '';
+  const safeInputPlaceholder = inputPlaceholder || '';
+  const safeButtonText = buttonText || '';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address.');
-      return;
+  const [email, setEmail] = useState(customerEmail || '');
+  const navigation = useNavigation();
+  const loading = navigation.state === 'submitting';
+
+  useEffect(() => {
+    if (customerEmail && !email) {
+      setEmail(customerEmail);
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1200);
-  };
+  }, [customerEmail, email]);
+
+  const showAlreadySubscribed = isLoggedIn && isSubscribed && !actionData?.success;
+  const showSuccess = actionData?.success;
 
   return (
     <section className="cp-signup">
-      {!submitted ? (
-        <>
+      <p
+        className="cp-signup__lead"
+        dangerouslySetInnerHTML={{ __html: safeHeading.replace(/\n/g, '<br />') }}
+      />
+
+      {showAlreadySubscribed ? (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '48px auto 64px',
+          padding: '0 20px',
+          textAlign: 'center'
+        }}>
+          <div 
+            className="cp-success-icon"
+            style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '56px',
+            height: '56px',
+            backgroundColor: '#c0df16',
+            color: '#000',
+            borderRadius: '50%',
+            fontWeight: '900',
+            fontSize: '28px',
+            marginBottom: '20px',
+            boxShadow: '0 0 20px rgba(192, 223, 22, 0.4)'
+          }}>✓</div>
+          <h2 
+            className="cp-success-title"
+            style={{
+            color: '#c0df16',
+            fontSize: 'clamp(24px, 7vw, 32px)',
+            fontWeight: '900',
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            margin: '0 0 12px 0'
+          }}>
+            {safeAlreadyRegisteredTitle}
+          </h2>
           <p 
-            className="cp-signup__lead"
-            dangerouslySetInnerHTML={{ __html: heading.replace(/\n/g, '<br />') }}
+            className="cp-success-text"
+            style={{
+            color: '#b0b0b0',
+            fontSize: 'clamp(15px, 4vw, 18px)',
+            fontWeight: '500',
+            maxWidth: '400px',
+            lineHeight: '1.5'
+          }}
+          dangerouslySetInnerHTML={{ __html: safeAlreadyRegisteredText.replace(/\n/g, '<br />') }}
           />
-
-          {error && <p className="cp-signup__error">{error}</p>}
-
-          <form className="cp-signup__form" onSubmit={handleSubmit} noValidate>
+        </div>
+      ) : showSuccess ? (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '48px auto 64px',
+          padding: '0 20px',
+          textAlign: 'center'
+        }}>
+          <div 
+            className="cp-success-icon"
+            style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '56px',
+            height: '56px',
+            backgroundColor: '#c0df16',
+            color: '#000',
+            borderRadius: '50%',
+            fontWeight: '900',
+            fontSize: '28px',
+            marginBottom: '20px',
+            boxShadow: '0 0 20px rgba(192, 223, 22, 0.4)'
+          }}>✓</div>
+          <h2 
+            className="cp-success-title"
+            style={{
+            color: '#c0df16',
+            fontSize: 'clamp(24px, 7vw, 32px)',
+            fontWeight: '900',
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            margin: '0 0 12px 0'
+          }}>
+            {safeSuccessTitle}
+          </h2>
+          <p 
+            className="cp-success-text"
+            style={{
+            color: '#b0b0b0',
+            fontSize: 'clamp(15px, 4vw, 18px)',
+            fontWeight: '500',
+            maxWidth: '400px',
+            lineHeight: '1.5'
+          }}
+          dangerouslySetInnerHTML={{ __html: safeSuccessText.replace(/\n/g, '<br />') }}
+          />
+        </div>
+      ) : (
+        <>
+          {actionData?.error && <p className="cp-signup__error">{actionData.error}</p>}
+          <Form method="post" className="cp-signup__form" noValidate>
+            <input type="hidden" name="actionType" value="newsletter_signup" />
             <input
               id="campaign-email"
+              name="email"
               type="email"
-              placeholder={inputPlaceholder}
+              placeholder={safeInputPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="cp-signup__input"
               autoComplete="email"
+              readOnly={isLoggedIn && !!customerEmail}
               style={{
                 backgroundColor: inputBgColor,
                 color: inputTextColor,
@@ -75,35 +201,33 @@ export default function SignupSection({
                 color: buttonTextColor,
               }}
             >
-              {loading ? 'ENTERING...' : buttonText}
+              {loading ? <div className="cp-spinner"></div> : safeButtonText}
             </button>
-          </form>
+          </Form>
+        </>
+      )}
 
-          <div className="cp-prize">
-            <p 
-              className="cp-prize__text"
-              dangerouslySetInnerHTML={{ __html: description.replace(/\n/g, '<br />') }}
-            />
-          </div>
+      <div className="cp-prize">
+        <p
+          className="cp-prize__text"
+          dangerouslySetInnerHTML={{ __html: safeDescription.replace(/\n/g, '<br />') }}
+        />
+        <div className="cp-prize__gap"></div>
+      </div>
 
-          <div className="cp-prize__balls">
+      <div className="cp-prize__balls">
+        {(prizeImage || prizeImageMobile) && (
+          <picture>
+            {prizeImageMobile && <source media="(max-width: 900px)" srcSet={prizeImageMobile} />}
+            {prizeImage && <source media="(min-width: 901px)" srcSet={prizeImage} />}
             <img
-              src="/campaign/4205_VGME_LandingPage_NewsletterSignUp_SummerOffer_v2_FA Balls-01.jpg"
-              alt="12 Vice Golf Balls"
+              src={prizeImage || prizeImageMobile}
+              alt="Campaign Prize"
               className="cp-prize__balls-img"
             />
-          </div>
-        </>
-      ) : (
-        <div className="cp-success">
-          <div className="cp-success__icon">✓</div>
-          <h2>You are in!</h2>
-          <p>
-            Thanks for signing up. Good luck — we will contact the 5 winners
-            via email soon.
-          </p>
-        </div>
-      )}
+          </picture>
+        )}
+      </div>
     </section>
   );
 }

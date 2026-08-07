@@ -1,8 +1,10 @@
-import { useLoaderData, isRouteErrorResponse, useRouteError, Link, useNavigation, type LoaderFunctionArgs } from 'react-router';
+import { useLoaderData, isRouteErrorResponse, useRouteError, Link, useNavigation, type LoaderFunctionArgs, type ActionFunctionArgs, useActionData } from 'react-router';
 import HeroSection from '~/components/campaign/newsletter-signup/HeroSection';
 import SignupSection from '~/components/campaign/newsletter-signup/SignupSection';
 import BenefitsSection from '~/components/campaign/newsletter-signup/BenefitsSection';
 import { getCampaignDataBySlug } from '~/lib/sanity/campaign';
+import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
+import { getCustomerSubscriptionStatus, processNewsletterSignup } from '~/lib/shopify/newsletter.server';
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
   const slug = params.slug;
@@ -16,7 +18,50 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
     throw new Response('Campaign Not Found', { status: 404 });
   }
 
-  return { campaign };
+  let isLoggedIn = false;
+  let customerEmail = '';
+  let isSubscribed = false;
+
+  try {
+    isLoggedIn = await context.customerAccount.isLoggedIn();
+    if (isLoggedIn) {
+      const { data } = await context.customerAccount.query(CUSTOMER_DETAILS_QUERY, {
+        variables: { language: context.customerAccount.i18n.language },
+      });
+      if (data?.customer?.emailAddress?.emailAddress) {
+        customerEmail = data.customer.emailAddress.emailAddress;
+        
+        // Check Admin API for marketing consent and tags
+        const subStatus = await getCustomerSubscriptionStatus(customerEmail, slug, campaign.customTag, context.env);
+        isSubscribed = subStatus.isSubscribed && subStatus.hasTag;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching customer context:", error);
+  }
+
+  return { campaign, isLoggedIn, customerEmail, isSubscribed };
+}
+
+export async function action({ request, params, context }: ActionFunctionArgs) {
+  const slug = params.slug;
+  if (!slug) return Response.json({ error: 'Missing campaign slug' }, { status: 400 });
+
+  const formData = await request.formData();
+  const email = formData.get('email') as string;
+
+  if (!email || !email.includes('@')) {
+    return Response.json({ error: 'Please enter a valid email address' }, { status: 400 });
+  }
+
+  const campaign = await getCampaignDataBySlug(slug, context.env);
+  const result = await processNewsletterSignup(email, slug, campaign?.customTag, context.env);
+
+  if (result.success) {
+    return Response.json({ success: true, message: 'You have successfully entered the giveaway!' });
+  } else {
+    return Response.json({ error: result.error || 'Failed to process signup' }, { status: 500 });
+  }
 }
 
 export const meta = ({ data }: any) => {
@@ -30,23 +75,35 @@ export const meta = ({ data }: any) => {
 };
 
 export default function CampaignNewsletterSignup() {
-  const { campaign } = useLoaderData<typeof loader>();
+  const { campaign, isLoggedIn, customerEmail, isSubscribed } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
 
   return (
     <div className="cp">
       <HeroSection 
         heroImageDesktop={campaign.heroImageDesktop?.asset?.url}
         heroImageMobile={campaign.heroImageMobile?.asset?.url}
+        heroAltText={campaign.heroAltText}
       />
       <SignupSection 
         heading={campaign.newsletterHeading}
         description={campaign.newsletterDescription}
+        prizeImage={campaign.prizeImage?.asset?.url}
+        prizeImageMobile={campaign.prizeImageMobile?.asset?.url}
+        successTitle={campaign.successTitle}
+        successText={campaign.successText}
+        alreadyRegisteredTitle={campaign.alreadyRegisteredTitle}
+        alreadyRegisteredText={campaign.alreadyRegisteredText}
         inputPlaceholder={campaign.inputPlaceholder}
         inputBgColor={campaign.inputBgColor?.hex}
         inputTextColor={campaign.inputTextColor?.hex}
         buttonText={campaign.buttonText}
         buttonBgColor={campaign.buttonBgColor?.hex}
         buttonTextColor={campaign.buttonTextColor?.hex}
+        isLoggedIn={isLoggedIn}
+        isSubscribed={isSubscribed}
+        customerEmail={customerEmail}
+        actionData={actionData}
       />
       <BenefitsSection 
         heading={campaign.benefitsHeading}
@@ -78,17 +135,24 @@ const campaignStyles = `
     width: 100%;
     line-height: 0;
     overflow: hidden;
+    border-radius: 0 !important;
+  }
+  .cp-hero picture {
+    display: block;
+    width: 100%;
+    border-radius: 0 !important;
   }
   .cp-hero__img {
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 0 !important;
   }
 
   /* ── SIGNUP SECTION ── */
   .cp-signup {
     background: #000000;
-    padding: 56px 20px 72px;
+    padding: 72px 20px 80px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -99,7 +163,8 @@ const campaignStyles = `
     font-weight: 400;
     color: #ffffff;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
     margin-bottom: 48px;
     max-width: 900px;
   }
@@ -119,48 +184,46 @@ const campaignStyles = `
     height: 60px;
     border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 72px;
+    margin-bottom: 80px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   }
 
   .cp-signup__input {
     flex: 1;
     background: #ffffff;
+    color: #111111;
     border: none;
     border-radius: 0 !important;
     -webkit-appearance: none;
     appearance: none;
-    padding: 0 32px;
-    font-size: 20px;
-    font-weight: 400;
-    font-family: inherit;
-    letter-spacing: 0.04em;
-    color: #111;
+    padding: 0 28px;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
     outline: none;
-    min-width: 0;
   }
   .cp-signup__input::placeholder {
-    color: #c5c5c5;
+    color: #aaaaaa;
+    font-weight: 500;
     letter-spacing: 0.08em;
-    font-size: 20px;
-    font-weight: 300;
   }
 
   .cp-signup__btn {
     background: #c0df16;
-    color: #000;
+    color: #000000;
     border: none;
     border-radius: 0 !important;
     -webkit-appearance: none;
     appearance: none;
-    padding: 0 48px;
-    font-size: 20px;
-    font-weight: 500;
-    letter-spacing: 0;
+    padding: 0 52px;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     cursor: pointer;
     font-family: inherit;
     white-space: nowrap;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, transform 0.15s ease;
   }
   .cp-signup__btn:hover:not(:disabled) {
     background: #d4f02a;
@@ -170,23 +233,59 @@ const campaignStyles = `
     cursor: not-allowed;
   }
 
-  /* Prize Overlay Text */
+  @keyframes cp-spin {
+    to { transform: rotate(360deg); }
+  }
+  .cp-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0,0,0,0.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: cp-spin 0.8s linear infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes cp-success-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes cp-success-fade-up {
+    0% { transform: translateY(15px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .cp-success-icon {
+    animation: cp-success-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  .cp-success-title {
+    opacity: 0;
+    animation: cp-success-fade-up 0.5s ease forwards 0.2s;
+  }
+  .cp-success-text {
+    opacity: 0;
+    animation: cp-success-fade-up 0.5s ease forwards 0.35s;
+  }
+
+  /* Prize Overlay Text Box */
   .cp-prize {
     position: relative;
     width: 100%;
     max-width: 1017px;
-    margin: 0 auto 32px;
+    margin: 0 auto 0;
     border: 2px solid #c0df16;
     border-radius: 16px;
     padding: 64px 40px;
   }
-  .cp-prize::before {
-    content: '';
+  .cp-prize__gap {
     position: absolute;
-    bottom: -2px;
-    left: 25%;
-    width: 50%;
-    height: 4px;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(240px, 55%, 460px);
+    max-width: calc(100% - 40px);
+    height: 8px;
     background: #000000;
     z-index: 1;
   }
@@ -200,23 +299,24 @@ const campaignStyles = `
     text-align: center;
     width: 100%;
   }
-  .cp-prize__text::before, .cp-prize__text::after {
+  .cp-prize__gap::before, .cp-prize__gap::after {
     content: '';
     position: absolute;
-    bottom: -3px;
-    width: 8px;
-    height: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
     background: #c0df16;
     border-radius: 50%;
     z-index: 2;
   }
-  .cp-prize__text::before { left: calc(25% - 4px); }
-  .cp-prize__text::after { right: calc(25% - 4px); }
+  .cp-prize__gap::before { left: -5px; }
+  .cp-prize__gap::after { right: -5px; }
 
   .cp-prize__balls {
     width: 45%;
     max-width: 420px;
-    min-width: min(260px, 100%);
+    min-width: min(220px, 100%);
     margin: -48px auto 0;
     position: relative;
     z-index: 2;
@@ -318,7 +418,7 @@ const campaignStyles = `
     border: none;
     border-top: 1px solid #d0d0d0;
     max-width: 1100px;
-    margin: 24px auto 32px;
+    margin: 40px auto 32px;
   }
 
   .cp-benefits__disclaimer {
@@ -408,13 +508,16 @@ const campaignStyles = `
       margin: 0;
     }
     .cp-prize {
-      padding: 32px 16px 24px;
+      padding: 32px 16px 44px;
     }
     .cp-prize__text {
-      font-size: 16px;
+      font-size: 17px;
+      line-height: 1.45;
     }
     .cp-prize__balls {
-      margin: 0 auto;
+      margin: -36px auto 0;
+      width: min(65%, 260px);
+      min-width: min(180px, 100%);
     }
     .cp-benefits__title {
       font-size: 20px;

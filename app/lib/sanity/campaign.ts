@@ -4,10 +4,18 @@ import { createAxiosSanity } from "~/utils/axiosInsatances";
 export interface CampaignData {
   title?: string;
   slug?: { current: string };
+  customTag?: string;
   heroImageDesktop?: { asset: { url: string } };
   heroImageMobile?: { asset: { url: string } };
+  heroAltText?: string;
   newsletterHeading?: string;
   newsletterDescription?: string;
+  prizeImage?: { asset: { url: string } };
+  prizeImageMobile?: { asset: { url: string } };
+  successTitle?: string;
+  successText?: string;
+  alreadyRegisteredTitle?: string;
+  alreadyRegisteredText?: string;
   inputPlaceholder?: string;
   inputBgColor?: { hex: string };
   inputTextColor?: { hex: string };
@@ -33,10 +41,18 @@ export async function getCampaignDataBySlug(slug: string, env?: any): Promise<Ca
     const query = encodeURIComponent(`*[_type == "campaignPage" && slug.current == "${safeSlug}"][0]{
       title,
       slug,
+      customTag,
       heroImageDesktop { asset->{url} },
       heroImageMobile { asset->{url} },
+      heroAltText,
       newsletterHeading,
       newsletterDescription,
+      prizeImage { asset->{url} },
+      prizeImageMobile { asset->{url} },
+      successTitle,
+      successText,
+      alreadyRegisteredTitle,
+      alreadyRegisteredText,
       inputPlaceholder,
       inputBgColor,
       inputTextColor,
