@@ -10,6 +10,7 @@ export interface CampaignData {
   newsletterHeading?: string;
   newsletterDescription?: string;
   prizeImage?: { asset: { url: string } };
+  prizeImageMobile?: { asset: { url: string } };
   successTitle?: string;
   successText?: string;
   alreadyRegisteredTitle?: string;
@@ -45,6 +46,7 @@ export async function getCampaignDataBySlug(slug: string, env?: any): Promise<Ca
       newsletterHeading,
       newsletterDescription,
       prizeImage { asset->{url} },
+      prizeImageMobile { asset->{url} },
       successTitle,
       successText,
       alreadyRegisteredTitle,

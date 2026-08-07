@@ -5,6 +5,7 @@ interface SignupSectionProps {
   heading?: string;
   description?: string;
   prizeImage?: string;
+  prizeImageMobile?: string;
   successTitle?: string;
   successText?: string;
   alreadyRegisteredTitle?: string;
@@ -25,6 +26,7 @@ export default function SignupSection({
   heading,
   description,
   prizeImage,
+  prizeImageMobile,
   successTitle,
   successText,
   alreadyRegisteredTitle,
@@ -214,12 +216,16 @@ export default function SignupSection({
       </div>
 
       <div className="cp-prize__balls">
-        {prizeImage && (
-          <img
-            src={prizeImage}
-            alt="Campaign Prize"
-            className="cp-prize__balls-img"
-          />
+        {(prizeImage || prizeImageMobile) && (
+          <picture>
+            {prizeImageMobile && <source media="(max-width: 900px)" srcSet={prizeImageMobile} />}
+            {prizeImage && <source media="(min-width: 901px)" srcSet={prizeImage} />}
+            <img
+              src={prizeImage || prizeImageMobile}
+              alt="Campaign Prize"
+              className="cp-prize__balls-img"
+            />
+          </picture>
         )}
       </div>
     </section>

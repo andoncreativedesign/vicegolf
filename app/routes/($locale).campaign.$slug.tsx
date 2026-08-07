@@ -88,6 +88,7 @@ export default function CampaignNewsletterSignup() {
         heading={campaign.newsletterHeading}
         description={campaign.newsletterDescription}
         prizeImage={campaign.prizeImage?.asset?.url}
+        prizeImageMobile={campaign.prizeImageMobile?.asset?.url}
         successTitle={campaign.successTitle}
         successText={campaign.successText}
         alreadyRegisteredTitle={campaign.alreadyRegisteredTitle}
@@ -506,13 +507,16 @@ const campaignStyles = `
       margin: 0;
     }
     .cp-prize {
-      padding: 32px 16px 24px;
+      padding: 32px 16px 44px;
     }
     .cp-prize__text {
-      font-size: 16px;
+      font-size: 17px;
+      line-height: 1.45;
     }
     .cp-prize__balls {
-      margin: 0 auto;
+      margin: -36px auto 0;
+      width: min(65%, 260px);
+      min-width: min(180px, 100%);
     }
     .cp-benefits__title {
       font-size: 20px;
