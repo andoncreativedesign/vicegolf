@@ -302,13 +302,14 @@ const campaignStyles = `
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     background: #c0df16;
     border-radius: 50%;
+    z-index: 2;
   }
-  .cp-prize__gap::before { left: -4px; }
-  .cp-prize__gap::after { right: -4px; }
+  .cp-prize__gap::before { left: -5px; }
+  .cp-prize__gap::after { right: -5px; }
 
   .cp-prize__balls {
     width: 45%;
