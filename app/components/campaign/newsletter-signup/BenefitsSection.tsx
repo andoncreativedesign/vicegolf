@@ -1,4 +1,33 @@
 import React from 'react';
+import { PortableText } from '@portabletext/react';
+
+const disclaimerTextComponents = {
+  block: {
+    normal: ({ children }: any) => <span className="inline">{children}</span>,
+  },
+  marks: {
+    linkExternal: ({ children, value }: any) => (
+      <a href={value?.url || value?.href} target="_blank" rel="noopener noreferrer" className="underline hover:text-black font-semibold">
+        {children}
+      </a>
+    ),
+    linkEmail: ({ children, value }: any) => (
+      <a href={`mailto:${value?.email}`} className="underline hover:text-black font-semibold">
+        {children}
+      </a>
+    ),
+    linkInternal: ({ children, value }: any) => (
+      <a href={value?.slug?.current || value?.href || '#'} className="underline hover:text-black font-semibold">
+        {children}
+      </a>
+    ),
+    link: ({ children, value }: any) => (
+      <a href={value?.href} target={value?.newWindow ? "_blank" : undefined} rel={value?.newWindow ? "noopener noreferrer" : undefined} className="underline hover:text-black font-semibold">
+        {children}
+      </a>
+    ),
+  },
+};
 
 interface BenefitItemProps {
   iconSrc: string;
@@ -24,7 +53,7 @@ interface Feature {
 interface BenefitsSectionProps {
   heading?: string;
   features?: Feature[];
-  disclaimerText?: string;
+  disclaimerText?: any[];
 }
 
 export default function BenefitsSection({
@@ -68,9 +97,11 @@ export default function BenefitsSection({
       )}
 
       <hr className="cp-benefits__divider" />
-      <p className="cp-benefits__disclaimer">
-        {disclaimerText}
-      </p>
+      <div className="cp-benefits__disclaimer">
+        {disclaimerText ? (
+          <PortableText value={disclaimerText} components={disclaimerTextComponents} />
+        ) : null}
+      </div>
     </section>
   );
 }

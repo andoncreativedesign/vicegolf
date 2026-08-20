@@ -27,7 +27,15 @@ export interface CampaignData {
     icon: { asset: { url: string } };
     title: string;
   }>;
-  disclaimerText?: string;
+  disclaimerText?: any[];
+  termsAndConditions?: {
+    heading?: string;
+    introText?: any[];
+    sections?: Array<{
+      title?: string;
+      body?: any[];
+    }>;
+  };
 }
 
 export async function getCampaignDataBySlug(slug: string, env?: any): Promise<CampaignData | null> {
@@ -64,7 +72,15 @@ export async function getCampaignDataBySlug(slug: string, env?: any): Promise<Ca
         icon { asset->{url} },
         title
       },
-      disclaimerText
+      disclaimerText,
+      termsAndConditions {
+        heading,
+        introText,
+        sections[] {
+          title,
+          body
+        }
+      }
     }`);
     
     const response = await axiosSanityInstance.get("/?query=" + query);
