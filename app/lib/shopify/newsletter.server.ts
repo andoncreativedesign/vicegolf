@@ -62,11 +62,37 @@ const TAGS_ADD_MUTATION = `
   }
 `;
 
-export async function processNewsletterSignup(email: string, campaignSlug: string, customTag?: string, env?: any) {
+const CUSTOMER_UPDATE_MUTATION = `
+  mutation customerUpdate($input: CustomerInput!) {
+    customerUpdate(input: $input) {
+      customer {
+        id
+        firstName
+        lastName
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+export async function processNewsletterSignup(email: string, campaignSlug: string, customTag?: string, env?: any, name?: string) {
   const adminApi = createAxiosShopifyAdmin(env);
   const universalTag = 'campaign_signup';
   const specificTag = customTag || `campaign_signup:${campaignSlug}`;
   const tagsToAdd = Array.from(new Set([universalTag, specificTag]));
+
+  let firstName: string | undefined;
+  let lastName: string | undefined;
+  if (name && name.trim()) {
+    const nameParts = name.trim().split(/\s+/);
+    firstName = nameParts[0];
+    if (nameParts.length > 1) {
+      lastName = nameParts.slice(1).join(' ');
+    }
+  }
 
   try {
     // 1. Check if customer exists
@@ -105,6 +131,24 @@ export async function processNewsletterSignup(email: string, campaignSlug: strin
         }
       }
 
+      if (firstName || lastName) {
+        // Update customer name if provided
+        try {
+          await adminApi.post('', {
+            query: CUSTOMER_UPDATE_MUTATION,
+            variables: {
+              input: {
+                id: customerId,
+                ...(firstName ? { firstName } : {}),
+                ...(lastName ? { lastName } : {})
+              }
+            }
+          });
+        } catch (nameErr) {
+          console.error("Error updating customer name:", nameErr);
+        }
+      }
+
       if (missingTags.length > 0) {
         // Add tags
         const tagRes = await adminApi.post('', {
@@ -128,6 +172,8 @@ export async function processNewsletterSignup(email: string, campaignSlug: strin
         variables: {
           input: {
             email,
+            ...(firstName ? { firstName } : {}),
+            ...(lastName ? { lastName } : {}),
             tags: tagsToAdd,
             emailMarketingConsent: {
               marketingState: 'SUBSCRIBED',
