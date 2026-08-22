@@ -16,6 +16,7 @@ export interface CampaignData {
   successText?: string;
   alreadyRegisteredTitle?: string;
   alreadyRegisteredText?: string;
+  namePlaceholder?: string;
   inputPlaceholder?: string;
   inputBgColor?: { hex: string };
   inputTextColor?: { hex: string };
@@ -61,6 +62,7 @@ export async function getCampaignDataBySlug(slug: string, env?: any): Promise<Ca
       successText,
       alreadyRegisteredTitle,
       alreadyRegisteredText,
+      namePlaceholder,
       inputPlaceholder,
       inputBgColor,
       inputTextColor,

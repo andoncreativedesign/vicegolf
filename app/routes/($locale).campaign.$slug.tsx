@@ -20,6 +20,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 
   let isLoggedIn = false;
   let customerEmail = '';
+  let customerName = '';
   let isSubscribed = false;
 
   try {
@@ -30,7 +31,12 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
       });
       if (data?.customer?.emailAddress?.emailAddress) {
         customerEmail = data.customer.emailAddress.emailAddress;
-        
+      }
+      if (data?.customer?.firstName) {
+        customerName = `${data.customer.firstName} ${data.customer.lastName || ''}`.trim();
+      }
+      
+      if (customerEmail) {
         // Check Admin API for marketing consent and tags
         const subStatus = await getCustomerSubscriptionStatus(customerEmail, slug, campaign.customTag, context.env);
         isSubscribed = subStatus.isSubscribed && subStatus.hasTag;
@@ -40,7 +46,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
     console.error("Error fetching customer context:", error);
   }
 
-  return { campaign, isLoggedIn, customerEmail, isSubscribed };
+  return { campaign, isLoggedIn, customerEmail, customerName, isSubscribed };
 }
 
 export async function action({ request, params, context }: ActionFunctionArgs) {
@@ -48,6 +54,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
   if (!slug) return Response.json({ error: 'Missing campaign slug' }, { status: 400 });
 
   const formData = await request.formData();
+  const name = (formData.get('name') as string) || '';
   const email = formData.get('email') as string;
 
   if (!email || !email.includes('@')) {
@@ -55,7 +62,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
   }
 
   const campaign = await getCampaignDataBySlug(slug, context.env);
-  const result = await processNewsletterSignup(email, slug, campaign?.customTag, context.env);
+  const result = await processNewsletterSignup(email, slug, campaign?.customTag, context.env, name);
 
   if (result.success) {
     return Response.json({ success: true, message: 'You have successfully entered the giveaway!' });
@@ -75,7 +82,7 @@ export const meta = ({ data }: any) => {
 };
 
 export default function CampaignNewsletterSignup() {
-  const { campaign, isLoggedIn, customerEmail, isSubscribed } = useLoaderData<typeof loader>();
+  const { campaign, isLoggedIn, customerEmail, customerName, isSubscribed } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   return (
@@ -94,6 +101,7 @@ export default function CampaignNewsletterSignup() {
         successText={campaign.successText}
         alreadyRegisteredTitle={campaign.alreadyRegisteredTitle}
         alreadyRegisteredText={campaign.alreadyRegisteredText}
+        namePlaceholder={campaign.namePlaceholder}
         inputPlaceholder={campaign.inputPlaceholder}
         inputBgColor={campaign.inputBgColor?.hex}
         inputTextColor={campaign.inputTextColor?.hex}
@@ -103,12 +111,27 @@ export default function CampaignNewsletterSignup() {
         isLoggedIn={isLoggedIn}
         isSubscribed={isSubscribed}
         customerEmail={customerEmail}
+        customerName={customerName}
         actionData={actionData}
       />
       <BenefitsSection 
         heading={campaign.benefitsHeading}
         features={campaign.features}
         disclaimerText={campaign.disclaimerText}
+        successTitle={campaign.successTitle}
+        successText={campaign.successText}
+        alreadyRegisteredTitle={campaign.alreadyRegisteredTitle}
+        alreadyRegisteredText={campaign.alreadyRegisteredText}
+        namePlaceholder={campaign.namePlaceholder}
+        inputPlaceholder={campaign.inputPlaceholder}
+        buttonText={campaign.buttonText}
+        buttonBgColor={campaign.buttonBgColor?.hex}
+        buttonTextColor={campaign.buttonTextColor?.hex}
+        isLoggedIn={isLoggedIn}
+        isSubscribed={isSubscribed}
+        customerEmail={customerEmail}
+        customerName={customerName}
+        actionData={actionData}
       />
 
       <style dangerouslySetInnerHTML={{ __html: campaignStyles }} />
@@ -165,8 +188,11 @@ const campaignStyles = `
     text-align: center;
     line-height: 1.35;
     letter-spacing: -0.01em;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
     max-width: 900px;
+  }
+  .cp-signup__lead strong {
+    font-weight: 800;
   }
 
   .cp-signup__error {
@@ -176,59 +202,95 @@ const campaignStyles = `
     text-align: center;
   }
 
-  /* Form */
-  .cp-signup__form {
-    display: flex;
+  /* Form Layout */
+  .cp-signup__form-wrapper {
     width: 100%;
-    max-width: 820px;
-    height: 60px;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 80px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    max-width: 560px;
+    margin: 0 auto 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  .cp-signup__input {
-    flex: 1;
+  .cp-signup__form-col {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .cp-signup__input-field {
+    width: 100%;
+    height: 56px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: center;
+    outline: none;
+    box-sizing: border-box;
+    padding: 0 20px;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .cp-signup__input-field--dark {
     background: #ffffff;
     color: #111111;
     border: none;
-    border-radius: 0 !important;
-    -webkit-appearance: none;
-    appearance: none;
-    padding: 0 28px;
-    font-size: 17px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    outline: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   }
-  .cp-signup__input::placeholder {
+  .cp-signup__input-field--dark::placeholder {
     color: #aaaaaa;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .cp-signup__btn {
+  .cp-signup__input-field--light {
+    background: #ffffff;
+    color: #111111;
+    border: 1.5px solid #d1d5db;
+    box-shadow: none;
+  }
+  .cp-signup__input-field--light:focus {
+    border-color: #000000;
+  }
+  .cp-signup__input-field--light::placeholder {
+    color: #9ca3af;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .cp-signup__btn-standalone {
     background: #c0df16;
     color: #000000;
     border: none;
-    border-radius: 0 !important;
-    -webkit-appearance: none;
-    appearance: none;
-    padding: 0 52px;
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    height: 50px;
+    width: 220px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     cursor: pointer;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: inherit;
     white-space: nowrap;
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 14px rgba(192, 223, 22, 0.25);
   }
-  .cp-signup__btn:hover:not(:disabled) {
+  .cp-signup__btn-standalone:hover:not(:disabled) {
     background: #d4f02a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(192, 223, 22, 0.35);
   }
-  .cp-signup__btn:disabled {
+  .cp-signup__btn-standalone:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
@@ -238,8 +300,8 @@ const campaignStyles = `
   }
   .cp-spinner {
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border: 3px solid rgba(0,0,0,0.3);
     border-radius: 50%;
     border-top-color: #000;
@@ -257,15 +319,49 @@ const campaignStyles = `
     100% { transform: translateY(0); opacity: 1; }
   }
   .cp-success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background-color: #c0df16;
+    color: #000000;
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 28px;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 20px rgba(192, 223, 22, 0.4);
     animation: cp-success-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
   .cp-success-title {
+    color: #c0df16;
+    font-size: clamp(24px, 7vw, 32px);
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 0 0 12px 0;
     opacity: 0;
     animation: cp-success-fade-up 0.5s ease forwards 0.2s;
   }
   .cp-success-text {
+    color: #b0b0b0;
+    font-size: clamp(15px, 4vw, 18px);
+    font-weight: 500;
+    max-width: 400px;
+    line-height: 1.5;
+    margin: 0 auto;
     opacity: 0;
     animation: cp-success-fade-up 0.5s ease forwards 0.35s;
+  }
+
+  .cp-signup__state-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 32px auto 56px;
+    padding: 0 20px;
+    text-align: center;
   }
 
   /* Prize Overlay Text Box */
@@ -299,6 +395,9 @@ const campaignStyles = `
     text-align: center;
     width: 100%;
   }
+  .cp-prize__text strong {
+    font-weight: 800;
+  }
   .cp-prize__gap::before, .cp-prize__gap::after {
     content: '';
     position: absolute;
@@ -327,36 +426,6 @@ const campaignStyles = `
     display: block;
   }
 
-  /* Success state */
-  .cp-success {
-    text-align: center;
-    padding: 40px 20px;
-    color: #fff;
-  }
-  .cp-success__icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: #c0df16;
-    color: #000;
-    font-size: 28px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-  }
-  .cp-success h2 {
-    color: #c0df16;
-    font-size: 26px;
-    margin-bottom: 12px;
-  }
-  .cp-success p {
-    color: #bbbbbb;
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
   /* ── BENEFITS SECTION ── */
   .cp-benefits {
     background: #f7f7f7;
@@ -366,7 +435,7 @@ const campaignStyles = `
   .cp-benefits__title {
     text-align: center;
     font-size: 29px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #000;
@@ -414,6 +483,38 @@ const campaignStyles = `
     font-weight: 400;
   }
 
+  .cp-benefits__form-container {
+    margin: 56px auto 32px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .cp-benefits__state-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 24px auto 32px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .cp-benefits__state-title {
+    color: #000000;
+    font-size: clamp(22px, 6vw, 28px);
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+  }
+  .cp-benefits__state-text {
+    color: #555555;
+    font-size: clamp(14px, 3.5vw, 16px);
+    font-weight: 500;
+    max-width: 400px;
+    line-height: 1.5;
+  }
+
   .cp-benefits__divider {
     border: none;
     border-top: 1px solid #d0d0d0;
@@ -449,9 +550,6 @@ const campaignStyles = `
     .cp-prize__text {
       font-size: 32px;
     }
-    .cp-signup__form {
-      max-width: 100%;
-    }
     .cp-benefits__row {
       gap: 32px 48px;
     }
@@ -476,42 +574,26 @@ const campaignStyles = `
     .cp-signup {
       padding: 40px 16px 56px;
     }
-    .cp-signup__form {
-      flex-direction: column;
-      height: auto;
-      border-radius: 0;
-      margin-bottom: 40px;
-      background: transparent;
-      gap: 12px;
+    .cp-signup__form-wrapper {
+      margin-bottom: 48px;
     }
-    .cp-signup__input {
-      flex: none;
+    .cp-signup__input-field {
       height: 52px;
-      font-size: 16px;
+      font-size: 15px;
       padding: 0 16px;
-      border-radius: 8px !important;
-      width: 100%;
-      text-align: center;
+      border-radius: 10px;
     }
-    .cp-signup__input::placeholder {
-      font-size: 14px;
-      text-align: center;
-      letter-spacing: 0.08em;
-    }
-    .cp-signup__btn {
-      flex: none;
-      height: 52px;
+    .cp-signup__btn-standalone {
+      height: 48px;
       width: 100%;
       font-size: 16px;
-      padding: 0;
-      border-radius: 8px !important;
-      margin: 0;
+      border-radius: 10px;
     }
     .cp-prize {
       padding: 32px 16px 44px;
     }
     .cp-prize__text {
-      font-size: 17px;
+      font-size: 18px;
       line-height: 1.45;
     }
     .cp-prize__balls {
@@ -528,8 +610,8 @@ const campaignStyles = `
       width: 140px;
     }
     .cp-benefits__disclaimer {
-      font-size: 11.5px;
-      margin-top: 40px;
+      font-size: 12px;
+      margin-top: 24px;
     }
   }
 `;
