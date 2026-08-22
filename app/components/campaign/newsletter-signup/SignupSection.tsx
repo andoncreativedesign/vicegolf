@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Form, useNavigation } from 'react-router';
+import { campaignTrack } from '~/lib/analytics/campaignEvents';
 
 interface SignupSectionProps {
   heading?: string;
@@ -68,6 +69,45 @@ export default function SignupSection({
   const navigation = useNavigation();
   const loading = navigation.state === 'submitting';
 
+  // Tracking refs — prevent duplicate fires
+  const hasTrackedPageView = useRef(false);
+  const hasTrackedFormStart = useRef(false);
+  const hasTrackedAlreadyRegistered = useRef(false);
+  const prevActionDataRef = useRef<any>(null);
+
+  // ── Page view (fires once on mount from the TOP form only) ──────────────
+  useEffect(() => {
+    if (!hasTrackedPageView.current) {
+      hasTrackedPageView.current = true;
+      campaignTrack.pageView();
+    }
+  }, []);
+
+  // ── Already registered (fires once when state is determined) ───────────
+  useEffect(() => {
+    if (
+      isLoggedIn &&
+      isSubscribed &&
+      !actionData?.success &&
+      !hasTrackedAlreadyRegistered.current
+    ) {
+      hasTrackedAlreadyRegistered.current = true;
+      campaignTrack.alreadyRegistered('newsletter_landing_page');
+    }
+  }, [isLoggedIn, isSubscribed, actionData?.success]);
+
+  // ── Success / invalid email (fires when actionData changes) ────────────
+  useEffect(() => {
+    if (!actionData || actionData === prevActionDataRef.current) return;
+    prevActionDataRef.current = actionData;
+
+    if (actionData.success) {
+      campaignTrack.signupSuccess('newsletter_landing_page');
+    } else if (actionData.error) {
+      campaignTrack.invalidEmail('newsletter_landing_page');
+    }
+  }, [actionData]);
+
   useEffect(() => {
     if (customerEmail && !email) {
       setEmail(customerEmail);
@@ -79,6 +119,19 @@ export default function SignupSection({
 
   const showAlreadySubscribed = isLoggedIn && isSubscribed && !actionData?.success;
   const showSuccess = actionData?.success;
+
+  // ── Submit attempt ──────────────────────────────────────────────────────
+  const handleSubmitClick = () => {
+    campaignTrack.submitAttempt('newsletter_landing_page');
+  };
+
+  // ── Form start (first engagement with email field) ─────────────────────
+  const handleEmailFocus = () => {
+    if (!hasTrackedFormStart.current) {
+      hasTrackedFormStart.current = true;
+      campaignTrack.formStart('newsletter_landing_page');
+    }
+  };
 
   return (
     <section className="cp-signup">
@@ -136,6 +189,7 @@ export default function SignupSection({
               placeholder={safeInputPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onFocus={handleEmailFocus}
               className="cp-signup__input-field cp-signup__input-field--dark"
               autoComplete="email"
               readOnly={isLoggedIn && !!customerEmail}
@@ -149,6 +203,7 @@ export default function SignupSection({
               type="submit"
               className="cp-signup__btn-standalone"
               disabled={loading}
+              onClick={handleSubmitClick}
               style={{
                 backgroundColor: buttonBgColor,
                 color: buttonTextColor,

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, useNavigation } from 'react-router';
 import { PortableText } from '@portabletext/react';
+import { campaignTrack } from '~/lib/analytics/campaignEvents';
 
 const disclaimerTextComponents = {
   block: {
@@ -103,6 +104,37 @@ export default function BenefitsSection({
   const navigation = useNavigation();
   const loading = navigation.state === 'submitting';
 
+  // Tracking refs — prevent duplicate fires
+  const hasTrackedFormStart = useRef(false);
+  const hasTrackedAlreadyRegistered = useRef(false);
+  const prevActionDataRef = useRef<any>(null);
+
+  // ── Already registered (fires once for bottom form) ────────────────────
+  useEffect(() => {
+    if (
+      isLoggedIn &&
+      isSubscribed &&
+      !actionData?.success &&
+      !hasTrackedAlreadyRegistered.current
+    ) {
+      hasTrackedAlreadyRegistered.current = true;
+      campaignTrack.alreadyRegistered('newsletter_landing_page_bottom');
+    }
+  }, [isLoggedIn, isSubscribed, actionData?.success]);
+
+  // ── Success / invalid email ─────────────────────────────────────────────
+  // NOTE: actionData is shared across both forms (single route action).
+  // The success event is primarily tracked from SignupSection (top form).
+  // Bottom form tracks its own submit_attempt and form_start independently.
+  useEffect(() => {
+    if (!actionData || actionData === prevActionDataRef.current) return;
+    prevActionDataRef.current = actionData;
+
+    if (actionData.error) {
+      campaignTrack.invalidEmail('newsletter_landing_page_bottom');
+    }
+  }, [actionData]);
+
   useEffect(() => {
     if (customerEmail && !email) {
       setEmail(customerEmail);
@@ -122,6 +154,19 @@ export default function BenefitsSection({
 
   const row1 = activeFeatures.slice(0, 4);
   const row2 = activeFeatures.slice(4);
+
+  // ── Submit attempt ──────────────────────────────────────────────────────
+  const handleSubmitClick = () => {
+    campaignTrack.submitAttempt('newsletter_landing_page_bottom');
+  };
+
+  // ── Form start (first engagement with email field on bottom form) ───────
+  const handleEmailFocus = () => {
+    if (!hasTrackedFormStart.current) {
+      hasTrackedFormStart.current = true;
+      campaignTrack.formStart('newsletter_landing_page_bottom');
+    }
+  };
 
   return (
     <section className="cp-benefits">
@@ -186,6 +231,7 @@ export default function BenefitsSection({
                 placeholder={safeInputPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={handleEmailFocus}
                 className="cp-signup__input-field cp-signup__input-field--light"
                 autoComplete="email"
                 readOnly={isLoggedIn && !!customerEmail}
@@ -195,6 +241,7 @@ export default function BenefitsSection({
                 type="submit"
                 className="cp-signup__btn-standalone"
                 disabled={loading}
+                onClick={handleSubmitClick}
                 style={{
                   backgroundColor: buttonBgColor,
                   color: buttonTextColor,
