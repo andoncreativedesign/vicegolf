@@ -196,11 +196,6 @@ function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart
         'Items': items
       }]);
     }
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('featuredDiscountCode');
-      localStorage.removeItem('featuredDiscountData');
-      console.log('[CartSummary] Checkout clicked. Cleared local discount state.');
-    }
   };
 
   return (
