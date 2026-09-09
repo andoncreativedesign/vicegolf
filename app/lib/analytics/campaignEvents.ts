@@ -54,7 +54,11 @@ export const campaignTrack = {
    */
   signupSuccess(form_location: FormLocation) {
     pushDataLayer({ event: 'newsletter_signup', form_location });
-    fireFbq('Lead', { content_name: 'Newsletter Signup', form_location });
+    fireFbq('Lead', {
+      content_name: 'Newsletter Landing Page',
+      content_category: 'Newsletter',
+      form_location,
+    });
   },
 
   /**
