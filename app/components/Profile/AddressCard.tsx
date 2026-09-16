@@ -1,5 +1,6 @@
 import type { AddressFragment } from 'customer-accountapi.generated';
-import { PencilIcon, TrashIcon } from 'lucide-react'
+import { PencilIcon, TrashIcon } from 'lucide-react';
+import { GCC_PROVINCES } from '~/lib/i18n';
 
 interface AddressCardProps {
   address: Pick<
@@ -49,8 +50,22 @@ export function AddressCard({
     phoneNumber,
   } = address;
 
+  // Map zoneCode to its full name if it exists in GCC_PROVINCES
+  let provinceName = zoneCode;
+  if (territoryCode && zoneCode && GCC_PROVINCES[territoryCode]) {
+    const provinceObj = GCC_PROVINCES[territoryCode].find(p => p.code === zoneCode || p.name === zoneCode);
+    if (provinceObj) {
+      provinceName = provinceObj.name;
+    }
+  }
+
+  const displayProvince = (provinceName && city && !city.toLowerCase().includes(provinceName.toLowerCase()))
+    ? provinceName
+    : (!city ? provinceName : null);
+
+  const displayZip = zip && zip !== '00000' ? zip : null;
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
-  const cityLine = [zip, city, zoneCode].filter(Boolean).join(' ');
+  const cityLine = [displayZip, city, displayProvince].filter(Boolean).join(' ');
 
   const addressLines = [
     address1 || undefined,

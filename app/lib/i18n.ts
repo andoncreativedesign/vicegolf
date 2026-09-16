@@ -120,3 +120,125 @@ export function buildLocalizedUrl(pathname: string, countryCode: SupportedCountr
   const prefix = COUNTRIES[countryCode]?.pathPrefix || '/en-ae';
   return `${prefix}${normalized === '/' ? '' : normalized}`;
 }
+
+export const GCC_PROVINCES: Record<string, { code: string; name: string }[]> = {
+  AE: [
+    { code: 'DU', name: 'Dubai' },
+    { code: 'AZ', name: 'Abu Dhabi' },
+    { code: 'SH', name: 'Sharjah' },
+    { code: 'AJ', name: 'Ajman' },
+    { code: 'RK', name: 'Ras Al Khaimah' },
+    { code: 'FU', name: 'Fujairah' },
+    { code: 'UQ', name: 'Umm Al Quwain' }
+  ],
+  SA: [
+    { code: '01', name: 'Riyadh' },
+    { code: '02', name: 'Makkah' },
+    { code: '03', name: 'Madinah' },
+    { code: '04', name: 'Eastern Province' },
+    { code: '05', name: 'Qassim' },
+    { code: '06', name: "Ha'il" },
+    { code: '07', name: 'Tabuk' },
+    { code: '08', name: 'Northern Borders' },
+    { code: '09', name: 'Jizan' },
+    { code: '10', name: 'Najran' },
+    { code: '11', name: 'Al Bahah' },
+    { code: '12', name: 'Al Jawf' },
+    { code: '14', name: 'Asir' }
+  ],
+  OM: [
+    { code: 'DA', name: 'Ad Dakhiliyah' },
+    { code: 'ZA', name: 'Ad Dhahirah' },
+    { code: 'BS', name: 'Al Batinah North' },
+    { code: 'BJ', name: 'Al Batinah South' },
+    { code: 'BU', name: 'Al Buraimi' },
+    { code: 'WU', name: 'Al Wusta' },
+    { code: 'SS', name: 'Ash Sharqiyah North' },
+    { code: 'SJ', name: 'Ash Sharqiyah South' },
+    { code: 'DH', name: 'Dhofar' },
+    { code: 'MA', name: 'Muscat' },
+    { code: 'MU', name: 'Musandam' }
+  ]
+};
+
+/**
+ * Formats city and province before submitting to Shopify.
+ * For UAE (AE), Shopify natively supports zones (e.g. Dubai -> DU).
+ * For SA and OM, Shopify does not persist zoneCode, so we append the province to the city field if not already included.
+ */
+export function formatAddressCityAndZone(
+  territoryCode: string = 'AE',
+  city: string = '',
+  zoneCode?: string | null
+): { city: string; zoneCode?: string } {
+  const trimmedCity = (city || '').trim();
+  const trimmedZone = (zoneCode || '').trim();
+
+  if (!trimmedZone || territoryCode === 'AE') {
+    return { city: trimmedCity, zoneCode: trimmedZone || undefined };
+  }
+
+  // If city doesn't already include the province name, append it
+  if (!trimmedCity.toLowerCase().includes(trimmedZone.toLowerCase())) {
+    return {
+      city: trimmedCity ? `${trimmedCity}, ${trimmedZone}` : trimmedZone,
+      zoneCode: trimmedZone,
+    };
+  }
+
+  return { city: trimmedCity, zoneCode: trimmedZone };
+}
+
+/**
+ * Parses raw city and zoneCode from a saved Shopify address.
+ * Resolves province from native zoneCode (UAE) or extracts it from the city field (SA, OM).
+ */
+export function parseAddressCityAndZone(
+  territoryCode: string = 'AE',
+  rawCity: string = '',
+  rawZoneCode?: string | null
+): { cleanCity: string; selectedProvince: string } {
+  const trimmedCity = (rawCity || '').trim();
+  const provinces = GCC_PROVINCES[territoryCode] || [];
+
+  // 1. If native zoneCode is available (e.g. UAE 'DU' or 'Dubai')
+  if (rawZoneCode) {
+    const match = provinces.find(
+      (p) => p.code === rawZoneCode || p.name.toLowerCase() === rawZoneCode.toLowerCase()
+    );
+    return {
+      cleanCity: trimmedCity,
+      selectedProvince: match ? match.name : rawZoneCode,
+    };
+  }
+
+  // 2. If zoneCode is not set (e.g. SA, OM where Shopify ignores it), parse from city
+  if (trimmedCity && provinces.length > 0) {
+    // Check if city ends with ", <ProvinceName>" or "- <ProvinceName>"
+    for (const p of provinces) {
+      const regex = new RegExp(`[,\\-]\\s*${p.name}$`, 'i');
+      if (regex.test(trimmedCity)) {
+        return {
+          cleanCity: trimmedCity.replace(regex, '').trim(),
+          selectedProvince: p.name,
+        };
+      }
+    }
+
+    // Check if the city itself matches a province name exactly
+    const exact = provinces.find(
+      (p) => p.name.toLowerCase() === trimmedCity.toLowerCase()
+    );
+    if (exact) {
+      return {
+        cleanCity: exact.name,
+        selectedProvince: exact.name,
+      };
+    }
+  }
+
+  return {
+    cleanCity: trimmedCity,
+    selectedProvince: '',
+  };
+}
