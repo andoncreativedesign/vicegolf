@@ -1,16 +1,24 @@
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { LuUser } from 'react-icons/lu';
-import { Await, NavLink, useAsyncValue, useLoaderData, useNavigate, type LoaderFunctionArgs } from 'react-router';
+import { Await, NavLink, useAsyncValue, useLoaderData, useRouteLoaderData, useNavigate, type LoaderFunctionArgs } from 'react-router';
 import { type CartViewPayload, Image, useAnalytics, useOptimisticCart, } from '@shopify/hydrogen';
 import type { HeaderQuery, CartApiQueryFragment } from 'storefrontapi.generated';
 import { useAside } from '~/components/Aside';
 import { debugMenuItems } from '~/utils/debug-menu';
-import type { loader } from '~/root';
+import type { RootLoader } from '~/root';
 import Banner from './Banner';
 import type { MenuData } from '~/lib/shopify/product-queries';
 import type { BannerData } from '~/lib/sanity/home';
 import DropdownItem from './Header/NavDropdownItem';
 import HeaderMenu from './Header/HeaderMenu';
+import { COUNTRIES, COUNTRIES_LIST, buildLocalizedUrl, type SupportedCountry } from '~/lib/i18n';
+import { AE, SA, OM } from 'country-flag-icons/react/3x2';
+
+function CountryFlag({ country, className = 'w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-xs' }: { country: string; className?: string }) {
+  if (country === 'SA') return <SA className={className} />;
+  if (country === 'OM') return <OM className={className} />;
+  return <AE className={className} />;
+}
 
 interface DropdownItem {
   name: string;
@@ -93,16 +101,19 @@ export function Header({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const rootData = useRouteLoaderData<RootLoader>('root');
+  const activePathPrefix = rootData?.selectedLocale?.pathPrefix || '/en-ae';
   const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
 
   const handleMenuNavigation = async () => {
-    const isHomePage = window.location.pathname === '/';
-    if (isHomePage) return; // Already on home page, do nothing
+    const currentPath = window.location.pathname.replace(/\/$/, '');
+    const homePath = activePathPrefix.replace(/\/$/, '');
+    if (currentPath === homePath) return; // Already on home page, do nothing
 
     try {
       setIsNavigating(true);
-      await navigate('/');
+      await navigate(activePathPrefix);
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {
@@ -117,12 +128,11 @@ export function Header({
       {banner && <Banner banner={banner} />}
 
       {/* Top Header Bar - Collapses on Scroll */}
-      <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 py-0 opacity-0' : 'py-3 h-auto opacity-100'}`}>
+      <div className={`flex items-center justify-between px-2 w-full transition-all duration-300 ${isScrolled ? 'h-0 py-0 opacity-0 overflow-hidden pointer-events-none' : 'py-3 h-auto opacity-100 overflow-visible'}`}>
         {/* Left: Mobile Menu Toggle */}
         <div className="flex-1 flex items-center">
           <HeaderMenuMobileToggle />
-          {/* Country selector is now only in the mobile menu */}
-          <div className="hidden lg:block ml-4">
+          <div className="hidden lg:block ml-4 relative z-50">
             <CountryCurrencySelector />
           </div>
         </div>
@@ -248,16 +258,6 @@ function CartBanner() {
   return <CartBadge count={cart?.totalQuantity ?? 0} />;
 }
 
-// Country/Currency data - Specified countries
-const countries = [
-  { code: 'UAE', name: 'United Arab Emirates', currency: 'AED', symbol: '', url: 'https://www.vicegolf.com' },
-  // { code: 'US', name: 'United States', currency: 'USD', symbol: '$', url: 'https://www.vicegolf.com' },
-  // { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', url: 'https://www.vicegolf.com/en-ca' },
-  // { code: 'DE', name: 'Germany', currency: 'EUR', symbol: '€', url: 'https://www.vicegolf.de' },
-  // { code: 'CH', name: 'Switzerland', currency: 'CHF', symbol: 'Fr.', url: 'https://www.vicegolf.ch' },
-  // { code: 'GB', name: 'United Kingdom', currency: 'GBP', symbol: '£', url: 'https://www.vicegolf.co.uk' },
-  // { code: 'SE', name: 'Sweden', currency: 'SEK', symbol: 'kr', url: 'https://www.vicegolf.se' },
-] as const;
 
 function AccountToggle({ isLoggedIn }: { isLoggedIn: Promise<boolean> }) {
   return (
@@ -289,14 +289,28 @@ function AccountIcon() {
 
 export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default to US
-  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const rootData = useRouteLoaderData<RootLoader>('root');
 
-  // Filter countries based on search term
-  const filteredCountries = countries.filter(country =>
-    country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    country.currency.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Active country from root context (defaults to AE)
+  const activeCountryCode: SupportedCountry =
+    (rootData?.selectedLocale?.country as SupportedCountry) || 'AE';
+
+  const selectedCountry = COUNTRIES[activeCountryCode] || COUNTRIES.AE;
+
+  // Close dropdown when pressing outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
 
   // Close dropdown when pressing Escape key
   useEffect(() => {
@@ -312,71 +326,96 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
     }
   }, [isOpen]);
 
-  const handleCountrySelect = (country: typeof countries[number]) => {
-    setSelectedCountry(country);
+  // Close dropdown on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isOpen) setIsOpen(false);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isOpen]);
+
+  const handleCountrySelect = (countryCode: SupportedCountry) => {
     setIsOpen(false);
-    setSearchTerm('');
-    // Redirect to the selected country site
-    window.location.href = country.url;
+    if (countryCode === activeCountryCode) return;
+
+    // Set cookie persistence for 1 year
+    document.cookie = `vice_country=${countryCode}; path=/; max-age=31536000; SameSite=Lax`;
+
+    // Compute localized destination URL
+    const targetPath = buildLocalizedUrl(window.location.pathname, countryCode);
+    const targetUrl = `${targetPath}${window.location.search}`;
+
+    // Navigate to localized route
+    window.location.href = targetUrl;
   };
 
   return (
-    <div className="relative z-[9999]">
+    <div className="relative inline-block" ref={dropdownRef}>
       <button
-        className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 p-2 rounded-md hover:bg-gray-50"
+        type="button"
+        className="flex items-center gap-1.5 text-xs md:text-sm font-medium text-gray-700 hover:text-black transition-colors duration-200 py-1 px-2.5 rounded-full border border-gray-200 hover:border-gray-400 bg-white/95 backdrop-blur-xs cursor-pointer shadow-2xs"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Select country and currency"
+        aria-expanded={isOpen}
       >
-        <img
-          src={flagUrls[selectedCountry.code]}
-          alt={selectedCountry.name}
-          className="w-5 h-5 object-cover flex-shrink-0"
-        />
-        <span className="hidden sm:inline">
-          {selectedCountry.name} ({selectedCountry.currency}{selectedCountry.symbol})
-        </span>
-        <span className="sm:hidden">
-          {selectedCountry.name} ({selectedCountry.currency} {selectedCountry.symbol})
-        </span>
-        {/* <svg
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        <CountryFlag country={selectedCountry.code} className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-xs" />
+        <span className="font-semibold text-gray-900">{selectedCountry.currency}</span>
+        <svg
+          className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg> */}
+        </svg>
       </button>
 
       {/* Dropdown Menu */}
-      {/* {isOpen && (
-        <>
-          {/* Backdrop */}
-      {/* <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} /> */}
+      {isOpen && (
+        <div
+          className={`absolute ${
+            isMobile ? 'bottom-full mb-2 left-0' : 'top-full mt-2 left-0'
+          } w-64 bg-white border border-gray-200 rounded-xl shadow-2xl z-[99999] overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-150`}
+        >
+          <div className="px-3.5 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-wider text-gray-500 uppercase">
+              Select Region & Currency
+            </span>
+            <span className="text-[10px] text-gray-400 font-medium">GCC</span>
+          </div>
 
-      {/* Dropdown Content */}
-      {/* <div className={`fixed ${isMobile ? 'bottom-16 left-4 right-4' : 'top-[var(--header-height, 80px)] left-4 w-64'} bg-white border border-gray-200 rounded-md shadow-lg z-[9999] max-h-[50vh] overflow-y-auto px-4`}>
-            <div className={`py-2 ${isMobile ? 'flex flex-col-reverse' : ''}`}>
-              {filteredCountries.map((country) => (
+          <div className="py-1">
+            {COUNTRIES_LIST.map((country) => {
+              const isSelected = country.code === activeCountryCode;
+              return (
                 <button
                   key={country.code}
-                  className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-200 ${selectedCountry.code === country.code ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'}`}
-                  onClick={() => handleCountrySelect(country)}
+                  type="button"
+                  onClick={() => handleCountrySelect(country.code)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left text-sm transition-colors duration-150 cursor-pointer ${
+                    isSelected
+                      ? 'bg-gray-100/80 font-semibold text-black'
+                      : 'hover:bg-gray-50 text-gray-700 hover:text-black'
+                  }`}
                 >
-                  <img
-                    src={flagUrls[country.code]}
-                    alt={country.name}
-                    className="w-5 h-4 object-cover flex-shrink-0"
-                  />
-                  <div className="flex-1 text-left ml-1 text-sm">
-                    {country.name} ({country.currency} {country.symbol})
+                  <div className="flex items-center gap-3">
+                    <CountryFlag country={country.code} className="w-5 h-3.5 rounded-xs shadow-xs" />
+                    <div>
+                      <div className="leading-tight text-xs font-medium text-gray-900">{country.name}</div>
+                      <div className="text-[11px] text-gray-500">{country.currency} ({country.symbol})</div>
+                    </div>
                   </div>
+
+                  {isSelected && (
+                    <span className="flex h-2 w-2 rounded-full bg-black ring-4 ring-black/10" />
+                  )}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </>
-      )} */}
+        </div>
+      )}
     </div>
   );
 }

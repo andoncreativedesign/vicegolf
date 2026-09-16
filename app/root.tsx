@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Analytics, getShopAnalytics, useNonce } from '@shopify/hydrogen';
-import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, } from 'react-router';
+import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, useNavigate } from 'react-router';
 import type { Route } from './+types/root';
 import favicon from '~/assets/vicefav.svg';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
@@ -17,6 +17,7 @@ import blogStyles from '~/components/Blog/blog.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import type { I18nLocale } from '~/lib/i18n';
 
 export type RootLoader = typeof loader;
 
@@ -169,6 +170,7 @@ export async function loader(args: Route.LoaderArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
+    selectedLocale: args.context.storefront.i18n as I18nLocale,
     publicKlaviyoCompanyId: env.PUBLIC_KLAVIYO_COMPANY_ID,
     publicYotpoAppKey: env.PUBLIC_YOTPO_APP_KEY,
     publicYotpoInstanceId: env.PUBLIC_YOTPO_INSTANCE_ID,
@@ -199,8 +201,8 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       cache: storefront.CacheLong(),
       variables: {
         handle: "customer-account-main-menu",
-        country: "IN",
-        language: "EN",
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       }
     }),
     // Fetch home page data including banner
@@ -330,7 +332,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
   const nonce = useNonce();
   const data = useRouteLoaderData<typeof loader>('root');
   const isTargetDomain = data?.isTargetDomain;
-  const { header, footer, storeDomain, publicYotpoAppKey } = data || {};
+  const { header, footer, publicStoreDomain, publicYotpoAppKey } = data || {};
   const yotpoAppKey = publicYotpoAppKey || '';
 
   // useEffect(() => {
@@ -456,6 +458,49 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
+  const navigate = useNavigate();
+
+  // Universal regional link localization: automatically preserves active market prefix for all links across the site
+  useEffect(() => {
+    const pathPrefix = data?.selectedLocale?.pathPrefix;
+    if (!pathPrefix) return;
+
+    const handleGlobalLinkClick = (event: MouseEvent) => {
+      // Ignore clicks with modifier keys or secondary buttons
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      const anchor = (event.target as HTMLElement).closest('a');
+      if (!anchor) return;
+
+      // Ignore target="_blank", downloads, or external relations
+      if (anchor.target && anchor.target !== '_self') return;
+      if (anchor.hasAttribute('download')) return;
+
+      const href = anchor.getAttribute('href');
+      // Only process internal relative paths (exclude external, hash, api, and already-prefixed paths)
+      if (
+        !href ||
+        !href.startsWith('/') ||
+        href.startsWith('//') ||
+        href.startsWith('/api') ||
+        href.startsWith('#')
+      ) {
+        return;
+      }
+
+      // If the link is not already prefixed with a regional market prefix
+      if (!href.startsWith(pathPrefix) && !href.match(/^\/en-(ae|sa|om)(\/|$)/i)) {
+        event.preventDefault();
+        const localizedHref = `${pathPrefix}${href === '/' ? '' : href}`;
+        navigate(localizedHref);
+      }
+    };
+
+    document.addEventListener('click', handleGlobalLinkClick, { capture: true });
+    return () => document.removeEventListener('click', handleGlobalLinkClick, { capture: true });
+  }, [data?.selectedLocale?.pathPrefix, navigate]);
 
   useEffect(() => {
     if (data?.customer) {
