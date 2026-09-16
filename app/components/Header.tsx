@@ -354,20 +354,25 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
     <div className="relative inline-block" ref={dropdownRef}>
       <button
         type="button"
-        className="flex items-center gap-1.5 text-xs md:text-sm font-medium text-gray-700 hover:text-black transition-colors duration-200 py-1 px-2.5 rounded-full border border-gray-200 hover:border-gray-400 bg-white/95 backdrop-blur-xs cursor-pointer shadow-2xs"
+        className="flex items-center gap-2 text-[13px] md:text-sm text-gray-800 hover:text-black transition-colors duration-200 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Select country and currency"
         aria-expanded={isOpen}
       >
-        <CountryFlag country={selectedCountry.code} className="w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-xs" />
-        <span className="font-semibold text-gray-900">{selectedCountry.currency}</span>
+        <CountryFlag country={selectedCountry.code} className="w-5 h-3.5 object-cover rounded-[2px]" />
+        <span className="hidden sm:inline">
+          {selectedCountry.name} ({selectedCountry.currency})
+        </span>
+        <span className="sm:hidden font-medium">
+          {selectedCountry.currency}
+        </span>
         <svg
-          className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 text-gray-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
@@ -376,16 +381,9 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
         <div
           className={`absolute ${
             isMobile ? 'bottom-full mb-2 left-0' : 'top-full mt-2 left-0'
-          } w-64 bg-white border border-gray-200 rounded-xl shadow-2xl z-[99999] overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-150`}
+          } w-[260px] bg-[#f8f8f8] border border-gray-200 shadow-md z-[99999] py-2 rounded-sm`}
         >
-          <div className="px-3.5 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-gray-500 uppercase">
-              Select Region & Currency
-            </span>
-            <span className="text-[10px] text-gray-400 font-medium">GCC</span>
-          </div>
-
-          <div className="py-1">
+          <div className="flex flex-col">
             {COUNTRIES_LIST.map((country) => {
               const isSelected = country.code === activeCountryCode;
               return (
@@ -393,23 +391,16 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
                   key={country.code}
                   type="button"
                   onClick={() => handleCountrySelect(country.code)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left text-sm transition-colors duration-150 cursor-pointer ${
+                  className={`w-full flex items-center gap-3 px-4 py-2 text-left text-[13px] md:text-sm cursor-pointer ${
                     isSelected
-                      ? 'bg-gray-100/80 font-semibold text-black'
-                      : 'hover:bg-gray-50 text-gray-700 hover:text-black'
+                      ? 'bg-[#e5e5e5] text-black font-medium'
+                      : 'hover:bg-gray-200/50 text-gray-800 hover:text-black'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <CountryFlag country={country.code} className="w-5 h-3.5 rounded-xs shadow-xs" />
-                    <div>
-                      <div className="leading-tight text-xs font-medium text-gray-900">{country.name}</div>
-                      <div className="text-[11px] text-gray-500">{country.currency} ({country.symbol})</div>
-                    </div>
-                  </div>
-
-                  {isSelected && (
-                    <span className="flex h-2 w-2 rounded-full bg-black ring-4 ring-black/10" />
-                  )}
+                  <CountryFlag country={country.code} className="w-5 h-3.5 object-cover rounded-[2px]" />
+                  <span>
+                    {country.name} ({country.currency})
+                  </span>
                 </button>
               );
             })}
