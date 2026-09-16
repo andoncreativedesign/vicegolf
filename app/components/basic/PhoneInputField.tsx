@@ -15,6 +15,7 @@ type PhoneInputFieldProps = {
     onChange: (value: string | undefined) => void;
     availableCountries?: Country[];
     hasBorder?: boolean;
+    defaultCountry?: Country;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>;
 
 const CustomCountrySelect = ({ value, onChange, labels, availableCountries }: any) => {
@@ -90,6 +91,7 @@ export function PhoneInputField({
     onChange,
     availableCountries,
     hasBorder = true,
+    defaultCountry = 'AE',
     ...inputProps
 }: PhoneInputFieldProps) {
     const generatedId = useId();
@@ -252,7 +254,7 @@ export function PhoneInputField({
                 <PhoneInput
                     id={inputId}
                     international
-                    defaultCountry="AE"
+                    defaultCountry={defaultCountry}
                     value={value}
                     flags={flags}
                     onChange={handlePhoneChange}

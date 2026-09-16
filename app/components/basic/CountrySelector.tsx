@@ -1,6 +1,7 @@
 import type { SelectHTMLAttributes } from 'react';
 import { getCountries } from 'react-phone-number-input';
 import en from 'react-phone-number-input/locale/en';
+import { COUNTRIES } from '~/lib/i18n';
 
 type CountrySelectorProps = {
     label: string;
@@ -20,10 +21,10 @@ export function CountrySelector({
     const labelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
     // Sort countries by name
-    // rmeove the filter show all countries - now store only avilable for UAE 
+    const allowedCountries = Object.keys(COUNTRIES);
     const countries = getCountries()
         .sort((a, b) => (en[a] || '').localeCompare(en[b] || ''))
-        .filter((country) => country === 'AE');
+        .filter((country) => allowedCountries.includes(country));
 
     return (
         <div className={containerClassName}>

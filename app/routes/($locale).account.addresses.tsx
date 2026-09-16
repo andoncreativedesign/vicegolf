@@ -28,6 +28,7 @@ import {
 import { AddressCard } from '~/components/Profile/AddressCard';
 import { AddressForm } from '~/components/Profile/AddressForm';
 import showToast from '~/components/basic/CustomToast';
+import { formatAddressCityAndZone } from '~/lib/i18n';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -94,6 +95,16 @@ export async function action({ request, context }: Route.ActionArgs) {
       if (typeof value === 'string') {
         address[key] = value;
       }
+    }
+
+    const { city: formattedCity, zoneCode: formattedZone } = formatAddressCityAndZone(
+      address.territoryCode as string,
+      address.city as string,
+      address.zoneCode as string
+    );
+    address.city = formattedCity;
+    if (formattedZone) {
+      address.zoneCode = formattedZone;
     }
 
     switch (request.method) {
