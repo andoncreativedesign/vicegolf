@@ -1,6 +1,6 @@
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLayout } from '~/types/cart';
-import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
+import { CartForm, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useFetcher, useFetchers, useNavigation } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
@@ -101,12 +101,18 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
             <div className="flex flex-col items-end">
-              <span className="font-medium text-gray-900">
-                {displaySubtotal?.amount ? <Money data={displaySubtotal} /> : '-'}
+              <span className="font-medium text-gray-900 flex items-center">
+                {displaySubtotal?.amount ? (
+                  <>
+                    <AedIcon className="w-4 h-4 mr-0.5" />
+                    {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displaySubtotal.amount))}
+                  </>
+                ) : '-'}
               </span>
               {baseVal > currentSubtotalVal && (
-                <span className="text-xs text-gray-400 line-through">
-                  <Money data={{ amount: baseVal.toFixed(2), currencyCode: subtotal!.currencyCode }} />
+                <span className="text-xs text-gray-400 line-through flex items-center">
+                  <AedIcon className="w-3 h-3 mr-0.5" />
+                  {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(baseVal)}
                 </span>
               )}
             </div>
@@ -145,8 +151,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
                       : '(Incl. taxes and shipping)'}
                   </span>
                 </span>
-                <span className="font-medium text-gray-900">
-                  <Money data={displayTotal} />
+                <span className="font-medium text-gray-900 flex items-center">
+                  <AedIcon className="w-4 h-4 mr-0.5" />
+                  {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displayTotal.amount))}
                 </span>
               </div>
             </div>
@@ -448,8 +455,9 @@ function CartGiftCard({
                     <span className="text-sm font-medium text-gray-900">
                       ***{giftCard.lastCharacters}
                     </span>
-                    <span className="text-sm text-green-600">
-                      <Money data={giftCard.amountUsed} />
+                    <span className="text-sm text-green-600 flex items-center">
+                      <AedIcon className="w-3 h-3 mr-0.5" />
+                      {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(giftCard.amountUsed.amount))}
                     </span>
                   </div>
                   <button
