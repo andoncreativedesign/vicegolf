@@ -160,6 +160,17 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
           )}
         </div>
 
+        {displayTotal?.currencyCode && displayTotal.currencyCode !== 'AED' && (
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200/80 text-xs text-gray-600 flex items-start gap-2.5 leading-relaxed">
+            <svg className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <span className="font-semibold text-gray-900">Checkout Notice:</span> Orders are processed in AED at checkout based on current exchange rates.
+            </div>
+          </div>
+        )}
+
         <div className="mt-6">
           <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} cart={cart} />
         </div>
