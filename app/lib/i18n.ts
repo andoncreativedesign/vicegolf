@@ -1,13 +1,13 @@
 import type {I18nBase} from '@shopify/hydrogen';
 
-export type SupportedCountry = 'AE' | 'SA' | 'OM';
+export type SupportedCountry = 'AE' | 'SA' | 'OM' | 'QA';
 export type SupportedLanguage = 'EN';
 
 export interface CountryConfig {
   code: SupportedCountry;
   name: string;
   language: SupportedLanguage;
-  currency: 'AED' | 'SAR' | 'OMR';
+  currency: 'AED' | 'SAR' | 'OMR' | 'QAR';
   symbol: string;
   decimals: number;
   pathPrefix: string;
@@ -49,6 +49,17 @@ export const COUNTRIES: Record<SupportedCountry, CountryConfig> = {
     phoneCode: '+968',
     phoneDigits: 8,
   },
+  QA: {
+    code: 'QA',
+    name: 'Qatar',
+    language: 'EN',
+    currency: 'QAR',
+    symbol: 'QAR',
+    decimals: 2,
+    pathPrefix: '/en-qa',
+    phoneCode: '+974',
+    phoneDigits: 8,
+  },
 };
 
 export const COUNTRIES_LIST = Object.values(COUNTRIES);
@@ -57,7 +68,7 @@ export interface I18nLocale extends I18nBase {
   pathPrefix: string;
   country: SupportedCountry;
   language: SupportedLanguage;
-  currency: 'AED' | 'SAR' | 'OMR';
+  currency: 'AED' | 'SAR' | 'OMR' | 'QAR';
 }
 
 export const DEFAULT_LOCALE: I18nLocale = {
@@ -84,12 +95,15 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
   const url = new URL(request.url);
   const firstPathPart = url.pathname.split('/')[1]?.toLowerCase() ?? '';
 
-  // 1. Resolve from URL market prefix (/en-ae, /en-sa, /en-om)
+  // 1. Resolve from URL market prefix (/en-ae, /en-sa, /en-om, /en-qa)
   if (firstPathPart === 'en-sa') {
     return { language: 'EN', country: 'SA', pathPrefix: '/en-sa', currency: 'SAR' };
   }
   if (firstPathPart === 'en-om') {
     return { language: 'EN', country: 'OM', pathPrefix: '/en-om', currency: 'OMR' };
+  }
+  if (firstPathPart === 'en-qa') {
+    return { language: 'EN', country: 'QA', pathPrefix: '/en-qa', currency: 'QAR' };
   }
   if (firstPathPart === 'en-ae') {
     return { language: 'EN', country: 'AE', pathPrefix: '/en-ae', currency: 'AED' };
@@ -115,7 +129,7 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
  * Builds a localized path for a given country code
  */
 export function buildLocalizedUrl(pathname: string, countryCode: SupportedCountry): string {
-  const cleanPath = pathname.replace(/^\/en-(ae|sa|om)(\/|$)/i, '/');
+  const cleanPath = pathname.replace(/^\/en-(ae|sa|om|qa)(\/|$)/i, '/');
   const normalized = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
   const prefix = COUNTRIES[countryCode]?.pathPrefix || '/en-ae';
   return `${prefix}${normalized === '/' ? '' : normalized}`;
@@ -158,13 +172,23 @@ export const GCC_PROVINCES: Record<string, { code: string; name: string }[]> = {
     { code: 'DH', name: 'Dhofar' },
     { code: 'MA', name: 'Muscat' },
     { code: 'MU', name: 'Musandam' }
+  ],
+  QA: [
+    { code: 'DA', name: 'Doha' },
+    { code: 'RA', name: 'Al Rayyan' },
+    { code: 'WA', name: 'Al Wakrah' },
+    { code: 'ZA', name: 'Al Daayen' },
+    { code: 'KH', name: 'Al Khor' },
+    { code: 'SH', name: 'Al Shamal' },
+    { code: 'US', name: 'Umm Salal' },
+    { code: 'SN', name: 'Al Sheehaniya' }
   ]
 };
 
 /**
  * Formats city and province before submitting to Shopify.
  * For UAE (AE), Shopify natively supports zones (e.g. Dubai -> DU).
- * For SA and OM, Shopify does not persist zoneCode, so we append the province to the city field if not already included.
+ * For SA, OM, and QA, Shopify does not persist zoneCode, so we append the province to the city field if not already included.
  */
 export function formatAddressCityAndZone(
   territoryCode: string = 'AE',
@@ -212,7 +236,7 @@ export function parseAddressCityAndZone(
     };
   }
 
-  // 2. If zoneCode is not set (e.g. SA, OM where Shopify ignores it), parse from city
+  // 2. If zoneCode is not set (e.g. SA, OM, QA where Shopify ignores it), parse from city
   if (trimmedCity && provinces.length > 0) {
     // Check if city ends with ", <ProvinceName>" or "- <ProvinceName>"
     for (const p of provinces) {

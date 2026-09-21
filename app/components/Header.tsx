@@ -12,11 +12,12 @@ import type { BannerData } from '~/lib/sanity/home';
 import DropdownItem from './Header/NavDropdownItem';
 import HeaderMenu from './Header/HeaderMenu';
 import { COUNTRIES, COUNTRIES_LIST, buildLocalizedUrl, type SupportedCountry } from '~/lib/i18n';
-import { AE, SA, OM } from 'country-flag-icons/react/3x2';
+import { AE, SA, OM, QA } from 'country-flag-icons/react/3x2';
 
 function CountryFlag({ country, className = 'w-4 h-3 md:w-5 md:h-3.5 object-cover rounded-xs' }: { country: string; className?: string }) {
   if (country === 'SA') return <SA className={className} />;
   if (country === 'OM') return <OM className={className} />;
+  if (country === 'QA') return <QA className={className} />;
   return <AE className={className} />;
 }
 
