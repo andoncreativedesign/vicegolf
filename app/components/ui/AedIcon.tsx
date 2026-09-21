@@ -28,6 +28,8 @@ export const CurrencySymbol: FC<CurrencySymbolProps> = ({
         activeCurrency = 'SAR';
       } else if (path.startsWith('/en-om')) {
         activeCurrency = 'OMR';
+      } else if (path.startsWith('/en-qa')) {
+        activeCurrency = 'QAR';
       } else if (path.startsWith('/en-ae')) {
         activeCurrency = 'AED';
       }
@@ -78,6 +80,32 @@ export const CurrencySymbol: FC<CurrencySymbolProps> = ({
         <path
           d="M259.9,219.89c-.63-49.2,11.44-95.41,35.76-137.75C331.7,19.4,371.24-.36,439.78,34.99c10.67,5.5,53.6,35.43,57.81,44.54,5.03,10.87-27.48,103.87-29.11,122.3-34.69-37.51-99.37-98.66-154.85-69.62-45.05,23.58-12.02,62.54,11.46,87.68h406.25l-39.14,70.23-289.2-2c-1.11,4.66.87,3.3,2.53,4.6,12.44,9.72,80.97,31.54,94.75,31.54l172.05,1.99-39.49,71.25H10.03l39.24-71.24h272.14l-37.11-36.13H69.33l39.23-70.23h151.33Z"
         />
+      </svg>
+    );
+  }
+
+  if (activeCurrency === 'QAR') {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 42 16"
+        width="28"
+        height="13"
+        className={`inline-block mr-1 align-middle fill-current ${className}`}
+        aria-label="QAR"
+        role="img"
+        {...props}
+      >
+        <text
+          x="0"
+          y="13"
+          fontSize="13"
+          fontWeight="800"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          letterSpacing="-0.5px"
+        >
+          QAR
+        </text>
       </svg>
     );
   }
