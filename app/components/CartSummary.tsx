@@ -193,6 +193,20 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart?: any }) {
   if (!checkoutUrl) return null;
 
+  let activeDiscountCode = cart?.discountCodes?.find((d: any) => d.applicable)?.code;
+  if (!activeDiscountCode && typeof window !== 'undefined') {
+    try {
+      activeDiscountCode = localStorage.getItem('featuredDiscountCode') || undefined;
+    } catch {
+      // ignore
+    }
+  }
+
+  let finalCheckoutUrl = checkoutUrl;
+  if (activeDiscountCode && !checkoutUrl.includes('discount=')) {
+    finalCheckoutUrl = `${checkoutUrl}${checkoutUrl.includes('?') ? '&' : '?'}discount=${encodeURIComponent(activeDiscountCode)}`;
+  }
+
   const handleCheckoutClick = () => {
     if (typeof window !== 'undefined' && (window as any)._learnq && cart) {
       const items = cart.lines?.nodes?.map((line: any) => ({
@@ -210,7 +224,7 @@ function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart
         '$event_id': cart.id,
         'Value': cart.cost?.totalAmount?.amount,
         'ItemNames': cart.lines?.nodes?.map((line: any) => line.merchandise?.product?.title),
-        'CheckoutURL': checkoutUrl,
+        'CheckoutURL': finalCheckoutUrl,
         'Items': items
       }]);
     }
@@ -219,7 +233,7 @@ function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart
   return (
     <div className="checkout-actions">
       <a
-        href={checkoutUrl}
+        href={finalCheckoutUrl}
         onClick={handleCheckoutClick}
         target="_self"
         className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
@@ -322,11 +336,15 @@ function CartDiscounts({
 
   const handleRemoveDiscount = () => {
     if (typeof window !== 'undefined') {
-      if (localStorage.getItem('featuredDiscountData')) {
-        shouldReloadRef.current = true;
+      try {
+        if (localStorage.getItem('featuredDiscountData')) {
+          shouldReloadRef.current = true;
+        }
+        localStorage.removeItem('featuredDiscountCode');
+        localStorage.removeItem('featuredDiscountData');
+      } catch {
+        // ignore
       }
-      localStorage.removeItem('featuredDiscountCode');
-      localStorage.removeItem('featuredDiscountData');
     }
   };
 
