@@ -81,9 +81,24 @@ const ProductOptionDozen = ({ option }: { option: MappedProductOptions }) => {
       <div className="space-y-4">
         {option.optionValues.map((value, index) => {
 
-          const pricePerDozenText = value.variant?.price?.amount ? getPricePerItem(value.variant.price.amount, value.name, value.variant.price.currencyCode) : null;
-          const totalPriceText = value.variant?.price?.amount ? `$${formatPrice(value.variant.price.amount)}` : null;
-          const originalPricePerDozenText = index === 0 || !singleDozenPrice ? null : `$${singleDozenPrice.toFixed(2)}/dz`;
+          const pricePerDozenText = value.variant?.price?.amount ? (
+            <span className="flex items-center justify-end">
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={value.variant.price.currencyCode} />
+              {formatPrice((parseFloat(value.variant.price.amount) / parseInt(value.name.split(' ')[0])).toFixed(2))}/dz
+            </span>
+          ) : null;
+          const totalPriceText = value.variant?.price?.amount ? (
+            <span className="flex items-center">
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={value.variant.price.currencyCode} />
+              {formatPrice(value.variant.price.amount)}
+            </span>
+          ) : null;
+          const originalPricePerDozenText = index === 0 || !singleDozenPrice ? null : (
+            <span className="flex items-center justify-end">
+              <AedIcon className="w-3 h-3 mr-0.5" currency={value.variant?.price?.currencyCode} />
+              {formatPrice(singleDozenPrice.toString())}/dz
+            </span>
+          );
 
           const {
             name,

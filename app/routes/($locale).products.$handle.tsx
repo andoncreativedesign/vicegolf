@@ -794,7 +794,7 @@ export default function Product() {
           product={product}
           url={`https://${publicStoreDomain}/products/${product.handle}`}
           price={selectedVariant?.price?.amount || finalPrice.toFixed(2)}
-          currency={selectedVariant?.price?.currencyCode || 'USD'}
+          currency={selectedVariant?.price?.currencyCode || ''}
         />
 
       </div>

@@ -98,9 +98,16 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
 
   // 1️⃣ Fetch main data
   const [collectionsData, categoryProducts] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
+    context.storefront.query(FEATURED_COLLECTION_QUERY, {
+      variables: {
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
+      },
+    }),
     context.storefront.query(MULTIPLE_COLLECTIONS_QUERY, {
       variables: {
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
         golfBallsHandle: createCategoryQuery('golf-balls'),
         golfBallsCursor,
         golfClubsHandle: createCategoryQuery('golf-clubs'),
@@ -172,6 +179,8 @@ async function loadDeferredData({ context, request }: Route.LoaderArgs) {
   const recommendedProducts = await context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY, {
       variables: {
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
         first: 15,
         after: recommendedCursor,
       },

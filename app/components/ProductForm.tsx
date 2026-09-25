@@ -199,10 +199,18 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         if (d.percentage) {
            total = total * (1 - d.percentage);
         } else if (d.amount) {
+           let itemDiscount = d.amount;
+           const discountCurrency = d.currencyCode;
+           const activeCurrency = selectedVariant?.price?.currencyCode;
+           const adminBasePrice = d.productPrices?.[product.id];
+
+           if (discountCurrency && activeCurrency && activeCurrency !== discountCurrency && adminBasePrice) {
+             itemDiscount = originalUnitPrice * (d.amount / adminBasePrice);
+           }
            if (d.appliesOnEachItem) {
-               total = Math.max(0, originalUnitPrice - d.amount) * qty;
+               total = Math.max(0, originalUnitPrice - itemDiscount) * qty;
            } else {
-               total = Math.max(0, total - d.amount);
+               total = Math.max(0, total - itemDiscount);
            }
         }
         if (total < bestTotal) bestTotal = total;
@@ -214,7 +222,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   const totalPriceAmount = getBestPriceForQuantity(totalQuantityDozens);
   const baseUnitCompare = unitCompareAmount > 0 ? unitCompareAmount : originalUnitPrice;
   const totalCompareAmount = baseUnitCompare * totalQuantityDozens;
-  const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
+  const currencyCode = selectedVariant?.price?.currencyCode || rootData?.selectedLocale?.currency || '';
 
   const displayQuantity = Math.max(1, totalQuantityDozens);
   const displayPriceAmount = getBestPriceForQuantity(displayQuantity);
@@ -223,8 +231,9 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currencyCode,
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -412,28 +421,28 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         {showCompare ? (
           <>
             <span className="text-xl font-bold text-[#e32619] flex items-center">
-              <AedIcon className="w-4 h-4 mr-0.5" />
+              <AedIcon className="w-4 h-4 mr-0.5" currency={currencyCode} />
               {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount)}
             </span>
             <s className="text-[17px] text-gray-500 line-through flex items-center">
-              <AedIcon className="w-3.5 h-3.5 mr-0.5" />
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={currencyCode} />
               {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayCompareAmount)}
             </s>
             {displayQuantity > 1 ? (
               <span className="text-[15px] font-medium text-gray-600 flex items-center">
-                (<AedIcon className="w-3 h-3 mr-0.5" />
+                (<AedIcon className="w-3 h-3 mr-0.5" currency={currencyCode} />
                 {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount / displayQuantity)}
                 /{isGolfBall ? 'dozen' : 'unit'})
               </span>
             ) : (
               <span className="text-sm text-emerald-600 font-medium flex items-center">
-                (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(displayCompareAmount - displayPriceAmount).toFixed(2)})
+                (Save <AedIcon className="w-3 h-3 mx-0.5" currency={currencyCode} /> {(displayCompareAmount - displayPriceAmount).toFixed(2)})
               </span>
             )}
           </>
         ) : (
           <span className="text-xl font-bold text-gray-900 flex items-center">
-            <AedIcon className="w-4 h-4 mr-0.5" />
+            <AedIcon className="w-4 h-4 mr-0.5" currency={currencyCode} />
             {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount)}
           </span>
         )}
@@ -550,7 +559,16 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
                 {
                   merchandiseId: selectedVariant.id,
                   quantity: totalQuantityDozens,
-                  selectedVariant,
+                  selectedVariant: {
+                    ...selectedVariant,
+                    product: {
+                      id: currentProductId || product?.id,
+                      handle: product?.handle,
+                      title: title || product?.title,
+                      collections: product?.collections,
+                      featuredImage: product?.featuredImage || selectedVariant?.image,
+                    },
+                  } as any,
                 },
               ]
               : []
@@ -562,7 +580,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
             'Max quantity in cart reached'
           ) : (
             <span className="flex items-center justify-center gap-1">
-              Add to Cart • <AedIcon className="w-3 h-3 text-white" />
+              Add to Cart • <AedIcon className="w-3 h-3 text-white" currency={currencyCode} />
               {new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,

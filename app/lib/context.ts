@@ -2,7 +2,6 @@ import {createHydrogenContext} from '@shopify/hydrogen';
 import {AppSession} from '~/lib/session';
 import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
 import {getLocaleFromRequest} from '~/lib/i18n';
-import {transformPrices} from '~/lib/currency';
 
 // Define the additional context object
 const additionalContext = {
@@ -64,22 +63,6 @@ export async function createHydrogenRouterContext(
   // This is required for segment-based discounts to work automatically
   if (hydrogenContext.cart && hydrogenContext.customerAccount) {
     (hydrogenContext.cart as any).customerAccount = hydrogenContext.customerAccount;
-  }
-
-  // Intercept Storefront API price responses for multi-region currency conversion
-  // NOTE: Automatically bypassed once Shopify Markets is enabled in Shopify Admin
-  if (locale.country !== 'AE' && hydrogenContext.storefront) {
-    const originalQuery = hydrogenContext.storefront.query.bind(hydrogenContext.storefront);
-    hydrogenContext.storefront.query = async (...args: any[]) => {
-      const data = await (originalQuery as any)(...args);
-      return transformPrices(data, locale.country);
-    };
-
-    const originalMutate = hydrogenContext.storefront.mutate.bind(hydrogenContext.storefront);
-    hydrogenContext.storefront.mutate = async (...args: any[]) => {
-      const data = await (originalMutate as any)(...args);
-      return transformPrices(data, locale.country);
-    };
   }
 
   return hydrogenContext;

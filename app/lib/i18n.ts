@@ -7,7 +7,7 @@ export interface CountryConfig {
   code: SupportedCountry;
   name: string;
   language: SupportedLanguage;
-  currency: 'AED' | 'SAR' | 'OMR' | 'QAR';
+  currency: string;
   symbol: string;
   decimals: number;
   pathPrefix: string;
@@ -68,14 +68,13 @@ export interface I18nLocale extends I18nBase {
   pathPrefix: string;
   country: SupportedCountry;
   language: SupportedLanguage;
-  currency: 'AED' | 'SAR' | 'OMR' | 'QAR';
+  currency?: string;
 }
 
 export const DEFAULT_LOCALE: I18nLocale = {
   language: 'EN',
   country: 'AE',
   pathPrefix: '/en-ae',
-  currency: 'AED',
 };
 
 export function parseCookie(cookieHeader: string | null): Record<string, string> {
@@ -97,19 +96,42 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
 
   // 1. Resolve from URL market prefix (/en-ae, /en-sa, /en-om, /en-qa)
   if (firstPathPart === 'en-sa') {
-    return { language: 'EN', country: 'SA', pathPrefix: '/en-sa', currency: 'SAR' };
+    return { language: 'EN', country: 'SA', pathPrefix: '/en-sa' };
   }
   if (firstPathPart === 'en-om') {
-    return { language: 'EN', country: 'OM', pathPrefix: '/en-om', currency: 'OMR' };
+    return { language: 'EN', country: 'OM', pathPrefix: '/en-om' };
   }
   if (firstPathPart === 'en-qa') {
-    return { language: 'EN', country: 'QA', pathPrefix: '/en-qa', currency: 'QAR' };
+    return { language: 'EN', country: 'QA', pathPrefix: '/en-qa' };
   }
   if (firstPathPart === 'en-ae') {
-    return { language: 'EN', country: 'AE', pathPrefix: '/en-ae', currency: 'AED' };
+    return { language: 'EN', country: 'AE', pathPrefix: '/en-ae' };
   }
 
-  // 2. Resolve from saved cookie
+  // 2. Resolve from Referer header if request URL is un-prefixed (e.g. /cart action from /en-sa/...)
+  const referer = request.headers.get('Referer');
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      const refFirstPart = refererUrl.pathname.split('/')[1]?.toLowerCase() ?? '';
+      if (refFirstPart === 'en-sa') {
+        return { language: 'EN', country: 'SA', pathPrefix: '/en-sa' };
+      }
+      if (refFirstPart === 'en-om') {
+        return { language: 'EN', country: 'OM', pathPrefix: '/en-om' };
+      }
+      if (refFirstPart === 'en-qa') {
+        return { language: 'EN', country: 'QA', pathPrefix: '/en-qa' };
+      }
+      if (refFirstPart === 'en-ae') {
+        return { language: 'EN', country: 'AE', pathPrefix: '/en-ae' };
+      }
+    } catch {
+      // ignore invalid referer URL
+    }
+  }
+
+  // 3. Resolve from saved cookie
   const cookies = parseCookie(request.headers.get('Cookie'));
   const savedCountry = cookies['vice_country']?.toUpperCase() as SupportedCountry | undefined;
   if (savedCountry && COUNTRIES[savedCountry]) {
@@ -117,11 +139,10 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
       language: 'EN',
       country: savedCountry,
       pathPrefix: COUNTRIES[savedCountry].pathPrefix,
-      currency: COUNTRIES[savedCountry].currency,
     };
   }
 
-  // 3. Fallback to default GCC locale (UAE)
+  // 4. Fallback to default GCC locale (UAE)
   return DEFAULT_LOCALE;
 }
 

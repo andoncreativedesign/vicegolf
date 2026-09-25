@@ -2,7 +2,7 @@ import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLayout } from '~/types/cart';
 import { CartForm, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useFetcher, useFetchers, useNavigation } from 'react-router';
+import { Link, useFetcher, useFetchers, useNavigation, useRouteLoaderData } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 import { AedIcon } from './ui/AedIcon';
 import { useMembership } from '~/hooks/useMembership';
@@ -39,7 +39,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
     const lineBaseTotal = basePrice * quantity;
 
     const productCollections = merchandise.product?.collections?.nodes?.map((c: any) => c.id) || [];
-    const { percentage, amount } = getBestDiscountForProduct(merchandise.product.id, productCollections, basePrice);
+    const { percentage, amount } = merchandise.product?.id
+      ? getBestDiscountForProduct(merchandise.product.id, productCollections, basePrice)
+      : { percentage: 0, amount: 0 };
 
     let lineExpectedTotal = lineBaseTotal;
 
@@ -104,14 +106,14 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
               <span className="font-medium text-gray-900 flex items-center">
                 {displaySubtotal?.amount ? (
                   <>
-                    <AedIcon className="w-4 h-4 mr-0.5" />
+                    <AedIcon className="w-4 h-4 mr-0.5" currency={displaySubtotal?.currencyCode} />
                     {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displaySubtotal.amount))}
                   </>
                 ) : '-'}
               </span>
               {baseVal > currentSubtotalVal && (
                 <span className="text-xs text-gray-400 line-through flex items-center">
-                  <AedIcon className="w-3 h-3 mr-0.5" />
+                  <AedIcon className="w-3 h-3 mr-0.5" currency={displaySubtotal?.currencyCode} />
                   {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(baseVal)}
                 </span>
               )}
@@ -130,7 +132,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
               <span className="flex items-center">
                 {isMember ? 'Membership' : 'Savings'} {actualAmount > 0 ? (
                   <span className="flex items-center mx-1">
-                    <AedIcon className="w-3 h-3 mx-0.5" />
+                    <AedIcon className="w-3 h-3 mx-0.5" currency={displaySubtotal?.currencyCode} />
                     {actualAmount.toFixed(2)}
                   </span>
                 ) : `${displayPercentage}%`} discount applied
@@ -152,24 +154,13 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
                   </span>
                 </span>
                 <span className="font-medium text-gray-900 flex items-center">
-                  <AedIcon className="w-4 h-4 mr-0.5" />
+                  <AedIcon className="w-4 h-4 mr-0.5" currency={displayTotal?.currencyCode} />
                   {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displayTotal.amount))}
                 </span>
               </div>
             </div>
           )}
         </div>
-
-        {displayTotal?.currencyCode && displayTotal.currencyCode !== 'AED' && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200/80 text-xs text-gray-600 flex items-start gap-2.5 leading-relaxed">
-            <svg className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-              <span className="font-semibold text-gray-900">Checkout Notice:</span> Orders are processed in AED at checkout based on current exchange rates.
-            </div>
-          </div>
-        )}
 
         <div className="mt-6">
           <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} cart={cart} />
@@ -414,10 +405,12 @@ function UpdateDiscountForm({
   onSuccess?: () => void;
   fetcherKey?: string;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
       fetcherKey={fetcherKey}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
         discountCodes: discountCodes || [],
@@ -467,7 +460,7 @@ function CartGiftCard({
                       ***{giftCard.lastCharacters}
                     </span>
                     <span className="text-sm text-green-600 flex items-center">
-                      <AedIcon className="w-3 h-3 mr-0.5" />
+                      <AedIcon className="w-3 h-3 mr-0.5" currency={giftCard.amountUsed.currencyCode} />
                       {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(giftCard.amountUsed.amount))}
                     </span>
                   </div>
@@ -535,10 +528,12 @@ function UpdateGiftCardForm({
   fetcherKey?: string;
   children: React.ReactNode;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
       fetcherKey={fetcherKey}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.GiftCardCodesUpdate}
       inputs={{
         giftCardCodes: giftCardCodes || [],
@@ -562,9 +557,11 @@ function RemoveGiftCardForm({
   giftCardId: string;
   children: React.ReactNode;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.GiftCardCodesRemove}
       inputs={{
         giftCardCodes: [giftCardId],

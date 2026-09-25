@@ -17,6 +17,7 @@ import blogStyles from '~/components/Blog/blog.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { LOCALIZATION_CURRENCIES_QUERY } from '~/graphql/CountriesQuery';
 import type { I18nLocale } from '~/lib/i18n';
 
 export type RootLoader = typeof loader;
@@ -34,6 +35,11 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
   // revalidate when manually revalidating via useRevalidator
   if (currentUrl.toString() === nextUrl.toString()) return true;
+
+  // Revalidate whenever the market region prefix changes (e.g. /en-om to /en-sa or /en-qa)
+  const currentLocale = currentUrl.pathname.split('/')[1]?.toLowerCase();
+  const nextLocale = nextUrl.pathname.split('/')[1]?.toLowerCase();
+  if (currentLocale !== nextLocale) return true;
 
   // Defaulting to no revalidation for root loader data to improve performance.
   // When using this feature, you risk your UI getting out of sync with your server.
@@ -170,7 +176,11 @@ export async function loader(args: Route.LoaderArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
-    selectedLocale: args.context.storefront.i18n as I18nLocale,
+    selectedLocale: {
+      ...(args.context.storefront.i18n as I18nLocale),
+      currency: criticalData?.marketCurrencies?.[args.context.storefront.i18n.country] || (args.context.storefront.i18n as any)?.currency || '',
+    },
+    marketCurrencies: criticalData?.marketCurrencies,
     publicKlaviyoCompanyId: env.PUBLIC_KLAVIYO_COMPANY_ID,
     publicYotpoAppKey: env.PUBLIC_YOTPO_APP_KEY,
     publicYotpoInstanceId: env.PUBLIC_YOTPO_INSTANCE_ID,
@@ -192,7 +202,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  const [header, productsForNav, homePageData] = await Promise.all([
+  const [header, productsForNav, homePageData, localizationData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: { headerMenuHandle: 'main-menu' }, // Adjust to your header menu handle
@@ -212,11 +222,21 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       console.error('Error fetching home page data:', error);
       return null;
     }),
+    storefront.query<any>(LOCALIZATION_CURRENCIES_QUERY, {
+      cache: storefront.CacheLong(),
+    }).catch(() => null),
   ]);
 
   const bannerData = homePageData?.banner;
 
-  return { header, productsForNav, banner: bannerData };
+  const marketCurrencies: Record<string, string> = {};
+  localizationData?.localization?.availableCountries?.forEach((c: any) => {
+    if (c?.isoCode && c?.currency?.isoCode) {
+      marketCurrencies[c.isoCode] = c.currency.isoCode;
+    }
+  });
+
+  return { header, productsForNav, banner: bannerData, marketCurrencies };
 }
 
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
@@ -288,12 +308,26 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
           let pct = value?.percentage ?? 0;
           if (typeof pct === 'number' && pct > 1) pct = pct / 100;
 
+          const amount = value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null;
+          const currencyCode = value?.amount?.currencyCode || null;
+
+          const productPrices: Record<string, number> = {};
+          if (items?.products?.nodes) {
+            items.products.nodes.forEach((p: any) => {
+              const pPrice = parseFloat(p.variants?.nodes?.[0]?.price || '0');
+              if (p.id && pPrice > 0) {
+                productPrices[p.id] = pPrice;
+              }
+            });
+          }
+
           return {
             title: ad.title,
             summary: ad.summary,
             percentage: pct,
-            amount: value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null,
-            currencyCode: value?.amount?.currencyCode || null,
+            amount: amount,
+            currencyCode: currencyCode,
+            productPrices,
             eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
             eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
             appliesToAll: items?.__typename === 'AllDiscountItems' || !items,
@@ -311,7 +345,6 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         };
       }).filter(Boolean);
 
-      // console.log('Mapped Discounts (Titles):', mappedDiscounts.map((d: any) => d.title));
       return mappedDiscounts;
     } catch (e) {
       console.error('Error fetching automatic discounts:', e);
@@ -319,8 +352,27 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     }
   })();
 
+  const cartPromise = cart.get().then(async (currentCart: any) => {
+    if (
+      currentCart &&
+      storefront.i18n?.country &&
+      currentCart.buyerIdentity?.countryCode !== storefront.i18n.country
+    ) {
+      try {
+        const updated = await cart.updateBuyerIdentity({
+          countryCode: storefront.i18n.country,
+        });
+        return updated?.cart || currentCart;
+      } catch (err) {
+        console.error('Error updating cart buyer identity in root loader:', err);
+        return currentCart;
+      }
+    }
+    return currentCart;
+  });
+
   return {
-    cart: cart.get(),
+    cart: cartPromise,
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
     automaticDiscounts,

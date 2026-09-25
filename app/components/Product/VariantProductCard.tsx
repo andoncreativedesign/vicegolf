@@ -102,6 +102,12 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
       const seenHandles = new Set();
       const variants = [];
 
+      const baseProductCurrency = product.variants?.nodes?.[0]?.price?.currencyCode;
+      const baseProductPrice = parseFloat(product.variants?.nodes?.[0]?.price?.amount || '0');
+      const adminMainProduct = product.variantFamilyProducts?.find((p: any) => p.id === product.id || p.handle === product.handle);
+      const adminBasePrice = parseFloat(adminMainProduct?.variants?.nodes?.[0]?.price?.amount || '0');
+      const rate = (baseProductPrice > 0 && adminBasePrice > 0) ? (baseProductPrice / adminBasePrice) : 1;
+
       // Add main product first if not already in the set
       if (!seenHandles.has(product.handle)) {
         seenHandles.add(product.handle);
@@ -122,6 +128,27 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
           if (!seenHandles.has(variant.handle)) {
             seenHandles.add(variant.handle);
             const famVariantImage = variant.variantImage?.reference?.image || variant.variantImage || null;
+
+            // Convert family variant price proportionally to active market currency
+            const famVariants = variant.variants?.nodes?.map((v: any) => {
+              const rawFamPrice = parseFloat(v.price?.amount || '0');
+              const convertedFamPrice = rawFamPrice > 0 ? rawFamPrice * rate : baseProductPrice;
+              const rawCompareAt = parseFloat(v.compareAtPrice?.amount || '0');
+              const convertedCompareAt = rawCompareAt > 0 ? rawCompareAt * rate : null;
+
+              return {
+                ...v,
+                price: {
+                  amount: convertedFamPrice.toFixed(2),
+                  currencyCode: baseProductCurrency,
+                },
+                compareAtPrice: convertedCompareAt ? {
+                  amount: convertedCompareAt.toFixed(2),
+                  currencyCode: baseProductCurrency,
+                } : null,
+              };
+            }) || product.variants?.nodes;
+
             variants.push({
               ...variant,
               isMain: false,
@@ -129,6 +156,9 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
               id: variant.id,
               image: variant.featuredImage || variant.images?.nodes?.[0],
               variantImage: famVariantImage || variant.featuredImage || "",
+              variants: {
+                nodes: famVariants || []
+              }
             });
           }
         });
@@ -235,6 +265,14 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
   const unitPrice = Math.min(membershipPrice, sessionPrice);
 
+  const activeProductId = currentSelectedVariantProduct?.id || product.id;
+  const activeProductCollections = currentSelectedVariantProduct?.collections?.nodes?.map((c: any) => c.id) || productCollections;
+  const rawAvailableQty = typeof (activeVariant as any)?.quantityAvailable === 'number' && (activeVariant as any).quantityAvailable > 0
+    ? (activeVariant as any).quantityAvailable
+    : (typeof (currentSelectedVariantProduct as any)?.availableForSale === 'number' && (currentSelectedVariantProduct as any).availableForSale > 0
+      ? (currentSelectedVariantProduct as any).availableForSale
+      : Infinity);
+
   // Find the lowest possible volume price
   let bestVolumePrice = unitPrice;
   let bestVolumeQuantity = 1;
@@ -242,8 +280,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
   if (automaticDiscounts && automaticDiscounts.length > 0) {
     let quantities = [1];
     automaticDiscounts.forEach((d: any) => {
-      const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
-      if (isEligible && d.minQuantity > 1 && !quantities.includes(d.minQuantity)) {
+      const isEligible = d.appliesToAll || d.eligibleProducts?.includes(activeProductId) || activeProductCollections.some((id: string) => d.eligibleCollections?.includes(id));
+      if (isEligible && d.minQuantity > 1 && !quantities.includes(d.minQuantity) && d.minQuantity <= rawAvailableQty) {
         quantities.push(d.minQuantity);
       }
     });
@@ -251,13 +289,22 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     quantities.forEach(qty => {
       let bestTotalForQty = unitPrice * qty;
       automaticDiscounts.forEach((d: any) => {
-        const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
+        const isEligible = d.appliesToAll || d.eligibleProducts?.includes(activeProductId) || activeProductCollections.some((id: string) => d.eligibleCollections?.includes(id));
         if (isEligible && d.minQuantity <= qty) {
           let total = basePrice * qty;
-          if (d.percentage) total = total * (1 - d.percentage);
-          else if (d.amount) {
-            if (d.appliesOnEachItem) total = Math.max(0, basePrice - d.amount) * qty;
-            else total = Math.max(0, total - d.amount);
+          if (d.percentage) {
+            total = total * (1 - d.percentage);
+          } else if (d.amount) {
+            let itemDiscount = d.amount;
+            const discountCurrency = d.currencyCode;
+            const activeCurrency = activeVariant?.price?.currencyCode;
+            const adminBasePrice = d.productPrices?.[activeProductId];
+
+            if (discountCurrency && activeCurrency && activeCurrency !== discountCurrency && adminBasePrice) {
+              itemDiscount = basePrice * (d.amount / adminBasePrice);
+            }
+            if (d.appliesOnEachItem) total = Math.max(0, basePrice - itemDiscount) * qty;
+            else total = Math.max(0, total - itemDiscount);
           }
           if (total < bestTotalForQty) bestTotalForQty = total;
         }
@@ -522,15 +569,15 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
             <div className="flex items-center justify-between pt-1 mt-auto">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <div className={`flex items-center ${finalCompareAtPrice > finalPrice ? 'text-[#e32619]' : 'text-gray-900'}`}>
-                  <AedIcon className="mr-1" />
+                  <AedIcon className="mr-1" currency={activeVariant?.price?.currencyCode} />
                   <span className="text-[17px] font-bold tracking-tight">
-                    {finalPrice.toFixed(2)}
+                    {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalPrice)}
                   </span>
                 </div>
                 {(finalCompareAtPrice > finalPrice) && (
                   <div className="flex items-center text-[15px] text-gray-500 line-through font-medium">
-                    <AedIcon className="w-3.5 h-3.5 mr-0.5" />
-                    {finalCompareAtPrice.toFixed(2)}
+                    <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={activeVariant?.compareAtPrice?.currencyCode || activeVariant?.price?.currencyCode} />
+                    {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalCompareAtPrice)}
                   </div>
                 )}
                 {bestVolumeQuantity > 1 && (

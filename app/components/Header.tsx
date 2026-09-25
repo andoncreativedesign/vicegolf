@@ -298,6 +298,8 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
     (rootData?.selectedLocale?.country as SupportedCountry) || 'AE';
 
   const selectedCountry = COUNTRIES[activeCountryCode] || COUNTRIES.AE;
+  const marketCurrencies = (rootData as any)?.marketCurrencies;
+  const activeCurrency = marketCurrencies?.[activeCountryCode] || selectedCountry.currency;
 
   // Close dropdown when pressing outside
   useEffect(() => {
@@ -362,10 +364,10 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
       >
         <CountryFlag country={selectedCountry.code} className="w-5 h-3.5 object-cover rounded-[2px]" />
         <span className="hidden sm:inline">
-          {selectedCountry.name} ({selectedCountry.currency})
+          {selectedCountry.name} ({activeCurrency})
         </span>
         <span className="sm:hidden font-medium">
-          {selectedCountry.currency}
+          {activeCurrency}
         </span>
         <svg
           className={`w-3.5 h-3.5 text-gray-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -387,6 +389,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
           <div className="flex flex-col">
             {COUNTRIES_LIST.map((country) => {
               const isSelected = country.code === activeCountryCode;
+              const countryCurrency = marketCurrencies?.[country.code] || country.currency;
               return (
                 <button
                   key={country.code}
@@ -400,7 +403,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
                 >
                   <CountryFlag country={country.code} className="w-5 h-3.5 object-cover rounded-[2px]" />
                   <span>
-                    {country.name} ({country.currency})
+                    {country.name} ({countryCurrency})
                   </span>
                 </button>
               );
