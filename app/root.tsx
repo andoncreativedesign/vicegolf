@@ -361,7 +361,14 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       try {
         await cart.updateBuyerIdentity({
           countryCode: storefront.i18n.country,
-        });
+          deliveryAddressPreferences: [
+            {
+              deliveryAddress: {
+                country: storefront.i18n.country,
+              },
+            },
+          ],
+        } as any);
         return await cart.get();
       } catch (err) {
         console.error('Error updating cart buyer identity in root loader:', err);
