@@ -21,7 +21,7 @@ export function ProductPrice({
         <div className="product-price-on-sale flex items-baseline gap-3">
           {price ? (
             <span className="text-xl font-bold text-gray-900 flex items-center">
-              <AedIcon className="w-4 h-4 mr-0.5" />
+              <AedIcon className="w-4 h-4 mr-0.5" currency={price?.currencyCode} />
               {new Intl.NumberFormat('en-US', currencyOptions).format(parseFloat(price.amount))}
             </span>
           ) : null}
@@ -31,7 +31,7 @@ export function ProductPrice({
         </div>
       ) : price ? (
         <span className="text-xl font-bold text-gray-900 flex items-center">
-          <AedIcon className="w-4 h-4 mr-0.5" />
+          <AedIcon className="w-4 h-4 mr-0.5" currency={price?.currencyCode} />
           {new Intl.NumberFormat('en-US', currencyOptions).format(parseFloat(price.amount))}
         </span>
       ) : (

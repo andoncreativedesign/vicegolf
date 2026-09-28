@@ -250,7 +250,7 @@ function SearchAside() {
                                 {product.productType}
                               </p>
                               <p className="font-normal text-black text-sm flex items-center gap-1">
-                                <AedIcon />
+                                <AedIcon currency={product.selectedOrFirstAvailableVariant?.price?.currencyCode} />
                                 <span>
                                   {parseFloat(
                                     product.selectedOrFirstAvailableVariant?.price?.amount || '0',

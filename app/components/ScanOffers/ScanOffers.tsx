@@ -1,12 +1,14 @@
 import { StoreContactCard } from '../DemoFitting/StoreContactCard';
 import { Image } from '@shopify/hydrogen';
-import { Link } from 'react-router';
+import { Link, useRouteLoaderData } from 'react-router';
 import type { ScanOffersData } from '~/lib/sanity/scanOffers';
 import { ProductCard } from '../ProductCard';
 import { useEffect } from 'react';
 
 
 export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanOffersData | null, discountValue?: any, overrideCode?: string }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const marketCurrency = rootData?.selectedLocale?.currency || '';
   // Mapping with home-page UI styles extracted from HeroSection.tsx
   const heroTitle = data?.hero?.title?.text || 'TRY BEFORE YOU BUY';
   const heroTitleColor = data?.hero?.title?.color || '#FFFFFF';
@@ -61,6 +63,8 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
       ? `/discount/${activeCode}?redirect=/products/${p.handle}`
       : undefined;
 
+    const currencyCode = p.priceRange?.minVariantPrice?.currencyCode || marketCurrency;
+
     return {
       ...p,
       offerUrl,
@@ -72,11 +76,11 @@ export function ScanOffers({ data, discountValue, overrideCode }: { data?: ScanO
             availableForSale: true,
             price: {
               amount: price.toFixed(2),
-              currencyCode: 'AED',
+              currencyCode,
             },
             compareAtPrice: compareAtPrice ? {
               amount: compareAtPrice.toFixed(2),
-              currencyCode: 'AED',
+              currencyCode,
             } : undefined,
           },
         ],

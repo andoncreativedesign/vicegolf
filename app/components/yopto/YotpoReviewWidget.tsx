@@ -57,7 +57,7 @@ export function YotpoReviewWidget({
     currency ||
     product.selectedOrFirstAvailableVariant?.price?.currencyCode ||
     product.variants?.nodes?.[0]?.price?.currencyCode ||
-    'USD';
+    '';
 
   return (
     <div

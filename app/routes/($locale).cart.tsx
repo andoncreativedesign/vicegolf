@@ -86,6 +86,29 @@ export async function action({request, context}: Route.ActionArgs) {
       throw new Error(`${action} cart action is not defined`);
   }
 
+  // Ensure the cart's buyer identity country matches the active storefront region
+  if (
+    result?.cart &&
+    context.storefront.i18n?.country &&
+    result.cart.buyerIdentity?.countryCode !== context.storefront.i18n.country
+  ) {
+    try {
+      await cart.updateBuyerIdentity({
+        countryCode: context.storefront.i18n.country,
+        deliveryAddressPreferences: [
+          {
+            deliveryAddress: {
+              country: context.storefront.i18n.country,
+            },
+          },
+        ],
+      } as any);
+      result.cart = await cart.get();
+    } catch (err) {
+      console.error('Error synchronizing cart buyer identity in cart action:', err);
+    }
+  }
+
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
   const {cart: cartResult, errors, warnings} = result;

@@ -42,6 +42,11 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                   products(first: 100) {
                     nodes {
                       id
+                      variants(first: 1) {
+                        nodes {
+                          price
+                        }
+                      }
                     }
                   }
                 }

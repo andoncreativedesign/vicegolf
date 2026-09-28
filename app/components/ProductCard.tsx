@@ -16,9 +16,11 @@ export function ProductCard({ product: _product, disableSoldout = false, session
   const product = _product as any;
   const variant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
+  const price = variant?.price;
+  const compareAtPrice = variant?.compareAtPrice;
 
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-  const basePrice = parseFloat(variant?.price?.amount || '0');
+  const basePrice = parseFloat(price?.amount || '0');
   const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
 
   let membershipPrice = basePrice;
@@ -62,10 +64,19 @@ export function ProductCard({ product: _product, disableSoldout = false, session
         const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
         if (isEligible && d.minQuantity <= qty) {
           let total = basePrice * qty;
-          if (d.percentage) total = total * (1 - d.percentage);
-          else if (d.amount) {
-            if (d.appliesOnEachItem) total = Math.max(0, basePrice - d.amount) * qty;
-            else total = Math.max(0, total - d.amount);
+          if (d.percentage) {
+            total = total * (1 - d.percentage);
+          } else if (d.amount) {
+            let itemDiscount = d.amount;
+            const discountCurrency = d.currencyCode;
+            const activeCurrency = price?.currencyCode;
+            const adminBasePrice = d.productPrices?.[product.id];
+
+            if (discountCurrency && activeCurrency && activeCurrency !== discountCurrency && adminBasePrice) {
+              itemDiscount = basePrice * (d.amount / adminBasePrice);
+            }
+            if (d.appliesOnEachItem) total = Math.max(0, basePrice - itemDiscount) * qty;
+            else total = Math.max(0, total - itemDiscount);
           }
           if (total < bestTotalForQty) bestTotalForQty = total;
         }
@@ -82,9 +93,6 @@ export function ProductCard({ product: _product, disableSoldout = false, session
   const isGolfBall = product.productType?.toLowerCase().includes('ball') || false;
 
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
-  const price = variant?.price;
-  const compareAtPrice = variant?.compareAtPrice;
-
   let finalCompareAtPrice = parseFloat(compareAtPrice?.amount || '0');
   if (finalPrice < basePrice) {
     finalCompareAtPrice = basePrice;
@@ -229,15 +237,15 @@ export function ProductCard({ product: _product, disableSoldout = false, session
               {price && (
                 <>
                   <div className={`flex items-center ${finalCompareAtPrice > finalPrice ? 'text-[#e32619]' : 'text-gray-900'}`}>
-                    <AedIcon className="mr-1" />
+                    <AedIcon className="mr-1" currency={price?.currencyCode} />
                     <span className="text-[17px] font-bold tracking-tight">
-                      {finalPrice.toFixed(2)}
+                      {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalPrice)}
                     </span>
                   </div>
                   {finalCompareAtPrice > finalPrice && (
                     <div className="flex items-center text-[15px] text-gray-500 line-through font-medium">
-                      <AedIcon className="w-3.5 h-3.5 mr-0.5" />
-                      {finalCompareAtPrice.toFixed(2)}
+                      <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={compareAtPrice?.currencyCode || price?.currencyCode} />
+                      {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalCompareAtPrice)}
                     </div>
                   )}
                   {bestVolumeQuantity > 1 && (
