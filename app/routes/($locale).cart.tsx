@@ -9,6 +9,7 @@ export const meta: Route.MetaFunction = () => {
   return [{title: `Vice Golf | Cart`}];
 };
 
+
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
 export async function action({request, context}: Route.ActionArgs) {
