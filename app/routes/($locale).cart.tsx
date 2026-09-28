@@ -85,12 +85,10 @@ export async function action({request, context}: Route.ActionArgs) {
     result.cart.buyerIdentity?.countryCode !== context.storefront.i18n.country
   ) {
     try {
-      const updated = await cart.updateBuyerIdentity({
+      await cart.updateBuyerIdentity({
         countryCode: context.storefront.i18n.country,
       });
-      if (updated?.cart) {
-        result.cart = updated.cart;
-      }
+      result.cart = await cart.get();
     } catch (err) {
       console.error('Error synchronizing cart buyer identity in cart action:', err);
     }

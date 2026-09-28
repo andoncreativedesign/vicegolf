@@ -359,10 +359,10 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
       currentCart.buyerIdentity?.countryCode !== storefront.i18n.country
     ) {
       try {
-        const updated = await cart.updateBuyerIdentity({
+        await cart.updateBuyerIdentity({
           countryCode: storefront.i18n.country,
         });
-        return updated?.cart || currentCart;
+        return await cart.get();
       } catch (err) {
         console.error('Error updating cart buyer identity in root loader:', err);
         return currentCart;

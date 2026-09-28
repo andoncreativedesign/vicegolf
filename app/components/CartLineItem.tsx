@@ -56,7 +56,7 @@ export function CartLineItem({
                 onClick={() => layout === 'aside' && close()}
                 style={{ textDecoration: 'none' }}
               >
-                {product.title}
+                {product?.title || title}
               </Link>
 
               {selectedOptions.length > 0 && (
