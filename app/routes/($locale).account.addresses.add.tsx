@@ -23,6 +23,7 @@ import { createAddress } from '~/lib/shopify/profile';
 import { PhoneInputField } from '~/components/basic/PhoneInputField';
 import { CountrySelector } from '~/components/basic/CountrySelector';
 import { COUNTRIES_QUERY } from '~/graphql/CountriesQuery';
+import { GCC_PROVINCES, COUNTRIES, formatAddressCityAndZone, parseAddressCityAndZone } from '~/lib/i18n';
 import { useEffect, useState, useMemo } from 'react';
 
 export type ActionResponse = {
@@ -100,6 +101,16 @@ export async function action({ request, context }: Route.ActionArgs) {
       if (typeof value === 'string') {
         address[key] = value;
       }
+    }
+
+    const { city: formattedCity, zoneCode: formattedZone } = formatAddressCityAndZone(
+      address.territoryCode as string,
+      address.city as string,
+      address.zoneCode as string
+    );
+    address.city = formattedCity;
+    if (formattedZone) {
+      address.zoneCode = formattedZone;
     }
 
     switch (request.method) {
@@ -413,6 +424,29 @@ export function AddressForm({
   const [phone, setPhone] = useState(address?.phoneNumber ?? '');
   const [selectedCountryCode, setSelectedCountryCode] = useState(address?.territoryCode || 'AE');
 
+  const [selectedLabel, setSelectedLabel] = useState(() => {
+    const comp = address?.company || '';
+    if (['Home', 'Work'].includes(comp)) return comp;
+    return comp ? 'Other' : '';
+  });
+  const [customLabel, setCustomLabel] = useState(() => {
+    const comp = address?.company || '';
+    return ['Home', 'Work'].includes(comp) ? '' : comp;
+  });
+
+  useEffect(() => {
+    if (address?.company) {
+      const comp = address.company;
+      if (['Home', 'Work'].includes(comp)) {
+        setSelectedLabel(comp);
+        setCustomLabel('');
+      } else {
+        setSelectedLabel('Other');
+        setCustomLabel(comp);
+      }
+    }
+  }, [address?.company]);
+
   const availableProvinces = useMemo(() => {
     const country = countries.find((c: any) => c.isoCode === selectedCountryCode);
     return country?.availableProvinces || [];
@@ -459,16 +493,69 @@ export function AddressForm({
         </div>
 
         <div>
-          <label htmlFor="company" className={labelClasses}>Company (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Address Label</label>
+          <div className="flex gap-2 mb-2">
+            {['Home', 'Work'].map((label) => {
+              const isActive = selectedLabel === label;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    setSelectedLabel(label);
+                  }}
+                  className={`px-4 py-2 text-sm font-medium border rounded-full transition duration-150 cursor-pointer ${
+                    isActive
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-gray-755 border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  {label === 'Home' ? '🏠 Home' : '💼 Work'}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedLabel(selectedLabel === 'Other' ? '' : 'Other');
+              }}
+              className={`px-4 py-2 text-sm font-medium border rounded-full transition duration-150 cursor-pointer ${
+                selectedLabel === 'Other'
+                  ? 'bg-black text-white border-black'
+                  : 'bg-white text-gray-755 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              📍 Other
+            </button>
+            {selectedLabel && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedLabel('');
+                  setCustomLabel('');
+                }}
+                className="px-4 py-2 text-sm font-medium text-red-650 hover:text-red-800 transition duration-150 cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {selectedLabel === 'Other' && (
+            <input
+              type="text"
+              placeholder="Enter custom label (e.g. Gym, Parent's House)"
+              value={customLabel}
+              onChange={(e) => setCustomLabel(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent text-sm bg-white text-gray-900"
+              required
+            />
+          )}
+
           <input
-            aria-label="Company"
-            autoComplete="organization"
-            defaultValue={address?.company ?? ''}
-            id="company"
+            type="hidden"
             name="company"
-            placeholder="Company"
-            type="text"
-            className={inputClasses}
+            value={selectedLabel === 'Other' ? customLabel : selectedLabel}
           />
         </div>
 
@@ -534,45 +621,6 @@ export function AddressForm({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="zoneCode" className={labelClasses}>State / Province *</label>
-            {availableProvinces.length > 0 ? (
-              <div className="relative">
-                <select
-                  id="zoneCode"
-                  name="zoneCode"
-                  defaultValue={address?.zoneCode ?? ''}
-                  required
-                  className={inputClasses + " appearance-none"}
-                >
-                  <option value="" disabled>Select region</option>
-                  {availableProvinces.map((province: any) => (
-                    <option key={province.code} value={province.code}>
-                      {province.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                  </svg>
-                </div>
-              </div>
-            ) : (
-              <input
-                aria-label="State/Province"
-                autoComplete="address-level1"
-                defaultValue={address?.zoneCode ?? ''}
-                id="zoneCode"
-                name="zoneCode"
-                placeholder="State / Province"
-                required
-                type="text"
-                className={inputClasses}
-              />
-            )}
-          </div>
-
           <CountrySelector
             label="Country"
             id="territoryCode"
@@ -581,6 +629,75 @@ export function AddressForm({
             onChange={(e) => setSelectedCountryCode(e.target.value)}
             required
           />
+
+          {/* State/Province Hybrid Dropdown */}
+          <div className="w-full">
+            <label htmlFor="zoneCode" className={labelClasses}>
+              State / Province {selectedCountryCode === 'AE' ? '*' : ''}
+            </label>
+            <div className="relative">
+              {GCC_PROVINCES[selectedCountryCode] ? (
+                <div className="relative">
+                  <select
+                    id="zoneCode"
+                    name="zoneCode"
+                    defaultValue={address?.zoneCode ?? ''}
+                    required={selectedCountryCode === 'AE'}
+                    className={inputClasses + " appearance-none"}
+                  >
+                    <option value="" disabled={selectedCountryCode === 'AE'}>
+                      Select region
+                    </option>
+                    {GCC_PROVINCES[selectedCountryCode].map((province: any) => (
+                      <option key={province.code} value={province.name}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
+              ) : availableProvinces.length > 0 ? (
+                <div className="relative">
+                  <select
+                    id="zoneCode"
+                    name="zoneCode"
+                    defaultValue={address?.zoneCode ?? ''}
+                    required
+                    className={inputClasses + " appearance-none"}
+                  >
+                    <option value="" disabled>Select region</option>
+                    {availableProvinces.map((province: any) => (
+                      <option key={province.code} value={province.name}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
+              ) : (
+                <input
+                  aria-label="State/Province"
+                  autoComplete="address-level1"
+                  defaultValue={address?.zoneCode ?? ''}
+                  id="zoneCode"
+                  name="zoneCode"
+                  placeholder="State / Province"
+                  required
+                  type="text"
+                  className={inputClasses}
+                />
+              )}
+            </div>
+          </div>
+
         </div>
 
         <div>
@@ -592,7 +709,8 @@ export function AddressForm({
             onChange={(val) => setPhone(val || '')}
             placeholder="Enter phone number"
             autoComplete="tel"
-            availableCountries={['AE']}
+            availableCountries={Object.keys(COUNTRIES) as any}
+            defaultCountry={selectedCountryCode as any}
           />
           <input type="hidden" name="phoneNumber" value={phone} />
         </div>

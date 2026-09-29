@@ -33,6 +33,9 @@ export default async function handleRequest(
       'https://www.facebook.com',
       'https://static.klaviyo.com',
       'https://a.klaviyo.com',
+      // Yotpo
+      'https://*.yotpo.com',
+      'https://*.yotpoapi.com',
       'data:',
     ],
 
@@ -53,6 +56,14 @@ export default async function handleRequest(
       'https://fast.a.klaviyo.com',
       'https://static-forms.klaviyo.com',
       'https://*.klaviyo.com',
+      // Yotpo
+      'https://*.yotpo.com',
+      'https://cdn-widgetsrepository.yotpo.com',
+      'https://staticw2.yotpo.com',
+      'https://*.yotpoapi.com',
+      'http://*.yotpoapi.com',
+      'http://p.yotpoapi.com',
+      'https://p.yotpoapi.com',
     ],
 
     mediaSrc: [
@@ -82,6 +93,10 @@ export default async function handleRequest(
       'https://connect.facebook.net',
       'https://static.klaviyo.com',
       'https://klaviyo.com',
+      // Yotpo
+      'https://cdn-widgetsrepository.yotpo.com',
+      'https://staticw2.yotpo.com',
+      'https://*.yotpo.com',
       "'sha256-s3SZTSyQxUKs/jb32OwDqhQD//UmajtRhqPKWi2BlbM='",
       "'sha256-ZHvi1PGvqzZ4VRdQO7VkiV7s1Y65GtErug8DAAzcHNY='",
       "'sha256-5q0ADi4wbx+5wxfG5iGAyEw/5EuQBTuMZ+y+XszyL60='",
@@ -89,6 +104,27 @@ export default async function handleRequest(
       "'strict-dynamic'",
       "https:",
       "http:",
+    ],
+
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'", // Required for Yotpo inline styles
+      'https://cdn-widgetsrepository.yotpo.com',
+      'https://staticw2.yotpo.com',
+      'https://*.yotpo.com',
+      // Google Fonts
+      'https://fonts.googleapis.com',
+    ],
+
+    fontSrc: [
+      "'self'",
+      'https://cdn-widgetsrepository.yotpo.com',
+      'https://staticw2.yotpo.com',
+      'https://*.yotpo.com',
+      // Google Fonts — gstatic serves the actual .woff2 font files
+      'https://fonts.googleapis.com',
+      'https://fonts.gstatic.com',
+      'data:',
     ],
 
     defaultSrc: [
@@ -125,7 +161,10 @@ export default async function handleRequest(
   }
 
   responseHeaders.set('Content-Type', 'text/html');
-  responseHeaders.set('Content-Security-Policy', header);
+  // Append upgrade-insecure-requests so the browser automatically upgrades
+  // http:// sub-resource requests (e.g. Yotpo's http://p.yotpoapi.com tracker)
+  // to https://, bypassing mixed-content blocking.
+  responseHeaders.set('Content-Security-Policy', `${header}; upgrade-insecure-requests`);
 
   return new Response(body, {
     headers: responseHeaders,

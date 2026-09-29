@@ -23,6 +23,8 @@ declare global {
         SESSION_SECRET: string;
         STORE_DOMAIN: string;
         PUBLIC_KLAVIYO_COMPANY_ID: string;
+        PUBLIC_YOTPO_APP_KEY?: string;
+        PUBLIC_YOTPO_INSTANCE_ID?: string;
     }
 }
 
@@ -31,6 +33,9 @@ declare global {
     interface Window {
         dataLayer: any[];
         _learnq: any[];
+        yotpoWidgetsContainer?: {
+            initWidgets: () => void;
+        };
     }
     interface HydrogenAdditionalContext {
         // Add any custom context properties your app needs

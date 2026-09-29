@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import { AedIcon } from '../ui/AedIcon';
 import { useMembership } from "~/hooks/useMembership";
+import { YotpoRating } from "../yopto/YotpoRating";
 
 type ColorOption = {
   id: string;
@@ -47,6 +48,9 @@ type ProductCardProps = {
     availableForSale: boolean;
     productType?: string;
     tags?: string[];
+    variant_type?: {
+      value: string;
+    };
     badge_colors?: string;
     family: FamilyMetaField;
     collections?: {
@@ -64,6 +68,7 @@ type ProductCardProps = {
 export function VariantProductCard({ product, sessionDiscount }: ProductCardProps) {
   const firstVariant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes?.[0];
+
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [currentImage, setCurrentImage] = useState(image?.url || '');
@@ -71,49 +76,96 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [hoverDelayTimeout, setHoverDelayTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isOverVariants, setIsOverVariants] = useState(false);
+  const [selectedVariantId, setSelectedVariantId] = useState<string>(product.id?.split('/').pop() || product.id);
 
+  // --- FOR TESTING ONLY ---
+  // const TEST_VARIANTS = Array.from({ length: 35 }).map((_, i) => ({
+  //   ...product,
+  //   isMain: i === 0,
+  //   id: `${product.id || 'gid://shopify/Product/1'}-test-${i}`,
+  //   handle: `${product.handle || 'test-product'}-test-${i}`,
+  //   title: `Test Variant ${i + 1} ${i === 2 ? '(Special)' : ''}`,
+  //   image: { url: `https://cdn.shopify.com/s/files/1/0563/0227/2645/files/Vice-Special-Tracers-Pro-Dozen-Ball_600b6cca-9919-4f60-a5ed-ffb94e208409.png?v=1776441699&width=600&quality=80` },
+  //   variantImage: { url: `https://cdn.shopify.com/s/files/1/0563/0227/2645/files/Yellow_Smiley_Variant_b8752df9-b176-4dab-95d0-127bac3a501a.png?v=1781079373` },
+  //   availableForSale: i !== 4, // 5th variant sold out for testing
+  //   variant_type: i === 2 ? { value: "special" } : undefined, // 3rd one is special
+  //   variants: {
+  //     nodes: [{
+  //       price: { amount: `${(10 + i * 2).toFixed(2)}`, currencyCode: "USD" },
+  //       compareAtPrice: i % 2 === 0 ? { amount: `${(20 + i * 2).toFixed(2)}`, currencyCode: "USD" } : null
+  //     }]
+  //   }
+  // }));
+  // allVariants = TEST_VARIANTS;
 
   const allVariants = useMemo(() => {
-    // Create a Set to track unique variant handles
-    if (product.title === "Vice Pro Plus") {
-      // console.log("product with variants  - ", product?.variantFamilyProducts?.[0])
-    }
+      const seenHandles = new Set();
+      const variants = [];
 
-    const seenHandles = new Set();
-    const variants = [];
+      const baseProductCurrency = product.variants?.nodes?.[0]?.price?.currencyCode;
+      const baseProductPrice = parseFloat(product.variants?.nodes?.[0]?.price?.amount || '0');
+      const adminMainProduct = product.variantFamilyProducts?.find((p: any) => p.id === product.id || p.handle === product.handle);
+      const adminBasePrice = parseFloat(adminMainProduct?.variants?.nodes?.[0]?.price?.amount || '0');
+      const rate = (baseProductPrice > 0 && adminBasePrice > 0) ? (baseProductPrice / adminBasePrice) : 1;
 
-    // Add main product first if not already in the set
-    if (!seenHandles.has(product.handle)) {
-      seenHandles.add(product.handle);
-      variants.push({
-        ...product,
-        isMain: true,
-        id: product.handle,
-        image: product.featuredImage || product.images?.nodes?.[0],
-        variantImage: product.productType === "Golf Balls"
-          ? product.variantImage || ""
-          : product.variantImage || product.featuredImage,
-      });
-    }
+      // Add main product first if not already in the set
+      if (!seenHandles.has(product.handle)) {
+        seenHandles.add(product.handle);
+        const mainVariantImage = product.variantImage?.reference?.image || product.variantImage || null;
+        variants.push({
+          ...product,
+          isMain: true,
+          // id: product.handle,
+          id: product.id,
+          image: product.featuredImage || product.images?.nodes?.[0],
+          variantImage: mainVariantImage || product.featuredImage || "",
+        });
+      }
 
-    // Add variant family products, skipping any duplicates
-    if (product.variantFamilyProducts?.length > 0) {
-      product.variantFamilyProducts.forEach(variant => {
-        if (!seenHandles.has(variant.handle)) {
-          seenHandles.add(variant.handle);
-          variants.push({
-            ...variant,
-            isMain: false,
-            id: variant.handle,
-            image: variant.featuredImage || variant.images?.nodes?.[0],
-            variantImage: variant.variantImage || variant.featuredImage,
-          });
-        }
-      });
-    }
+      // Add variant family products, skipping any duplicates
+      if (product.variantFamilyProducts?.length > 0) {
+        product.variantFamilyProducts.forEach(variant => {
+          if (!seenHandles.has(variant.handle)) {
+            seenHandles.add(variant.handle);
+            const famVariantImage = variant.variantImage?.reference?.image || variant.variantImage || null;
 
-    return variants;
-  }, [product]);
+            // Convert family variant price proportionally to active market currency
+            const famVariants = variant.variants?.nodes?.map((v: any) => {
+              const rawFamPrice = parseFloat(v.price?.amount || '0');
+              const convertedFamPrice = rawFamPrice > 0 ? rawFamPrice * rate : baseProductPrice;
+              const rawCompareAt = parseFloat(v.compareAtPrice?.amount || '0');
+              const convertedCompareAt = rawCompareAt > 0 ? rawCompareAt * rate : null;
+
+              return {
+                ...v,
+                price: {
+                  amount: convertedFamPrice.toFixed(2),
+                  currencyCode: baseProductCurrency,
+                },
+                compareAtPrice: convertedCompareAt ? {
+                  amount: convertedCompareAt.toFixed(2),
+                  currencyCode: baseProductCurrency,
+                } : null,
+              };
+            }) || product.variants?.nodes;
+
+            variants.push({
+              ...variant,
+              isMain: false,
+              // id: variant.handle,
+              id: variant.id,
+              image: variant.featuredImage || variant.images?.nodes?.[0],
+              variantImage: famVariantImage || variant.featuredImage || "",
+              variants: {
+                nodes: famVariants || []
+              }
+            });
+          }
+        });
+      }
+
+      return variants;
+    }, [product]);
 
   // Set initial image
   useEffect(() => {
@@ -126,7 +178,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     e.preventDefault();
     e.stopPropagation();
     setSelectedVariant(index);
-    setSelectedVariantHandle(variant.handle)
+    setSelectedVariantHandle(variant.handle);
+    setSelectedVariantId(variant.id?.split('/')?.pop() || variant.id);
     if (variant.image?.url) {
       setCurrentImage(variant.image?.url);
     }
@@ -166,6 +219,10 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
   const reviewCount = Math.floor(Math.random() * 50) + 10;
 
   useEffect(() => {
+    if (product.title.toLocaleLowerCase() === 'vice pro plus') 
+      console.log("vice pro plus products : ", product)
+
+
     if (product.variantFamilyProducts?.length > 0) {
       // Add your effect logic here
     }
@@ -179,12 +236,13 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     };
   }, [hoverDelayTimeout]);
 
-  const { getBestDiscountForProduct } = useMembership();
+  const { getBestDiscountForProduct, automaticDiscounts } = useMembership();
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-  const basePrice = parseFloat(firstVariant?.price?.amount || '0');
-  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+  const currentSelectedVariantProduct = allVariants[selectedVariant];
+  const activeVariant = currentSelectedVariantProduct?.variants?.nodes?.[0] || firstVariant;
+  const basePrice = parseFloat(activeVariant?.price?.amount || '0');
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(currentSelectedVariantProduct?.id || product.id, productCollections, basePrice);
 
-  // 1. Calculate price with membership discount
   let membershipPrice = basePrice;
   if (productAmount > 0) {
     membershipPrice = Math.max(0, basePrice - productAmount);
@@ -192,15 +250,11 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     membershipPrice = basePrice * (1 - productPercentage);
   }
 
-  // 2. Calculate price with session discount (starting from original base price)
   let sessionPrice = basePrice;
-  let isSessionEligible = false;
   if (sessionDiscount) {
     const isEligibleProduct = sessionDiscount.products?.includes(product.id);
     const isEligibleCollection = productCollections.some((id: string) => sessionDiscount.collections?.includes(id));
-
     if (sessionDiscount.appliesToAll || isEligibleProduct || isEligibleCollection) {
-      isSessionEligible = true;
       if (sessionDiscount.percentage) {
         sessionPrice = basePrice * (1 - sessionDiscount.percentage);
       } else if (sessionDiscount.amount) {
@@ -209,11 +263,64 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
     }
   }
 
-  // 3. Choose the best price (lowest) for the user
-  const finalPrice = Math.min(membershipPrice, sessionPrice);
-  
+  const unitPrice = Math.min(membershipPrice, sessionPrice);
+
+  const activeProductId = currentSelectedVariantProduct?.id || product.id;
+  const activeProductCollections = currentSelectedVariantProduct?.collections?.nodes?.map((c: any) => c.id) || productCollections;
+  const rawAvailableQty = typeof (activeVariant as any)?.quantityAvailable === 'number' && (activeVariant as any).quantityAvailable > 0
+    ? (activeVariant as any).quantityAvailable
+    : (typeof (currentSelectedVariantProduct as any)?.availableForSale === 'number' && (currentSelectedVariantProduct as any).availableForSale > 0
+      ? (currentSelectedVariantProduct as any).availableForSale
+      : Infinity);
+
+  // Find the lowest possible volume price
+  let bestVolumePrice = unitPrice;
+  let bestVolumeQuantity = 1;
+
+  if (automaticDiscounts && automaticDiscounts.length > 0) {
+    let quantities = [1];
+    automaticDiscounts.forEach((d: any) => {
+      const isEligible = d.appliesToAll || d.eligibleProducts?.includes(activeProductId) || activeProductCollections.some((id: string) => d.eligibleCollections?.includes(id));
+      if (isEligible && d.minQuantity > 1 && !quantities.includes(d.minQuantity) && d.minQuantity <= rawAvailableQty) {
+        quantities.push(d.minQuantity);
+      }
+    });
+
+    quantities.forEach(qty => {
+      let bestTotalForQty = unitPrice * qty;
+      automaticDiscounts.forEach((d: any) => {
+        const isEligible = d.appliesToAll || d.eligibleProducts?.includes(activeProductId) || activeProductCollections.some((id: string) => d.eligibleCollections?.includes(id));
+        if (isEligible && d.minQuantity <= qty) {
+          let total = basePrice * qty;
+          if (d.percentage) {
+            total = total * (1 - d.percentage);
+          } else if (d.amount) {
+            let itemDiscount = d.amount;
+            const discountCurrency = d.currencyCode;
+            const activeCurrency = activeVariant?.price?.currencyCode;
+            const adminBasePrice = d.productPrices?.[activeProductId];
+
+            if (discountCurrency && activeCurrency && activeCurrency !== discountCurrency && adminBasePrice) {
+              itemDiscount = basePrice * (d.amount / adminBasePrice);
+            }
+            if (d.appliesOnEachItem) total = Math.max(0, basePrice - itemDiscount) * qty;
+            else total = Math.max(0, total - itemDiscount);
+          }
+          if (total < bestTotalForQty) bestTotalForQty = total;
+        }
+      });
+      const pricePerUnit = bestTotalForQty / qty;
+      if (pricePerUnit < bestVolumePrice) {
+        bestVolumePrice = pricePerUnit;
+        bestVolumeQuantity = qty;
+      }
+    });
+  }
+
+  const finalPrice = bestVolumePrice;
+
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
-  let finalCompareAtPrice = parseFloat(firstVariant?.compareAtPrice?.amount || '0');
+  let finalCompareAtPrice = parseFloat(activeVariant?.compareAtPrice?.amount || '0');
   if (finalPrice < basePrice) {
     finalCompareAtPrice = basePrice;
   }
@@ -313,10 +420,10 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
         {/* all other variants */}
         {!isGolfBall && isHovering && allVariants.length > 1 && (
           <div
-            className="absolute bottom-18 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
+            className="absolute bottom-25 left-0 right-0 z-30 p-2  bg-[#fafafa] backdrop-blur-sm "
             onClick={(e) => e.preventDefault()}
           >
-            <div className="grid grid-cols-6 w-full">
+            <div className="w-full flex justify-start gap-1">
               {allVariants
                 .sort((a, b) => {
                   // Move current variant to the start
@@ -387,8 +494,8 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
 
         <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
           <div className="relative">
-            <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[2.8rem]">
-              {product.title}
+            <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[1.8rem]">
+              {allVariants[selectedVariant]?.title || product.title}
             </h3>
           </div>
 
@@ -396,11 +503,15 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
             {product.productType || 'Golf Equipment'}
           </p>
 
+          <div className="flex items-center pt-2 pb-0">
+            <YotpoRating productId={selectedVariantId} />
+          </div>
+
           {/* ball variants */}
           {isGolfBall && allVariants.length > 1 && (
             <div className="pt-3">
               <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Options:</span>
+                <span className="text-sm font-medium text-gray-700"></span>
                 <div className="flex flex-wrap gap-2">
                   {allVariants
                     .sort((a, b) => {
@@ -408,6 +519,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
                       if (b.handle === product.handle) return 1;
                       return 0;
                     })
+                    .slice(0, 25)
                     .map((variant, index) => (
                       <button
                         key={variant.id}
@@ -419,7 +531,7 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
                           }
                         }}
                         className={`w-6 h-6 rounded-full overflow-hidden border transition-all duration-200 cursor-pointer ${selectedVariant === index ? 'border-black scale-110' : 'border-gray-200'
-                          } ${!variant.availableForSale ? 'opacity-40' : ''}`}
+                          } ${!variant.availableForSale ? 'opacity-40' : ''} ${index >= 15 ? 'hidden lg:block' : index >= 4 ? 'hidden sm:block' : ''}`}
                         title={`${variant.title}${!variant.availableForSale ? ' (Sold Out)' : ''}`}
                       >
                         {typeof variant.variantImage === 'object' && variant.variantImage?.url ? (
@@ -439,29 +551,38 @@ export function VariantProductCard({ product, sessionDiscount }: ProductCardProp
                         )}
                       </button>
                     ))}
-                  {allVariants.length > 5 && (
-                    <span className="text-xs text-gray-400 self-center">+{allVariants.length - 5}</span>
+                  {allVariants.length > 4 && (
+                    <span className="text-xs text-gray-400 self-center sm:hidden">+{allVariants.length - 4}</span>
+                  )}
+                  {allVariants.length > 15 && (
+                    <span className="text-xs text-gray-400 self-center hidden sm:inline lg:hidden">+{allVariants.length - 15}</span>
+                  )}
+                  {allVariants.length > 25 && (
+                    <span className="text-xs text-gray-400 self-center hidden lg:inline">+{allVariants.length - 25}</span>
                   )}
                 </div>
               </div>
             </div>
           )}
 
-          {firstVariant && (
+          {activeVariant && (
             <div className="flex items-center justify-between pt-1 mt-auto">
-              <div className="flex items-center space-x-2">
-                {(finalCompareAtPrice > finalPrice) && (
-                  <div className="flex items-center text-sm text-gray-400 line-through font-medium">
-                    <AedIcon className="mr-0.5" />
-                    {finalCompareAtPrice.toFixed(2)}
-                  </div>
-                )}
-                <div className="flex items-center">
-                  <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold tracking-tight">
-                    {finalPrice.toFixed(2)}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <div className={`flex items-center ${finalCompareAtPrice > finalPrice ? 'text-[#e32619]' : 'text-gray-900'}`}>
+                  <AedIcon className="mr-1" currency={activeVariant?.price?.currencyCode} />
+                  <span className="text-[17px] font-bold tracking-tight">
+                    {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalPrice)}
                   </span>
                 </div>
+                {(finalCompareAtPrice > finalPrice) && (
+                  <div className="flex items-center text-[15px] text-gray-500 line-through font-medium">
+                    <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={activeVariant?.compareAtPrice?.currencyCode || activeVariant?.price?.currencyCode} />
+                    {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalCompareAtPrice)}
+                  </div>
+                )}
+                {bestVolumeQuantity > 1 && (
+                   <span className="text-[15px] font-medium text-gray-900 whitespace-nowrap">from {bestVolumeQuantity} {isGolfBall ? 'dozen' : 'items'}</span>
+                )}
               </div>
             </div>
           )}

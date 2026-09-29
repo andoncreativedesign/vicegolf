@@ -1,8 +1,8 @@
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLayout } from '~/types/cart';
-import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
+import { CartForm, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useFetcher, useFetchers, useNavigation } from 'react-router';
+import { Link, useFetcher, useFetchers, useNavigation, useRouteLoaderData } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 import { AedIcon } from './ui/AedIcon';
 import { useMembership } from '~/hooks/useMembership';
@@ -39,7 +39,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
     const lineBaseTotal = basePrice * quantity;
 
     const productCollections = merchandise.product?.collections?.nodes?.map((c: any) => c.id) || [];
-    const { percentage, amount } = getBestDiscountForProduct(merchandise.product.id, productCollections, basePrice);
+    const { percentage, amount } = merchandise.product?.id
+      ? getBestDiscountForProduct(merchandise.product.id, productCollections, basePrice)
+      : { percentage: 0, amount: 0 };
 
     let lineExpectedTotal = lineBaseTotal;
 
@@ -101,12 +103,18 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Subtotal</span>
             <div className="flex flex-col items-end">
-              <span className="font-medium text-gray-900">
-                {displaySubtotal?.amount ? <Money data={displaySubtotal} /> : '-'}
+              <span className="font-medium text-gray-900 flex items-center">
+                {displaySubtotal?.amount ? (
+                  <>
+                    <AedIcon className="w-4 h-4 mr-0.5" currency={displaySubtotal?.currencyCode} />
+                    {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displaySubtotal.amount))}
+                  </>
+                ) : '-'}
               </span>
               {baseVal > currentSubtotalVal && (
-                <span className="text-xs text-gray-400 line-through">
-                  <Money data={{ amount: baseVal.toFixed(2), currencyCode: subtotal!.currencyCode }} />
+                <span className="text-xs text-gray-400 line-through flex items-center">
+                  <AedIcon className="w-3 h-3 mr-0.5" currency={displaySubtotal?.currencyCode} />
+                  {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(baseVal)}
                 </span>
               )}
             </div>
@@ -124,7 +132,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
               <span className="flex items-center">
                 {isMember ? 'Membership' : 'Savings'} {actualAmount > 0 ? (
                   <span className="flex items-center mx-1">
-                    <AedIcon className="w-3 h-3 mx-0.5" />
+                    <AedIcon className="w-3 h-3 mx-0.5" currency={displaySubtotal?.currencyCode} />
                     {actualAmount.toFixed(2)}
                   </span>
                 ) : `${displayPercentage}%`} discount applied
@@ -145,8 +153,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
                       : '(Incl. taxes and shipping)'}
                   </span>
                 </span>
-                <span className="font-medium text-gray-900">
-                  <Money data={displayTotal} />
+                <span className="font-medium text-gray-900 flex items-center">
+                  <AedIcon className="w-4 h-4 mr-0.5" currency={displayTotal?.currencyCode} />
+                  {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displayTotal.amount))}
                 </span>
               </div>
             </div>
@@ -175,6 +184,20 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart?: any }) {
   if (!checkoutUrl) return null;
 
+  let activeDiscountCode = cart?.discountCodes?.find((d: any) => d.applicable)?.code;
+  if (!activeDiscountCode && typeof window !== 'undefined') {
+    try {
+      activeDiscountCode = localStorage.getItem('featuredDiscountCode') || undefined;
+    } catch {
+      // ignore
+    }
+  }
+
+  let finalCheckoutUrl = checkoutUrl;
+  if (activeDiscountCode && !checkoutUrl.includes('discount=')) {
+    finalCheckoutUrl = `${checkoutUrl}${checkoutUrl.includes('?') ? '&' : '?'}discount=${encodeURIComponent(activeDiscountCode)}`;
+  }
+
   const handleCheckoutClick = () => {
     if (typeof window !== 'undefined' && (window as any)._learnq && cart) {
       const items = cart.lines?.nodes?.map((line: any) => ({
@@ -192,21 +215,16 @@ function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart
         '$event_id': cart.id,
         'Value': cart.cost?.totalAmount?.amount,
         'ItemNames': cart.lines?.nodes?.map((line: any) => line.merchandise?.product?.title),
-        'CheckoutURL': checkoutUrl,
+        'CheckoutURL': finalCheckoutUrl,
         'Items': items
       }]);
-    }
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('featuredDiscountCode');
-      localStorage.removeItem('featuredDiscountData');
-      console.log('[CartSummary] Checkout clicked. Cleared local discount state.');
     }
   };
 
   return (
     <div className="checkout-actions">
       <a
-        href={checkoutUrl}
+        href={finalCheckoutUrl}
         onClick={handleCheckoutClick}
         target="_self"
         className="w-auto min-w-[200px] flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-full !text-white bg-black hover:bg-gray-800 transition-colors duration-200 shadow-sm hover:shadow-md no-underline mb-3 cursor-pointer"
@@ -309,11 +327,15 @@ function CartDiscounts({
 
   const handleRemoveDiscount = () => {
     if (typeof window !== 'undefined') {
-      if (localStorage.getItem('featuredDiscountData')) {
-        shouldReloadRef.current = true;
+      try {
+        if (localStorage.getItem('featuredDiscountData')) {
+          shouldReloadRef.current = true;
+        }
+        localStorage.removeItem('featuredDiscountCode');
+        localStorage.removeItem('featuredDiscountData');
+      } catch {
+        // ignore
       }
-      localStorage.removeItem('featuredDiscountCode');
-      localStorage.removeItem('featuredDiscountData');
     }
   };
 
@@ -401,10 +423,12 @@ function UpdateDiscountForm({
   onSuccess?: () => void;
   fetcherKey?: string;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
       fetcherKey={fetcherKey}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
         discountCodes: discountCodes || [],
@@ -453,8 +477,9 @@ function CartGiftCard({
                     <span className="text-sm font-medium text-gray-900">
                       ***{giftCard.lastCharacters}
                     </span>
-                    <span className="text-sm text-green-600">
-                      <Money data={giftCard.amountUsed} />
+                    <span className="text-sm text-green-600 flex items-center">
+                      <AedIcon className="w-3 h-3 mr-0.5" currency={giftCard.amountUsed.currencyCode} />
+                      {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(giftCard.amountUsed.amount))}
                     </span>
                   </div>
                   <button
@@ -521,10 +546,12 @@ function UpdateGiftCardForm({
   fetcherKey?: string;
   children: React.ReactNode;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
       fetcherKey={fetcherKey}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.GiftCardCodesUpdate}
       inputs={{
         giftCardCodes: giftCardCodes || [],
@@ -548,9 +575,11 @@ function RemoveGiftCardForm({
   giftCardId: string;
   children: React.ReactNode;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.GiftCardCodesRemove}
       inputs={{
         giftCardCodes: [giftCardId],

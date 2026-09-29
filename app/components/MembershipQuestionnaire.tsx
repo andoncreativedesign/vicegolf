@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFetcher, useNavigate } from 'react-router';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { CheckCircle2Icon } from 'lucide-react';
 import { PhoneInputField } from '~/components/basic/PhoneInputField';
 import { format, getDaysInMonth } from 'date-fns';
@@ -203,8 +204,7 @@ export function MembershipQuestionnaire({ customer, isLoggedIn }: MembershipQues
                                                     placeholder="Enter phone number"
                                                     hasBorder={false}
                                                     required
-                                                    minLength={10}
-                                                    error={phone && phone.replace(/\D/g, '').length < 10 ? 'Phone number must be at least 10 digits' : ''}
+                                                    error={phone && !isValidPhoneNumber(phone) ? 'Please enter a valid phone number' : ''}
                                                 />
                                                 <input type="hidden" name="phone" value={phone} />
                                             </div>

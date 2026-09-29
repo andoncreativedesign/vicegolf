@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -15,10 +15,12 @@ import { useState, useEffect, forwardRef } from 'react';
 import type { AccordionItem } from '~/lib/sanity/products';
 import type { ClubVariant, UIColorVariant } from '~/lib/shopify/product-queries';
 import ColorVariant from './Product/ColorVariant';
+import VariantGroup from './Product/VariantGroup';
 import type { ShippingDetails } from '~/lib/sanity/home';
 import { AedIcon } from './ui/AedIcon';
 import ProductCustomization from './basic/ProductCustomization';
 import { useMembership } from '~/hooks/useMembership';
+import { YotpoRating } from './yopto/YotpoRating';
 
 export type ProductFormProps = {
   productOptions: MappedProductOptions[];
@@ -37,6 +39,14 @@ export type ProductFormProps = {
     handle: string;
   } | null;
   sessionDiscount?: any;
+  product: any;
+  optionSubtext?: {
+    text?: string;
+    color?: string;
+    size?: string;
+  };
+  specialVariants?: UIColorVariant[];
+  selectedSpecialVariant?: any;
 };
 
 export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
@@ -53,6 +63,10 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
   bundleBtn,
   collectionIds,
   sessionDiscount,
+  product,
+  optionSubtext,
+  specialVariants,
+  selectedSpecialVariant,
 }, ref) => {
   const originalUnitPrice = parseFloat(selectedVariant?.price?.amount || '0');
 
@@ -61,9 +75,87 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
   const navigate = useNavigate();
   const { open } = useAside();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedTier, setSelectedTier] = useState('1');
+
+  const rootData = useRouteLoaderData<any>('root');
+  const [cartData, setCartData] = useState<any>(null);
+
+  useEffect(() => {
+    if (rootData?.cart) {
+      Promise.resolve(rootData.cart)
+        .then((resolvedCart) => {
+          setCartData(resolvedCart);
+        })
+        .catch((err) => {
+          console.error('Error resolving cart in ProductForm:', err);
+        });
+    }
+  }, [rootData?.cart]);
+
+  const cartLine = cartData?.lines?.nodes?.find(
+    (node: any) => node.merchandise?.id === selectedVariant?.id
+  );
+  const quantityInCart = cartLine?.quantity || 0;
+
+  const automaticDiscounts = rootData?.automaticDiscounts || [];
+
+  const applicableDiscounts = automaticDiscounts.filter((d: any) => {
+    const isEligibleProduct = d.eligibleProducts?.includes(currentProductId);
+    const isEligibleCollection = collectionIds?.some((id: string) => d.eligibleCollections?.includes(id));
+    return d.appliesToAll || isEligibleProduct || isEligibleCollection;
+  });
+
+  const getInitialTier = () => {
+    let tiers = [1];
+    const rawAvailableQty = typeof (selectedVariant as any)?.quantityAvailable === 'number' && (selectedVariant as any).quantityAvailable > 0
+      ? (selectedVariant as any).quantityAvailable
+      : Infinity;
+    const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity) && d.minQuantity <= availableQty) {
+        tiers.push(d.minQuantity);
+      }
+    });
+    return Math.max(...tiers);
+  };
+
+  const [quantity, setQuantity] = useState(getInitialTier);
+  const [selectedTier, setSelectedTier] = useState(() => getInitialTier().toString());
   const totalQuantityDozens = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+  const [prevProductId, setPrevProductId] = useState(currentProductId);
+
+  useEffect(() => {
+    if (prevProductId !== currentProductId) {
+      const defaultTier = getInitialTier();
+      setQuantity(defaultTier);
+      setSelectedTier(defaultTier.toString());
+      setPrevProductId(currentProductId);
+    } else {
+      const rawAvailableQty = typeof (selectedVariant as any)?.quantityAvailable === 'number' && (selectedVariant as any).quantityAvailable > 0
+        ? (selectedVariant as any).quantityAvailable
+        : Infinity;
+      const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+
+      let tiers = [1];
+      applicableDiscounts.forEach((d: any) => {
+        if (d.minQuantity && d.minQuantity > 1 && !tiers.includes(d.minQuantity) && d.minQuantity <= availableQty) {
+          tiers.push(d.minQuantity);
+        }
+      });
+
+      const currentQty = selectedTier === 'custom' ? quantity : parseInt(selectedTier);
+
+      if (currentQty > availableQty) {
+        const cappedQty = availableQty === Infinity ? 1 : Math.max(availableQty > 0 ? 1 : 0, availableQty);
+        if (tiers.includes(cappedQty)) {
+          setSelectedTier(cappedQty.toString());
+          setQuantity(cappedQty);
+        } else {
+          setSelectedTier('custom');
+          setQuantity(cappedQty);
+        }
+      }
+    }
+  }, [selectedVariant?.id, currentProductId, quantityInCart]);
 
   // 1. Calculate price with membership discount
   let membershipPrice = originalUnitPrice;
@@ -99,39 +191,116 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     unitCompareAmount = originalUnitPrice;
   }
 
-  const totalPriceAmount = unitPriceAmount * totalQuantityDozens;
-  const totalCompareAmount = unitCompareAmount * totalQuantityDozens;
-  const currencyCode = selectedVariant?.price?.currencyCode || 'USD';
-  const showCompare = unitCompareAmount > unitPriceAmount;
+  const getBestPriceForQuantity = (qty: number) => {
+    let bestTotal = unitPriceAmount * qty;
+    for (const d of applicableDiscounts) {
+      if (d.minQuantity && qty >= d.minQuantity) {
+        let total = originalUnitPrice * qty;
+        if (d.percentage) {
+           total = total * (1 - d.percentage);
+        } else if (d.amount) {
+           let itemDiscount = d.amount;
+           const discountCurrency = d.currencyCode;
+           const activeCurrency = selectedVariant?.price?.currencyCode;
+           const adminBasePrice = d.productPrices?.[product.id];
+
+           if (discountCurrency && activeCurrency && activeCurrency !== discountCurrency && adminBasePrice) {
+             itemDiscount = originalUnitPrice * (d.amount / adminBasePrice);
+           }
+           if (d.appliesOnEachItem) {
+               total = Math.max(0, originalUnitPrice - itemDiscount) * qty;
+           } else {
+               total = Math.max(0, total - itemDiscount);
+           }
+        }
+        if (total < bestTotal) bestTotal = total;
+      }
+    }
+    return bestTotal;
+  };
+
+  const totalPriceAmount = getBestPriceForQuantity(totalQuantityDozens);
+  const baseUnitCompare = unitCompareAmount > 0 ? unitCompareAmount : originalUnitPrice;
+  const totalCompareAmount = baseUnitCompare * totalQuantityDozens;
+  const currencyCode = selectedVariant?.price?.currencyCode || rootData?.selectedLocale?.currency || '';
+
+  const displayQuantity = Math.max(1, totalQuantityDozens);
+  const displayPriceAmount = getBestPriceForQuantity(displayQuantity);
+  const displayCompareAmount = baseUnitCompare * displayQuantity;
+  const showCompare = (unitCompareAmount > 0 && unitCompareAmount > unitPriceAmount) || displayPriceAmount < (originalUnitPrice * displayQuantity);
+
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currencyCode,
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
-  const pricingTiers = [
-    {
-      key: '1',
-      label: '1 dozen',
-      price: formatPrice(unitPriceAmount),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount) : undefined
-    },
-    {
-      key: '3',
-      label: '3 dozen',
-      price: formatPrice(unitPriceAmount * 3),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount * 3) : undefined
-    },
-    {
-      key: '6',
-      label: '6 dozen',
-      price: formatPrice(unitPriceAmount * 6),
-      oldPrice: showCompare ? formatPrice(unitCompareAmount * 6) : undefined
-    },
-  ];
+
+  let hasVolumeDiscount = false;
+  applicableDiscounts.forEach((d: any) => {
+    if (d.minQuantity && d.minQuantity > 1) {
+      hasVolumeDiscount = true;
+    }
+  });
+
+  const rawAvailableQty = typeof (selectedVariant as any)?.quantityAvailable === 'number' && (selectedVariant as any).quantityAvailable > 0
+    ? (selectedVariant as any).quantityAvailable
+    : Infinity;
+  const isMaxQuantityReached = rawAvailableQty !== Infinity && quantityInCart >= rawAvailableQty;
+
+  let tierQuantities: number[] = [];
+  if (hasVolumeDiscount) {
+    const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+    if (1 <= availableQty) {
+      tierQuantities.push(1);
+    }
+    applicableDiscounts.forEach((d: any) => {
+      if (d.minQuantity && d.minQuantity > 1 && !tierQuantities.includes(d.minQuantity) && d.minQuantity <= availableQty) {
+        tierQuantities.push(d.minQuantity);
+      }
+    });
+  }
+  tierQuantities.sort((a, b) => a - b);
+
+  const isGolfBall = productType?.toLowerCase().includes('ball') || false;
+  const getUnitLabel = (qty: number) => {
+    if (isGolfBall) return 'dozen';
+    return '';
+  };
+
+  const pricingTiers = tierQuantities.map(qty => {
+    const price = getBestPriceForQuantity(qty);
+    const unitPrice = price / qty;
+    
+    // Compare against the base 1-dozen price for volume discount visualization
+    const baseUnitPrice = getBestPriceForQuantity(1);
+    const oldPriceTotal = baseUnitPrice * qty;
+    
+    const unitLabel = getUnitLabel(qty);
+    const labelString = unitLabel ? `${qty} ${unitLabel}` : `${qty}`;
+    
+    return {
+      key: qty.toString(),
+      label: labelString,
+      price: formatPrice(price),
+      oldPrice: oldPriceTotal > price ? formatPrice(oldPriceTotal) : undefined,
+      unitPrice: formatPrice(unitPrice),
+      oldUnitPrice: baseUnitPrice > unitPrice ? formatPrice(baseUnitPrice) : undefined
+    };
+  });
+
   const handleCustomQuantity = (q: number) => {
-    setQuantity(Math.max(1, q));
-    if (selectedTier !== 'custom') {
+    const availableQty = Math.max(0, rawAvailableQty - quantityInCart);
+    const newQuantity = Math.min(availableQty, Math.max(availableQty > 0 ? 1 : 0, q));
+    setQuantity(newQuantity);
+    
+    // Check if the new quantity matches any available Dozen tier
+    const matchingTier = pricingTiers.find(tier => parseInt(tier.key) === newQuantity);
+    
+    if (matchingTier) {
+      setSelectedTier(matchingTier.key);
+    } else {
       setSelectedTier('custom');
     }
   };
@@ -144,7 +313,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
     //   }
     // });
     // open('cart');
-   
+
     if (typeof window !== 'undefined' && (window as any).fbq) {
       console.log('FB Pixel fired', {
         currency: currencyCode,
@@ -226,24 +395,62 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       // ADDED: Some padding for better spacing on larger screens
       className="product-form py-4 md:py-5 w-full"
     >
-      {/* Product Title */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-      {productType && (
-        <div className="text-sm text-gray-500 mb-2">{productType}</div>
-      )}
-
-      {/* Product Price */}
-      <div className="mb-6">
-        <ProductPrice
-          price={{ amount: totalPriceAmount.toFixed(2), currencyCode }}
-          compareAtPrice={showCompare ? { amount: totalCompareAmount.toFixed(2), currencyCode } : undefined}
-        />
-        {showCompare && (
-          <span className="text-sm text-emerald-600 font-medium ml-2 flex items-center inline-flex">
-            (Save <AedIcon className="w-3 h-3 mx-0.5" /> {(totalCompareAmount - totalPriceAmount).toFixed(2)})
+      {/* Product Title and Category */}
+      <div 
+        className="mb-4"
+        style={{ padding: 0, minHeight: 0, height: 'max-content', overflow: 'hidden' }}
+      >
+        <h1 
+          className="text-[32px] md:text-[36px] font-bold text-gray-900 m-0 p-0 leading-none tracking-tight block"
+          style={{ padding: 0, margin: 0, lineHeight: 1 }}
+        >
+          {title?.trim()}
+        </h1>
+        {productType && (
+          <span 
+            className="text-[15px] text-gray-500 font-medium m-0 p-0 block mt-2"
+            style={{ padding: 0, margin: 0, marginTop: '8px', lineHeight: 1.2 }}
+          >
+            {productType?.trim()}
           </span>
         )}
       </div>
+
+      {/* Product Price */}
+      <div className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {showCompare ? (
+          <>
+            <span className="text-xl font-bold text-[#e32619] flex items-center">
+              <AedIcon className="w-4 h-4 mr-0.5" currency={currencyCode} />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount)}
+            </span>
+            <s className="text-[17px] text-gray-500 line-through flex items-center">
+              <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={currencyCode} />
+              {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayCompareAmount)}
+            </s>
+            {displayQuantity > 1 ? (
+              <span className="text-[15px] font-medium text-gray-600 flex items-center">
+                (<AedIcon className="w-3 h-3 mr-0.5" currency={currencyCode} />
+                {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount / displayQuantity)}
+                /{isGolfBall ? 'dozen' : 'unit'})
+              </span>
+            ) : (
+              <span className="text-sm text-emerald-600 font-medium flex items-center">
+                (Save <AedIcon className="w-3 h-3 mx-0.5" currency={currencyCode} /> {(displayCompareAmount - displayPriceAmount).toFixed(2)})
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="text-xl font-bold text-gray-900 flex items-center">
+            <AedIcon className="w-4 h-4 mr-0.5" currency={currencyCode} />
+            {new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPriceAmount)}
+          </span>
+        )}
+      </div>
+
+      <YotpoRating
+        productId={product.id.split('/')[product.id.split('/').length - 1]}
+      />
 
       {/* Product Description */}
       {description && (
@@ -255,10 +462,29 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
 
       {/* Color Variants Section */}
       {colorVariants && colorVariants.length > 0 && (
+        <>
+          {(specialVariants?.length || productType?.toLowerCase() === 'golf balls') ? (
+            <VariantGroup
+              productType={productType?.toLowerCase()}
+              colorVariants={colorVariants}
+              selectedVariant={selectedVariant}
+            />
+          ) : (
+            <ColorVariant
+              productType={productType?.toLowerCase()}
+              colorVariants={colorVariants}
+              selectedVariant={selectedVariant}
+            />
+          )}
+        </>
+      )}
+
+      {specialVariants && specialVariants.length > 0 && (
         <ColorVariant
           productType={productType?.toLowerCase()}
-          colorVariants={colorVariants}
-          selectedVariant={selectedVariant}
+          colorVariants={specialVariants}
+          selectedVariant={selectedSpecialVariant}
+          label="Special & Limited Editions"
         />
       )}
 
@@ -267,25 +493,51 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         styling={getProductCustomizationStyleType(productType)}
         clubVariants={clubVariants}
         currentProductId={currentProductId}
+        optionSubtext={optionSubtext}
       />
       }
+
+      {/* Fallback Option Subtext for products without a 'size' option */}
+      {!productOptions?.some(opt => opt.name?.toLowerCase().includes('size')) && optionSubtext?.text && (
+        <div className="product-form-container">
+          <p 
+            className="text-sm font-medium text-gray-900 mb-3"
+            style={{
+              color: optionSubtext.color || undefined,
+              fontSize: optionSubtext.size || undefined
+            }}
+          >
+            {optionSubtext.text}
+          </p>
+        </div>
+      )}
 
       {/* Quantity Selector - Only show for products that need quantity selection */}
       {shouldShowQuantitySelector(productType) && (
         <div className="mb-6">
           <QuantitySelector
             selectedTier={selectedTier}
-            setSelectedTier={setSelectedTier}
+            setSelectedTier={(tier) => {
+              setSelectedTier(tier);
+              if (tier !== 'custom') {
+                setQuantity(parseInt(tier));
+              }
+            }}
             quantity={quantity}
             setQuantity={handleCustomQuantity}
             pricingTiers={pricingTiers}
             unitPrice={unitPriceAmount}
             currencyCode={currencyCode}
+            quantityAvailable={
+              rawAvailableQty !== Infinity
+                ? Math.max(0, rawAvailableQty - quantityInCart)
+                : undefined
+            }
           />
         </div>
       )}
 
-      {bundleBtn && (
+      {/* bundleBtn && (
         <div className="mb-6 md:max-w-[399px]">
           <button
             className="w-full cursor-pointer bg-white text-black border border-black py-4 px-6 rounded-full font-medium text-base transition-all duration-300"
@@ -294,12 +546,12 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
             {bundleBtn?.text || 'not text'}
           </button>
         </div>
-      )}
+      ) */}
 
       {/* Add to Cart Button */}
       <div className="mb-6">
         <AddToCartButton
-          disabled={!selectedVariant || !selectedVariant.availableForSale}
+          disabled={!selectedVariant || !selectedVariant.availableForSale || isMaxQuantityReached}
           onClick={handleAddToCart}
           lines={
             selectedVariant
@@ -307,22 +559,33 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
                 {
                   merchandiseId: selectedVariant.id,
                   quantity: totalQuantityDozens,
-                  selectedVariant,
+                  selectedVariant: {
+                    ...selectedVariant,
+                    product: {
+                      id: currentProductId || product?.id,
+                      handle: product?.handle,
+                      title: title || product?.title,
+                      collections: product?.collections,
+                      featuredImage: product?.featuredImage || selectedVariant?.image,
+                    },
+                  } as any,
                 },
               ]
               : []
           }
         >
-          {selectedVariant?.availableForSale ? (
+          {!selectedVariant || !selectedVariant.availableForSale ? (
+            'Out of stock'
+          ) : isMaxQuantityReached ? (
+            'Max quantity in cart reached'
+          ) : (
             <span className="flex items-center justify-center gap-1">
-              Add to Cart • <AedIcon className="w-3 h-3 text-white" />
+              Add to Cart • <AedIcon className="w-3 h-3 text-white" currency={currencyCode} />
               {new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               }).format(totalPriceAmount)}
             </span>
-          ) : (
-            'Out of stock'
           )}
         </AddToCartButton>
       </div>

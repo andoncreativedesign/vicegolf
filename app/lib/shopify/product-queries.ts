@@ -38,6 +38,7 @@ export const COLLECTION_PRODUCTS_QUERY = `#graphql
       nodes {
         id
         availableForSale
+        quantityAvailable
         price {
           amount
           currencyCode
@@ -97,6 +98,20 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
           badge_colors: metafield(namespace: "custom", key: "badge_colors") {
             value
           }
+          variantImage: metafield(namespace: "custom", key: "variant_image") {
+            reference {
+              ... on MediaImage {
+                id
+                image {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+          }
           featuredImage {
             id
             url
@@ -117,6 +132,7 @@ export const COLLECTION_PRODUCTS_PAGINATED_QUERY = `#graphql
             nodes {
               id
               availableForSale
+              quantityAvailable
               price {
                 amount
                 currencyCode
@@ -413,6 +429,7 @@ fragment ProductItem on Product {
         nodes {
       id
       availableForSale
+      quantityAvailable
             price {
         amount
         currencyCode
@@ -426,6 +443,20 @@ fragment ProductItem on Product {
   collections(first: 20) {
     nodes {
       id
+    }
+  }
+  variantImage: metafield(namespace: "custom", key: "variant_image") {
+    reference {
+      ... on MediaImage {
+        id
+        image {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
     }
   }
     featuredImage {
@@ -689,6 +720,7 @@ fragment ProductCardFragment on Product {
       nodes {
         id
         availableForSale
+        quantityAvailable
         price {
           amount
           currencyCode
@@ -719,6 +751,20 @@ fragment ProductCardFragment on Product {
     badge_colors: metafield(namespace: "custom", key: "badge_colors") {
       value
     }
+    variantImage: metafield(namespace: "custom", key: "variant_image") {
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            id
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
     featuredImage {
       id
       url
@@ -739,6 +785,7 @@ fragment ProductCardFragment on Product {
       nodes {
         id
         availableForSale
+        quantityAvailable
         price {
           amount
           currencyCode
@@ -849,6 +896,7 @@ export interface UIColorVariant {
     url: string;
     altText: string | null;
   } | null;
+  categoryVariant?: string | null;
 }
 
 export interface ClubVariant {
@@ -959,6 +1007,15 @@ export const ADMIN_PRODUCTS_BY_FAMILY = `#graphql
             value
           }
 
+          category_variant: metafield(namespace: "custom", key: "category_variant") {
+            value
+          }
+          
+          # type for indentifying special variant
+          variant_type: metafield(namespace: "custom", key: "variant_type") {
+            value
+          }
+
           # Product-level: Variant Image metafield 
           variantImage: metafield(namespace: "custom", key: "variant_image") {
             reference {
@@ -1037,6 +1094,11 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
             }
           }
 
+          # type for indentifying special variant
+          variant_type: metafield(namespace: "custom", key: "variant_type") {
+            value
+          }
+
           # Featured image
           featuredImage {
             url
@@ -1062,6 +1124,18 @@ export const ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD = `#graphql
               }
             }
           }
+
+          variants(first: 1) {
+            edges {
+              node {
+                id
+                availableForSale
+                price
+                compareAtPrice
+              }
+            }
+          }
+            
         }
       }
     }
@@ -1087,6 +1161,7 @@ export const GET_COLLECTION_DETAILS_WITHOUT_PRODUCTS = `#graphql
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
   fragment ProductVariant on ProductVariant {
     availableForSale
+    quantityAvailable
     compareAtPrice {
       amount
       currencyCode

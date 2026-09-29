@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { AedIcon } from "./ui/AedIcon";
 import type { ProductFragment } from "storefrontapi.generated";
 import { useMembership } from "~/hooks/useMembership";
+import { YotpoRating } from "./yopto/YotpoRating";
 
 interface ProductCardProps {
   product: ProductFragment;
@@ -11,16 +12,17 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product: _product, disableSoldout = false, sessionDiscount }: ProductCardProps) {
-  const { getBestDiscountForProduct } = useMembership();
+  const { getBestDiscountForProduct, automaticDiscounts } = useMembership();
   const product = _product as any;
   const variant = product.variants?.nodes[0];
   const image = product.featuredImage || product.images?.nodes[0];
+  const price = variant?.price;
+  const compareAtPrice = variant?.compareAtPrice;
 
   const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-  const basePrice = parseFloat(variant?.price?.amount || '0');
+  const basePrice = parseFloat(price?.amount || '0');
   const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
 
-  // 1. Calculate price with membership discount
   let membershipPrice = basePrice;
   if (productAmount > 0) {
     membershipPrice = Math.max(0, basePrice - productAmount);
@@ -28,12 +30,10 @@ export function ProductCard({ product: _product, disableSoldout = false, session
     membershipPrice = basePrice * (1 - productPercentage);
   }
 
-  // 2. Calculate price with session discount
   let sessionPrice = basePrice;
   if (sessionDiscount) {
     const isEligibleProduct = sessionDiscount.products?.includes(product.id);
     const isEligibleCollection = productCollections.some((id: string) => sessionDiscount.collections?.includes(id));
-
     if (sessionDiscount.appliesToAll || isEligibleProduct || isEligibleCollection) {
       if (sessionDiscount.percentage) {
         sessionPrice = basePrice * (1 - sessionDiscount.percentage);
@@ -43,13 +43,56 @@ export function ProductCard({ product: _product, disableSoldout = false, session
     }
   }
 
-  // 3. Choose the best price (lowest) for the user
-  const finalPrice = Math.min(membershipPrice, sessionPrice);
+  const unitPrice = Math.min(membershipPrice, sessionPrice);
+
+  // Find the lowest possible volume price
+  let bestVolumePrice = unitPrice;
+  let bestVolumeQuantity = 1;
+
+  if (automaticDiscounts && automaticDiscounts.length > 0) {
+    let quantities = [1];
+    automaticDiscounts.forEach((d: any) => {
+      const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
+      if (isEligible && d.minQuantity > 1 && !quantities.includes(d.minQuantity)) {
+        quantities.push(d.minQuantity);
+      }
+    });
+
+    quantities.forEach(qty => {
+      let bestTotalForQty = unitPrice * qty;
+      automaticDiscounts.forEach((d: any) => {
+        const isEligible = d.appliesToAll || d.eligibleProducts?.includes(product.id) || productCollections.some((id: string) => d.eligibleCollections?.includes(id));
+        if (isEligible && d.minQuantity <= qty) {
+          let total = basePrice * qty;
+          if (d.percentage) {
+            total = total * (1 - d.percentage);
+          } else if (d.amount) {
+            let itemDiscount = d.amount;
+            const discountCurrency = d.currencyCode;
+            const activeCurrency = price?.currencyCode;
+            const adminBasePrice = d.productPrices?.[product.id];
+
+            if (discountCurrency && activeCurrency && activeCurrency !== discountCurrency && adminBasePrice) {
+              itemDiscount = basePrice * (d.amount / adminBasePrice);
+            }
+            if (d.appliesOnEachItem) total = Math.max(0, basePrice - itemDiscount) * qty;
+            else total = Math.max(0, total - itemDiscount);
+          }
+          if (total < bestTotalForQty) bestTotalForQty = total;
+        }
+      });
+      const pricePerUnit = bestTotalForQty / qty;
+      if (pricePerUnit < bestVolumePrice) {
+        bestVolumePrice = pricePerUnit;
+        bestVolumeQuantity = qty;
+      }
+    });
+  }
+
+  const finalPrice = bestVolumePrice;
+  const isGolfBall = product.productType?.toLowerCase().includes('ball') || false;
 
   // 4. Show strikethrough if any discount is better than original or if Shopify has one
-  const price = variant?.price;
-  const compareAtPrice = variant?.compareAtPrice;
-
   let finalCompareAtPrice = parseFloat(compareAtPrice?.amount || '0');
   if (finalPrice < basePrice) {
     finalCompareAtPrice = basePrice;
@@ -169,9 +212,9 @@ export function ProductCard({ product: _product, disableSoldout = false, session
       </Link>
 
       {/* Product Info */}
-      <div className="flex flex-col flex-1 px-5 pb-5 pt-4">
+      <div className="flex flex-col flex-1 px-5 pb-5 pt-4 space-y-3">
         <div className="mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[3rem]">
+          <h3 className="text-lg font-semibold text-gray-900 leading-snug line-clamp-2 min-h-[1.8rem]">
             {product.title}
           </h3>
         </div>
@@ -183,25 +226,34 @@ export function ProductCard({ product: _product, disableSoldout = false, session
           </p>
         </div>
 
+        <div className="flex items-center pt-2 pb-0">
+          <YotpoRating productId={product.id?.split('/').pop() || product.id} />
+        </div>
+
         {/* Price */}
-        <div className="mt-auto pt-2">
+        <div className="pt-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {finalCompareAtPrice > finalPrice && (
-                <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
-                  <AedIcon className="mr-0.5" />
-                  <span>
-                    {finalCompareAtPrice.toFixed(2)}
-                  </span>
-                </div>
-              )}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               {price && (
-                <div className="flex items-center text-gray-900">
-                  <AedIcon className="mr-1" />
-                  <span className="text-xl font-bold tracking-tight">
-                    {finalPrice.toFixed(2)}
-                  </span>
-                </div>
+                <>
+                  <div className={`flex items-center ${finalCompareAtPrice > finalPrice ? 'text-[#e32619]' : 'text-gray-900'}`}>
+                    <AedIcon className="mr-1" currency={price?.currencyCode} />
+                    <span className="text-[17px] font-bold tracking-tight">
+                      {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalPrice)}
+                    </span>
+                  </div>
+                  {finalCompareAtPrice > finalPrice && (
+                    <div className="flex items-center text-[15px] text-gray-500 line-through font-medium">
+                      <AedIcon className="w-3.5 h-3.5 mr-0.5" currency={compareAtPrice?.currencyCode || price?.currencyCode} />
+                      {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalCompareAtPrice)}
+                    </div>
+                  )}
+                  {bestVolumeQuantity > 1 && (
+                    <span className="text-[15px] font-medium text-gray-900 whitespace-nowrap">
+                      from {bestVolumeQuantity} {isGolfBall ? 'dozen' : 'items'}
+                    </span>
+                  )}
+                </>
               )}
             </div>
           </div>

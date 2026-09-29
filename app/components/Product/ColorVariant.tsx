@@ -7,9 +7,10 @@ interface ColorVariantProps {
   productType?: string;
   colorVariants: UIColorVariant[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  label?: string;
 }
 
-const ColorVariant = ({ productType, colorVariants, selectedVariant }: ColorVariantProps) => {
+const ColorVariant = ({ productType, colorVariants, selectedVariant, label = 'Color' }: ColorVariantProps) => {
   const location = useLocation()
   const [variantStyle, setVariantStyle] = useState('w-18 h-18 rounded-md');
   const [selectedVariantHandle, setSelectedVariantHandle] = useState<string>('');
@@ -31,7 +32,7 @@ const ColorVariant = ({ productType, colorVariants, selectedVariant }: ColorVari
   return (
     <div className="mb-6">
       <div className='flex gap-2 items-center mb-3'>
-        <p className="font-semibold text-gray-700">Color:</p>
+        <p className="font-semibold text-gray-700">{label}:</p>
         <p className="text-sm text-gray-500">{selectedVariant?.selectedOptions?.[0].value}</p>
       </div>
       <div className="flex flex-wrap gap-2">

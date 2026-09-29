@@ -1,0 +1,99 @@
+import { HttpStatusCode } from "axios";
+import { createAxiosSanity } from "~/utils/axiosInsatances";
+
+export interface CampaignData {
+  title?: string;
+  slug?: { current: string };
+  customTag?: string;
+  heroImageDesktop?: { asset: { url: string } };
+  heroImageMobile?: { asset: { url: string } };
+  heroAltText?: string;
+  newsletterHeading?: string;
+  newsletterDescription?: string;
+  prizeImage?: { asset: { url: string } };
+  prizeImageMobile?: { asset: { url: string } };
+  successTitle?: string;
+  successText?: string;
+  alreadyRegisteredTitle?: string;
+  alreadyRegisteredText?: string;
+  namePlaceholder?: string;
+  inputPlaceholder?: string;
+  inputBgColor?: { hex: string };
+  inputTextColor?: { hex: string };
+  buttonText?: string;
+  buttonBgColor?: { hex: string };
+  buttonTextColor?: { hex: string };
+  benefitsHeading?: string;
+  features?: Array<{
+    icon: { asset: { url: string } };
+    title: string;
+  }>;
+  disclaimerText?: any[];
+  termsAndConditions?: {
+    heading?: string;
+    introText?: any[];
+    sections?: Array<{
+      title?: string;
+      body?: any[];
+    }>;
+  };
+}
+
+export async function getCampaignDataBySlug(slug: string, env?: any): Promise<CampaignData | null> {
+  try {
+    const axiosSanityInstance = createAxiosSanity(env);
+    
+    // Injecting slug directly since we are using a URL encoded string,
+    // ensure slug is safe (basic alphanumeric/hyphen check)
+    const safeSlug = slug.replace(/[^a-zA-Z0-9-]/g, '');
+    
+    const query = encodeURIComponent(`*[_type == "campaignPage" && slug.current == "${safeSlug}"][0]{
+      title,
+      slug,
+      customTag,
+      heroImageDesktop { asset->{url} },
+      heroImageMobile { asset->{url} },
+      heroAltText,
+      newsletterHeading,
+      newsletterDescription,
+      prizeImage { asset->{url} },
+      prizeImageMobile { asset->{url} },
+      successTitle,
+      successText,
+      alreadyRegisteredTitle,
+      alreadyRegisteredText,
+      namePlaceholder,
+      inputPlaceholder,
+      inputBgColor,
+      inputTextColor,
+      buttonText,
+      buttonBgColor,
+      buttonTextColor,
+      benefitsHeading,
+      features[] {
+        icon { asset->{url} },
+        title
+      },
+      disclaimerText,
+      termsAndConditions {
+        heading,
+        introText,
+        sections[] {
+          title,
+          body
+        }
+      }
+    }`);
+    
+    const response = await axiosSanityInstance.get("/?query=" + query);
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.data?.result || null;
+  } catch (error) {
+    console.error('Error fetching campaign data:', error);
+    return null;
+  }
+}

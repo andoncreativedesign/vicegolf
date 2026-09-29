@@ -167,7 +167,7 @@ query MultipleProductGroups(
 */
 
 export const MULTIPLE_COLLECTIONS_QUERY = `#graphql
-fragment ProductCard on Product {
+fragment MultipleGroupProductCard on Product {
   id
   title
   handle
@@ -177,6 +177,20 @@ fragment ProductCard on Product {
   vendor
   badge_colors: metafield(namespace: "custom", key: "badge_colors") {
     value
+  }
+  variantImage: metafield(namespace: "custom", key: "variant_image") {
+    reference {
+      ... on MediaImage {
+        id
+        image {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
   }
   featuredImage {
     id
@@ -218,6 +232,8 @@ fragment ProductCard on Product {
 }
 
 query MultipleProductGroups(
+  $country: CountryCode
+  $language: LanguageCode
   $golfBallsHandle: String!
   $golfClubsHandle: String!
   $apparelHandle: String!
@@ -230,14 +246,14 @@ query MultipleProductGroups(
   $golfClubsCursor: String
   $apparelCursor: String
   $gearCursor: String
-) {
+) @inContext(country: $country, language: $language) {
 
   golfBalls: collection(handle: $golfBallsHandle) {
     id
     title
     products(first: $first, after: $golfBallsCursor) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage
@@ -251,7 +267,7 @@ query MultipleProductGroups(
     title
     products(first: $first, after: $golfClubsCursor) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage
@@ -265,7 +281,7 @@ query MultipleProductGroups(
     title
     products(first: $first, after: $apparelCursor) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage
@@ -279,7 +295,7 @@ query MultipleProductGroups(
     title
     products(first: $first, after: $gearCursor) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage
@@ -293,7 +309,7 @@ query MultipleProductGroups(
     title
     products(first: $first) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage
@@ -307,7 +323,7 @@ query MultipleProductGroups(
     title
     products(first: $first) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage
@@ -321,7 +337,7 @@ query MultipleProductGroups(
     title
     products(first: $first) {
       nodes {
-        ...ProductCard
+        ...MultipleGroupProductCard
       }
       pageInfo {
         hasNextPage

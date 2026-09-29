@@ -2,7 +2,7 @@ import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types
 import type { CartLayout } from '~/types/cart';
 import { CartForm, Image, type OptimisticCartLine } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
-import { Link } from 'react-router';
+import { Link, useRouteLoaderData } from 'react-router';
 import { ProductPrice } from './ProductPrice';
 import { useAside } from './Aside';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
@@ -18,8 +18,11 @@ export function CartLineItem({
   line: CartLine;
 }) {
   const { id, merchandise } = line;
-  const { product, title, image, selectedOptions } = merchandise;
-  const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+  const product = (merchandise as any)?.product;
+  const title = merchandise?.title || product?.title || 'Product';
+  const image = merchandise?.image || product?.featuredImage;
+  const selectedOptions = merchandise?.selectedOptions || [];
+  const lineItemUrl = useVariantUrl(product?.handle || '', selectedOptions);
   const { close } = useAside();
   const { getBestDiscountForProduct } = useMembership();
 
@@ -53,7 +56,7 @@ export function CartLineItem({
                 onClick={() => layout === 'aside' && close()}
                 style={{ textDecoration: 'none' }}
               >
-                {product.title}
+                {product?.title || title}
               </Link>
 
               {selectedOptions.length > 0 && (
@@ -77,12 +80,14 @@ export function CartLineItem({
                     const cost = line?.cost;
                     if (!cost) return undefined;
 
-                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || '0');
-                    const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-                    const { percentage, amount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise?.price?.amount || '0');
+                    const productCollections = product?.collections?.nodes?.map((c: any) => c.id) || [];
+                    const { percentage, amount } = product?.id
+                      ? getBestDiscountForProduct(product.id, productCollections, basePrice)
+                      : { percentage: 0, amount: 0 };
 
                     // If Shopify Backend already applied a discount, use it natively
-                    if (parseFloat(cost.totalAmount.amount) < basePrice * line.quantity) {
+                    if (parseFloat(cost.totalAmount?.amount || '0') < basePrice * line.quantity) {
                       return cost.totalAmount;
                     }
 
@@ -105,12 +110,14 @@ export function CartLineItem({
                     const discountSum = discountAllocations?.reduce((acc: number, discount: any) =>
                       acc + parseFloat(discount.discountedAmount.amount), 0) || 0;
 
-                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || '0');
-                    const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-                    const { percentage, amount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise?.price?.amount || '0');
+                    const productCollections = product?.collections?.nodes?.map((c: any) => c.id) || [];
+                    const { percentage, amount } = product?.id
+                      ? getBestDiscountForProduct(product.id, productCollections, basePrice)
+                      : { percentage: 0, amount: 0 };
 
                     if (cost.compareAtAmountPerQuantity?.amount &&
-                      cost.totalAmount.amount !== cost.compareAtAmountPerQuantity.amount) {
+                      cost.totalAmount?.amount !== cost.compareAtAmountPerQuantity.amount) {
                       return {
                         amount: String(Number(cost.compareAtAmountPerQuantity.amount) * line.quantity),
                         currencyCode: cost.compareAtAmountPerQuantity.currencyCode,
@@ -125,14 +132,14 @@ export function CartLineItem({
                     }
 
                     // If frontend member discount is active, use amountPerQuantity as compareAt
-                    if ((amount > 0 || percentage > 0) && parseFloat(cost.totalAmount.amount) >= basePrice * line.quantity) {
+                    if ((amount > 0 || percentage > 0) && parseFloat(cost.totalAmount?.amount || '0') >= basePrice * line.quantity) {
                       return {
                         amount: String(basePrice * line.quantity),
-                        currencyCode: cost.amountPerQuantity.currencyCode
+                        currencyCode: cost.amountPerQuantity?.currencyCode || cost.totalAmount?.currencyCode
                       };
                     }
 
-                    if (merchandise.compareAtPrice) {
+                    if (merchandise?.compareAtPrice) {
                       return {
                         amount: String(Number(merchandise.compareAtPrice.amount) * line.quantity),
                         currencyCode: merchandise.compareAtPrice.currencyCode,
@@ -170,6 +177,9 @@ function CartLineQuantity({ line }: { line: CartLine }) {
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
+  const quantityAvailable = (line.merchandise as any)?.quantityAvailable;
+  const maxQty = typeof quantityAvailable === 'number' && quantityAvailable > 0 ? quantityAvailable : Infinity;
+
   return (
     <div className="flex items-center gap-2">
       <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
@@ -196,7 +206,7 @@ function CartLineQuantity({ line }: { line: CartLine }) {
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
-          disabled={!!isOptimistic}
+          disabled={quantity >= maxQty || !!isOptimistic}
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -214,10 +224,12 @@ function CartLineRemoveButton({
   lineIds: string[];
   disabled: boolean;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds }}
     >
@@ -242,12 +254,14 @@ function CartLineUpdateButton({
   children: React.ReactNode;
   lines: CartLineUpdateInput[];
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   const lineIds = lines.map((line) => line.id);
 
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{ lines }}
     >

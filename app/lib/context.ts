@@ -41,6 +41,8 @@ export async function createHydrogenRouterContext(
     AppSession.init(request, [env.SESSION_SECRET]),
   ]);
 
+  const locale = getLocaleFromRequest(request);
+
   const hydrogenContext = createHydrogenContext(
     {
       env,
@@ -49,7 +51,7 @@ export async function createHydrogenRouterContext(
       waitUntil,
       session,
       // Or detect from URL path based on locale subpath, cookies, or any other strategy
-      i18n: getLocaleFromRequest(request),
+      i18n: locale,
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
       },

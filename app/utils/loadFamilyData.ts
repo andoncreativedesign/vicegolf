@@ -1,7 +1,7 @@
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { ADMIN_PRODUCTS_BY_FAMILY_FOR_CARD } from '~/lib/shopify/product-queries';
 
-export async function loadFamilyData(families: string[]) {
+export async function loadFamilyData(families: string[], currencyCode?: string) {
   if (!families || families.length === 0) return {};
 
   const familyQueries = families.map(fam => ({
@@ -58,6 +58,13 @@ export async function loadFamilyData(families: string[]) {
         badge_colors: node?.badge_colors?.value || null,
         collections: {
           nodes: node.collections?.edges?.map(({ node: col }: any) => ({ id: col.id })) || []
+        },
+        variants: {
+          nodes: node.variants?.edges?.map(({ node: variant }: any) => ({
+            ...variant,
+            price: { amount: variant.price, currencyCode: currencyCode || '' },
+            compareAtPrice: variant.compareAtPrice ? { amount: variant.compareAtPrice, currencyCode: currencyCode || '' } : null
+          })) || []
         }
       }));
 

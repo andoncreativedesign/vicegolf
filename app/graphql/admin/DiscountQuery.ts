@@ -9,6 +9,18 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
             title
             status
             summary
+         
+            minimumRequirement {
+              ... on DiscountMinimumQuantity {
+                greaterThanOrEqualToQuantity
+              }
+              ... on DiscountMinimumSubtotal {
+                greaterThanOrEqualToSubtotal {
+                  amount
+                  currencyCode
+                }
+              }
+            }
             customerGets {
               value {
                 ... on DiscountPercentage {
@@ -30,6 +42,11 @@ export const GET_AUTOMATIC_DISCOUNT_QUERY = `#graphql
                   products(first: 100) {
                     nodes {
                       id
+                      variants(first: 1) {
+                        nodes {
+                          price
+                        }
+                      }
                     }
                   }
                 }

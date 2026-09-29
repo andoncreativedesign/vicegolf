@@ -1,5 +1,6 @@
 import type { AddressFragment } from 'customer-accountapi.generated';
-import { PencilIcon, TrashIcon } from 'lucide-react'
+import { PencilIcon, TrashIcon } from 'lucide-react';
+import { GCC_PROVINCES } from '~/lib/i18n';
 
 interface AddressCardProps {
   address: Pick<
@@ -49,11 +50,24 @@ export function AddressCard({
     phoneNumber,
   } = address;
 
+  // Map zoneCode to its full name if it exists in GCC_PROVINCES
+  let provinceName = zoneCode;
+  if (territoryCode && zoneCode && GCC_PROVINCES[territoryCode]) {
+    const provinceObj = GCC_PROVINCES[territoryCode].find(p => p.code === zoneCode || p.name === zoneCode);
+    if (provinceObj) {
+      provinceName = provinceObj.name;
+    }
+  }
+
+  const displayProvince = (provinceName && city && !city.toLowerCase().includes(provinceName.toLowerCase()))
+    ? provinceName
+    : (!city ? provinceName : null);
+
+  const displayZip = zip && zip !== '00000' ? zip : null;
   const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
-  const cityLine = [zip, city, zoneCode].filter(Boolean).join(' ');
+  const cityLine = [displayZip, city, displayProvince].filter(Boolean).join(' ');
 
   const addressLines = [
-    company || undefined,
     address1 || undefined,
     address2 || undefined,
     cityLine || undefined,
@@ -66,10 +80,19 @@ export function AddressCard({
       <div className="flex items-start justify-between gap-4">
         {/* Left Side: Badge + Address Details */}
         <div className="flex flex-col gap-3">
-          {isDefault && (
-            <span className="self-start inline-flex items-center rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-              Default
-            </span>
+          {(isDefault || company) && (
+            <div className="flex flex-wrap gap-2 items-center">
+              {isDefault && (
+                <span className="inline-flex items-center rounded-full bg-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                  Default
+                </span>
+              )}
+              {company && (
+                <span className="inline-flex items-center rounded-full bg-gray-200 border border-gray-350 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-800">
+                  {company}
+                </span>
+              )}
+            </div>
           )}
 
           <div className="text-gray-900">

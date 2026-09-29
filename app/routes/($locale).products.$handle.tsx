@@ -38,6 +38,7 @@ import { RECOMMENDED_PRODUCTS_QUERY } from '~/lib/shopify/product-queries';
 import { getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
 import { DriversProduct } from '~/components/Product/DriversProduct';
+import { YotpoReviewWidget } from '~/components/yopto/YotpoReviewWidget';
 type ProductImageType = {
   id: string;
   url: string;
@@ -112,6 +113,7 @@ export async function loader(args: Route.LoaderArgs) {
     ...criticalData,
     productDetails,
     url: args.request.url,
+    publicStoreDomain: args.context.env.PUBLIC_STORE_DOMAIN,
   };
 }
 async function loadCriticalData({ context, params, request }: Route.LoaderArgs) {
@@ -123,6 +125,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: { handle, selectedOptions: getSelectedProductOptions(request) },
+      cache: storefront.CacheNone(),
     }),
   ]);
   if (!product?.id) {
@@ -137,6 +140,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   const clubFamily = product?.metafields?.find((item: any) => item?.key === "club_family")
   const family = product?.metafields?.find((item: any) => item?.key === "family")
   let colorVariants: UIColorVariant[] = [];
+  let specialVariants: UIColorVariant[] = [];
   if (product.metafield?.value) {
     try {
       const FAMILY = product.metafield.value.trim();
@@ -175,10 +179,12 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
             title: node.title,
             handle: node.handle,
             featuredImage: finalImage,
+            categoryVariant: node.category_variant?.value || null,
           };
         });
       }
-      colorVariants = mapColorVariants(colorVariantsRes)
+      colorVariants = mapColorVariants(colorVariantsRes.filter((edge: any) => edge.node.variant_type?.value !== 'special'))
+      specialVariants = mapColorVariants(colorVariantsRes.filter((edge: any) => edge.node.variant_type?.value === 'special'))
       // Include all variants, we'll handle the current product styling in the UI
       // The current product will be identified by matching the handle
     } catch (error) {
@@ -204,7 +210,7 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
       console.error('Error fetching club variants:', error);
     }
   }
-  return { product, colorVariants, clubVariants, bundleBtn };
+  return { product, colorVariants, clubVariants, bundleBtn, specialVariants };
 }
 
 async function loadDeferredData({ context, request, product }: Route.LoaderArgs & { product?: any }) {
@@ -250,7 +256,7 @@ async function loadDeferredData({ context, request, product }: Route.LoaderArgs 
   return { recommendedProducts, shippingDetails, showBestSellers };
 }
 export default function Product() {
-  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails } = useLoaderData<typeof loader>();
+  const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails, url, publicStoreDomain, specialVariants } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
   const [sessionDiscount, setSessionDiscount] = useState<any>(null);
@@ -486,10 +492,18 @@ export default function Product() {
                   colorVariants={colorVariants}
                   shippingDetails={shippingDetails}
                   currentProductId={product.id}
+                  optionSubtext={resolvedProductDetails?.optionSubtext}
                   collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
                   sessionDiscount={sessionDiscount}
+                  product={product}
+                  specialVariants={specialVariants}
+                  selectedSpecialVariant={
+                    specialVariants?.some((v: any) => v.handle === product?.handle) 
+                      ? selectedVariant 
+                      : null
+                  }
                 />
               )}
             </Await>
@@ -773,6 +787,17 @@ export default function Product() {
           ],
         }}
       />
+      {/* Yotpo Reviews Widget */}
+      {/* <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 mt-12 mb-12"> */}
+      <div className="yotpo-wrapper">
+        <YotpoReviewWidget
+          product={product}
+          url={`https://${publicStoreDomain}/products/${product.handle}`}
+          price={selectedVariant?.price?.amount || finalPrice.toFixed(2)}
+          currency={selectedVariant?.price?.currencyCode || ''}
+        />
+
+      </div>
     </div>
   );
 }
