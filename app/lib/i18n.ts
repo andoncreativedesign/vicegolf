@@ -64,6 +64,21 @@ export const COUNTRIES: Record<SupportedCountry, CountryConfig> = {
 
 export const COUNTRIES_LIST = Object.values(COUNTRIES);
 
+/**
+ * Official peg conversion rate between AED and OMR (both officially pegged to USD).
+ * 1 USD = 3.6725 AED, 1 USD = 0.3845 OMR -> 1 AED ≈ 0.1047 OMR.
+ */
+export const AED_TO_OMR_RATE = 0.1047;
+
+export function convertAedToOmr(aedAmount: number | string): string {
+  const numeric = typeof aedAmount === 'string' ? parseFloat(aedAmount) : aedAmount;
+  if (isNaN(numeric)) return '0.000';
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  }).format(numeric * AED_TO_OMR_RATE);
+}
+
 export interface I18nLocale extends I18nBase {
   pathPrefix: string;
   country: SupportedCountry;
