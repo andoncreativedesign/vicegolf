@@ -400,10 +400,28 @@ export const shippingDetailsQuery = `*[_type == "home"][0]{
       pointDescription,
       showBullet
     }
+  },
+  regionalShipping[] {
+    countryCode,
+    shippingDetails {
+      _id,
+      _type,
+      title,
+      contentType,
+      description,
+      points[] {
+        _key,
+        pointType,
+        simplePoint,
+        pointTitle,
+        pointDescription,
+        showBullet
+      }
+    }
   }
 }`;
 
-export async function getShippingDetails(env?: any): Promise<ShippingDetails | null> {
+export async function getShippingDetails(env?: any): Promise<any> {
   try {
     const axiosSanityInstance = createAxiosSanity(env);
     const query = encodeURIComponent(shippingDetailsQuery);
@@ -415,8 +433,8 @@ export async function getShippingDetails(env?: any): Promise<ShippingDetails | n
 
     const result = response.data;
 
-    // Return the shipping details directly since that's all we're querying for
-    return result.result?.shippingDetails || null;
+    // Return the whole object which includes shippingDetails and regionalShipping
+    return result.result || null;
 
   } catch (error) {
     console.error('Error fetching shipping details:', error);
