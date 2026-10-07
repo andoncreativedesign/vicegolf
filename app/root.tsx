@@ -18,6 +18,7 @@ import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
 import { LOCALIZATION_CURRENCIES_QUERY } from '~/graphql/CountriesQuery';
+import { getDiscount } from '~/utils/discounts.server';
 import type { I18nLocale } from '~/lib/i18n';
 
 export type RootLoader = typeof loader;
@@ -152,14 +153,22 @@ export async function loader(args: Route.LoaderArgs) {
     }
   }
 
-  // Final check: if no specific membership discount was found but there are global ones, 
-  // they will be handled by useMembership hook using the 'eligibleDiscounts' list.
+  let cartDiscount = null;
+  const applicableCode = criticalData?.cart?.discountCodes?.find((d: any) => d.applicable)?.code;
+  if (applicableCode) {
+    try {
+      cartDiscount = await getDiscount(applicableCode, env);
+    } catch (err) {
+      console.error('Error fetching cart discount in root loader:', err);
+    }
+  }
 
   return {
     ...deferredData,
     customer,
     automaticDiscounts: eligibleDiscounts,
     membershipDiscount,
+    cartDiscount,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({

@@ -15,6 +15,7 @@ export function useMembership() {
         eligibleCollections: []
     };
     const automaticDiscounts = data?.automaticDiscounts || [];
+    const cartDiscount = (data as any)?.cartDiscount;
 
     const customerTags = customer?.tags?.map((t: string) => t.toLowerCase().replace(/\s+/g, '_')) || [];
     const userSegment = customerTags.find((tag: string) => tag.startsWith('vice_'));
@@ -37,6 +38,18 @@ export function useMembership() {
             }
         }
     });
+
+    if (cartDiscount && cartDiscount.appliesToAll) {
+        if (cartDiscount.percentage > bestGlobalPct) {
+            bestGlobalPct = cartDiscount.percentage;
+        }
+        if (cartDiscount.amount?.amount) {
+            const amt = parseFloat(cartDiscount.amount.amount);
+            if (amt > bestGlobalAmt) {
+                bestGlobalAmt = amt;
+            }
+        }
+    }
 
     // If the membership tier discount itself is in the filtered list and matches appliesToAll, 
     // it will be caught above. 
@@ -85,6 +98,30 @@ export function useMembership() {
             }
         });
 
+        // Check active cart code discount (e.g. LEGENDS15)
+        if (cartDiscount) {
+            const isEligible =
+                cartDiscount.appliesToAll ||
+                cartDiscount.products?.includes(productId) ||
+                collectionIds.some((id: string) => cartDiscount.collections?.includes(id));
+
+            if (isEligible) {
+                const savingsFromPct = (cartDiscount.percentage || 0) * basePrice;
+                const savingsFromAmt = cartDiscount.amount?.amount ? parseFloat(cartDiscount.amount.amount) : 0;
+                const currentBestSavings = (bestPercentage * basePrice) || bestAmount;
+
+                if (savingsFromPct > currentBestSavings || savingsFromAmt > currentBestSavings) {
+                    if (savingsFromPct >= savingsFromAmt) {
+                        bestPercentage = cartDiscount.percentage;
+                        bestAmount = 0;
+                    } else {
+                        bestAmount = savingsFromAmt;
+                        bestPercentage = 0;
+                    }
+                }
+            }
+        }
+
         return {
             percentage: bestPercentage,
             amount: bestAmount,
@@ -99,5 +136,6 @@ export function useMembership() {
         getBestDiscountForProduct,
         membershipDiscount,
         automaticDiscounts,
+        cartDiscount,
     };
 }
