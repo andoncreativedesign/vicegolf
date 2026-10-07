@@ -1,5 +1,5 @@
 import { useOptimisticCart } from '@shopify/hydrogen';
-import { Link } from 'react-router';
+import { Link, useNavigation } from 'react-router';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import { useAside } from '~/components/Aside';
 import { CartLineItem } from '~/components/CartLineItem';
@@ -10,11 +10,41 @@ type CartMainProps = {
 };
 
 /**
+ * Skeleton loader shown while the cart is re-fetching after a country switch.
+ */
+function CartSkeleton() {
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden animate-pulse px-4 pt-2">
+      {[1, 2].map((i) => (
+        <div key={i} className="flex gap-4 py-4 border-b border-gray-100">
+          <div className="w-20 h-20 bg-gray-200 rounded-md flex-shrink-0" />
+          <div className="flex-1 space-y-2 pt-1">
+            <div className="h-3 bg-gray-200 rounded w-3/4" />
+            <div className="h-3 bg-gray-200 rounded w-1/2" />
+            <div className="h-3 bg-gray-200 rounded w-1/4 mt-2" />
+          </div>
+        </div>
+      ))}
+      <div className="mt-auto border-t border-gray-200 pt-4 space-y-2">
+        <div className="h-3 bg-gray-200 rounded w-1/2" />
+        <div className="h-10 bg-gray-200 rounded w-full mt-2" />
+      </div>
+    </div>
+  );
+}
+
+/**
  * The cart component used specifically for the aside/mini-cart view
  */
 export function CartMain({ cart: originalCart }: CartMainProps) {
   const cart = useOptimisticCart(originalCart);
   const { close } = useAside();
+  const navigation = useNavigation();
+
+  // While navigating between locales (country switch), show a skeleton
+  // instead of the "empty cart" flash. The cart is not actually empty —
+  // it's just waiting for the new locale's server data to arrive.
+  const isNavigating = navigation.state !== 'idle';
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
 
   return (
@@ -23,7 +53,9 @@ export function CartMain({ cart: originalCart }: CartMainProps) {
         <h2 className="text-lg font-semibold mb-4">Your Cart</h2>
       </div>
 
-      {!cartHasItems ? (
+      {isNavigating && !cartHasItems ? (
+        <CartSkeleton />
+      ) : !cartHasItems ? (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
           <p className="text-gray-500 mb-4">Your cart is empty</p>
           <Link

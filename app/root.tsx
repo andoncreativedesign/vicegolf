@@ -192,7 +192,7 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context }: Route.LoaderArgs) {
-  const { storefront } = context;
+  const { storefront, cart } = context;
 
   const golfBallsHandle = createCategoryQuery('Golf Balls');
   const golfClubsHandle = createCategoryQuery('Golf Club Set');
@@ -202,7 +202,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  const [header, productsForNav, homePageData, localizationData] = await Promise.all([
+  const [header, productsForNav, homePageData, localizationData, cartData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: { headerMenuHandle: 'main-menu' }, // Adjust to your header menu handle
@@ -225,6 +225,36 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     storefront.query<any>(LOCALIZATION_CURRENCIES_QUERY, {
       cache: storefront.CacheLong(),
     }).catch(() => null),
+    (async () => {
+      try {
+        let currentCart = await cart.get();
+        if (
+          currentCart &&
+          storefront.i18n?.country &&
+          currentCart.buyerIdentity?.countryCode !== storefront.i18n.country
+        ) {
+          try {
+            await cart.updateBuyerIdentity({
+              countryCode: storefront.i18n.country,
+              deliveryAddressPreferences: [
+                {
+                  deliveryAddress: {
+                    country: storefront.i18n.country,
+                  },
+                },
+              ],
+            } as any);
+            currentCart = await cart.get();
+          } catch (err) {
+            console.error('Error updating cart buyer identity in root loader:', err);
+          }
+        }
+        return currentCart;
+      } catch (err) {
+        console.error('Error loading cart in root loader:', err);
+        return null;
+      }
+    })(),
   ]);
 
   const bannerData = homePageData?.banner;
@@ -236,7 +266,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
     }
   });
 
-  return { header, productsForNav, banner: bannerData, marketCurrencies };
+  return { header, productsForNav, banner: bannerData, marketCurrencies, cart: cartData };
 }
 
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
@@ -352,34 +382,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
     }
   })();
 
-  const cartPromise = cart.get().then(async (currentCart: any) => {
-    if (
-      currentCart &&
-      storefront.i18n?.country &&
-      currentCart.buyerIdentity?.countryCode !== storefront.i18n.country
-    ) {
-      try {
-        await cart.updateBuyerIdentity({
-          countryCode: storefront.i18n.country,
-          deliveryAddressPreferences: [
-            {
-              deliveryAddress: {
-                country: storefront.i18n.country,
-              },
-            },
-          ],
-        } as any);
-        return await cart.get();
-      } catch (err) {
-        console.error('Error updating cart buyer identity in root loader:', err);
-        return currentCart;
-      }
-    }
-    return currentCart;
-  });
-
   return {
-    cart: cartPromise,
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
     automaticDiscounts,
@@ -550,7 +553,7 @@ export default function App() {
       }
 
       // If the link is not already prefixed with a regional market prefix
-      if (!href.startsWith(pathPrefix) && !href.match(/^\/en-(ae|sa|om)(\/|$)/i)) {
+      if (!href.startsWith(pathPrefix) && !href.match(/^\/en-[a-z]{2}(\/|$)/i)) {
         event.preventDefault();
         const localizedHref = `${pathPrefix}${href === '/' ? '' : href}`;
         navigate(localizedHref);
