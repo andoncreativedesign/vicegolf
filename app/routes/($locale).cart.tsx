@@ -26,17 +26,9 @@ export async function action({request, context}: Route.ActionArgs) {
   let result: CartQueryDataReturn;
 
   switch (action) {
-    case CartForm.ACTIONS.LinesAdd: {
+    case CartForm.ACTIONS.LinesAdd:
       result = await cart.addLines(inputs.lines);
-      const formDiscountCode = (inputs.discountCode || formData.get('discountCode')) as string | undefined;
-      if (
-        formDiscountCode &&
-        !result.cart?.discountCodes?.some((d: any) => d.applicable)
-      ) {
-        result = await cart.updateDiscountCodes([formDiscountCode]);
-      }
       break;
-    }
     case CartForm.ACTIONS.LinesUpdate:
       result = await cart.updateLines(inputs.lines);
       break;
