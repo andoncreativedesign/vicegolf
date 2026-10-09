@@ -2,12 +2,14 @@ import type { Route } from './+types/($locale).legends-offers.$code';
 import { ScanOffers } from '~/components/ScanOffers/ScanOffers';
 import { getScanOffersData, getScanBookingData } from '~/lib/sanity/scanOffers';
 import { getDiscount } from '~/utils/discounts.server';
-import { redirect } from 'react-router';
+import { redirect, data, type HeadersFunction } from 'react-router';
 import { useEffect } from 'react';
 
 export const meta: Route.MetaFunction = ({ data }: any) => {
   return [{ title: data?.scanOffersData?.seo?.title || 'Legends Offers | Vice Golf' }];
 };
+
+export const headers: HeadersFunction = ({ loaderHeaders }) => loaderHeaders;
 
 export async function loader({ params, context }: Route.LoaderArgs) {
   const { code } = params;
@@ -22,19 +24,18 @@ export async function loader({ params, context }: Route.LoaderArgs) {
   ]);
 
   if (scanOffersData && bookingData) {
-    scanOffersData.booking = bookingData
+    scanOffersData.booking = bookingData;
   }
 
   const verificationCode = scanOffersData?.verificationCode?.trim();
   const featuredProductCode = scanOffersData?.featuredProductDiscountCode;
-
 
   if (code?.trim() !== verificationCode || !verificationCode) {
     console.log(`Code mismatch - URL code: ${code}, Sanity code: ${verificationCode}`);
     return redirect('/');
   }
 
-  const { env } = context;
+  const { env, cart } = context;
   const discount = await getDiscount(featuredProductCode || '', env);
 
   if (!discount) {
@@ -46,20 +47,35 @@ export async function loader({ params, context }: Route.LoaderArgs) {
     ? { percentage: discount.percentage } 
     : { amount: discount.amount };
 
-  return { scanOffersData, discountValue, code: featuredProductCode, discount };
+  let headers = new Headers();
+  if (featuredProductCode) {
+    try {
+      const result = await cart.updateDiscountCodes([featuredProductCode]);
+      if (result.cart?.id) {
+        headers = cart.setCartId(result.cart.id);
+      }
+    } catch (err) {
+      console.error('Error applying discount code to cart in legends-offers loader:', err);
+    }
+  }
+
+  return data(
+    { scanOffersData, discountValue, code: featuredProductCode, discount },
+    { headers }
+  );
 }
 
 export default function ScanOffersRoute({ loaderData }: Route.ComponentProps) {
-  const { scanOffersData, discountValue, code, discount } = loaderData;
+  const { scanOffersData, discountValue, code } = loaderData;
 
   useEffect(() => {
-    if (code) {
-      localStorage.setItem('featuredDiscountCode', code);
-      if (discount) {
-        localStorage.setItem('featuredDiscountData', JSON.stringify(discount));
-      }
+    try {
+      localStorage.removeItem('featuredDiscountCode');
+      localStorage.removeItem('featuredDiscountData');
+    } catch {
+      // ignore
     }
-  }, [code, discount]);
+  }, []);
 
   return (
     <div className="scan-offers-page">

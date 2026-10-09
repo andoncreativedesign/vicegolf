@@ -209,14 +209,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart?: any }) {
   if (!checkoutUrl) return null;
 
-  let activeDiscountCode = cart?.discountCodes?.find((d: any) => d.applicable)?.code;
-  if (!activeDiscountCode && typeof window !== 'undefined') {
-    try {
-      activeDiscountCode = localStorage.getItem('featuredDiscountCode') || undefined;
-    } catch {
-      // ignore
-    }
-  }
+  const activeDiscountCode = cart?.discountCodes?.find((d: any) => d.applicable)?.code || cart?.discountCodes?.[0]?.code;
 
   let finalCheckoutUrl = checkoutUrl;
   if (activeDiscountCode && !checkoutUrl.includes('discount=')) {
@@ -342,20 +335,9 @@ function CartDiscounts({
     }
   }, [applyFetcher.state, applyFetcher.data]);
 
-  const shouldReloadRef = useRef(false);
-
-  useEffect(() => {
-    if (removeFetcher.state === 'idle' && removeFetcher.data && shouldReloadRef.current) {
-      window.location.reload();
-    }
-  }, [removeFetcher.state, removeFetcher.data]);
-
   const handleRemoveDiscount = () => {
     if (typeof window !== 'undefined') {
       try {
-        if (localStorage.getItem('featuredDiscountData')) {
-          shouldReloadRef.current = true;
-        }
         localStorage.removeItem('featuredDiscountCode');
         localStorage.removeItem('featuredDiscountData');
       } catch {

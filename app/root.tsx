@@ -154,10 +154,13 @@ export async function loader(args: Route.LoaderArgs) {
   }
 
   let cartDiscount = null;
-  const applicableCode = criticalData?.cart?.discountCodes?.find((d: any) => d.applicable)?.code;
-  if (applicableCode) {
+  const activeCartDiscountCode =
+    criticalData?.cart?.discountCodes?.find((d: any) => d.applicable)?.code ||
+    criticalData?.cart?.discountCodes?.[0]?.code;
+
+  if (activeCartDiscountCode) {
     try {
-      cartDiscount = await getDiscount(applicableCode, env);
+      cartDiscount = await getDiscount(activeCartDiscountCode, env);
     } catch (err) {
       console.error('Error fetching cart discount in root loader:', err);
     }

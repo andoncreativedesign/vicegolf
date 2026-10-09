@@ -363,7 +363,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 /**
  * Sub-component for rendering the product grid or empty state
  */
-function ProductGrid({ products, sessionDiscount }: { products: any, sessionDiscount?: any }) {
+function ProductGrid({ products }: { products: any }) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const navigation = useNavigation();
@@ -391,7 +391,6 @@ function ProductGrid({ products, sessionDiscount }: { products: any, sessionDisc
                             key={node.id}
                             product={node}
                             loading={index < 8 ? 'eager' : undefined}
-                            sessionDiscount={sessionDiscount}
                         />
                     )}
                 </PaginatedResourceSection>
@@ -420,21 +419,6 @@ function ProductGrid({ products, sessionDiscount }: { products: any, sessionDisc
 
 export default function Collection() {
     const { collection, handle, listing, cardSection } = useLoaderData<typeof loader>();
-    const [sessionDiscount, setSessionDiscount] = useState<any>(null);
-
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const storedData = localStorage.getItem('featuredDiscountData');
-        if (storedData) {
-            try {
-                const parsedDiscount = JSON.parse(storedData);
-                console.log('[Collection] Setting session discount from localStorage:', parsedDiscount);
-                setSessionDiscount(parsedDiscount);
-            } catch (e) {
-                console.error('Error parsing stored discount data:', e);
-            }
-        }
-    }, []);
 
     return (
         <div className="collection px-4 md:px-6 lg:px-8">
@@ -491,7 +475,7 @@ export default function Collection() {
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
-                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
+                        <ProductGrid products={collection?.products} />
                     </SortFilter>
                 </div>
             ) : (
@@ -517,7 +501,7 @@ export default function Collection() {
                         filters={collection?.products?.filters || []}
                         hide={collection?.hide_filters?.value === 'true'}
                     >
-                        <ProductGrid products={collection?.products} sessionDiscount={sessionDiscount} />
+                        <ProductGrid products={collection?.products} />
                     </SortFilter>
                 </div>
             )}
