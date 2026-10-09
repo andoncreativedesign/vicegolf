@@ -39,18 +39,6 @@ export function useMembership() {
         }
     });
 
-    if (cartDiscount && cartDiscount.appliesToAll) {
-        if (cartDiscount.percentage > bestGlobalPct) {
-            bestGlobalPct = cartDiscount.percentage;
-        }
-        if (cartDiscount.amount?.amount) {
-            const amt = parseFloat(cartDiscount.amount.amount);
-            if (amt > bestGlobalAmt) {
-                bestGlobalAmt = amt;
-            }
-        }
-    }
-
     // If the membership tier discount itself is in the filtered list and matches appliesToAll, 
     // it will be caught above. 
 
@@ -98,10 +86,11 @@ export function useMembership() {
             }
         });
 
-        // Check active cart code discount (e.g. LEGENDS15)
-        if (cartDiscount) {
+        // Check active cart code discount for specific products/collections (e.g. LEGENDS15)
+        // Order-level discounts (appliesToAll: true, like XYZ or XYZA) apply to the order total at checkout,
+        // NOT to individual product unit prices, preventing double-counting!
+        if (cartDiscount && !cartDiscount.appliesToAll) {
             const isEligible =
-                cartDiscount.appliesToAll ||
                 cartDiscount.products?.includes(productId) ||
                 collectionIds.some((id: string) => cartDiscount.collections?.includes(id));
 
