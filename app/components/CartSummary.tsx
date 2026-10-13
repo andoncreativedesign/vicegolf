@@ -34,9 +34,10 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
     const cost = line?.cost;
     const merchandise = line?.merchandise;
     if (!cost || !merchandise) return;
+    const quantity = typeof line.quantity === 'number' ? line.quantity : 1;
+    if (quantity <= 0) return;
 
     const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise.price?.amount || '0');
-    const quantity = line.quantity || 1;
     const lineBaseTotal = basePrice * quantity;
 
     const productCollections = merchandise.product?.collections?.nodes?.map((c: any) => c.id) || [];

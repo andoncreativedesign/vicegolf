@@ -551,10 +551,10 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
       {/* Add to Cart Button */}
       <div className="mb-6">
         <AddToCartButton
-          disabled={!selectedVariant || !selectedVariant.availableForSale || isMaxQuantityReached}
+          disabled={!selectedVariant || !selectedVariant.availableForSale || isMaxQuantityReached || totalQuantityDozens <= 0}
           onClick={handleAddToCart}
           lines={
-            selectedVariant
+            selectedVariant && selectedVariant.availableForSale && totalQuantityDozens > 0
               ? [
                 {
                   merchandiseId: selectedVariant.id,
@@ -576,7 +576,7 @@ export const ProductForm = forwardRef<HTMLDivElement, ProductFormProps>(({
         >
           {!selectedVariant || !selectedVariant.availableForSale ? (
             'Out of stock'
-          ) : isMaxQuantityReached ? (
+          ) : isMaxQuantityReached || totalQuantityDozens <= 0 ? (
             'Max quantity in cart reached'
           ) : (
             <span className="flex items-center justify-center gap-1">

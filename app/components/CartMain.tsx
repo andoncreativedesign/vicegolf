@@ -71,11 +71,13 @@ export function CartMain({ cart: originalCart }: CartMainProps) {
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             <ul className="space-y-4">
-              {cart?.lines?.nodes.map((line) => (
-                <li key={line.id}>
-                  <CartLineItem line={line} layout="aside" />
-                </li>
-              ))}
+              {cart?.lines?.nodes
+                ?.filter((line) => line.quantity > 0)
+                .map((line) => (
+                  <li key={line.id}>
+                    <CartLineItem line={line} layout="aside" />
+                  </li>
+                ))}
             </ul>
           </div>
 
