@@ -80,9 +80,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   let actualPercentage = 0;
   let actualAmount = 0;
 
-  if (baseVal > totVal) {
-    actualPercentage = Math.round((1 - (totVal / baseVal)) * 100) / 100;
-    actualAmount = Math.max(0, baseVal - totVal);
+  if (baseVal > currentSubtotalVal) {
+    actualPercentage = Math.round((1 - (currentSubtotalVal / baseVal)) * 100) / 100;
+    actualAmount = Math.max(0, baseVal - currentSubtotalVal);
   }
 
   const displayPercentage = (actualPercentage * 100).toFixed(0);
