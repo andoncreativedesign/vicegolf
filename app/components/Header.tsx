@@ -301,6 +301,12 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
   const marketCurrencies = (rootData as any)?.marketCurrencies;
   const activeCurrency = marketCurrencies?.[activeCountryCode] || selectedCountry.currency;
 
+  // Only display markets that are currently Active in Shopify Admin (present in marketCurrencies)
+  const activeCountries = COUNTRIES_LIST.filter(
+    (country) => marketCurrencies && marketCurrencies[country.code]
+  );
+  const displayCountries = activeCountries.length > 0 ? activeCountries : COUNTRIES_LIST;
+
   // Close dropdown when pressing outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -387,7 +393,7 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
           className="absolute top-full mt-2 left-0 w-[260px] bg-[#f8f8f8] border border-gray-200 shadow-lg z-[99999] py-2 rounded-sm"
         >
           <div className="flex flex-col">
-            {COUNTRIES_LIST.map((country) => {
+            {displayCountries.map((country) => {
               const isSelected = country.code === activeCountryCode;
               const countryCurrency = marketCurrencies?.[country.code] || country.currency;
               return (
