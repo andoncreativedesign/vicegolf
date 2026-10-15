@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Analytics, getShopAnalytics, useNonce } from '@shopify/hydrogen';
-import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, } from 'react-router';
+import { Outlet, useRouteError, isRouteErrorResponse, type ShouldRevalidateFunction, Links, Meta, Scripts, ScrollRestoration, useRouteLoaderData, useNavigate } from 'react-router';
 import type { Route } from './+types/root';
 import favicon from '~/assets/vicefav.svg';
 import { FOOTER_QUERY, HEADER_QUERY } from '~/lib/fragments';
@@ -17,6 +17,9 @@ import blogStyles from '~/components/Blog/blog.css?url';
 import { CookieConsentWrapper } from './components/cookie/CookieConsentWrapper';
 import { axiosShopifyAdmin } from '~/utils/axiosInsatances';
 import { GET_AUTOMATIC_DISCOUNT_QUERY } from '~/graphql/admin/DiscountQuery';
+import { LOCALIZATION_CURRENCIES_QUERY } from '~/graphql/CountriesQuery';
+import { getDiscount } from '~/utils/discounts.server';
+import type { I18nLocale } from '~/lib/i18n';
 
 export type RootLoader = typeof loader;
 
@@ -33,6 +36,11 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
   // revalidate when manually revalidating via useRevalidator
   if (currentUrl.toString() === nextUrl.toString()) return true;
+
+  // Revalidate whenever the market region prefix changes (e.g. /en-om to /en-sa or /en-qa)
+  const currentLocale = currentUrl.pathname.split('/')[1]?.toLowerCase();
+  const nextLocale = nextUrl.pathname.split('/')[1]?.toLowerCase();
+  if (currentLocale !== nextLocale) return true;
 
   // Defaulting to no revalidation for root loader data to improve performance.
   // When using this feature, you risk your UI getting out of sync with your server.
@@ -145,14 +153,25 @@ export async function loader(args: Route.LoaderArgs) {
     }
   }
 
-  // Final check: if no specific membership discount was found but there are global ones, 
-  // they will be handled by useMembership hook using the 'eligibleDiscounts' list.
+  let cartDiscount = null;
+  const activeCartDiscountCode =
+    criticalData?.cart?.discountCodes?.find((d: any) => d.applicable)?.code ||
+    criticalData?.cart?.discountCodes?.[0]?.code;
+
+  if (activeCartDiscountCode) {
+    try {
+      cartDiscount = await getDiscount(activeCartDiscountCode, env);
+    } catch (err) {
+      console.error('Error fetching cart discount in root loader:', err);
+    }
+  }
 
   return {
     ...deferredData,
     customer,
     automaticDiscounts: eligibleDiscounts,
     membershipDiscount,
+    cartDiscount,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -169,6 +188,11 @@ export async function loader(args: Route.LoaderArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
+    selectedLocale: {
+      ...(args.context.storefront.i18n as I18nLocale),
+      currency: criticalData?.marketCurrencies?.[args.context.storefront.i18n.country] || (args.context.storefront.i18n as any)?.currency || '',
+    },
+    marketCurrencies: criticalData?.marketCurrencies,
     publicKlaviyoCompanyId: env.PUBLIC_KLAVIYO_COMPANY_ID,
     publicYotpoAppKey: env.PUBLIC_YOTPO_APP_KEY,
     publicYotpoInstanceId: env.PUBLIC_YOTPO_INSTANCE_ID,
@@ -180,7 +204,7 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context }: Route.LoaderArgs) {
-  const { storefront } = context;
+  const { storefront, cart } = context;
 
   const golfBallsHandle = createCategoryQuery('Golf Balls');
   const golfClubsHandle = createCategoryQuery('Golf Club Set');
@@ -190,7 +214,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
   const fittingCustomisationHandle = createCategoryQuery('Longsleeve');
   const juniorsHandle = createCategoryQuery('Divot Tool');
 
-  const [header, productsForNav, homePageData] = await Promise.all([
+  const [header, productsForNav, homePageData, localizationData, cartData] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: { headerMenuHandle: 'main-menu' }, // Adjust to your header menu handle
@@ -199,8 +223,8 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       cache: storefront.CacheLong(),
       variables: {
         handle: "customer-account-main-menu",
-        country: "IN",
-        language: "EN",
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       }
     }),
     // Fetch home page data including banner
@@ -210,11 +234,51 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       console.error('Error fetching home page data:', error);
       return null;
     }),
+    storefront.query<any>(LOCALIZATION_CURRENCIES_QUERY, {
+      cache: storefront.CacheLong(),
+    }).catch(() => null),
+    (async () => {
+      try {
+        let currentCart = await cart.get();
+        if (
+          currentCart &&
+          storefront.i18n?.country &&
+          currentCart.buyerIdentity?.countryCode !== storefront.i18n.country
+        ) {
+          try {
+            await cart.updateBuyerIdentity({
+              countryCode: storefront.i18n.country,
+              deliveryAddressPreferences: [
+                {
+                  deliveryAddress: {
+                    country: storefront.i18n.country,
+                  },
+                },
+              ],
+            } as any);
+            currentCart = await cart.get();
+          } catch (err) {
+            console.error('Error updating cart buyer identity in root loader:', err);
+          }
+        }
+        return currentCart;
+      } catch (err) {
+        console.error('Error loading cart in root loader:', err);
+        return null;
+      }
+    })(),
   ]);
 
   const bannerData = homePageData?.banner;
 
-  return { header, productsForNav, banner: bannerData };
+  const marketCurrencies: Record<string, string> = {};
+  localizationData?.localization?.availableCountries?.forEach((c: any) => {
+    if (c?.isoCode && c?.currency?.isoCode) {
+      marketCurrencies[c.isoCode] = c.currency.isoCode;
+    }
+  });
+
+  return { header, productsForNav, banner: bannerData, marketCurrencies, cart: cartData };
 }
 
 import { CUSTOMER_DETAILS_QUERY } from '~/graphql/customer-account/CustomerDetailsQuery';
@@ -286,12 +350,26 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
           let pct = value?.percentage ?? 0;
           if (typeof pct === 'number' && pct > 1) pct = pct / 100;
 
+          const amount = value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null;
+          const currencyCode = value?.amount?.currencyCode || null;
+
+          const productPrices: Record<string, number> = {};
+          if (items?.products?.nodes) {
+            items.products.nodes.forEach((p: any) => {
+              const pPrice = parseFloat(p.variants?.nodes?.[0]?.price || '0');
+              if (p.id && pPrice > 0) {
+                productPrices[p.id] = pPrice;
+              }
+            });
+          }
+
           return {
             title: ad.title,
             summary: ad.summary,
             percentage: pct,
-            amount: value?.amount ? parseFloat(value.amount.amount.replace(/,/g, '')) : null,
-            currencyCode: value?.amount?.currencyCode || null,
+            amount: amount,
+            currencyCode: currencyCode,
+            productPrices,
             eligibleProducts: items?.products?.nodes?.map((p: any) => p.id) || [],
             eligibleCollections: items?.collections?.nodes?.map((c: any) => c.id) || [],
             appliesToAll: items?.__typename === 'AllDiscountItems' || !items,
@@ -309,7 +387,6 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
         };
       }).filter(Boolean);
 
-      // console.log('Mapped Discounts (Titles):', mappedDiscounts.map((d: any) => d.title));
       return mappedDiscounts;
     } catch (e) {
       console.error('Error fetching automatic discounts:', e);
@@ -318,7 +395,6 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
   })();
 
   return {
-    cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
     customer,
     automaticDiscounts,
@@ -330,7 +406,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
   const nonce = useNonce();
   const data = useRouteLoaderData<typeof loader>('root');
   const isTargetDomain = data?.isTargetDomain;
-  const { header, footer, storeDomain, publicYotpoAppKey } = data || {};
+  const { header, footer, publicStoreDomain, publicYotpoAppKey } = data || {};
   const yotpoAppKey = publicYotpoAppKey || '';
 
   // useEffect(() => {
@@ -456,6 +532,49 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
+  const navigate = useNavigate();
+
+  // Universal regional link localization: automatically preserves active market prefix for all links across the site
+  useEffect(() => {
+    const pathPrefix = data?.selectedLocale?.pathPrefix;
+    if (!pathPrefix) return;
+
+    const handleGlobalLinkClick = (event: MouseEvent) => {
+      // Ignore clicks with modifier keys or secondary buttons
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+
+      const anchor = (event.target as HTMLElement).closest('a');
+      if (!anchor) return;
+
+      // Ignore target="_blank", downloads, or external relations
+      if (anchor.target && anchor.target !== '_self') return;
+      if (anchor.hasAttribute('download')) return;
+
+      const href = anchor.getAttribute('href');
+      // Only process internal relative paths (exclude external, hash, api, and already-prefixed paths)
+      if (
+        !href ||
+        !href.startsWith('/') ||
+        href.startsWith('//') ||
+        href.startsWith('/api') ||
+        href.startsWith('#')
+      ) {
+        return;
+      }
+
+      // If the link is not already prefixed with a regional market prefix
+      if (!href.startsWith(pathPrefix) && !href.match(/^\/en-[a-z]{2}(\/|$)/i)) {
+        event.preventDefault();
+        const localizedHref = `${pathPrefix}${href === '/' ? '' : href}`;
+        navigate(localizedHref);
+      }
+    };
+
+    document.addEventListener('click', handleGlobalLinkClick, { capture: true });
+    return () => document.removeEventListener('click', handleGlobalLinkClick, { capture: true });
+  }, [data?.selectedLocale?.pathPrefix, navigate]);
 
   useEffect(() => {
     if (data?.customer) {

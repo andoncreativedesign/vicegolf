@@ -15,6 +15,7 @@ export function useMembership() {
         eligibleCollections: []
     };
     const automaticDiscounts = data?.automaticDiscounts || [];
+    const cartDiscount = (data as any)?.cartDiscount;
 
     const customerTags = customer?.tags?.map((t: string) => t.toLowerCase().replace(/\s+/g, '_')) || [];
     const userSegment = customerTags.find((tag: string) => tag.startsWith('vice_'));
@@ -85,6 +86,31 @@ export function useMembership() {
             }
         });
 
+        // Check active cart code discount for specific products/collections (e.g. LEGENDS15)
+        // Order-level discounts (appliesToAll: true, like XYZ or XYZA) apply to the order total at checkout,
+        // NOT to individual product unit prices, preventing double-counting!
+        if (cartDiscount && !cartDiscount.appliesToAll) {
+            const isEligible =
+                cartDiscount.products?.includes(productId) ||
+                collectionIds.some((id: string) => cartDiscount.collections?.includes(id));
+
+            if (isEligible) {
+                const savingsFromPct = (cartDiscount.percentage || 0) * basePrice;
+                const savingsFromAmt = cartDiscount.amount?.amount ? parseFloat(cartDiscount.amount.amount) : 0;
+                const currentBestSavings = (bestPercentage * basePrice) || bestAmount;
+
+                if (savingsFromPct > currentBestSavings || savingsFromAmt > currentBestSavings) {
+                    if (savingsFromPct >= savingsFromAmt) {
+                        bestPercentage = cartDiscount.percentage;
+                        bestAmount = 0;
+                    } else {
+                        bestAmount = savingsFromAmt;
+                        bestPercentage = 0;
+                    }
+                }
+            }
+        }
+
         return {
             percentage: bestPercentage,
             amount: bestAmount,
@@ -99,5 +125,6 @@ export function useMembership() {
         getBestDiscountForProduct,
         membershipDiscount,
         automaticDiscounts,
+        cartDiscount,
     };
 }

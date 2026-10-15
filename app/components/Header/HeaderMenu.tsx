@@ -4,7 +4,6 @@ import { NavLink, useFetcher, useNavigate } from "react-router"
 import NavDropdownItem from "./NavDropdownItem";
 import { useAside } from '~/components/Aside';
 import { useEffect, useState, useRef } from "react";
-import { CountryCurrencySelector } from '../Header';
 
 // Custom SVG Caret component
 const CaretIcon = ({ className = "" }) => (
@@ -207,7 +206,7 @@ const HeaderMenu = ({
   if (viewport === "mobile") {
     return (
       <nav className="w-full h-full flex flex-col relative" role="navigation">
-        <div className="flex-1 overflow-y-auto pb-24">
+        <div className="flex-1 overflow-y-auto pb-6">
           {activeSubmenu ? (
             <div>
               <button
@@ -274,12 +273,6 @@ const HeaderMenu = ({
           )}
         </div>
 
-        {/* Country Selector for Mobile - Fixed at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3">
-          <div className="relative z-50">
-            <CountryCurrencySelector isMobile={true} />
-          </div>
-        </div>
       </nav>
     );
   }

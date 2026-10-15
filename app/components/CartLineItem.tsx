@@ -1,8 +1,9 @@
+import { useState, useEffect, useRef } from 'react';
 import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
 import type { CartLayout } from '~/types/cart';
 import { CartForm, Image, type OptimisticCartLine } from '@shopify/hydrogen';
 import { useVariantUrl } from '~/lib/variants';
-import { Link } from 'react-router';
+import { Link, useFetcher, useRouteLoaderData } from 'react-router';
 import { ProductPrice } from './ProductPrice';
 import { useAside } from './Aside';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
@@ -18,8 +19,11 @@ export function CartLineItem({
   line: CartLine;
 }) {
   const { id, merchandise } = line;
-  const { product, title, image, selectedOptions } = merchandise;
-  const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+  const product = (merchandise as any)?.product;
+  const title = merchandise?.title || product?.title || 'Product';
+  const image = merchandise?.image || product?.featuredImage;
+  const selectedOptions = merchandise?.selectedOptions || [];
+  const lineItemUrl = useVariantUrl(product?.handle || '', selectedOptions);
   const { close } = useAside();
   const { getBestDiscountForProduct } = useMembership();
 
@@ -53,7 +57,7 @@ export function CartLineItem({
                 onClick={() => layout === 'aside' && close()}
                 style={{ textDecoration: 'none' }}
               >
-                {product.title}
+                {product?.title || title}
               </Link>
 
               {selectedOptions.length > 0 && (
@@ -77,12 +81,14 @@ export function CartLineItem({
                     const cost = line?.cost;
                     if (!cost) return undefined;
 
-                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || '0');
-                    const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-                    const { percentage, amount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise?.price?.amount || '0');
+                    const productCollections = product?.collections?.nodes?.map((c: any) => c.id) || [];
+                    const { percentage, amount } = product?.id
+                      ? getBestDiscountForProduct(product.id, productCollections, basePrice)
+                      : { percentage: 0, amount: 0 };
 
                     // If Shopify Backend already applied a discount, use it natively
-                    if (parseFloat(cost.totalAmount.amount) < basePrice * line.quantity) {
+                    if (parseFloat(cost.totalAmount?.amount || '0') < basePrice * line.quantity) {
                       return cost.totalAmount;
                     }
 
@@ -105,12 +111,14 @@ export function CartLineItem({
                     const discountSum = discountAllocations?.reduce((acc: number, discount: any) =>
                       acc + parseFloat(discount.discountedAmount.amount), 0) || 0;
 
-                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || '0');
-                    const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-                    const { percentage, amount } = getBestDiscountForProduct(product.id, productCollections, basePrice);
+                    const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise?.price?.amount || '0');
+                    const productCollections = product?.collections?.nodes?.map((c: any) => c.id) || [];
+                    const { percentage, amount } = product?.id
+                      ? getBestDiscountForProduct(product.id, productCollections, basePrice)
+                      : { percentage: 0, amount: 0 };
 
                     if (cost.compareAtAmountPerQuantity?.amount &&
-                      cost.totalAmount.amount !== cost.compareAtAmountPerQuantity.amount) {
+                      cost.totalAmount?.amount !== cost.compareAtAmountPerQuantity.amount) {
                       return {
                         amount: String(Number(cost.compareAtAmountPerQuantity.amount) * line.quantity),
                         currencyCode: cost.compareAtAmountPerQuantity.currencyCode,
@@ -125,14 +133,14 @@ export function CartLineItem({
                     }
 
                     // If frontend member discount is active, use amountPerQuantity as compareAt
-                    if ((amount > 0 || percentage > 0) && parseFloat(cost.totalAmount.amount) >= basePrice * line.quantity) {
+                    if ((amount > 0 || percentage > 0) && parseFloat(cost.totalAmount?.amount || '0') >= basePrice * line.quantity) {
                       return {
                         amount: String(basePrice * line.quantity),
-                        currencyCode: cost.amountPerQuantity.currencyCode
+                        currencyCode: cost.amountPerQuantity?.currencyCode || cost.totalAmount?.currencyCode
                       };
                     }
 
-                    if (merchandise.compareAtPrice) {
+                    if (merchandise?.compareAtPrice) {
                       return {
                         amount: String(Number(merchandise.compareAtPrice.amount) * line.quantity),
                         currencyCode: merchandise.compareAtPrice.currencyCode,
@@ -166,46 +174,101 @@ export function CartLineItem({
 
 function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const { id: lineId, quantity, isOptimistic } = line;
-  const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
-  const nextQuantity = Number((quantity + 1).toFixed(0));
+  const { id: lineId, quantity } = line;
+
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
+  const fetcherKey = getUpdateKey([lineId]);
+  const fetcher = useFetcher({ key: fetcherKey });
 
   const quantityAvailable = (line.merchandise as any)?.quantityAvailable;
   const maxQty = typeof quantityAvailable === 'number' && quantityAvailable > 0 ? quantityAvailable : Infinity;
 
+  const [displayQuantity, setDisplayQuantity] = useState(quantity);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const targetQuantityRef = useRef(quantity);
+
+  // Synchronize targetQuantityRef with displayQuantity
+  targetQuantityRef.current = displayQuantity;
+
+  // Whenever the server/cart updates quantity and we are not debouncing, sync displayQuantity
+  useEffect(() => {
+    if (!debounceTimerRef.current && fetcher.state === 'idle') {
+      setDisplayQuantity(quantity);
+    }
+  }, [quantity, fetcher.state]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleQuantityChange = (nextQty: number) => {
+    const clampedQty = Math.max(1, Math.min(maxQty, nextQty));
+    if (clampedQty === displayQuantity) return;
+
+    setDisplayQuantity(clampedQty);
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      const targetQty = targetQuantityRef.current;
+
+      if (targetQty !== quantity) {
+        const formData = new FormData();
+        formData.set(
+          CartForm.INPUT_NAME,
+          JSON.stringify({
+            action: CartForm.ACTIONS.LinesUpdate,
+            inputs: {
+              lines: [{ id: lineId, quantity: targetQty }],
+            },
+          }),
+        );
+        fetcher.submit(formData, {
+          method: 'POST',
+          action: `${pathPrefix}/cart`,
+        });
+      }
+    }, 300);
+  };
+
   return (
     <div className="flex items-center gap-2">
-      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
-        <button
-          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-          aria-label="Decrease quantity"
-          disabled={quantity <= 1 || !!isOptimistic}
-          name="decrease-quantity"
-          value={prevQuantity}
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-          </svg>
-        </button>
-      </CartLineUpdateButton>
+      <button
+        type="button"
+        className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        aria-label="Decrease quantity"
+        disabled={displayQuantity <= 1}
+        onClick={() => handleQuantityChange(displayQuantity - 1)}
+      >
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+        </svg>
+      </button>
 
       <span className="w-6 text-center text-sm font-medium text-gray-900">
-        {quantity}
+        {displayQuantity}
       </span>
 
-      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
-        <button
-          className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-          aria-label="Increase quantity"
-          name="increase-quantity"
-          value={nextQuantity}
-          disabled={quantity >= maxQty || !!isOptimistic}
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </CartLineUpdateButton>
+      <button
+        type="button"
+        className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+        aria-label="Increase quantity"
+        disabled={displayQuantity >= maxQty}
+        onClick={() => handleQuantityChange(displayQuantity + 1)}
+      >
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
     </div>
   );
 }
@@ -217,10 +280,12 @@ function CartLineRemoveButton({
   lineIds: string[];
   disabled: boolean;
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds }}
     >
@@ -245,12 +310,14 @@ function CartLineUpdateButton({
   children: React.ReactNode;
   lines: CartLineUpdateInput[];
 }) {
+  const rootData = useRouteLoaderData<any>('root');
+  const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   const lineIds = lines.map((line) => line.id);
 
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={`${pathPrefix}/cart`}
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{ lines }}
     >

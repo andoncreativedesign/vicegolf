@@ -39,6 +39,7 @@ import { getShippingDetails } from '~/lib/sanity/home';
 import { ChevronRight } from 'lucide-react';
 import { DriversProduct } from '~/components/Product/DriversProduct';
 import { YotpoReviewWidget } from '~/components/yopto/YotpoReviewWidget';
+import { useMembership } from '~/hooks/useMembership';
 type ProductImageType = {
   id: string;
   url: string;
@@ -259,29 +260,6 @@ export default function Product() {
   const { product, colorVariants, clubVariants, recommendedProducts, shippingDetails, showBestSellers, bundleBtn, productDetails, url, publicStoreDomain, specialVariants } = useLoaderData<typeof loader>();
   const navigate = useNavigate()
   const fetcher = useFetcher()
-  const [sessionDiscount, setSessionDiscount] = useState<any>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const storedData = localStorage.getItem('featuredDiscountData');
-    if (storedData) {
-      try {
-        const discount = JSON.parse(storedData);
-        console.log('[Product] Checking eligibility for stored discount:', discount);
-        
-        const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
-        const isEligibleProduct = discount.products.includes(product.id);
-        const isEligibleCollection = productCollections.some((id: string) => discount.collections.includes(id));
-        
-        if (discount.appliesToAll || isEligibleProduct || isEligibleCollection) {
-          console.log('[Product] SUCCESS: Setting session discount from localStorage');
-          setSessionDiscount(discount);
-        }
-      } catch (e) {
-        console.error('Error parsing stored discount data:', e);
-      }
-    }
-  }, [product.id, product.collections]);
   // useEffect(() => {
   // if (!data) return
   // console.log("data.homePageData ", data.homePageData)
@@ -340,14 +318,15 @@ export default function Product() {
   }, [selectedVariant, images]);
 
   const price = parseFloat(selectedVariant?.price?.amount || '0');
-  let finalPrice = price;
+  const { getBestDiscountForProduct } = useMembership();
+  const productCollections = product.collections?.nodes?.map((c: any) => c.id) || [];
+  const { percentage: productPercentage, amount: productAmount } = getBestDiscountForProduct(product.id, productCollections, price);
 
-  if (sessionDiscount) {
-    if (sessionDiscount.percentage) {
-      finalPrice = price * (1 - sessionDiscount.percentage);
-    } else if (sessionDiscount.amount) {
-      finalPrice = Math.max(0, price - parseFloat(sessionDiscount.amount.amount));
-    }
+  let finalPrice = price;
+  if (productAmount > 0) {
+    finalPrice = Math.max(0, price - productAmount);
+  } else if (productPercentage > 0) {
+    finalPrice = price * (1 - productPercentage);
   }
 
   // Track page view event
@@ -496,7 +475,6 @@ export default function Product() {
                   collectionIds={product.collections?.nodes?.map((c: any) => c.id) || []}
                   clubVariants={clubVariants}
                   bundleBtn={bundleBtn}
-                  sessionDiscount={sessionDiscount}
                   product={product}
                   specialVariants={specialVariants}
                   selectedSpecialVariant={
@@ -794,7 +772,7 @@ export default function Product() {
           product={product}
           url={`https://${publicStoreDomain}/products/${product.handle}`}
           price={selectedVariant?.price?.amount || finalPrice.toFixed(2)}
-          currency={selectedVariant?.price?.currencyCode || 'USD'}
+          currency={selectedVariant?.price?.currencyCode || ''}
         />
 
       </div>

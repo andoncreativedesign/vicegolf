@@ -2,6 +2,7 @@ import { Image } from '@shopify/hydrogen';
 import { useFetcher, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import type { ViceLookSectionData } from '~/lib/sanity/home';
+import { AedIcon } from '../ui/AedIcon';
 
 export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
     const navigate = useNavigate()
@@ -131,7 +132,7 @@ export function ViceLookSection({ data }: { data?: ViceLookSectionData }) {
                                                                 </span>
                                                                 {tooltip.product?.store?.priceRange && (
                                                                     <div className="flex items-center gap-1 mt-0.5">
-                                                                        <img src="/uae-dirham-symbol.svg" alt="AED" className="h-3 w-auto" />
+                                                                        <AedIcon className="h-3 w-auto" />
                                                                         <span className="text-gray-900 font-bold text-sm leading-none">{formatPrice(tooltip.product.store.priceRange)}</span>
                                                                     </div>
                                                                 )}

@@ -6,6 +6,7 @@ export type Discount = {
   products: string[];
   percentage: number;
   amount: { amount: string, currencyCode: string } | null;
+  appliesOnEachItem?: boolean;
   appliesToAll: boolean;
 };
 
@@ -38,6 +39,7 @@ export async function getDiscount(code: string, env: any): Promise<Discount | nu
       products: items?.products?.nodes?.map((p: any) => p.id) || [],
       percentage: value?.percentage ?? 0,
       amount: value?.amount || null,
+      appliesOnEachItem: value?.appliesOnEachItem ?? false,
       appliesToAll: items?.__typename === 'AllDiscountItems',
     };
 

@@ -139,7 +139,7 @@ export function QuantitySelector({
                     </div>
                     {tierNum > 1 && (
                       <div className="text-sm text-gray-500 mt-1 flex items-center">
-                        {currencyCode === 'AED' ? <AedIcon className="w-[11px] h-[11px] mr-1" /> : <span className="mr-1">{currencyCode}</span>}
+                        <AedIcon className="w-[11px] h-[11px] mr-1" currency={currencyCode} />
                         {totalPriceText}
                       </div>
                     )}
@@ -149,13 +149,13 @@ export function QuantitySelector({
                 <div className="text-right">
                   <div className="flex flex-col items-end">
                     <div className="text-[17px] md:text-lg font-bold text-gray-900 flex items-center">
-                      {currencyCode === 'AED' ? <AedIcon className="w-3.5 h-3.5 mr-1" /> : <span className="mr-1">{currencyCode}</span>}
+                      <AedIcon className="w-3.5 h-3.5 mr-1" currency={currencyCode} />
                       {unitPriceText || totalPriceText}
                     </div>
                     {oldUnitPriceBase && (
                       <div className="text-sm text-gray-400 mt-0.5 flex items-center justify-end">
                         <span className="line-through flex items-center">
-                          {currencyCode === 'AED' ? <AedIcon className="w-3 h-3 mr-0.5" /> : <span className="mr-0.5">{currencyCode}</span>}
+                          <AedIcon className="w-3 h-3 mr-0.5" currency={currencyCode} />
                           {oldUnitPriceBase}
                         </span>
                         {oldUnitPriceSuffix}

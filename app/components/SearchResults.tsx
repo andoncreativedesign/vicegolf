@@ -170,14 +170,14 @@ function SearchResultsProducts({
                           {isOnSale && compareAtPrice && (
                             <div className="flex items-center text-sm text-gray-400 line-through font-medium tracking-wide">
                               {/* <span className="mr-0.5">AED</span> */}
-                              <AedIcon />
+                              <AedIcon currency={compareAtPrice?.currencyCode || price?.currencyCode} />
                               <span>{parseFloat(compareAtPrice.amount).toFixed(2)}</span>
                             </div>
                           )}
                           {price && (
                             <div className="flex items-center">
                               {/* <span className="mr-1">AED</span> */}
-                              <AedIcon />
+                              <AedIcon currency={price?.currencyCode} />
                               <span className="text-xl font-bold text-red-600 tracking-tight">
                                 {parseFloat(price.amount).toFixed(2)}
                               </span>

@@ -27,13 +27,53 @@ export async function action({request, context}: Route.ActionArgs) {
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd: {
-      result = await cart.addLines(inputs.lines);
-      const formDiscountCode = (inputs.discountCode || formData.get('discountCode')) as string | undefined;
-      if (
-        formDiscountCode &&
-        !result.cart?.discountCodes?.some((d: any) => d.applicable)
-      ) {
-        result = await cart.updateDiscountCodes([formDiscountCode]);
+      /**
+       * Strip any UI-only fields (e.g. `selectedVariant`) that are not part of
+       * the Shopify CartLineInput schema. Only pass the fields Shopify accepts.
+       */
+      const sanitizedLines = (inputs.lines || [])
+        .filter((line: any) => line?.merchandiseId && Number(line.quantity) > 0)
+        .map((line: any) => ({
+          merchandiseId: line.merchandiseId,
+          quantity: Number(line.quantity),
+          ...(line.attributes ? {attributes: line.attributes} : {}),
+          ...(line.sellingPlanId ? {sellingPlanId: line.sellingPlanId} : {}),
+        }));
+
+      if (sanitizedLines.length === 0) {
+        result = {cart: await cart.get()};
+        break;
+      }
+
+      // Try to add to the existing cart first.
+      result = await cart.addLines(sanitizedLines);
+
+      /**
+       * If the result has no cart, or if Shopify returned userErrors/errors indicating
+       * that the session cart does not exist (e.g. completed via checkout),
+       * create a fresh cart instead.
+       */
+      const hasInvalidCart =
+        !result?.cart ||
+        (result as any)?.userErrors?.some(
+          (e: any) =>
+            e.field?.includes('cartId') ||
+            e.message?.toLowerCase().includes('cart does not exist') ||
+            e.message?.toLowerCase().includes('not found'),
+        ) ||
+        result?.errors?.some(
+          (e: any) =>
+            e.message?.toLowerCase().includes('cart does not exist') ||
+            e.message?.toLowerCase().includes('not found'),
+        );
+
+      if (hasInvalidCart) {
+        result = await cart.create({
+          lines: sanitizedLines,
+          buyerIdentity: {
+            countryCode: context.storefront.i18n?.country,
+          },
+        });
       }
       break;
     }
@@ -84,6 +124,29 @@ export async function action({request, context}: Route.ActionArgs) {
     }
     default:
       throw new Error(`${action} cart action is not defined`);
+  }
+
+  // Ensure the cart's buyer identity country matches the active storefront region
+  if (
+    result?.cart &&
+    context.storefront.i18n?.country &&
+    result.cart.buyerIdentity?.countryCode !== context.storefront.i18n.country
+  ) {
+    try {
+      await cart.updateBuyerIdentity({
+        countryCode: context.storefront.i18n.country,
+        deliveryAddressPreferences: [
+          {
+            deliveryAddress: {
+              country: context.storefront.i18n.country,
+            },
+          },
+        ],
+      } as any);
+      result.cart = await cart.get();
+    } catch (err) {
+      console.error('Error synchronizing cart buyer identity in cart action:', err);
+    }
   }
 
   const cartId = result?.cart?.id;
