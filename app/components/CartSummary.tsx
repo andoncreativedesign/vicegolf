@@ -6,6 +6,7 @@ import { Link, useFetcher, useFetchers, useNavigation, useRouteLoaderData } from
 import type { FetcherWithComponents } from 'react-router';
 import { AedIcon } from './ui/AedIcon';
 import { useMembership } from '~/hooks/useMembership';
+import { convertAedToOmr } from '~/lib/i18n';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -33,9 +34,10 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
     const cost = line?.cost;
     const merchandise = line?.merchandise;
     if (!cost || !merchandise) return;
+    const quantity = typeof line.quantity === 'number' ? line.quantity : 1;
+    if (quantity <= 0) return;
 
     const basePrice = parseFloat(cost.amountPerQuantity?.amount || merchandise.price?.amount || '0');
-    const quantity = line.quantity || 1;
     const lineBaseTotal = basePrice * quantity;
 
     const productCollections = merchandise.product?.collections?.nodes?.map((c: any) => c.id) || [];
@@ -79,9 +81,9 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   let actualPercentage = 0;
   let actualAmount = 0;
 
-  if (baseVal > totVal) {
-    actualPercentage = Math.round((1 - (totVal / baseVal)) * 100) / 100;
-    actualAmount = Math.max(0, baseVal - totVal);
+  if (baseVal > currentSubtotalVal) {
+    actualPercentage = Math.round((1 - (currentSubtotalVal / baseVal)) * 100) / 100;
+    actualAmount = Math.max(0, baseVal - currentSubtotalVal);
   }
 
   const displayPercentage = (actualPercentage * 100).toFixed(0);
@@ -89,6 +91,10 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   // Create overridden subtotal/total objects for Money component
   const displaySubtotal = subtotal ? { ...subtotal, amount: String(currentSubtotalVal) } : undefined;
   const displayTotal = originalTotal ? { ...originalTotal, amount: String(totVal) } : undefined;
+
+  const rootData = useRouteLoaderData<any>('root');
+  const activeCountry = rootData?.selectedLocale?.country || cart?.buyerIdentity?.countryCode;
+  const isOman = activeCountry === 'OM';
 
   return (
     <div
@@ -158,6 +164,26 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
                   {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displayTotal.amount))}
                 </span>
               </div>
+              {isOman && (
+                <div className="mt-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-neutral-800">
+                      Approx. Total (OMR)
+                    </span>
+                    <span className="text-base font-bold text-neutral-900">
+                      OMR {convertAedToOmr(displayTotal.amount)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-neutral-500">
+                    <svg className="w-3.5 h-3.5 shrink-0 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>
+                      Orders are processed in AED at checkout ({new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(displayTotal.amount))} AED)
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -184,14 +210,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 function CartCheckoutActions({ checkoutUrl, cart }: { checkoutUrl?: string, cart?: any }) {
   if (!checkoutUrl) return null;
 
-  let activeDiscountCode = cart?.discountCodes?.find((d: any) => d.applicable)?.code;
-  if (!activeDiscountCode && typeof window !== 'undefined') {
-    try {
-      activeDiscountCode = localStorage.getItem('featuredDiscountCode') || undefined;
-    } catch {
-      // ignore
-    }
-  }
+  const activeDiscountCode = cart?.discountCodes?.find((d: any) => d.applicable)?.code || cart?.discountCodes?.[0]?.code;
 
   let finalCheckoutUrl = checkoutUrl;
   if (activeDiscountCode && !checkoutUrl.includes('discount=')) {
@@ -317,20 +336,9 @@ function CartDiscounts({
     }
   }, [applyFetcher.state, applyFetcher.data]);
 
-  const shouldReloadRef = useRef(false);
-
-  useEffect(() => {
-    if (removeFetcher.state === 'idle' && removeFetcher.data && shouldReloadRef.current) {
-      window.location.reload();
-    }
-  }, [removeFetcher.state, removeFetcher.data]);
-
   const handleRemoveDiscount = () => {
     if (typeof window !== 'undefined') {
       try {
-        if (localStorage.getItem('featuredDiscountData')) {
-          shouldReloadRef.current = true;
-        }
         localStorage.removeItem('featuredDiscountCode');
         localStorage.removeItem('featuredDiscountData');
       } catch {

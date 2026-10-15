@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { type FetcherWithComponents, useRouteLoaderData } from 'react-router';
 import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
 
@@ -19,23 +18,11 @@ export function AddToCartButton({
   const pathPrefix = rootData?.selectedLocale?.pathPrefix || '';
   const cartRoute = `${pathPrefix}/cart`;
 
-  const [discountCode, setDiscountCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const code = localStorage.getItem('featuredDiscountCode');
-      if (code) setDiscountCode(code);
-    } catch {
-      // safe fallback if storage is restricted
-    }
-  }, []);
-
   return (
     <CartForm
       route={cartRoute}
       inputs={{
         lines,
-        discountCode: discountCode || undefined,
       }}
       action={CartForm.ACTIONS.LinesAdd}
     >
@@ -46,13 +33,6 @@ export function AddToCartButton({
             type="hidden"
             value={JSON.stringify(analytics)}
           />
-          {discountCode && (
-            <input
-              name="discountCode"
-              type="hidden"
-              value={discountCode}
-            />
-          )}
           <button
             type="submit"
             onClick={onClick}

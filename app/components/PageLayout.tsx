@@ -7,7 +7,7 @@ import { AedIcon } from './ui/AedIcon';
 import type { CartApiQueryFragment, FooterQuery, HeaderQuery, } from 'storefrontapi.generated';
 import { Aside, useAside } from '~/components/Aside';
 import { Footer } from '~/components/Footer';
-import { Header } from '~/components/Header';
+import { Header, CountryCurrencySelector } from '~/components/Header';
 import HeaderMenu from './Header/HeaderMenu';
 import { CartMain } from '~/components/CartMain';
 import { SEARCH_ENDPOINT, SearchFormPredictive, } from '~/components/SearchFormPredictive';
@@ -314,7 +314,14 @@ function MobileMenuAside({
   return (
     header?.menu &&
     header?.shop?.primaryDomain?.url && (
-      <Aside type="mobile" heading="">
+      <Aside
+        type="mobile"
+        heading={
+          <div className="flex items-center pl-1 py-1">
+            <CountryCurrencySelector isMobile={true} />
+          </div>
+        }
+      >
         <HeaderMenu viewport="mobile" menuItems={menuItems} />
       </Aside>
     )

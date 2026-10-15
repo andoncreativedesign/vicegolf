@@ -31,14 +31,16 @@ export function CartPage({ cart: originalCart }: CartPageProps) {
           {/* Left Column - Cart Items */}
           <div className="cart-items px-8">
             <ul className="space-y-6">
-              {cart?.lines?.nodes.map((line) => (
-                <li key={line.id}>
-                  <CartLineItem
-                    line={line}
-                    layout="page"
-                  />
-                </li>
-              ))}
+              {cart?.lines?.nodes
+                ?.filter((line) => line.quantity > 0)
+                .map((line) => (
+                  <li key={line.id}>
+                    <CartLineItem
+                      line={line}
+                      layout="page"
+                    />
+                  </li>
+                ))}
             </ul>
           </div>
 

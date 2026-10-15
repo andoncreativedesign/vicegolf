@@ -1,7 +1,7 @@
-import type { ShippingDetails } from "~/lib/sanity/home";
+import { useRouteLoaderData } from 'react-router';
 
 type ShippingInfoProps = {
-  shippingDetails: ShippingDetails;
+  shippingDetails: any; // Now contains both default and regional arrays
 };
 
 type ShippingPoint = {
@@ -14,7 +14,20 @@ type ShippingPoint = {
 };
 
 export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
+  const rootData = useRouteLoaderData<any>('root');
+  const activeCountry = rootData?.selectedLocale?.country;
+
   if (!shippingDetails) return null;
+
+  // Extract the specific regional shipping if it exists
+  const regionalData = shippingDetails.regionalShipping?.find(
+    (region: any) => region.countryCode === activeCountry
+  );
+
+  // Fallback to default if no specific regional match is found
+  const displayDetails = regionalData?.shippingDetails || shippingDetails.shippingDetails || shippingDetails;
+
+  if (!displayDetails) return null;
 
   return (
     <div className="w-full flex items-start gap-4 p-5 border border-gray-200 rounded-lg">
@@ -30,18 +43,18 @@ export function ShippingInfo({ shippingDetails }: ShippingInfoProps) {
       </div>
       <div className="flex-1">
         <h3 className="font-medium text-gray-900 mb-2 text-base">
-          {shippingDetails.title || 'Shipping Information'}
+          {displayDetails.title || 'Shipping Information'}
         </h3>
 
-        {shippingDetails.description && (
+        {displayDetails.description && (
           <p className="text-sm text-gray-600 mb-2">
-            {shippingDetails.description}
+            {displayDetails.description}
           </p>
         )}
 
-        {shippingDetails.points && shippingDetails.points.length > 0 && (
+        {displayDetails.points && displayDetails.points.length > 0 && (
           <div className="space-y-3 text-sm text-gray-600 mt-3">
-            {(shippingDetails.points as unknown as ShippingPoint[]).map((point) => (
+            {(displayDetails.points as unknown as ShippingPoint[]).map((point) => (
               <div key={point._key} className="space-y-1">
                 {point.pointType === 'simple' ? (
                   <div className="flex items-start gap-3">

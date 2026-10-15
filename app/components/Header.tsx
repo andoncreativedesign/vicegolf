@@ -301,6 +301,12 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
   const marketCurrencies = (rootData as any)?.marketCurrencies;
   const activeCurrency = marketCurrencies?.[activeCountryCode] || selectedCountry.currency;
 
+  // Only display markets that are currently Active in Shopify Admin (present in marketCurrencies)
+  const activeCountries = COUNTRIES_LIST.filter(
+    (country) => marketCurrencies && marketCurrencies[country.code]
+  );
+  const displayCountries = activeCountries.length > 0 ? activeCountries : COUNTRIES_LIST;
+
   // Close dropdown when pressing outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -363,12 +369,14 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
         aria-expanded={isOpen}
       >
         <CountryFlag country={selectedCountry.code} className="w-5 h-3.5 object-cover rounded-[2px]" />
-        <span className="hidden sm:inline">
+        <span className={isMobile ? 'inline text-sm font-medium text-gray-900' : 'hidden sm:inline'}>
           {selectedCountry.name} ({activeCurrency})
         </span>
-        <span className="sm:hidden font-medium">
-          {activeCurrency}
-        </span>
+        {!isMobile && (
+          <span className="sm:hidden font-medium">
+            {activeCurrency}
+          </span>
+        )}
         <svg
           className={`w-3.5 h-3.5 text-gray-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
@@ -382,12 +390,10 @@ export function CountryCurrencySelector({ isMobile = false }: { isMobile?: boole
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute ${
-            isMobile ? 'bottom-full mb-2 left-0' : 'top-full mt-2 left-0'
-          } w-[260px] bg-[#f8f8f8] border border-gray-200 shadow-md z-[99999] py-2 rounded-sm`}
+          className="absolute top-full mt-2 left-0 w-[260px] bg-[#f8f8f8] border border-gray-200 shadow-lg z-[99999] py-2 rounded-sm"
         >
           <div className="flex flex-col">
-            {COUNTRIES_LIST.map((country) => {
+            {displayCountries.map((country) => {
               const isSelected = country.code === activeCountryCode;
               const countryCurrency = marketCurrencies?.[country.code] || country.currency;
               return (
