@@ -337,24 +337,20 @@ function NewsletterForm() {
   }, [fetcher.data]);
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto">
       {isSuccess ? (
-        <div className="bg-black text-white p-6 rounded-2xl flex items-center justify-center gap-3 shadow-md animate-fade-in">
+        <div className="bg-black text-white p-6 rounded-full flex items-center justify-center gap-3 shadow-lg animate-fade-in border border-gray-800">
           <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-          <p className="font-medium text-base sm:text-lg">
-            {fetcher.data?.message || 'Thank you for subscribing to our newsletter!'}
+          <p className="font-semibold text-base sm:text-lg">
+            {fetcher.data?.message || manualResult?.message || 'Thank you for subscribing to our newsletter!'}
           </p>
         </div>
       ) : (
-        <fetcher.Form
-          method="post"
-          action="/api/newsletter"
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-3"
-        >
-          <div className="flex flex-col sm:flex-row gap-3">
+        <form onSubmit={handleSubmit} className="w-full">
+          {/* Unified Premium Pill Container */}
+          <div className="relative flex flex-col sm:flex-row items-center bg-[#EAEAEA] rounded-[36px] sm:rounded-full p-1.5 sm:p-2 transition-all focus-within:ring-2 focus-within:ring-black focus-within:bg-[#E5E5E5] shadow-inner">
             {/* Name Input */}
-            <div className="w-full sm:w-1/2">
+            <div className="w-full sm:w-5/12 px-4 py-2 sm:py-0">
               <input
                 type="text"
                 name="name"
@@ -363,13 +359,16 @@ function NewsletterForm() {
                 onFocus={handleFocus}
                 placeholder="Your Name"
                 disabled={isSubmitting}
-                className="w-full px-6 py-4 bg-gray-200 text-gray-900 placeholder-gray-500 text-base rounded-full focus:outline-none focus:ring-2 focus:ring-black border-0 transition-all h-[56px]"
+                className="w-full bg-transparent text-gray-900 placeholder-gray-500 text-base font-normal focus:outline-none border-0 h-[46px] px-2"
                 required
               />
             </div>
 
-            {/* Email Input + Arrow Submit Button */}
-            <div className="w-full sm:w-1/2 relative">
+            {/* Subtle Divider (Desktop only) */}
+            <div className="hidden sm:block w-[1px] h-8 bg-gray-300"></div>
+
+            {/* Email Input + Submit Arrow Button */}
+            <div className="w-full sm:w-7/12 flex items-center justify-between pl-4 pr-1 py-1 sm:py-0">
               <input
                 type="email"
                 name="email"
@@ -378,14 +377,16 @@ function NewsletterForm() {
                 onFocus={handleFocus}
                 placeholder="Type in your email"
                 disabled={isSubmitting}
-                className="w-full px-6 py-4 pr-16 bg-gray-200 text-gray-900 placeholder-gray-500 text-base rounded-full focus:outline-none focus:ring-2 focus:ring-black border-0 transition-all h-[56px]"
+                className="w-full bg-transparent text-gray-900 placeholder-gray-500 text-base font-normal focus:outline-none border-0 h-[46px] px-2 pr-12"
                 required
               />
+
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
                 aria-label="Subscribe to newsletter"
-                className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-black text-white hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center rounded-full h-[46px] w-[46px]"
+                className="flex-shrink-0 bg-black text-white hover:bg-neutral-800 active:scale-95 disabled:bg-neutral-400 transition-all flex items-center justify-center rounded-full h-[48px] w-[48px] shadow-sm ml-2 cursor-pointer"
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin text-white" />
@@ -396,14 +397,14 @@ function NewsletterForm() {
             </div>
           </div>
 
-          {/* Error Message */}
+          {/* Inline Error Message */}
           {errorMsg && (
-            <div className="flex items-center justify-center gap-2 text-rose-600 text-sm mt-1">
+            <div className="flex items-center justify-center gap-2 text-rose-600 text-sm mt-3 animate-fade-in font-medium">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
-        </fetcher.Form>
+        </form>
       )}
     </div>
   );
