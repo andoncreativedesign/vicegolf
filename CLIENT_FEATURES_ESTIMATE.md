@@ -1,22 +1,20 @@
-# Client Features Estimation & Technical Specification (Final)
+# Client Features Estimation & Technical Specification (Final - Without Sanity)
 **Storefront: Vice Golf (vicegolf.ae)**
-*Architecture: Hydrogen Storefront (Remix / Oxygen) ➡️ Sanity Studio CMS ➡️ Shopify Admin API ➡️ GTM & Meta Analytics*
+*Architecture: Hydrogen Storefront (Remix / Oxygen) ➡️ Shopify Admin API ➡️ GTM & Meta Analytics*
 
-This document provides the final, approved client-facing estimation across all 3 features. Each section matches the corresponding Google Sheets tab.
+This document provides the updated client-facing estimation with **Sanity CMS removed** from the global newsletter feature (since it is a permanent sitewide element, hardcoded for maximum performance and zero CMS latency).
 
 ---
 
-## Tab 1: Global Newsletter & Auto Account Creation (Hydrogen, Sanity, Shopify, GTM)
-**Summary:** Sitewide footer newsletter capture with Full Name and Email fields. Includes dynamic CMS copy control via Sanity Studio, asynchronous submission via Remix API route, automated customer account creation with marketing consent (`SUBSCRIBED`) in Shopify Admin API, automated customer tagging, and custom GTM DataLayer & Meta Pixel conversion tracking. *(Klaviyo setup excluded).*
+## Tab 1: Global Newsletter & Auto Account Creation (Hydrogen, Shopify, GTM)
+**Summary:** Sitewide footer newsletter capture with Full Name and Email fields. Includes asynchronous submission via Remix API route, automated customer account creation with marketing consent (`SUBSCRIBED`) in Shopify Admin API, automated customer tagging, and custom GTM DataLayer & Meta Pixel conversion tracking. *(Sanity CMS and Klaviyo setup excluded).*
 
 ### Google Sheets Copy-Paste Table (Tab 1):
 ```tsv
 Module / Platform	Task Title	Task Description & Technical Scope	Estimated Hours
 Hydrogen Frontend	Footer UI Component Refactor	Uncomment existing footer newsletter layout in Footer.tsx. Build responsive dual-pill design (Full Name + Email inputs + submit button). Fully mobile and desktop optimized across break-points.	2.00
 Hydrogen Frontend	Interactive States & UX Feedback	Implement user feedback states: idle, submitting (inline spinner), success state ("Thank you for subscribing!"), and client-side error handling for invalid emails and blank fields.	1.50
-Hydrogen Server API	Dedicated Newsletter Endpoint	Build /api/newsletter Remix action route to accept POST payload, validate inputs, rate-limit, and interface with backend services without full page reload (useFetcher).	1.50
-Sanity CMS	Footer Content Schema Extension	Extend Sanity Studio global footer settings with editable fields: newsletterHeading (default: "JOIN OUR NEWSLETTER!"), newsletterDescription, placeholder texts, and custom campaign tag.	1.50
-Sanity CMS & Hydrogen	GROQ Query & Data Hydration	Update storefront root layout query to retrieve footer newsletter schema fields dynamically from Sanity and thread them with fallbacks into the Footer component.	1.00
+Hydrogen Server API	Dedicated Newsletter Endpoint	Build /api/newsletter Remix action route to accept POST payload, validate inputs, rate-limit, and interface with backend services without full page reload.	1.50
 Shopify Admin API	Customer Existence & Account Lookup	Query Shopify Admin GraphQL API by email. Detect whether the customer record already exists or needs to be newly provisioned with proper token/permission handling.	1.00
 Shopify Admin API	Auto-Account Creation & Name Splitting	Parse full name into firstName and lastName. Automatically create customer account via customerCreate mutation if no account exists in Shopify.	1.50
 Shopify Admin API	Marketing Consent & Single Opt-In	Execute customerEmailMarketingConsentUpdate mutation setting marketingState to SUBSCRIBED with SINGLE_OPT_IN level for immediate subscriber eligibility.	1.00
@@ -25,7 +23,7 @@ GTM & Meta Analytics	GTM DataLayer Implementation	Implement globalNewsletterTrac
 GTM & Meta Analytics	Meta Pixel Lead Event Tracking	Fire direct Meta Pixel event fbq('track', 'Lead', { content_name: 'Global Newsletter Signup', form_location: 'global_footer' }) on successful signup.	0.50
 QA & Verification	Cross-Device & Browser UI Testing	Cross-browser testing across mobile Safari (iOS), Chrome (Android), tablet, and desktop (Chrome, Safari, Firefox). Verify accessibility and keyboard behavior.	1.50
 QA & Verification	End-to-End System Integration Testing	Live submission verification: check Shopify Admin customer creation, check name & consent status, verify tag assignments, and test GTM Debug Preview.	2.00
-Total Estimated Time		Tab 1 Total Hours	17.50
+Total Estimated Time		Tab 1 Total Hours	15.00
 ```
 
 ---
@@ -61,8 +59,8 @@ Total Estimated Time		Tab 3 Total Hours	3.00
 
 ```tsv
 Tab / Feature	Feature Summary	Estimated Hours
-Tab 1	Global Newsletter & Auto-Account (Hydrogen UI/API, Sanity CMS, Shopify Mutations, GTM)	17.50
+Tab 1	Global Newsletter & Auto-Account (Hydrogen UI/API, Shopify Mutations, GTM)	15.00
 Tab 2	Country Traffic Security (Block Chinese Traffic via Oxygen Header)	1.50
 Tab 3	Regional URL Routing (UAE Root Domain without /en-ae prefix)	3.00
-Grand Total	Full Implementation of All 3 Features	22.00
+Grand Total	Full Implementation of All 3 Features	19.50
 ```
