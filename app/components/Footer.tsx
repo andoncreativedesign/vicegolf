@@ -1,8 +1,8 @@
-import { Suspense } from 'react';
-import { useState } from 'react';
-import { Await, NavLink } from 'react-router';
-// import { ArrowRight } from 'lucide-react';
+import { Suspense, useState, useEffect, useRef } from 'react';
+import { Await, NavLink, useFetcher } from 'react-router';
+import { ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { FaInstagram, FaFacebookF, FaTiktok, FaYoutube, FaLinkedinIn, FaPinterestP } from "react-icons/fa";
+import { globalNewsletterTrack } from '~/lib/analytics/newsletterEvents';
 
 import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated';
 import { useCookieConsent } from '~/contexts/CookieConsentContext';
@@ -18,73 +18,25 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
-
-
-  // const [email, setEmail] = useState('');
-  // const [isSubmitted, setIsSubmitted] = useState(false);
-
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // Handle form submission here
-  //   console.log('Submitted email:', email);
-  //   // Show success message
-  //   setIsSubmitted(true);
-  //   // Clear the input field
-  //   setEmail('');
-  //   // Reset the success message after 5 seconds
-  //   setTimeout(() => {
-  //     setIsSubmitted(false);
-  //   }, 5000);
-  // };
   return (
     <footer className="bg-white">
-      {/* Modern Newsletter Section - Commented Out */}
-      {/* <div className="bg-gray-50 border-b border-gray-200 py-10">
+      {/* Global Newsletter Section */}
+      <div className="bg-[#f9f9f9] border-t border-b border-gray-200 py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-light tracking-wide text-gray-900 sm:text-4xl uppercase">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl uppercase">
               JOIN OUR NEWSLETTER!
             </h2>
-            <p className="mt-2 text-base text-gray-600">
+            <p className="mt-3 text-base text-gray-600 sm:text-lg">
               Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
             </p>
-            <div className="mt-6 flex justify-center">
-              <form onSubmit={handleSubmit} className="w-full max-w-2xl">
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Type in your email"
-                    className="w-full px-8 py-5 pr-56 bg-gray-200 text-gray-800 placeholder-gray-500 text-base focus:outline-none focus:ring-0 border-0"
-                    style={{ borderRadius: '50px', height: '60px' }}
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="absolute top-1/2 -translate-y-1/2 bg-black text-white hover:bg-gray-800 transition-colors flex items-center justify-center"
-                    style={{ 
-                      borderRadius: '50px',
-                      right: '4px',
-                      height: '52px',
-                      width: '180px'
-                    }}
-                  >
-                    <ArrowRight className="w-6 h-6" strokeWidth={2.5} />
-                  </button>
-                </div>
-                <div className="h-6 mt-2">
-                  {isSubmitted && (
-                    <p className="text-green-500 text-sm text-center">
-                      Thank you for subscribing!
-                    </p>
-                  )}
-                </div>
-              </form>
+
+            <div className="mt-8 flex justify-center">
+              <NewsletterForm />
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
 
       {/* Main Footer Content - No border top since newsletter is removed */}
       <div className="bg-black text-white pt-10">
@@ -288,5 +240,174 @@ function FooterContent({
     </div>
   );
 }
+
+function NewsletterForm() {
+  const fetcher = useFetcher<{
+    success?: boolean;
+    error?: string;
+    message?: string;
+    action?: string;
+  }>();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const hasTrackedFormStart = useRef(false);
+  const prevDataRef = useRef(fetcher.data);
+
+  const [isManualSubmitting, setIsManualSubmitting] = useState(false);
+  const [manualResult, setManualResult] = useState<{
+    success?: boolean;
+    error?: string;
+    message?: string;
+  } | null>(null);
+
+  const isSubmitting = fetcher.state === 'submitting' || isManualSubmitting;
+  const isSuccess = (fetcher.data?.success === true) || (manualResult?.success === true);
+  const errorMsg = fetcher.data?.error || manualResult?.error;
+
+  const handleFocus = () => {
+    if (!hasTrackedFormStart.current) {
+      hasTrackedFormStart.current = true;
+      globalNewsletterTrack.formStart('global_footer');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      globalNewsletterTrack.invalidEmail('global_footer');
+      setManualResult({ error: 'Please enter your name.' });
+      return;
+    }
+
+    if (!email.trim() || !email.includes('@') || !email.includes('.')) {
+      globalNewsletterTrack.invalidEmail('global_footer');
+      setManualResult({ error: 'Please enter a valid email address.' });
+      return;
+    }
+
+    // Fire submit attempt right as button is clicked
+    globalNewsletterTrack.submitAttempt('global_footer');
+    setIsManualSubmitting(true);
+    setManualResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', name.trim());
+      formData.append('email', email.trim());
+
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      setIsManualSubmitting(false);
+
+      if (data?.success) {
+        setManualResult({ success: true, message: data.message });
+        globalNewsletterTrack.signupSuccess('global_footer');
+        setName('');
+        setEmail('');
+      } else {
+        setManualResult({ error: data?.error || 'Failed to subscribe. Please try again.' });
+        globalNewsletterTrack.invalidEmail('global_footer');
+      }
+    } catch (err: any) {
+      setIsManualSubmitting(false);
+      setManualResult({ error: err.message || 'Network error. Please try again.' });
+      globalNewsletterTrack.invalidEmail('global_footer');
+    }
+  };
+
+  useEffect(() => {
+    if (fetcher.data && fetcher.data !== prevDataRef.current) {
+      prevDataRef.current = fetcher.data;
+
+      if (fetcher.data.success) {
+        // Fire successful signup event: { event: 'newsletter_signup', form_location: 'global_footer' }
+        globalNewsletterTrack.signupSuccess('global_footer');
+        setName('');
+        setEmail('');
+      } else if (fetcher.data.error) {
+        globalNewsletterTrack.invalidEmail('global_footer');
+      }
+    }
+  }, [fetcher.data]);
+
+  return (
+    <div className="w-full max-w-2xl">
+      {isSuccess ? (
+        <div className="bg-black text-white p-6 rounded-2xl flex items-center justify-center gap-3 shadow-md animate-fade-in">
+          <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+          <p className="font-medium text-base sm:text-lg">
+            {fetcher.data?.message || 'Thank you for subscribing to our newsletter!'}
+          </p>
+        </div>
+      ) : (
+        <fetcher.Form
+          method="post"
+          action="/api/newsletter"
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-3"
+        >
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Name Input */}
+            <div className="w-full sm:w-1/2">
+              <input
+                type="text"
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onFocus={handleFocus}
+                placeholder="Your Name"
+                disabled={isSubmitting}
+                className="w-full px-6 py-4 bg-gray-200 text-gray-900 placeholder-gray-500 text-base rounded-full focus:outline-none focus:ring-2 focus:ring-black border-0 transition-all h-[56px]"
+                required
+              />
+            </div>
+
+            {/* Email Input + Arrow Submit Button */}
+            <div className="w-full sm:w-1/2 relative">
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={handleFocus}
+                placeholder="Type in your email"
+                disabled={isSubmitting}
+                className="w-full px-6 py-4 pr-16 bg-gray-200 text-gray-900 placeholder-gray-500 text-base rounded-full focus:outline-none focus:ring-2 focus:ring-black border-0 transition-all h-[56px]"
+                required
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                aria-label="Subscribe to newsletter"
+                className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-black text-white hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center rounded-full h-[46px] w-[46px]"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
+                ) : (
+                  <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {errorMsg && (
+            <div className="flex items-center justify-center gap-2 text-rose-600 text-sm mt-1">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+        </fetcher.Form>
+      )}
+    </div>
+  );
+}
+
 
 
