@@ -20,21 +20,35 @@ export function Footer({
 }: FooterProps) {
   return (
     <footer className="bg-white">
-      {/* Global Newsletter Section */}
-      <div className="bg-[#f9f9f9] border-t border-b border-gray-200 py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl uppercase">
-              JOIN OUR NEWSLETTER!
-            </h2>
-            <p className="mt-3 text-base text-gray-600 sm:text-lg">
+      {/* Global Newsletter Section — exact 1:1 vicegolf.com match */}
+      <div style={{ backgroundColor: '#f0f0f0', padding: '64px 16px 56px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 'normal',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            color: '#111111',
+            margin: '0 0 10px',
+            fontFamily: "'Poppins-Bold', sans-serif",
+            lineHeight: 1.2,
+          }}>
+            JOIN OUR NEWSLETTER!
+          </h2>
+          <p style={{
+            fontSize: '15px',
+            fontWeight: 400,
+            color: '#555555',
+            margin: '0 0 24px',
+            lineHeight: 1.5,
+            fontFamily: "'Inter-Regular', 'Inter', sans-serif",
+            textDecoration: 'none',
+          }}>
+            <span style={{ color: '#555555', textDecoration: 'none' }}>
               Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
-            </p>
-
-            <div className="mt-8 flex justify-center">
-              <NewsletterForm />
-            </div>
-          </div>
+            </span>
+          </p>
+          <NewsletterForm />
         </div>
       </div>
 
@@ -251,6 +265,8 @@ function NewsletterForm() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
   const hasTrackedFormStart = useRef(false);
   const prevDataRef = useRef(fetcher.data);
 
@@ -263,7 +279,6 @@ function NewsletterForm() {
 
   const isSubmitting = fetcher.state === 'submitting' || isManualSubmitting;
   const isSuccess = (fetcher.data?.success === true) || (manualResult?.success === true);
-  const errorMsg = fetcher.data?.error || manualResult?.error;
 
   const handleFocus = () => {
     if (!hasTrackedFormStart.current) {
@@ -275,15 +290,32 @@ function NewsletterForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName) {
       globalNewsletterTrack.invalidEmail('global_footer');
-      setManualResult({ error: 'Please enter your name.' });
+      if (nameInputRef.current) {
+        nameInputRef.current.setCustomValidity('Please fill out this field.');
+        nameInputRef.current.reportValidity();
+      }
       return;
     }
 
-    if (!email.trim() || !email.includes('@') || !email.includes('.')) {
+    if (!trimmedEmail || !trimmedEmail.includes('@') || !trimmedEmail.includes('.')) {
       globalNewsletterTrack.invalidEmail('global_footer');
-      setManualResult({ error: 'Please enter a valid email address.' });
+      if (emailInputRef.current) {
+        if (!trimmedEmail) {
+          emailInputRef.current.setCustomValidity('Please fill out this field.');
+        } else if (!trimmedEmail.includes('@')) {
+          emailInputRef.current.setCustomValidity(`Please include an '@' in the email address. '${trimmedEmail}' is missing an '@'.`);
+        } else if (!trimmedEmail.includes('.')) {
+          emailInputRef.current.setCustomValidity('Please enter a valid email address with a domain.');
+        } else {
+          emailInputRef.current.setCustomValidity('Please enter a valid email address.');
+        }
+        emailInputRef.current.reportValidity();
+      }
       return;
     }
 
@@ -294,8 +326,8 @@ function NewsletterForm() {
 
     try {
       const formData = new FormData();
-      formData.append('name', name.trim());
-      formData.append('email', email.trim());
+      formData.append('name', trimmedName);
+      formData.append('email', trimmedEmail);
 
       const res = await fetch('/api/newsletter', {
         method: 'POST',
@@ -311,13 +343,19 @@ function NewsletterForm() {
         setName('');
         setEmail('');
       } else {
-        setManualResult({ error: data?.error || 'Failed to subscribe. Please try again.' });
         globalNewsletterTrack.invalidEmail('global_footer');
+        if (emailInputRef.current) {
+          emailInputRef.current.setCustomValidity(data?.error || 'Failed to subscribe. Please try again.');
+          emailInputRef.current.reportValidity();
+        }
       }
     } catch (err: any) {
       setIsManualSubmitting(false);
-      setManualResult({ error: err.message || 'Network error. Please try again.' });
       globalNewsletterTrack.invalidEmail('global_footer');
+      if (emailInputRef.current) {
+        emailInputRef.current.setCustomValidity(err.message || 'Network error. Please try again.');
+        emailInputRef.current.reportValidity();
+      }
     }
   };
 
@@ -332,78 +370,164 @@ function NewsletterForm() {
         setEmail('');
       } else if (fetcher.data.error) {
         globalNewsletterTrack.invalidEmail('global_footer');
+        if (emailInputRef.current) {
+          emailInputRef.current.setCustomValidity(fetcher.data.error);
+          emailInputRef.current.reportValidity();
+        }
       }
     }
   }, [fetcher.data]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div style={{ width: '100%', maxWidth: '390px', margin: '0 auto' }}>
+      <style>{`
+        .vice-newsletter-input::placeholder {
+          color: #666666 !important;
+          opacity: 1 !important;
+          font-size: 14px !important;
+          font-weight: 400 !important;
+          font-family: 'Inter-Regular', 'Inter', sans-serif !important;
+        }
+      `}</style>
       {isSuccess ? (
-        <div className="bg-black text-white p-6 rounded-full flex items-center justify-center gap-3 shadow-lg animate-fade-in border border-gray-800">
-          <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-          <p className="font-semibold text-base sm:text-lg">
-            {fetcher.data?.message || manualResult?.message || 'Thank you for subscribing to our newsletter!'}
-          </p>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          backgroundColor: '#111111',
+          color: '#ffffff',
+          borderRadius: '9999px',
+          height: '42px',
+          padding: '0 24px',
+        }}>
+          <CheckCircle2 style={{ width: 16, height: 16, color: '#34d399', flexShrink: 0 }} />
+          <span style={{ fontWeight: 600, fontSize: '14px', fontFamily: "'Inter-Regular', 'Inter', sans-serif" }}>
+            {fetcher.data?.message || manualResult?.message || 'Thank you for subscribing!'}
+          </span>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="w-full">
-          {/* Unified Premium Pill Container */}
-          <div className="relative flex flex-col sm:flex-row items-center bg-[#EAEAEA] rounded-[36px] sm:rounded-full p-1.5 sm:p-2 transition-all focus-within:ring-2 focus-within:ring-black focus-within:bg-[#E5E5E5] shadow-inner">
+        <form onSubmit={handleSubmit}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#e2e2e2',
+            borderRadius: '9999px',
+            height: '42px',
+            padding: '0 0 0 18px',
+            overflow: 'hidden',
+            boxSizing: 'border-box',
+          }}>
             {/* Name Input */}
-            <div className="w-full sm:w-5/12 px-4 py-2 sm:py-0">
-              <input
-                type="text"
-                name="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onFocus={handleFocus}
-                placeholder="Your Name"
-                disabled={isSubmitting}
-                className="w-full bg-transparent text-gray-900 placeholder-gray-500 text-base font-normal focus:outline-none border-0 h-[46px] px-2"
-                required
-              />
-            </div>
+            <input
+              ref={nameInputRef}
+              type="text"
+              name="name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                e.target.setCustomValidity('');
+              }}
+              onFocus={handleFocus}
+              placeholder="Your Name"
+              disabled={isSubmitting}
+              autoComplete="given-name"
+              className="vice-newsletter-input"
+              style={{
+                width: '88px',
+                flexShrink: 0,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                fontSize: '14px',
+                fontWeight: 400,
+                color: '#111111',
+                fontFamily: "'Inter-Regular', 'Inter', sans-serif",
+                padding: '0',
+                height: '100%',
+              }}
+            />
 
-            {/* Subtle Divider (Desktop only) */}
-            <div className="hidden sm:block w-[1px] h-8 bg-gray-300"></div>
+            {/* Divider */}
+            <div style={{
+              width: '1px',
+              height: '16px',
+              backgroundColor: '#b0b0b0',
+              flexShrink: 0,
+              margin: '0 10px',
+            }} />
 
-            {/* Email Input + Submit Arrow Button */}
-            <div className="w-full sm:w-7/12 flex items-center justify-between pl-4 pr-1 py-1 sm:py-0">
-              <input
-                type="email"
-                name="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onFocus={handleFocus}
-                placeholder="Type in your email"
-                disabled={isSubmitting}
-                className="w-full bg-transparent text-gray-900 placeholder-gray-500 text-base font-normal focus:outline-none border-0 h-[46px] px-2 pr-12"
-                required
-              />
+            {/* Email Input */}
+            <input
+              ref={emailInputRef}
+              type="email"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                e.target.setCustomValidity('');
+              }}
+              onFocus={handleFocus}
+              placeholder="Type in your email"
+              disabled={isSubmitting}
+              autoComplete="email"
+              className="vice-newsletter-input"
+              style={{
+                flex: '1 1 auto',
+                minWidth: 0,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                fontSize: '14px',
+                fontWeight: 400,
+                color: '#111111',
+                fontFamily: "'Inter-Regular', 'Inter', sans-serif",
+                padding: '0 8px 0 0',
+                height: '100%',
+              }}
+            />
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                aria-label="Subscribe to newsletter"
-                className="flex-shrink-0 bg-black text-white hover:bg-neutral-800 active:scale-95 disabled:bg-neutral-400 transition-all flex items-center justify-center rounded-full h-[48px] w-[48px] shadow-sm ml-2 cursor-pointer"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-white" />
-                ) : (
-                  <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
-                )}
-              </button>
-            </div>
+            {/* Submit button — wide capsule button capping right end of pill */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              aria-label="Subscribe to newsletter"
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: isSubmitting ? '#444444' : '#111111',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '9999px',
+                height: '42px',
+                width: '84px',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.15s ease',
+                padding: 0,
+                margin: 0,
+              }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#2b2b2b';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#111111';
+              }}
+            >
+              {isSubmitting ? (
+                <Loader2 style={{ width: 15, height: 15, animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="#ffffff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="7" x2="15" y2="7" />
+                  <polyline points="9.5 2 15 7 9.5 12" />
+                </svg>
+              )}
+            </button>
           </div>
-
-          {/* Inline Error Message */}
-          {errorMsg && (
-            <div className="flex items-center justify-center gap-2 text-rose-600 text-sm mt-3 animate-fade-in font-medium">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
         </form>
       )}
     </div>
