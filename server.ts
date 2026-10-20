@@ -13,6 +13,14 @@ export default {
     executionContext: ExecutionContext,
   ): Promise<Response> {
     try {
+      const url = new URL(request.url);
+
+      // 301 canonical redirect: /en-ae/* → /* (UAE flagship serves from root)
+      if (url.pathname === '/en-ae' || url.pathname.startsWith('/en-ae/')) {
+        url.pathname = url.pathname.replace(/^\/en-ae(\/|$)/, '/');
+        return Response.redirect(url.toString(), 301);
+      }
+
       const hydrogenContext = await createHydrogenRouterContext(
         request,
         env,

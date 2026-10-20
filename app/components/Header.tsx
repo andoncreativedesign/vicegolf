@@ -103,7 +103,7 @@ export function Header({
   }, []);
 
   const rootData = useRouteLoaderData<RootLoader>('root');
-  const activePathPrefix = rootData?.selectedLocale?.pathPrefix || '/en-ae';
+  const activePathPrefix = rootData?.selectedLocale?.pathPrefix ?? '';
   const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
 
@@ -114,7 +114,7 @@ export function Header({
 
     try {
       setIsNavigating(true);
-      await navigate(activePathPrefix);
+      await navigate(activePathPrefix || '/');
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {

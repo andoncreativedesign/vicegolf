@@ -23,7 +23,7 @@ export const COUNTRIES: Record<SupportedCountry, CountryConfig> = {
     currency: 'AED',
     symbol: 'AED',
     decimals: 2,
-    pathPrefix: '/en-ae',
+    pathPrefix: '',
     phoneCode: '+971',
     phoneDigits: 9,
   },
@@ -89,7 +89,7 @@ export interface I18nLocale extends I18nBase {
 export const DEFAULT_LOCALE: I18nLocale = {
   language: 'EN',
   country: 'AE',
-  pathPrefix: '/en-ae',
+  pathPrefix: '',
 };
 
 export function parseCookie(cookieHeader: string | null): Record<string, string> {
@@ -109,44 +109,24 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
   const url = new URL(request.url);
   const firstPathPart = url.pathname.split('/')[1]?.toLowerCase() ?? '';
 
-  // 1. Resolve from URL market prefix (/en-ae, /en-sa, /en-om, /en-qa)
-  if (firstPathPart === 'en-sa') {
-    return { language: 'EN', country: 'SA', pathPrefix: '/en-sa' };
+  // 1. Resolve from URL market prefix dynamically using COUNTRIES config (/en-sa, /en-om, /en-qa)
+  const matchedCountry = Object.values(COUNTRIES).find(
+    (c) => c.pathPrefix && c.pathPrefix.toLowerCase() === `/${firstPathPart}`,
+  );
+  if (matchedCountry) {
+    return {
+      language: matchedCountry.language,
+      country: matchedCountry.code,
+      pathPrefix: matchedCountry.pathPrefix,
+    };
   }
-  if (firstPathPart === 'en-om') {
-    return { language: 'EN', country: 'OM', pathPrefix: '/en-om' };
-  }
-  if (firstPathPart === 'en-qa') {
-    return { language: 'EN', country: 'QA', pathPrefix: '/en-qa' };
-  }
+
+  // Legacy /en-ae path fallback (301'd in server.ts to root, handled defensively here)
   if (firstPathPart === 'en-ae') {
-    return { language: 'EN', country: 'AE', pathPrefix: '/en-ae' };
+    return { language: 'EN', country: 'AE', pathPrefix: '' };
   }
 
-  // 2. Resolve from Referer header if request URL is un-prefixed (e.g. /cart action from /en-sa/...)
-  const referer = request.headers.get('Referer');
-  if (referer) {
-    try {
-      const refererUrl = new URL(referer);
-      const refFirstPart = refererUrl.pathname.split('/')[1]?.toLowerCase() ?? '';
-      if (refFirstPart === 'en-sa') {
-        return { language: 'EN', country: 'SA', pathPrefix: '/en-sa' };
-      }
-      if (refFirstPart === 'en-om') {
-        return { language: 'EN', country: 'OM', pathPrefix: '/en-om' };
-      }
-      if (refFirstPart === 'en-qa') {
-        return { language: 'EN', country: 'QA', pathPrefix: '/en-qa' };
-      }
-      if (refFirstPart === 'en-ae') {
-        return { language: 'EN', country: 'AE', pathPrefix: '/en-ae' };
-      }
-    } catch {
-      // ignore invalid referer URL
-    }
-  }
-
-  // 3. Resolve from saved cookie
+  // 2. Resolve from saved cookie (explicit user selection takes precedence over Referer)
   const cookies = parseCookie(request.headers.get('Cookie'));
   const savedCountry = cookies['vice_country']?.toUpperCase() as SupportedCountry | undefined;
   if (savedCountry && COUNTRIES[savedCountry]) {
@@ -157,7 +137,28 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
     };
   }
 
-  // 4. Fallback to default GCC locale (UAE)
+  // 3. Fallback: Resolve from Referer header if request URL is un-prefixed without cookie (e.g. background fetch /cart)
+  const referer = request.headers.get('Referer');
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      const refFirstPart = refererUrl.pathname.split('/')[1]?.toLowerCase() ?? '';
+      const refMatchedCountry = Object.values(COUNTRIES).find(
+        (c) => c.pathPrefix && c.pathPrefix.toLowerCase() === `/${refFirstPart}`,
+      );
+      if (refMatchedCountry) {
+        return {
+          language: refMatchedCountry.language,
+          country: refMatchedCountry.code,
+          pathPrefix: refMatchedCountry.pathPrefix,
+        };
+      }
+    } catch {
+      // ignore invalid referer URL
+    }
+  }
+
+  // 4. Fallback to default GCC flagship locale (UAE at root domain)
   return DEFAULT_LOCALE;
 }
 
@@ -165,9 +166,14 @@ export function getLocaleFromRequest(request: Request): I18nLocale {
  * Builds a localized path for a given country code
  */
 export function buildLocalizedUrl(pathname: string, countryCode: SupportedCountry): string {
+  // Strip any existing locale prefix (including legacy /en-ae)
   const cleanPath = pathname.replace(/^\/en-(ae|sa|om|qa)(\/|$)/i, '/');
   const normalized = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
-  const prefix = COUNTRIES[countryCode]?.pathPrefix || '/en-ae';
+  const prefix = COUNTRIES[countryCode]?.pathPrefix ?? '';
+  // UAE (pathPrefix: '') serves directly from root domain
+  if (!prefix) {
+    return normalized;
+  }
   return `${prefix}${normalized === '/' ? '' : normalized}`;
 }
 
