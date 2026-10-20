@@ -80,9 +80,10 @@ const CUSTOMER_UPDATE_MUTATION = `
 
 export async function processNewsletterSignup(email: string, campaignSlug: string, customTag?: string, env?: any, name?: string) {
   const adminApi = createAxiosShopifyAdmin(env);
-  const universalTag = 'campaign_signup';
-  const specificTag = customTag || `campaign_signup:${campaignSlug}`;
-  const tagsToAdd = Array.from(new Set([universalTag, specificTag]));
+  const isGlobalFooter = campaignSlug === 'global_footer';
+  const tagsToAdd = isGlobalFooter
+    ? [customTag || 'newsletter_global']
+    : Array.from(new Set(['campaign_signup', customTag || `campaign_signup:${campaignSlug}`]));
 
   let firstName: string | undefined;
   let lastName: string | undefined;

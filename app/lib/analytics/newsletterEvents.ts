@@ -10,12 +10,15 @@ function pushDataLayer(event: Record<string, unknown>) {
   if (typeof window === 'undefined') return;
   (window as any).dataLayer = (window as any).dataLayer || [];
   (window as any).dataLayer.push(event);
+  console.log('[GTM dataLayer]', event);
 }
 
 function fireFbq(eventName: string, params?: Record<string, unknown>) {
   if (typeof window === 'undefined') return;
-  if (typeof (window as any).fbq !== 'function') return;
-  (window as any).fbq('track', eventName, params);
+  if (typeof (window as any).fbq === 'function') {
+    (window as any).fbq('track', eventName, params);
+  }
+  console.log('[Meta Pixel fbq]', eventName, params);
 }
 
 export const globalNewsletterTrack = {

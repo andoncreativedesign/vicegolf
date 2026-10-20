@@ -419,7 +419,13 @@ export function Layout({ children }: { children?: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager */}
+        {/* Google Tag Manager & DataLayer Initialization */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];`,
+          }}
+        />
         {isTargetDomain && (
           <script
             nonce={nonce}
