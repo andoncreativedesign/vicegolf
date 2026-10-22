@@ -21,32 +21,30 @@ export function Footer({
   return (
     <footer className="bg-white">
       {/* Global Newsletter Section — exact 1:1 vicegolf.com match */}
-      <div style={{ backgroundColor: '#f0f0f0', padding: '64px 16px 56px' }}>
+      <div style={{ backgroundColor: '#f0f0f0', padding: '56px 16px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{
             fontSize: '24px',
-            fontWeight: 'normal',
-            letterSpacing: '0.04em',
+            fontWeight: 700,
+            letterSpacing: 'normal',
             textTransform: 'uppercase',
-            color: '#111111',
-            margin: '0 0 10px',
-            fontFamily: "'Poppins-Bold', sans-serif",
-            lineHeight: 1.2,
+            color: '#1d1d1f',
+            margin: '0 0 8px',
+            fontFamily: "'Poppins-Bold', 'Poppins', sans-serif",
+            lineHeight: 1.5,
           }}>
             JOIN OUR NEWSLETTER!
           </h2>
           <p style={{
-            fontSize: '15px',
+            fontSize: '16px',
             fontWeight: 400,
-            color: '#555555',
+            color: '#636363',
             margin: '0 0 24px',
-            lineHeight: 1.5,
-            fontFamily: "'Inter-Regular', 'Inter', sans-serif",
+            lineHeight: '24px',
+            fontFamily: "'Inter', sans-serif",
             textDecoration: 'none',
           }}>
-            <span style={{ color: '#555555', textDecoration: 'none' }}>
-              Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
-            </span>
+            Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
           </p>
           <NewsletterForm />
         </div>
@@ -379,14 +377,14 @@ function NewsletterForm() {
   }, [fetcher.data]);
 
   return (
-    <div style={{ width: '100%', maxWidth: '390px', margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: '480px', margin: '0 auto' }}>
       <style>{`
         .vice-newsletter-input::placeholder {
-          color: #666666 !important;
+          color: #5c5c5e !important;
           opacity: 1 !important;
-          font-size: 14px !important;
+          font-size: 15px !important;
           font-weight: 400 !important;
-          font-family: 'Inter-Regular', 'Inter', sans-serif !important;
+          font-family: 'Inter', sans-serif !important;
         }
       `}</style>
       {isSuccess ? (
@@ -395,14 +393,14 @@ function NewsletterForm() {
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
-          backgroundColor: '#111111',
+          backgroundColor: '#1d1d1f',
           color: '#ffffff',
           borderRadius: '9999px',
-          height: '42px',
+          height: '48px',
           padding: '0 24px',
         }}>
-          <CheckCircle2 style={{ width: 16, height: 16, color: '#34d399', flexShrink: 0 }} />
-          <span style={{ fontWeight: 600, fontSize: '14px', fontFamily: "'Inter-Regular', 'Inter', sans-serif" }}>
+          <CheckCircle2 style={{ width: 18, height: 18, color: '#34d399', flexShrink: 0 }} />
+          <span style={{ fontWeight: 600, fontSize: '15px', fontFamily: "'Inter', sans-serif" }}>
             {fetcher.data?.message || manualResult?.message || 'Thank you for subscribing!'}
           </span>
         </div>
@@ -413,8 +411,8 @@ function NewsletterForm() {
             alignItems: 'center',
             backgroundColor: '#e2e2e2',
             borderRadius: '9999px',
-            height: '42px',
-            padding: '0 0 0 18px',
+            height: '48px',
+            padding: '0 4px 0 20px',
             overflow: 'hidden',
             boxSizing: 'border-box',
           }}>
@@ -434,16 +432,16 @@ function NewsletterForm() {
               autoComplete="given-name"
               className="vice-newsletter-input"
               style={{
-                width: '88px',
+                width: '95px',
                 flexShrink: 0,
                 background: 'transparent',
                 border: 'none',
                 outline: 'none',
                 boxShadow: 'none',
-                fontSize: '14px',
+                fontSize: '15px',
                 fontWeight: 400,
-                color: '#111111',
-                fontFamily: "'Inter-Regular', 'Inter', sans-serif",
+                color: '#1d1d1f',
+                fontFamily: "'Inter', sans-serif",
                 padding: '0',
                 height: '100%',
               }}
@@ -452,10 +450,10 @@ function NewsletterForm() {
             {/* Divider */}
             <div style={{
               width: '1px',
-              height: '16px',
-              backgroundColor: '#b0b0b0',
+              height: '18px',
+              backgroundColor: '#c0c0c0',
               flexShrink: 0,
-              margin: '0 10px',
+              margin: '0 12px',
             }} />
 
             {/* Email Input */}
@@ -481,16 +479,16 @@ function NewsletterForm() {
                 border: 'none',
                 outline: 'none',
                 boxShadow: 'none',
-                fontSize: '14px',
+                fontSize: '15px',
                 fontWeight: 400,
-                color: '#111111',
-                fontFamily: "'Inter-Regular', 'Inter', sans-serif",
+                color: '#1d1d1f',
+                fontFamily: "'Inter', sans-serif",
                 padding: '0 8px 0 0',
                 height: '100%',
               }}
             />
 
-            {/* Submit button — wide capsule button capping right end of pill */}
+            {/* Submit button — rounded pill button matching vicegolf.com */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -500,28 +498,28 @@ function NewsletterForm() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: isSubmitting ? '#444444' : '#111111',
+                backgroundColor: isSubmitting ? '#444444' : '#1d1d1f',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '9999px',
-                height: '42px',
-                width: '84px',
+                height: '40px',
+                minWidth: '64px',
                 cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 transition: 'background-color 0.15s ease',
-                padding: 0,
+                padding: '0 16px',
                 margin: 0,
               }}
               onMouseEnter={(e) => {
-                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#2b2b2b';
+                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#3e3e40';
               }}
               onMouseLeave={(e) => {
-                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#111111';
+                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1d1d1f';
               }}
             >
               {isSubmitting ? (
                 <Loader2 style={{ width: 15, height: 15, animation: 'spin 1s linear infinite' }} />
               ) : (
-                <svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="#ffffff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="15" viewBox="0 0 17 14" fill="none" stroke="#ffffff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="1" y1="7" x2="15" y2="7" />
                   <polyline points="9.5 2 15 7 9.5 12" />
                 </svg>
