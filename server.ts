@@ -4,12 +4,6 @@ import {createRequestHandler} from '@shopify/hydrogen/oxygen';
 import {createHydrogenRouterContext} from '~/lib/context';
 
 /**
- * Restricted country codes blocked at the edge from accessing storefront SSR.
- * Identified via Oxygen/Cloudflare geo headers ('oxygen-buyer-country' or 'cf-ipcountry').
- */
-const BLOCKED_COUNTRIES = new Set(['CN']);
-
-/**
  * Export a fetch handler in module format.
  */
 export default {
@@ -19,21 +13,6 @@ export default {
     executionContext: ExecutionContext,
   ): Promise<Response> {
     try {
-      // Edge Security: Block restricted traffic (CN) before executing SSR
-      const oxygenCountry = request.headers.get('oxygen-buyer-country')?.toUpperCase() || '';
-      const cfCountry = request.headers.get('cf-ipcountry')?.toUpperCase() || '';
-
-      if (BLOCKED_COUNTRIES.has(oxygenCountry) || BLOCKED_COUNTRIES.has(cfCountry)) {
-        return new Response('Access Denied', {
-          status: 403,
-          statusText: 'Forbidden',
-          headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'Cache-Control': 'no-store, no-cache, must-revalidate',
-          },
-        });
-      }
-
       const url = new URL(request.url);
 
       // 301 canonical redirect: /en-ae/* → /* (UAE flagship serves from root)
