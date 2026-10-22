@@ -13,12 +13,12 @@ export async function loader({params, context, request}: LoaderFunctionArgs) {
     throw new Response(null, {status: 404});
   }
 
-  // If URL has no locale prefix, redirect uniformly to the active regional prefix (/en-ae, /en-sa, /en-om)
-  if (!params.locale) {
+  // If URL has no locale prefix AND the active locale has a regional prefix (e.g. SA, OM, QA),
+  // redirect to that regional prefix. For UAE (pathPrefix: ''), root path IS canonical — no redirect.
+  if (!params.locale && pathPrefix) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith('/api') && !url.pathname.endsWith('.xml')) {
-      const prefix = pathPrefix || '/en-ae';
-      const targetPath = url.pathname === '/' ? prefix : `${prefix}${url.pathname}`;
+      const targetPath = url.pathname === '/' ? pathPrefix : `${pathPrefix}${url.pathname}`;
       return redirect(`${targetPath}${url.search}`);
     }
   }
