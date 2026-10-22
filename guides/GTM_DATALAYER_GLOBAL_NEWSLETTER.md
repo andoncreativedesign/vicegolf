@@ -24,7 +24,7 @@ When a user submits the newsletter in the global footer:
 All events are pushed to `window.dataLayer` with the standard format.
 
 ### Event 1: Form Engagement Start
-Fires the first time a user focuses into the "Your Name" or "Type in your email" input.
+Fires the first time a user focuses into the "Your name" or "Type in your email" input.
 
 ```javascript
 window.dataLayer.push({

@@ -429,7 +429,7 @@ function NewsletterForm() {
                 e.target.setCustomValidity('');
               }}
               onFocus={handleFocus}
-              placeholder="Your Name"
+              placeholder="Your name"
               disabled={isSubmitting}
               autoComplete="given-name"
               className="vice-newsletter-input"
