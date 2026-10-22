@@ -1,8 +1,8 @@
-import { Suspense } from 'react';
-import { useState } from 'react';
-import { Await, NavLink } from 'react-router';
-// import { ArrowRight } from 'lucide-react';
+import { Suspense, useState, useEffect, useRef } from 'react';
+import { Await, NavLink, useFetcher } from 'react-router';
+import { ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { FaInstagram, FaFacebookF, FaTiktok, FaYoutube, FaLinkedinIn, FaPinterestP } from "react-icons/fa";
+import { globalNewsletterTrack } from '~/lib/analytics/newsletterEvents';
 
 import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated';
 import { useCookieConsent } from '~/contexts/CookieConsentContext';
@@ -18,73 +18,37 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
-
-
-  // const [email, setEmail] = useState('');
-  // const [isSubmitted, setIsSubmitted] = useState(false);
-
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // Handle form submission here
-  //   console.log('Submitted email:', email);
-  //   // Show success message
-  //   setIsSubmitted(true);
-  //   // Clear the input field
-  //   setEmail('');
-  //   // Reset the success message after 5 seconds
-  //   setTimeout(() => {
-  //     setIsSubmitted(false);
-  //   }, 5000);
-  // };
   return (
     <footer className="bg-white">
-      {/* Modern Newsletter Section - Commented Out */}
-      {/* <div className="bg-gray-50 border-b border-gray-200 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-light tracking-wide text-gray-900 sm:text-4xl uppercase">
-              JOIN OUR NEWSLETTER!
-            </h2>
-            <p className="mt-2 text-base text-gray-600">
-              Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
-            </p>
-            <div className="mt-6 flex justify-center">
-              <form onSubmit={handleSubmit} className="w-full max-w-2xl">
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Type in your email"
-                    className="w-full px-8 py-5 pr-56 bg-gray-200 text-gray-800 placeholder-gray-500 text-base focus:outline-none focus:ring-0 border-0"
-                    style={{ borderRadius: '50px', height: '60px' }}
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="absolute top-1/2 -translate-y-1/2 bg-black text-white hover:bg-gray-800 transition-colors flex items-center justify-center"
-                    style={{ 
-                      borderRadius: '50px',
-                      right: '4px',
-                      height: '52px',
-                      width: '180px'
-                    }}
-                  >
-                    <ArrowRight className="w-6 h-6" strokeWidth={2.5} />
-                  </button>
-                </div>
-                <div className="h-6 mt-2">
-                  {isSubmitted && (
-                    <p className="text-green-500 text-sm text-center">
-                      Thank you for subscribing!
-                    </p>
-                  )}
-                </div>
-              </form>
-            </div>
-          </div>
+      {/* Global Newsletter Section — exact 1:1 vicegolf.com match */}
+      <div style={{ backgroundColor: '#f0f0f0', padding: '56px 16px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            letterSpacing: 'normal',
+            textTransform: 'uppercase',
+            color: '#1d1d1f',
+            margin: '0 0 8px',
+            fontFamily: "'Poppins-Bold', 'Poppins', sans-serif",
+            lineHeight: 1.5,
+          }}>
+            JOIN OUR NEWSLETTER!
+          </h2>
+          <p style={{
+            fontSize: '16px',
+            fontWeight: 400,
+            color: '#636363',
+            margin: '0 0 24px',
+            lineHeight: '24px',
+            fontFamily: "'Inter', sans-serif",
+            textDecoration: 'none',
+          }}>
+            Unlock exclusive benefits, receive promo codes and access special perks as a subscriber.
+          </p>
+          <NewsletterForm />
         </div>
-      </div> */}
+      </div>
 
       {/* Main Footer Content - No border top since newsletter is removed */}
       <div className="bg-black text-white pt-10">
@@ -288,5 +252,285 @@ function FooterContent({
     </div>
   );
 }
+
+function NewsletterForm() {
+  const fetcher = useFetcher<{
+    success?: boolean;
+    error?: string;
+    message?: string;
+    action?: string;
+  }>();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const hasTrackedFormStart = useRef(false);
+  const prevDataRef = useRef(fetcher.data);
+
+  const [isManualSubmitting, setIsManualSubmitting] = useState(false);
+  const [manualResult, setManualResult] = useState<{
+    success?: boolean;
+    error?: string;
+    message?: string;
+  } | null>(null);
+
+  const isSubmitting = fetcher.state === 'submitting' || isManualSubmitting;
+  const isSuccess = (fetcher.data?.success === true) || (manualResult?.success === true);
+
+  const handleFocus = () => {
+    if (!hasTrackedFormStart.current) {
+      hasTrackedFormStart.current = true;
+      globalNewsletterTrack.formStart('global_footer');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName) {
+      globalNewsletterTrack.invalidEmail('global_footer');
+      if (nameInputRef.current) {
+        nameInputRef.current.setCustomValidity('Please fill out this field.');
+        nameInputRef.current.reportValidity();
+      }
+      return;
+    }
+
+    if (!trimmedEmail || !trimmedEmail.includes('@') || !trimmedEmail.includes('.')) {
+      globalNewsletterTrack.invalidEmail('global_footer');
+      if (emailInputRef.current) {
+        if (!trimmedEmail) {
+          emailInputRef.current.setCustomValidity('Please fill out this field.');
+        } else if (!trimmedEmail.includes('@')) {
+          emailInputRef.current.setCustomValidity(`Please include an '@' in the email address. '${trimmedEmail}' is missing an '@'.`);
+        } else if (!trimmedEmail.includes('.')) {
+          emailInputRef.current.setCustomValidity('Please enter a valid email address with a domain.');
+        } else {
+          emailInputRef.current.setCustomValidity('Please enter a valid email address.');
+        }
+        emailInputRef.current.reportValidity();
+      }
+      return;
+    }
+
+    // Fire submit attempt right as button is clicked
+    globalNewsletterTrack.submitAttempt('global_footer');
+    setIsManualSubmitting(true);
+    setManualResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', trimmedName);
+      formData.append('email', trimmedEmail);
+
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      setIsManualSubmitting(false);
+
+      if (data?.success) {
+        setManualResult({ success: true, message: data.message });
+        globalNewsletterTrack.signupSuccess('global_footer');
+        setName('');
+        setEmail('');
+      } else {
+        globalNewsletterTrack.invalidEmail('global_footer');
+        if (emailInputRef.current) {
+          emailInputRef.current.setCustomValidity(data?.error || 'Failed to subscribe. Please try again.');
+          emailInputRef.current.reportValidity();
+        }
+      }
+    } catch (err: any) {
+      setIsManualSubmitting(false);
+      globalNewsletterTrack.invalidEmail('global_footer');
+      if (emailInputRef.current) {
+        emailInputRef.current.setCustomValidity(err.message || 'Network error. Please try again.');
+        emailInputRef.current.reportValidity();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (fetcher.data && fetcher.data !== prevDataRef.current) {
+      prevDataRef.current = fetcher.data;
+
+      if (fetcher.data.success) {
+        // Fire successful signup event: { event: 'newsletter_signup', form_location: 'global_footer' }
+        globalNewsletterTrack.signupSuccess('global_footer');
+        setName('');
+        setEmail('');
+      } else if (fetcher.data.error) {
+        globalNewsletterTrack.invalidEmail('global_footer');
+        if (emailInputRef.current) {
+          emailInputRef.current.setCustomValidity(fetcher.data.error);
+          emailInputRef.current.reportValidity();
+        }
+      }
+    }
+  }, [fetcher.data]);
+
+  return (
+    <div style={{ width: '100%', maxWidth: '480px', margin: '0 auto' }}>
+      <style>{`
+        .vice-newsletter-input::placeholder {
+          color: #5c5c5e !important;
+          opacity: 1 !important;
+          font-size: 15px !important;
+          font-weight: 400 !important;
+          font-family: 'Inter', sans-serif !important;
+        }
+      `}</style>
+      {isSuccess ? (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          backgroundColor: '#1d1d1f',
+          color: '#ffffff',
+          borderRadius: '9999px',
+          height: '48px',
+          padding: '0 24px',
+        }}>
+          <CheckCircle2 style={{ width: 18, height: 18, color: '#34d399', flexShrink: 0 }} />
+          <span style={{ fontWeight: 600, fontSize: '15px', fontFamily: "'Inter', sans-serif" }}>
+            {fetcher.data?.message || manualResult?.message || 'Thank you for subscribing!'}
+          </span>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#e2e2e2',
+            borderRadius: '9999px',
+            height: '48px',
+            padding: '0 4px 0 20px',
+            overflow: 'hidden',
+            boxSizing: 'border-box',
+          }}>
+            {/* Name Input */}
+            <input
+              ref={nameInputRef}
+              type="text"
+              name="name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                e.target.setCustomValidity('');
+              }}
+              onFocus={handleFocus}
+              placeholder="Your name"
+              disabled={isSubmitting}
+              autoComplete="given-name"
+              className="vice-newsletter-input"
+              style={{
+                width: '95px',
+                flexShrink: 0,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                fontSize: '15px',
+                fontWeight: 400,
+                color: '#1d1d1f',
+                fontFamily: "'Inter', sans-serif",
+                padding: '0',
+                height: '100%',
+              }}
+            />
+
+            {/* Divider */}
+            <div style={{
+              width: '1px',
+              height: '18px',
+              backgroundColor: '#c0c0c0',
+              flexShrink: 0,
+              margin: '0 12px',
+            }} />
+
+            {/* Email Input */}
+            <input
+              ref={emailInputRef}
+              type="email"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                e.target.setCustomValidity('');
+              }}
+              onFocus={handleFocus}
+              placeholder="Type in your email"
+              disabled={isSubmitting}
+              autoComplete="email"
+              className="vice-newsletter-input"
+              style={{
+                flex: '1 1 auto',
+                minWidth: 0,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                fontSize: '15px',
+                fontWeight: 400,
+                color: '#1d1d1f',
+                fontFamily: "'Inter', sans-serif",
+                padding: '0 8px 0 0',
+                height: '100%',
+              }}
+            />
+
+            {/* Submit button — rounded pill button matching vicegolf.com */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              aria-label="Subscribe to newsletter"
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: isSubmitting ? '#444444' : '#1d1d1f',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '9999px',
+                height: '40px',
+                minWidth: '64px',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.15s ease',
+                padding: '0 16px',
+                margin: 0,
+              }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#3e3e40';
+              }}
+              onMouseLeave={(e) => {
+                if (!isSubmitting) (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1d1d1f';
+              }}
+            >
+              {isSubmitting ? (
+                <Loader2 style={{ width: 15, height: 15, animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <svg width="18" height="15" viewBox="0 0 17 14" fill="none" stroke="#ffffff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="7" x2="15" y2="7" />
+                  <polyline points="9.5 2 15 7 9.5 12" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
 
 

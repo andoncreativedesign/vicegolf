@@ -64,6 +64,9 @@ export function links() {
   return [
     { rel: 'preconnect', href: 'https://cdn.shopify.com' },
     { rel: 'preconnect', href: 'https://shop.app' },
+    { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600;1,700&family=Inter:wght@400;500;600;700&display=swap' },
     { rel: 'icon', type: 'image/svg+xml', href: favicon },
     { rel: "stylesheet", href: toastStyles }
   ];
@@ -419,7 +422,13 @@ export function Layout({ children }: { children?: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager */}
+        {/* Google Tag Manager & DataLayer Initialization */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];`,
+          }}
+        />
         {isTargetDomain && (
           <script
             nonce={nonce}
